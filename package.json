@@ -1,0 +1,10 @@
+{
+    "author": "Nisheeth Kashyap",
+    "name": "Console.IO",
+    "version": "0.0.1",
+    "dependencies": {
+        "express.io": "latest"
+    },
+    "main": "./server/main.js",
+    "private": true
+}

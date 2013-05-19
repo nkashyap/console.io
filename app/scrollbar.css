@@ -1,0 +1,47 @@
+::-webkit-scrollbar {
+    width: 15px
+}
+
+::-webkit-scrollbar-button:vertical {
+    background-color: transparent;
+    height: 5px
+}
+
+::-webkit-scrollbar-button:start:decrement {
+    display: block
+}
+
+::-webkit-scrollbar-button:end:increment {
+    display: block
+}
+
+::-webkit-scrollbar-button:vertical:start:increment {
+    display: none
+}
+
+::-webkit-scrollbar-button:vertical:end:decrement {
+    display: none
+}
+
+::-webkit-scrollbar-track-piece {
+    background-color: white
+}
+
+::-webkit-scrollbar-thumb:vertical {
+    background-color: rgba(0, 0, 0, 0.2);
+    height: 50px;
+    border-right: 4px solid white;
+    border-left: 4px solid white
+}
+
+::-webkit-scrollbar-thumb:vertical:hover {
+    background-color: rgba(0, 0, 0, 0.4)
+}
+
+::-webkit-scrollbar-corner:vertical {
+    background-color: white
+}
+
+::-webkit-scrollbar-resizer:vertical {
+    background-color: red
+}

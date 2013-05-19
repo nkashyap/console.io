@@ -1,0 +1,22 @@
+html, body {
+    background-color: #a9a9a9;
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    font-size: 12px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 800px;
+}
+
+#wrapper {
+    margin: 0;
+    padding: 5px;
+    font-size: 14px;
+    background-color: #d3d3d3;
+    color: black;
+    margin: 5px;
+}
