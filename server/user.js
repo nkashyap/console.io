@@ -17,22 +17,22 @@ function User(application, request, manager){
     this.online();
 }
 
-User.prototype.subscribe = function subscribe(data){
-    if(this.devices.indexOf(data) === -1){
-        this.devices.push(data);
-        this.request.io.join(data);
-        console.log('subscribe', data);
-        this.emit('subscribed', data);
+User.prototype.subscribe = function subscribe(name){
+    if(this.devices.indexOf(name) === -1){
+        this.devices.push(name);
+        this.request.io.join(name);
+        console.log('subscribe', name);
+        this.emit('subscribed', { name: name });
     }
 };
 
-User.prototype.unSubscribe = function unSubscribe(data){
-    var index = this.devices.indexOf(data);
+User.prototype.unSubscribe = function unSubscribe(name){
+    var index = this.devices.indexOf(name);
     if(index > -1){
         this.devices.splice(index, 1);
-        this.request.io.leave(data);
-        console.log('unSubscribe', data);
-        this.emit('unSubscribe', data);
+        this.request.io.leave(name);
+        console.log('unSubscribe', name);
+        this.emit('unSubscribed', { name: name });
     }
 };
 

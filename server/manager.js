@@ -44,7 +44,8 @@ function Manager() {
                 register('user', req);
             },
             subscribe: defineRouteHandler(users, 'subscribe'),
-            unSubscribe: defineRouteHandler(users, 'unSubscribe')
+            unSubscribe: defineRouteHandler(users, 'unSubscribe'),
+            deviceFiles: defineRouteHandler(users, 'deviceFiles')
         });
     }
 

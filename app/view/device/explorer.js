@@ -2,34 +2,50 @@
  * Created with IntelliJ IDEA.
  * User: nisheeth
  * Date: 19/05/13
- * Time: 07:26
+ * Time: 13:29
  * To change this template use File | Settings | File Templates.
  */
 
-ConsoleIO.namespace("ConsoleIO.View.Editor");
+ConsoleIO.namespace("ConsoleIO.View.Explorer");
 
-ConsoleIO.View.Editor = function EditorView(ctrl, model) {
+ConsoleIO.View.Explorer = function ExplorerView(ctrl, model) {
     this.ctrl = ctrl;
     this.model = model;
 
-    this.container = null;
-    this.textArea = null;
+    this.tree = null;
     this.target = null;
     this.toolbar = null;
-
-    this.createElements();
 };
 
-ConsoleIO.View.Editor.prototype.render = function render(target){
+ConsoleIO.View.Explorer.prototype.render = function render(target){
     this.target = target;
-    this.target.attachObject(this.container);
+    this.target.setWidth(this.model.width);
+    this.addTree();
 
     if(this.model.toolbar){
         this.addToolbar();
     }
 };
 
-ConsoleIO.View.Editor.prototype.addToolbar = function addToolbar(items) {
+ConsoleIO.View.Explorer.prototype.addTree = function addTree() {
+    if(this.target && !this.tree){
+        this.tree = this.target.attachTree();
+        this.tree.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('tree'));
+        this.tree.enableHighlighting(true);
+        this.tree.enableTreeImages(true);
+        this.tree.enableTreeLines(true);
+        this.tree.enableIEImageFix(true);
+
+        var scope = this;
+        this.tree.attachEvent("onDblClick", function(itemId){
+            if(!scope.tree.hasChildren(itemId)){
+                this.viewFile(itemId);
+            }
+        }, this.ctrl);
+    }
+};
+
+ConsoleIO.View.Explorer.prototype.addToolbar = function addToolbar(items) {
     if(this.target && !this.toolbar){
         this.toolbar = this.target.attachToolbar();
         //this.toolbar.setIconsPath("../common/imgs/");
@@ -60,17 +76,8 @@ ConsoleIO.View.Editor.prototype.addToolbar = function addToolbar(items) {
     }
 };
 
-ConsoleIO.View.Editor.prototype.createElements = function createElements() {
-    this.container = document.createElement('div');
-    this.textArea = document.createElement('textarea');
-
-    this.container.setAttribute('class', 'editor');
-    this.container.setAttribute('id', this.model.id);
-
-    if (this.model.placeholder) {
-        this.textArea.setAttribute('placeholder', this.model.placeholder);
+ConsoleIO.View.Explorer.prototype.add = function add(id, name, parentId) {
+    if(this.tree){
+        this.tree.insertNewItem(parentId, id, name);
     }
-
-    this.container.appendChild(this.textArea);
-    document.body.appendChild(this.container);
 };

@@ -49,6 +49,6 @@ ConsoleIO.App.Editor.prototype.render = function render(target) {
     this.view.render(target);
 };
 
-ConsoleIO.App.Editor.prototype.click = function click(itemId) {
-    console.log(itemId);
+ConsoleIO.App.Editor.prototype.buttonClick = function buttonClick(btnId) {
+    console.log(btnId);
 };

@@ -19,7 +19,6 @@ ConsoleIO.App.Browser = function BrowserController(parent, model){
     this.view = new ConsoleIO.View.Browser(this, this.model);
 
     ConsoleIO.Service.Socket.on('user:devices', ConsoleIO.App.Browser.prototype.add, this);
-
     ConsoleIO.Service.Socket.on('device:registered', ConsoleIO.App.Browser.prototype.add, this);
     ConsoleIO.Service.Socket.on('device:offline', function(data){
         console.log('device:offline', data);
@@ -51,6 +50,10 @@ ConsoleIO.App.Browser.prototype.render = function render(target) {
     this.view.render(target);
 };
 
-ConsoleIO.App.Browser.prototype.click = function click(itemId) {
+ConsoleIO.App.Browser.prototype.buttonClick = function buttonClick(btnId) {
+    console.log('buttonClick', btnId);
+};
+
+ConsoleIO.App.Browser.prototype.subscribe = function subscribe(itemId) {
     ConsoleIO.Service.Socket.emit('subscribe', itemId);
 };

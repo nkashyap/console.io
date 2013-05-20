@@ -25,7 +25,8 @@ ConsoleIO.App = function AppController() {
         title: 'Device List',
         contextId: 'browser',
         width: 200,
-        height: 250
+        height: 250,
+        toolbar: [{ id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: '', tooltip: 'Refresh' }]
     });
 
     this.editor = new ConsoleIO.App.Editor(this, {
