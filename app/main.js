@@ -109,7 +109,8 @@ ConsoleIO.namespace("ConsoleIO.Settings");
 
 ConsoleIO.Settings = {
     secure: false,
-    theme: 'web'
+    theme: 'web',
+    iconPath: 'icons/'
 };
 
 ConsoleIO.Constraint = {

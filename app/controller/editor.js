@@ -11,7 +11,7 @@ ConsoleIO.namespace("ConsoleIO.App.Editor");
 ConsoleIO.App.Editor = function EditorController(parent, model) {
     this.parent = parent;
     this.model = model;
-    this.model.codeMirror = ConsoleIO.extend(this.model.codeMirror, {
+    this.model.codeMirror = ConsoleIO.extend({
         mode: {
             name: "htmlmixed",
             scriptTypes: [
@@ -34,7 +34,7 @@ ConsoleIO.App.Editor = function EditorController(parent, model) {
             "Ctrl-Enter": "submit",
             "Ctrl-Q": "toggleComment"
         }
-    });
+    }, this.model.codeMirror);
 
     this.view = new ConsoleIO.View.Editor(this, {
         id: this.model.id,
@@ -44,7 +44,9 @@ ConsoleIO.App.Editor = function EditorController(parent, model) {
 };
 
 ConsoleIO.App.Editor.prototype.render = function render(target) {
-    this.parent.setTitle(this.model.contextId || this.model.id, this.model.title);
+    if(this.parent.setTitle){
+        this.parent.setTitle(this.model.contextId || this.model.id, this.model.title);
+    }
     this.editor = CodeMirror.fromTextArea(this.view.textArea, this.model.codeMirror);
     this.view.render(target);
 };

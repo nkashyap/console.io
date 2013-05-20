@@ -22,9 +22,7 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
         title: 'Files',
         contextId: 'explorer',
         width: 200,
-        toolbar: [
-            { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: '', tooltip: 'Refresh' }
-        ]
+        toolbar: [{ id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }]
     });
     this.panel = new ConsoleIO.App.Device.Panel(this, {
         name: this.model.name

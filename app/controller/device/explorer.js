@@ -13,7 +13,7 @@ ConsoleIO.App.Device.Explorer = function ExplorerController(parent, model){
     this.model = model;
     this.view = new ConsoleIO.View.Device.Explorer(this, this.model);
 
-    ConsoleIO.Service.Socket.on('device:files', ConsoleIO.App.Explorer.prototype.add, this);
+    ConsoleIO.Service.Socket.on('device:files', this.add, this);
 
     this.refresh();
 };

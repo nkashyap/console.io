@@ -11,7 +11,6 @@ ConsoleIO.namespace("ConsoleIO.View.Device");
 ConsoleIO.View.Device = function DeviceView(ctrl, model) {
     this.ctrl = ctrl;
     this.model = model;
-
     this.target = null;
     this.layout = null;
 };

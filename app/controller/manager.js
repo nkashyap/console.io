@@ -18,8 +18,8 @@ ConsoleIO.App.Manager = function ManagerController(parent, model){
 
     this.view = new ConsoleIO.View.Manager(this, this.model);
 
-    ConsoleIO.Service.Socket.on('user:subscribed', ConsoleIO.App.Manager.prototype.add, this);
-    ConsoleIO.Service.Socket.on('user:unSubscribed', ConsoleIO.App.Manager.prototype.remove, this);
+    ConsoleIO.Service.Socket.on('user:subscribed', this.add, this);
+    ConsoleIO.Service.Socket.on('user:unSubscribed', this.remove, this);
 };
 
 ConsoleIO.App.Manager.prototype.render = function render(target) {

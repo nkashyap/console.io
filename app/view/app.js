@@ -11,7 +11,6 @@ ConsoleIO.namespace("ConsoleIO.View.App");
 ConsoleIO.View.App = function AppView(ctrl, model) {
     this.ctrl = ctrl;
     this.model = model;
-
     this.layout = null;
 };
 
@@ -29,15 +28,7 @@ ConsoleIO.View.App.prototype.render = function render(){
     //var appMenu = this.layout.attachMenu();
     //var appToolbar = this.layout.attachToolbar();
 
-    if(this.model.status){
-        this.addStatusBar();
-    }
-};
-
-ConsoleIO.View.App.prototype.addStatusBar = function addStatusBar(text){
-    if(this.layout){
-        this.layout.attachStatusBar().setText(text || this.model.status);
-    }
+    this.layout.attachStatusBar().setText(this.model.status);
 };
 
 ConsoleIO.View.App.prototype.getContextById = function getContextById(contextId){

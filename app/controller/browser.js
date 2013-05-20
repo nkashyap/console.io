@@ -18,8 +18,8 @@ ConsoleIO.App.Browser = function BrowserController(parent, model){
 
     this.view = new ConsoleIO.View.Browser(this, this.model);
 
-    ConsoleIO.Service.Socket.on('user:devices', ConsoleIO.App.Browser.prototype.add, this);
-    ConsoleIO.Service.Socket.on('device:registered', ConsoleIO.App.Browser.prototype.add, this);
+    ConsoleIO.Service.Socket.on('user:devices', this.add, this);
+    ConsoleIO.Service.Socket.on('device:registered', this.add, this);
     ConsoleIO.Service.Socket.on('device:offline', function(data){
         console.log('device:offline', data);
     }, this);

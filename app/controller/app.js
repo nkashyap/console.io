@@ -26,11 +26,11 @@ ConsoleIO.App = function AppController() {
         contextId: 'browser',
         width: 200,
         height: 250,
-        toolbar: [{ id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: '', tooltip: 'Refresh' }]
+        toolbar: [{ id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }]
     });
 
     this.editor = new ConsoleIO.App.Editor(this, {
-        id: 'editor',
+        contextId: 'editor',
         title: 'Editor',
         placeholder: 'Write javascript code to execute on remote client',
         codeMirror: {
@@ -38,18 +38,12 @@ ConsoleIO.App = function AppController() {
             readOnly: false
         },
         toolbar: [
-            { id: 'back', type: 'select', text: 'Back', opts: [
-                ['id1', 'obj', 'option1', 'img1'],
-                ['sep01', 'sep', '', '']
-            ], imgEnabled: '', imgDisabled: '', tooltip: '' },
-            { id: 'forward', type: 'select', text: 'Forward', opts: [
-                ['id1', 'obj', 'option1', 'img1'],
-                ['sep01', 'sep', '', '']
-            ], imgEnabled: '', imgDisabled: '', tooltip: '' },
+            { id: 'back', type: 'select', text: 'Back', opts: [], imgEnabled: 'back.gif', imgDisabled: 'back_dis.gif', tooltip: 'Back in History' },
+            { id: 'forward', type: 'select', text: 'Forward', opts: [], imgEnabled: 'forward.gif', imgDisabled: 'forward_dis.gif', tooltip: 'Forward in History' },
             { type: 'separator' },
-            { id: 'clear', type: 'button', text: 'Clear', imgEnabled: '', tooltip: '' },
+            { id: 'clear', type: 'button', text: 'Clear', imgEnabled: 'clear.gif', tooltip: 'Clear Editor' },
             { type: 'separator' },
-            { id: 'send', type: 'button', text: 'Send', imgEnabled: '', tooltip: 'Send command' }
+            { id: 'send', type: 'button', text: 'Send', imgEnabled: 'execute.png', imgDisabled: 'execute_dis.png', tooltip: 'Send command' }
         ]
     });
 

@@ -18,25 +18,16 @@ ConsoleIO.View.Manager = function ManagerView(ctrl, model) {
 
 ConsoleIO.View.Manager.prototype.render = function render(target) {
     this.target = target;
-};
+    this.tabs = this.target.attachTabbar();
+    this.tabs.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('tab'));
+    this.tabs.enableTabCloseButton(true);
 
-ConsoleIO.View.Manager.prototype.addTabber = function addTabber() {
-    if (this.target && !this.tabs) {
-        this.tabs = this.target.attachTabbar();
-        this.tabs.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('tab'));
-        this.tabs.enableTabCloseButton(true);
-
-        this.tabs.attachEvent('onTabClose', function(id){
-            this.close(id);
-        }, this.ctrl);
-    }
+    this.tabs.attachEvent('onTabClose', function(id){
+        this.close(id);
+    }, this.ctrl);
 };
 
 ConsoleIO.View.Manager.prototype.add = function add(name, isActive) {
-    if (!this.tabs) {
-        this.addTabber();
-    }
-
     this.tabs.addTab(name, name);
     if (isActive) {
         this.tabs.setTabActive(name);
@@ -44,11 +35,8 @@ ConsoleIO.View.Manager.prototype.add = function add(name, isActive) {
 };
 
 ConsoleIO.View.Manager.prototype.remove = function remove(name) {
-    if (this.tabs) {
-        this.tabs.removeTab(name);
-    }
+    this.tabs.removeTab(name);
 };
-
 
 ConsoleIO.View.Manager.prototype.getContextById = function getContextById(contextId){
     return this.tabs ? this.tabs.cells(contextId) : null;
