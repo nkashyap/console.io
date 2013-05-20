@@ -6,15 +6,15 @@
  * To change this template use File | Settings | File Templates.
  */
 
-ConsoleIO.namespace("ConsoleIO.View.Preview");
+ConsoleIO.namespace("ConsoleIO.View.Device.Preview");
 
-ConsoleIO.View.Preview = function PreviewView(ctrl, model) {
+ConsoleIO.View.Device.Preview = function PreviewView(ctrl, model) {
     this.ctrl = ctrl;
     this.model = model;
 
     this.target = null;
 };
 
-ConsoleIO.View.Preview.prototype.render = function render(target){
+ConsoleIO.View.Device.Preview.prototype.render = function render(target){
     this.target = target;
 };

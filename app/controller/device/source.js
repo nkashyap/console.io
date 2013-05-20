@@ -6,15 +6,15 @@
  * To change this template use File | Settings | File Templates.
  */
 
-ConsoleIO.namespace("ConsoleIO.App.Source");
+ConsoleIO.namespace("ConsoleIO.App.Device.Source");
 
-ConsoleIO.App.Source = function SourceController(parent, model){
+ConsoleIO.App.Device.Source = function SourceController(parent, model){
     this.parent = parent;
     this.model = model;
 
-    this.view = new ConsoleIO.View.Source(this, this.model);
+    this.view = new ConsoleIO.View.Device.Source(this, this.model);
 };
 
-ConsoleIO.App.Source.prototype.render = function render(target) {
+ConsoleIO.App.Device.Source.prototype.render = function render(target) {
     this.view.render(target);
 };

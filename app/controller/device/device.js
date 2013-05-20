@@ -8,37 +8,33 @@
 
 ConsoleIO.namespace("ConsoleIO.App.Device");
 
-ConsoleIO.App.Device = function DeviceController(parent, model){
+ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.parent = parent;
     this.model = model;
-
     this.context = {
         explorer: "a",
-        device: "b"
+        panel: "b"
     };
 
     this.view = new ConsoleIO.View.Device(this, this.model);
-
-    this.explorer = new ConsoleIO.App.Explorer(this, {
+    this.explorer = new ConsoleIO.App.Device.Explorer(this, {
         name: this.model.name,
         title: 'Files',
         contextId: 'explorer',
         width: 200,
-        toolbar: [{ id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: '', tooltip: 'Refresh' }]
+        toolbar: [
+            { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: '', tooltip: 'Refresh' }
+        ]
     });
-    
-    this.console = new ConsoleIO.App.Console(this, {});
-    this.source = new ConsoleIO.App.Source(this, {});
-    this.preview = new ConsoleIO.App.Preview(this, {});
+    this.panel = new ConsoleIO.App.Device.Panel(this, {
+        name: this.model.name
+    });
 };
 
 ConsoleIO.App.Device.prototype.render = function render(target) {
     this.view.render(target);
-
     this.explorer.render(this.view.getContextById(this.context.explorer));
-    //this.console.render(this.view.getContextById(this.context.console));
-    //this.source.render(this.view.getContextById(this.context.source));
-    //this.preview.render(this.view.getContextById(this.context.preview));
+    this.panel.render(this.view.getContextById(this.context.panel));
 };
 
 ConsoleIO.App.Device.prototype.setTitle = function setTitle(name, title) {

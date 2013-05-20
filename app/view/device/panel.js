@@ -1,0 +1,40 @@
+/**
+ * Created with JetBrains WebStorm.
+ * User: nisheeth
+ * Date: 20/05/13
+ * Time: 15:02
+ * To change this template use File | Settings | File Templates.
+ */
+
+ConsoleIO.namespace("ConsoleIO.View.Device.Panel");
+
+ConsoleIO.View.Device.Panel = function PanelView(ctrl, model) {
+    this.ctrl = ctrl;
+    this.model = model;
+
+    this.target = null;
+    this.tabs = null;
+};
+
+ConsoleIO.View.Device.Panel.prototype.render = function render(target){
+    this.target = target;
+    this.addTabber();
+};
+
+ConsoleIO.View.Device.Panel.prototype.addTabber = function addTabber() {
+    if (this.target && !this.tabs) {
+        this.tabs = this.target.attachTabbar();
+        this.tabs.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('tab'));
+    }
+};
+
+ConsoleIO.View.Device.Panel.prototype.add = function add(name, isActive) {
+    this.tabs.addTab(name, name);
+    if (isActive) {
+        this.tabs.setTabActive(name);
+    }
+};
+
+ConsoleIO.View.Device.Panel.prototype.getContextById = function getContextById(contextId){
+    return this.tabs ? this.tabs.cells(contextId) : null;
+};

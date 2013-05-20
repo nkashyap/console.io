@@ -6,9 +6,9 @@
  * To change this template use File | Settings | File Templates.
  */
 
-ConsoleIO.namespace("ConsoleIO.View.Explorer");
+ConsoleIO.namespace("ConsoleIO.View.Device.Explorer");
 
-ConsoleIO.View.Explorer = function ExplorerView(ctrl, model) {
+ConsoleIO.View.Device.Explorer = function ExplorerView(ctrl, model) {
     this.ctrl = ctrl;
     this.model = model;
 
@@ -17,7 +17,7 @@ ConsoleIO.View.Explorer = function ExplorerView(ctrl, model) {
     this.toolbar = null;
 };
 
-ConsoleIO.View.Explorer.prototype.render = function render(target){
+ConsoleIO.View.Device.Explorer.prototype.render = function render(target){
     this.target = target;
     this.target.setWidth(this.model.width);
     this.addTree();
@@ -27,7 +27,7 @@ ConsoleIO.View.Explorer.prototype.render = function render(target){
     }
 };
 
-ConsoleIO.View.Explorer.prototype.addTree = function addTree() {
+ConsoleIO.View.Device.Explorer.prototype.addTree = function addTree() {
     if(this.target && !this.tree){
         this.tree = this.target.attachTree();
         this.tree.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('tree'));
@@ -45,7 +45,7 @@ ConsoleIO.View.Explorer.prototype.addTree = function addTree() {
     }
 };
 
-ConsoleIO.View.Explorer.prototype.addToolbar = function addToolbar(items) {
+ConsoleIO.View.Device.Explorer.prototype.addToolbar = function addToolbar(items) {
     if(this.target && !this.toolbar){
         this.toolbar = this.target.attachToolbar();
         //this.toolbar.setIconsPath("../common/imgs/");
@@ -76,7 +76,7 @@ ConsoleIO.View.Explorer.prototype.addToolbar = function addToolbar(items) {
     }
 };
 
-ConsoleIO.View.Explorer.prototype.add = function add(id, name, parentId) {
+ConsoleIO.View.Device.Explorer.prototype.add = function add(id, name, parentId) {
     if(this.tree){
         this.tree.insertNewItem(parentId, id, name);
     }
