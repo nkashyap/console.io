@@ -11,9 +11,15 @@ ConsoleIO.namespace("ConsoleIO.App.Manager");
 ConsoleIO.App.Manager = function ManagerController(parent, model){
     this.parent = parent;
     this.model = model;
-    this.devices = [];
+    this.store = {
+        name: [],
+        device: []
+    };
 
     this.view = new ConsoleIO.View.Manager(this, this.model);
+
+    ConsoleIO.Service.Socket.on('user:subscribed', ConsoleIO.App.Manager.prototype.add, this);
+    ConsoleIO.Service.Socket.on('user:unSubscribed', ConsoleIO.App.Manager.prototype.remove, this);
 };
 
 ConsoleIO.App.Manager.prototype.render = function render(target) {
@@ -21,22 +27,38 @@ ConsoleIO.App.Manager.prototype.render = function render(target) {
     this.view.render(target);
 };
 
-ConsoleIO.App.Manager.prototype.add = function add(device) {
-    if(this.devices.indexOf(device) === -1){
-        this.devices.push(device);
-    }
+ConsoleIO.App.Manager.prototype.add = function add(data) {
+    if(this.store.name.indexOf(data.name) === -1){
+        this.store.name.push(data.name);
+        this.view.add(data.name, this.store.name.length > 0);
 
-    this.view.add(device, this.devices.length > 0);
+        var device = new ConsoleIO.App.Device(this, {
+            name: data.name
+        });
+        this.store.device.push(device);
+        device.render(this.view.getContextById(data.name));
+    }
 };
 
-ConsoleIO.App.Manager.prototype.remove = function remove(device) {
-    var index = this.devices.indexOf(device);
+ConsoleIO.App.Manager.prototype.remove = function remove(data) {
+    var index = this.store.name.indexOf(data.name);
     if(index > -1){
-        this.devices.splice(index, 1);
-        this.view.remove(device);
+        this.store.name.splice(index, 1);
+        this.view.remove(data.name);
+
+        ConsoleIO.every(this.store.device, function(device, index){
+            if(device.name === data.name){
+                //device.destroy();
+                this.splice(index, 1);
+                return false;
+            }
+
+            return true;
+        });
     }
 };
 
 ConsoleIO.App.Manager.prototype.close = function close(itemId) {
-    console.log('close', itemId);
+    ConsoleIO.Service.Socket.emit('unSubscribe', itemId);
+    //this.remove(itemId);
 };

@@ -11,7 +11,7 @@ ConsoleIO.namespace("ConsoleIO.App.Editor");
 ConsoleIO.App.Editor = function EditorController(parent, model) {
     this.parent = parent;
     this.model = model;
-    this.model.codeMirror = ConsoleIO.merge(this.model.codeMirror, {
+    this.model.codeMirror = ConsoleIO.extend(this.model.codeMirror, {
         mode: {
             name: "htmlmixed",
             scriptTypes: [

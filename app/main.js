@@ -47,6 +47,27 @@ if(typeof window.ConsoleIO === "undefined"){
             }
         },
 
+        every: (function () {
+            if (Array.prototype.every) {
+                return function (array, callback, scope) {
+                    return (array || []).every(callback, scope);
+                };
+            } else {
+                return function (array, callback, scope) {
+                    array = array || [];
+                    var i = 0, length = array.length;
+                    if (length) {
+                        do {
+                            if (!callback.call(scope || array, array[i], i, array)) {
+                                return false;
+                            }
+                        } while (++i < length);
+                    }
+                    return true;
+                };
+            }
+        }()),
+
         forEach: (function () {
             if (Array.prototype.forEach) {
                 return function (array, callback, scope) {
@@ -72,7 +93,7 @@ if(typeof window.ConsoleIO === "undefined"){
             }
         },
 
-        merge: function merge(source, target) {
+        extend: function extend(target, source) {
             this.forEachProperty(source, function (value, property) {
                 target[property] = value;
             });

@@ -32,20 +32,24 @@ ConsoleIO.View.Manager.prototype.addTabber = function addTabber() {
     }
 };
 
-ConsoleIO.View.Manager.prototype.add = function add(device, isActive) {
+ConsoleIO.View.Manager.prototype.add = function add(name, isActive) {
     if (!this.tabs) {
         this.addTabber();
     }
 
-    this.tabs.addTab(device.id, device.name);
-
+    this.tabs.addTab(name, name);
     if (isActive) {
-        this.tabs.setTabActive(device.id);
+        this.tabs.setTabActive(name);
     }
-
-    device.render(this.tabs.cells(device.id));
 };
 
-ConsoleIO.View.Manager.prototype.remove = function remove(device) {
-    this.tabs.removeTab(device.id);
+ConsoleIO.View.Manager.prototype.remove = function remove(name) {
+    if (this.tabs) {
+        this.tabs.removeTab(name);
+    }
+};
+
+
+ConsoleIO.View.Manager.prototype.getContextById = function getContextById(contextId){
+    return this.tabs ? this.tabs.cells(contextId) : null;
 };

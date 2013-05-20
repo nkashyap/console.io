@@ -30,31 +30,9 @@ function main() {
 
     //console app routes
     app.use('/addons', express.static('addons'));
-    app.use('/inject.js', express.static('addons/inject.js'));
-
+    //app.use('/inject.js', express.static('addons/inject.js'));
 
     manager.setUp(app);
-
-    // IO handlers
-    // Setup a route for the ready event, and add session data.
-    app.io.route('disconnect', function disconnect(req) {
-        manager.offline(req);
-    });
-
-    app.io.route('device', {
-        setUp: function setUp(req) {
-            manager.register('device', req);
-        },
-        log: function log(req) {
-            manager.log(req);
-        }
-    });
-
-    app.io.route('user', {
-        setUp: function setUp(req) {
-            manager.register('user', req);
-        }
-    });
 
     // listen to port
     app.listen(app.get('port-number'));

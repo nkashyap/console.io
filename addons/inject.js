@@ -49,9 +49,9 @@
             this.io.on('connect_failed', this.onConnectFailed);
             this.io.on('reconnect_failed', this.onReconnectFailed);
             this.io.on('error', this.onError);
-            this.io.on('ready', this.onReady);
+            this.io.on('device:ready', this.onReady);
             //this.io.on('unsubscribe', this.onUnSubscribe);
-            this.io.on('command', this.onCommand);
+            this.io.on('device:command', this.onCommand);
         },
 
         emit: function emit(name, data) {

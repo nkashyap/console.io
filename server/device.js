@@ -8,20 +8,21 @@
 
 var detechDevice = require('./detectdevice');
 
-function Device(application, request, number){
+function Device(application, request, manager, number){
     this.application = application;
     this.request = request;
+    this.manager = manager;
     this.info = detechDevice.get(request.data);
     this.number = this.request.cookies.guid || number;
     this.name = this.getName();
-    this.online = true;
+    this.isOnline = false;
 
     this.emit('ready', {
         name: this.name,
         number: this.number
     });
 
-    this.request.io.join(this.request.sessionID);
+    this.online();
 }
 
 Device.prototype.getIdentity = function getIdentity(){
@@ -48,10 +49,16 @@ Device.prototype.getName = function getName(){
     return name.join("|");
 };
 
+Device.prototype.online = function online(){
+    this.isOnline = true;
+    this.request.io.join(this.name);
+    this.emit('online');
+};
+
 Device.prototype.offline = function offline(){
-    this.online = false;
-    this.broadcast('offline');
-    this.request.io.leave(this.request.sessionID);
+    this.isOnline = false;
+    this.request.io.leave(this.name);
+    this.emit('offline');
 };
 
 Device.prototype.log = function(data){
@@ -60,11 +67,11 @@ Device.prototype.log = function(data){
 
 
 Device.prototype.emit = function emit(name, data){
-    this.request.io.emit(name, data);
+    this.request.io.emit('device:' + name, data);
 };
 
 Device.prototype.broadcast = function broadcast(name, data){
-    this.request.io.room(this.request.sessionID).broadcast(name, data);
+    this.request.io.room(this.name).broadcast('device:' + name, data);
 };
 
 

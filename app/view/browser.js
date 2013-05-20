@@ -42,7 +42,7 @@ ConsoleIO.View.Browser.prototype.addTree = function addTree() {
     }
 };
 
-ConsoleIO.View.Browser.prototype.addItem = function addItem(id, name, parentId) {
+ConsoleIO.View.Browser.prototype.add = function add(id, name, parentId) {
     if(this.tree){
         this.tree.insertNewItem(parentId, id, name);
     }

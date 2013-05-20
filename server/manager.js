@@ -12,70 +12,98 @@ var Device = require('./device'),
 function Manager() {
 
     var application = null,
-        devices = [],
-        users = [];
+        devices = {},
+        users = {},
+        self;
+
+    function defineRouteHandler(list, name) {
+        return function (request) {
+            var reference = list[request.sessionID];
+            if (reference && reference[name]) {
+                reference[name](request.data);
+            }
+        };
+    }
 
     function setUp(app) {
         application = app;
+
+        // IO handlers
+        // Setup a route for the ready event, and add session data.
+        app.io.route('disconnect', disconnect);
+
+        app.io.route('device', {
+            setUp: function setUp(req) {
+                register('device', req);
+            },
+            log: defineRouteHandler(devices, 'log')
+        });
+
+        app.io.route('user', {
+            setUp: function setUp(req) {
+                register('user', req);
+            },
+            subscribe: defineRouteHandler(users, 'subscribe'),
+            unSubscribe: defineRouteHandler(users, 'unSubscribe')
+        });
+    }
+
+    self = {
+
+    };
+
+
+
+    function forEach(list, callback){
+        Object.getOwnPropertyNames(list).forEach(function(name){
+            callback(list[name]);
+        });
     }
 
     function register(type, request) {
         if (type === 'device') {
-            if (!getByRequest(devices, request)) {
-                var registeredDevice = new Device(application, request, devices.length + 1);
-                devices.push(registeredDevice);
+            var deviceReg = devices[request.sessionID];
+            if (!deviceReg) {
+                deviceReg = new Device(application, request, self, Object.getOwnPropertyNames(devices).length + 1);
+                devices[request.sessionID] = deviceReg;
 
-                users.forEach(function(user){
-                    user.emit('deviceRegistered', registeredDevice.getIdentity());
-                });
+                deviceReg.emit('registered', deviceReg.getIdentity());
+//                forEach(users, function(user){
+//                    user.emit('registered', deviceReg.getIdentity());
+//                });
+            }else{
+                deviceReg.online();
             }
         }
         else if (type === 'user') {
-            if (!getByRequest(users, request)) {
-                var newUser = new User(application, request);
-                users.push(newUser);
+            var userReg = users[request.sessionID];
+            if (!userReg) {
+                userReg = new User(application, request, self);
+                users[request.sessionID] = userReg;
 
-                devices.forEach(function(device){
-                    newUser.emit('deviceRegistered', device.getIdentity());
+                forEach(devices, function(device){
+                    userReg.emit('devices', device.getIdentity());
                 });
+            }else{
+                userReg.online();
             }
         }
-
-        //console.log('devices', devices.length, 'users', users.length, request.sessionID, request.cookies['connect.sid']);
     }
 
-    function offline(request){
-        var registeredDevice = getByRequest(devices, request);
-        if (registeredDevice) {
-            registeredDevice.offline();
+    function disconnect(request){
+        var deviceReg = devices[request.sessionID];
+        if (deviceReg) {
+            deviceReg.offline();
         }else {
-            var registeredUsers = getByRequest(users, request);
-            if (registeredUsers) {
-                registeredUsers.offline();
+            var userReg = users[request.sessionID];
+            if (userReg) {
+                userReg.offline();
             }
         }
-    }
-
-    function log(request){
-        var registeredDevice = getByRequest(devices, request);
-        if (registeredDevice) {
-            registeredDevice.log(request.data);
-        }
-    }
-
-    function getByRequest(list, request) {
-        var filteredItem = list.filter(function (item) {
-            return request.sessionID === item.request.sessionID;
-        });
-        return filteredItem.length > 0 ? filteredItem[0] : null;
     }
 
     return {
-        setUp: setUp,
-        register: register,
-        offline: offline,
-
-        log: log
+        setUp: setUp
     }
 }
 

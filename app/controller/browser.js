@@ -18,24 +18,32 @@ ConsoleIO.App.Browser = function BrowserController(parent, model){
 
     this.view = new ConsoleIO.View.Browser(this, this.model);
 
-    ConsoleIO.Service.Socket.on('deviceRegistered', ConsoleIO.App.Browser.prototype.addItem, this);
+    ConsoleIO.Service.Socket.on('user:devices', ConsoleIO.App.Browser.prototype.add, this);
+
+    ConsoleIO.Service.Socket.on('device:registered', ConsoleIO.App.Browser.prototype.add, this);
+    ConsoleIO.Service.Socket.on('device:offline', function(data){
+        console.log('device:offline', data);
+    }, this);
+    ConsoleIO.Service.Socket.on('device:online', function(data){
+        console.log('device:online', data);
+    }, this);
 };
 
-ConsoleIO.App.Browser.prototype.addItem = function addItem(data) {
+ConsoleIO.App.Browser.prototype.add = function add(data) {
     var name = data.browser + '-' + data.version;
 
     if(this.store.os.indexOf(data.os) === -1){
-        this.view.addItem(data.os, data.os, 0);
+        this.view.add(data.os, data.os, 0);
         this.store.os.push(data.os);
     }
 
     if(this.store.browser.indexOf(name) === -1){
-        this.view.addItem(data.browser, data.browser, data.os);
-        this.view.addItem(name, data.version, data.browser);
+        this.view.add(data.browser, data.browser, data.os);
+        this.view.add(name, data.version, data.browser);
         this.store.browser.push(name);
     }
 
-    this.view.addItem(data.name, data.browser +'|'+ data.number, name);
+    this.view.add(data.name, data.browser +'|'+ data.number, name);
 };
 
 ConsoleIO.App.Browser.prototype.render = function render(target) {
@@ -44,5 +52,5 @@ ConsoleIO.App.Browser.prototype.render = function render(target) {
 };
 
 ConsoleIO.App.Browser.prototype.click = function click(itemId) {
-    console.log(itemId);
+    ConsoleIO.Service.Socket.emit('subscribe', itemId);
 };
