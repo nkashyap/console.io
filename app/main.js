@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-if(typeof window.ConsoleIO === "undefined"){
+if (typeof window.ConsoleIO === "undefined") {
     window.ConsoleIO = {
         domReady: false,
 
@@ -115,18 +115,18 @@ ConsoleIO.Settings = {
 
 ConsoleIO.Constraint = {
     THEMES: {
-        'web' : {
+        'web': {
             layout: 'dhx_skyblue'
         },
         'terrace': {
             layout: 'dhx_terrace'
         },
-        get: function get(type){
+        get: function get(type) {
             return ConsoleIO.Constraint.THEMES[ConsoleIO.Settings.theme][type];
         }
     },
     IMAGE_URL: {
-        'web' : {
+        'web': {
             tree: "lib/dhtmlx/web/imgs/csh_vista/",
             tab: "lib/dhtmlx/web/imgs/"
         },
@@ -134,14 +134,14 @@ ConsoleIO.Constraint = {
             tree: "lib/dhtmlx/terrace/imgs/csh_dhx_terrace/",
             tab: "lib/dhtmlx/terrace/imgs/"
         },
-        get: function get(type){
+        get: function get(type) {
             return ConsoleIO.Constraint.IMAGE_URL[ConsoleIO.Settings.theme][type];
         }
     }
 };
 
 
-ConsoleIO.ready(function(){
+ConsoleIO.ready(function () {
     if (ConsoleIO.domReady) {
         return;
     }

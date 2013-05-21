@@ -26,7 +26,9 @@ ConsoleIO.App = function AppController() {
         contextId: 'browser',
         width: 200,
         height: 250,
-        toolbar: [{ id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }]
+        toolbar: [
+            { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
+        ]
     });
 
     this.editor = new ConsoleIO.App.Editor(this, {

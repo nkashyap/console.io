@@ -27,6 +27,7 @@ Device.prototype.getIdentity = function getIdentity(){
     return {
         name: this.name,
         number: this.number,
+        online: this.isOnline,
         browser: this.info.name,
         os: this.info.os,
         version: this.info.version

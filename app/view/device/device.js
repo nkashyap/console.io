@@ -15,17 +15,17 @@ ConsoleIO.View.Device = function DeviceView(ctrl, model) {
     this.layout = null;
 };
 
-ConsoleIO.View.Device.prototype.render = function render(target){
+ConsoleIO.View.Device.prototype.render = function render(target) {
     this.target = target;
     this.layout = this.target.attachLayout("2U");
 };
 
-ConsoleIO.View.Device.prototype.getContextById = function getContextById(contextId){
+ConsoleIO.View.Device.prototype.getContextById = function getContextById(contextId) {
     return this.layout ? this.layout.cells(contextId) : null;
 };
 
-ConsoleIO.View.Device.prototype.setTitle = function setTitle(contextId, title){
-    if(this.layout){
+ConsoleIO.View.Device.prototype.setTitle = function setTitle(contextId, title) {
+    if (this.layout) {
         this.layout.cells(contextId).setText(title);
         this.layout.setCollapsedText(contextId, title);
     }

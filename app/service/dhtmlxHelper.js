@@ -9,9 +9,9 @@
 ConsoleIO.namespace("ConsoleIO.Service.DHTMLXHelper");
 
 ConsoleIO.Service.DHTMLXHelper = {
-    populateToolbar: function populateToolbar(items, toolbar){
-        ConsoleIO.forEach(items, function(item, index){
-            switch(item.type){
+    populateToolbar: function populateToolbar(items, toolbar) {
+        ConsoleIO.forEach(items, function (item, index) {
+            switch (item.type) {
                 case 'button':
                     this.addButton(item.id, index, item.text, item.imgEnabled, item.imgDisabled);
                     break;
@@ -34,22 +34,22 @@ ConsoleIO.Service.DHTMLXHelper = {
     createElement: function createElement(config) {
         var element = document.createElement(config.tag || 'div');
 
-        ConsoleIO.forEachProperty(config.attr, function(value, property){
-            if(value){
+        ConsoleIO.forEachProperty(config.attr, function (value, property) {
+            if (value) {
                 element.setAttribute(property, value);
             }
         });
 
-        ConsoleIO.forEachProperty(config.prop, function(value, property){
-            if(value){
+        ConsoleIO.forEachProperty(config.prop, function (value, property) {
+            if (value) {
                 element[property] = value;
             }
         });
 
-        if(config.target){
-            if(config.insert && config.insert === 'top'){
+        if (config.target) {
+            if (config.insert && config.insert === 'top') {
                 config.target.insertBefore(element, config.target.firstElementChild || config.target.firstChild);
-            }else{
+            } else {
                 config.target.appendChild(element);
             }
         }

@@ -22,7 +22,7 @@ ConsoleIO.View.Manager.prototype.render = function render(target) {
     this.tabs.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('tab'));
     this.tabs.enableTabCloseButton(true);
 
-    this.tabs.attachEvent('onTabClose', function(id){
+    this.tabs.attachEvent('onTabClose', function (id) {
         this.close(id);
     }, this.ctrl);
 };
@@ -38,6 +38,6 @@ ConsoleIO.View.Manager.prototype.remove = function remove(name) {
     this.tabs.removeTab(name);
 };
 
-ConsoleIO.View.Manager.prototype.getContextById = function getContextById(contextId){
+ConsoleIO.View.Manager.prototype.getContextById = function getContextById(contextId) {
     return this.tabs ? this.tabs.cells(contextId) : null;
 };

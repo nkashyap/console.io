@@ -8,13 +8,15 @@
 
 ConsoleIO.namespace("ConsoleIO.App.Device.Source");
 
-ConsoleIO.App.Device.Source = function SourceController(parent, model){
+ConsoleIO.App.Device.Source = function SourceController(parent, model) {
     this.parent = parent;
     this.model = model;
 
     this.view = new ConsoleIO.View.Device.Source(this, {
         name: "Source",
-        toolbar: [{ id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }]
+        toolbar: [
+            { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
+        ]
     });
 
     this.editor = new ConsoleIO.App.Editor(this, {
@@ -31,7 +33,7 @@ ConsoleIO.App.Device.Source.prototype.render = function render(target) {
 
 ConsoleIO.App.Device.Source.prototype.buttonClick = function buttonClick(btnId) {
     console.log('buttonClick', btnId);
-    if(btnId === 'refresh'){
+    if (btnId === 'refresh') {
         this.refresh();
     }
 };

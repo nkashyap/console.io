@@ -11,7 +11,7 @@ ConsoleIO.namespace("ConsoleIO.App.View.Editor");
 ConsoleIO.namespace("ConsoleIO.App.View.Device");
 ConsoleIO.namespace("ConsoleIO.App.View.DeviceManager");
 
-ConsoleIO.App.View = function(){
+ConsoleIO.App.View = function () {
 
     var appLayout = new dhtmlXLayoutObject(document.body, "3U", ConsoleIO.App.Constraint.THEMES.get('layout'));
 
@@ -43,14 +43,18 @@ ConsoleIO.App.View = function(){
         deviceTree.enableTreeImages(1);
         deviceTree.loadJSONObject({
             id: 0,
-            item: [{
-                id: 1,
-                text: 'Console.IO',
-                item: [{
-                    id: 2,
-                    text: 'LG'
-                }]
-            }]
+            item: [
+                {
+                    id: 1,
+                    text: 'Console.IO',
+                    item: [
+                        {
+                            id: 2,
+                            text: 'LG'
+                        }
+                    ]
+                }
+            ]
         });
     }
 
@@ -74,7 +78,7 @@ ConsoleIO.App.View = function(){
             id: "editor",
             placeholder: "Write javascript code to execute on remote client",
             mode: "javascript",
-            readOnly:false
+            readOnly: false
         });
 
         editorCell.attachObject(editor.dom.container);
@@ -107,14 +111,18 @@ ConsoleIO.App.View = function(){
         fileTree.enableTreeImages(1);
         fileTree.loadJSONObject({
             id: 0,
-            item: [{
-                id: 1,
-                text: 'scripts',
-                item: [{
-                    id: 2,
-                    text: 'javascript'
-                }]
-            }]
+            item: [
+                {
+                    id: 1,
+                    text: 'scripts',
+                    item: [
+                        {
+                            id: 2,
+                            text: 'javascript'
+                        }
+                    ]
+                }
+            ]
         });
         var fileToolbar = fileCell.attachToolbar();
         fileToolbar.addButton("reload", 0, "Reload", "save_as.gif");
@@ -140,7 +148,7 @@ ConsoleIO.App.View = function(){
 
         var sourceCell = contentTabs.cells("source");
         var sourceToolbar = sourceCell.attachToolbar();
-            sourceToolbar.addButton("reload", 0, "Reload", "save_as.gif");
+        sourceToolbar.addButton("reload", 0, "Reload", "save_as.gif");
 
         var editor = new ConsoleIO.App.Editor({
             id: "src-editor",
@@ -152,8 +160,8 @@ ConsoleIO.App.View = function(){
 
         var domCell = contentTabs.cells("dom");
         var domToolbar = domCell.attachToolbar();
-            domToolbar.addButton("reload", 0, "Reload", "save_as.gif");
-            domToolbar.addButton("preview", 1, "Preview", "save_as.gif");
+        domToolbar.addButton("reload", 0, "Reload", "save_as.gif");
+        domToolbar.addButton("preview", 1, "Preview", "save_as.gif");
 
         var domEditor = new ConsoleIO.App.Editor({
             id: "dom-preview"
@@ -172,7 +180,7 @@ ConsoleIO.App.View = function(){
 };
 
 
-ConsoleIO.App.View.DeviceManager = function DeviceManager(target){
+ConsoleIO.App.View.DeviceManager = function DeviceManager(target) {
     target.setText("Device List");
     target.setWidth(200);
     target.setHeight(250);
@@ -183,13 +191,17 @@ ConsoleIO.App.View.DeviceManager = function DeviceManager(target){
     deviceTree.enableTreeImages(1);
     deviceTree.loadJSONObject({
         id: 0,
-        item: [{
-            id: 1,
-            text: 'Console.IO',
-            item: [{
-                id: 2,
-                text: 'LG'
-            }]
-        }]
+        item: [
+            {
+                id: 1,
+                text: 'Console.IO',
+                item: [
+                    {
+                        id: 2,
+                        text: 'LG'
+                    }
+                ]
+            }
+        ]
     });
 };

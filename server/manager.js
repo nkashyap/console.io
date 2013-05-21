@@ -23,6 +23,15 @@ function Manager() {
         },
         broadcast: function broadcast(room, name, data){
             application.io.room(room).broadcast(name, data);
+        },
+        emitRegisteredDevices: function emitRegisteredDevices(user){
+            if(user){
+                forEach(devices, function(device){
+                    var deviceConfig = device.getIdentity();
+                    deviceConfig.subscribed = user.isSubscribed(deviceConfig.name);
+                    user.emit('registeredDevice', deviceConfig);
+                });
+            }
         }
     };
 
@@ -100,6 +109,9 @@ function Manager() {
             setUp: function setUp(req) {
                 register('user', req);
             },
+            getRegisteredDevices: function getRegisteredDevices(req){
+                self.emitRegisteredDevices(users[req.cookies.guid]);
+            },
             subscribe: defineRouteHandler(users, 'subscribe'),
             unSubscribe: defineRouteHandler(users, 'unSubscribe'),
             deviceFiles: defineRouteHandler(users, 'deviceFiles')
@@ -112,7 +124,7 @@ function Manager() {
             if (!deviceReg) {
                 deviceReg = new Device(application, request, self);
                 devices[request.cookies.guid] = deviceReg;
-                deviceReg.emit('registered', deviceReg.getIdentity());
+                self.emit('device:registered', deviceReg.getIdentity());
             }
             deviceReg.online(request);
         }
@@ -124,9 +136,7 @@ function Manager() {
             }
 
             userReg.online(request);
-            forEach(devices, function(device){
-                userReg.emit('devices', device.getIdentity());
-            });
+            self.emitRegisteredDevices(userReg);
         }
     }
 

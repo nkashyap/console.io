@@ -8,7 +8,7 @@
 
 ConsoleIO.namespace("ConsoleIO.App.Device.Panel");
 
-ConsoleIO.App.Device.Panel = function PanelController(parent, model){
+ConsoleIO.App.Device.Panel = function PanelController(parent, model) {
     this.parent = parent;
     this.model = model;
 

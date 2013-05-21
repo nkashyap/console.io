@@ -8,7 +8,7 @@
 
 ConsoleIO.namespace("ConsoleIO.App.Manager");
 
-ConsoleIO.App.Manager = function ManagerController(parent, model){
+ConsoleIO.App.Manager = function ManagerController(parent, model) {
     this.parent = parent;
     this.model = model;
     this.store = {
@@ -28,7 +28,7 @@ ConsoleIO.App.Manager.prototype.render = function render(target) {
 };
 
 ConsoleIO.App.Manager.prototype.add = function add(data) {
-    if(this.store.name.indexOf(data.name) === -1){
+    if (this.store.name.indexOf(data.name) === -1) {
         this.store.name.push(data.name);
         this.view.add(data.name, this.store.name.length > 0);
 
@@ -42,12 +42,12 @@ ConsoleIO.App.Manager.prototype.add = function add(data) {
 
 ConsoleIO.App.Manager.prototype.remove = function remove(data) {
     var index = this.store.name.indexOf(data.name);
-    if(index > -1){
+    if (index > -1) {
         this.store.name.splice(index, 1);
         this.view.remove(data.name);
 
-        ConsoleIO.every(this.store.device, function(device, index){
-            if(device.name === data.name){
+        ConsoleIO.every(this.store.device, function (device, index) {
+            if (device.name === data.name) {
                 //device.destroy();
                 this.splice(index, 1);
                 return false;

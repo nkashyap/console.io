@@ -8,16 +8,18 @@
 
 ConsoleIO.namespace("ConsoleIO.App.Device.Console");
 
-ConsoleIO.App.Device.Console = function ConsoleController(parent, model){
+ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
     this.parent = parent;
     this.model = model;
 
     this.view = new ConsoleIO.View.Device.Console(this, {
         name: "Console",
-        toolbar: [{ id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }]
+        toolbar: [
+            { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
+        ]
     });
 
-    ConsoleIO.Service.Socket.on('device:console:'+ this.model.name, this.add, this);
+    ConsoleIO.Service.Socket.on('device:console:' + this.model.name, this.add, this);
 };
 
 ConsoleIO.App.Device.Console.prototype.render = function render(target) {
@@ -30,7 +32,7 @@ ConsoleIO.App.Device.Console.prototype.add = function add(data) {
 
 ConsoleIO.App.Device.Console.prototype.buttonClick = function buttonClick(btnId) {
     console.log('buttonClick', btnId);
-    if(btnId === 'refresh'){
+    if (btnId === 'refresh') {
         this.refresh();
     }
 };

@@ -8,7 +8,7 @@
 
 ConsoleIO.namespace("ConsoleIO.App.Device.Explorer");
 
-ConsoleIO.App.Device.Explorer = function ExplorerController(parent, model){
+ConsoleIO.App.Device.Explorer = function ExplorerController(parent, model) {
     this.parent = parent;
     this.model = model;
     this.view = new ConsoleIO.View.Device.Explorer(this, this.model);
@@ -33,7 +33,7 @@ ConsoleIO.App.Device.Explorer.prototype.clear = function clear() {
 
 ConsoleIO.App.Device.Explorer.prototype.buttonClick = function buttonClick(btnId) {
     console.log('buttonClick', btnId);
-    if(btnId === 'refresh'){
+    if (btnId === 'refresh') {
         this.refresh();
     }
 };

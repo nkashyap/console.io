@@ -16,7 +16,7 @@ ConsoleIO.View.Browser = function BrowserView(ctrl, model) {
     this.toolbar = null;
 };
 
-ConsoleIO.View.Browser.prototype.render = function render(target){
+ConsoleIO.View.Browser.prototype.render = function render(target) {
     var scope = this;
     this.target = target;
     this.target.setWidth(this.model.width);
@@ -24,7 +24,7 @@ ConsoleIO.View.Browser.prototype.render = function render(target){
 
     this.toolbar = this.target.attachToolbar();
     this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
-    this.toolbar.attachEvent("onClick", function(itemId){
+    this.toolbar.attachEvent("onClick", function (itemId) {
         this.buttonClick(itemId);
     }, this.ctrl);
 
@@ -32,19 +32,30 @@ ConsoleIO.View.Browser.prototype.render = function render(target){
 
     this.tree = this.target.attachTree();
     this.tree.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('tree'));
+    this.tree.setIconPath(ConsoleIO.Settings.iconPath);
     this.tree.enableHighlighting(true);
     this.tree.enableTreeImages(true);
     this.tree.enableTreeLines(true);
     this.tree.enableIEImageFix(true);
-    this.tree.attachEvent("onDblClick", function(itemId){
-        if(!scope.tree.hasChildren(itemId)){
+    this.tree.attachEvent("onDblClick", function (itemId) {
+        if (!scope.tree.hasChildren(itemId)) {
             this.subscribe(itemId);
         }
     }, this.ctrl);
 };
 
-ConsoleIO.View.Browser.prototype.add = function add(id, name, parentId) {
-    if(this.tree){
+ConsoleIO.View.Browser.prototype.add = function add(id, name, parentId, icon) {
+    if (icon) {
+        this.tree.insertNewItem(parentId, id, name, 0, icon, icon, icon);
+    } else {
         this.tree.insertNewItem(parentId, id, name);
     }
+};
+
+ConsoleIO.View.Browser.prototype.setIcon = function setIcon(id, icon) {
+    this.tree.setItemImage(id, icon);
+};
+
+ConsoleIO.View.Browser.prototype.deleteItem = function deleteItem(id) {
+    this.tree.deleteItem(id);
 };

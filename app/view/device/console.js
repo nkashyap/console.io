@@ -18,7 +18,7 @@ ConsoleIO.View.Device.Console = function ConsoleView(ctrl, model) {
     this.createElements();
 };
 
-ConsoleIO.View.Device.Console.prototype.render = function render(target){
+ConsoleIO.View.Device.Console.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.model.name, this.model.name);
     this.target.setTabActive(this.model.name);
@@ -27,7 +27,7 @@ ConsoleIO.View.Device.Console.prototype.render = function render(target){
 
     this.toolbar = this.tab.attachToolbar();
     this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
-    this.toolbar.attachEvent("onClick", function(itemId){
+    this.toolbar.attachEvent("onClick", function (itemId) {
         this.buttonClick(itemId);
     }, this.ctrl);
 

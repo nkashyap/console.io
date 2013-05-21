@@ -24,7 +24,7 @@ ConsoleIO.View.Editor.prototype.render = function render(target) {
     this.target = target;
     this.target.attachObject(this.container);
 
-    if(this.model.toolbar){
+    if (this.model.toolbar) {
         this.toolbar = this.target.attachToolbar();
         this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
         this.toolbar.attachEvent("onClick", function (itemId) {

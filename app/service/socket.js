@@ -38,7 +38,7 @@ ConsoleIO.Service.Socket = {
     },
 
     on: function on(name, callback, scope) {
-        this.io.on(name, function(){
+        this.io.on(name, function () {
             callback.apply(scope, arguments);
         });
     },

@@ -17,8 +17,12 @@ function User(application, request, manager){
     this.emit('ready');
 }
 
+User.prototype.isSubscribed = function isSubscribed(name){
+    return this.devices.indexOf(name) > -1;
+};
+
 User.prototype.subscribe = function subscribe(name){
-    if(this.devices.indexOf(name) === -1){
+    if(!this.isSubscribed(name)){
         this.devices.push(name);
         this.request.io.join(name);
         this.emit('subscribed', { name: name });

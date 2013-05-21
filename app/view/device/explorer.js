@@ -16,14 +16,14 @@ ConsoleIO.View.Device.Explorer = function ExplorerView(ctrl, model) {
     this.toolbar = null;
 };
 
-ConsoleIO.View.Device.Explorer.prototype.render = function render(target){
+ConsoleIO.View.Device.Explorer.prototype.render = function render(target) {
     var scope = this;
     this.target = target;
     this.target.setWidth(this.model.width);
 
     this.toolbar = this.target.attachToolbar();
     this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
-    this.toolbar.attachEvent("onClick", function(itemId){
+    this.toolbar.attachEvent("onClick", function (itemId) {
         this.buttonClick(itemId);
     }, this.ctrl);
 
@@ -36,15 +36,15 @@ ConsoleIO.View.Device.Explorer.prototype.render = function render(target){
     this.tree.enableTreeLines(true);
     this.tree.enableIEImageFix(true);
 
-    this.tree.attachEvent("onDblClick", function(itemId){
-        if(!scope.tree.hasChildren(itemId)){
+    this.tree.attachEvent("onDblClick", function (itemId) {
+        if (!scope.tree.hasChildren(itemId)) {
             this.viewFile(itemId);
         }
     }, this.ctrl);
 };
 
 ConsoleIO.View.Device.Explorer.prototype.add = function add(id, name, parentId) {
-    if(this.tree){
+    if (this.tree) {
         this.tree.insertNewItem(parentId, id, name);
     }
 };

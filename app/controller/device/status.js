@@ -8,13 +8,15 @@
 
 ConsoleIO.namespace("ConsoleIO.App.Device.Status");
 
-ConsoleIO.App.Device.Status = function StatusController(parent, model){
+ConsoleIO.App.Device.Status = function StatusController(parent, model) {
     this.parent = parent;
     this.model = model;
 
     this.view = new ConsoleIO.View.Device.Status(this, {
         name: "Status",
-        toolbar: [{ id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }]
+        toolbar: [
+            { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
+        ]
     });
 };
 
@@ -24,7 +26,7 @@ ConsoleIO.App.Device.Status.prototype.render = function render(target) {
 
 ConsoleIO.App.Device.Status.prototype.buttonClick = function buttonClick(btnId) {
     console.log('buttonClick', btnId);
-    if(btnId === 'refresh'){
+    if (btnId === 'refresh') {
         this.refresh();
     }
 };

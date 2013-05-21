@@ -16,14 +16,14 @@ ConsoleIO.View.Device.Source = function SourceView(ctrl, model) {
     this.tab = null;
 };
 
-ConsoleIO.View.Device.Source.prototype.render = function render(target){
+ConsoleIO.View.Device.Source.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.model.name, this.model.name);
     this.tab = this.target.cells(this.model.name);
 
     this.toolbar = this.tab.attachToolbar();
     this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
-    this.toolbar.attachEvent("onClick", function(itemId){
+    this.toolbar.attachEvent("onClick", function (itemId) {
         this.buttonClick(itemId);
     }, this.ctrl);
 

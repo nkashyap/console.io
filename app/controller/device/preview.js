@@ -8,13 +8,15 @@
 
 ConsoleIO.namespace("ConsoleIO.App.Device.Preview");
 
-ConsoleIO.App.Device.Preview = function PreviewController(parent, model){
+ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
     this.parent = parent;
     this.model = model;
 
     this.view = new ConsoleIO.View.Device.Preview(this, {
         name: "Preview",
-        toolbar: [{ id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }]
+        toolbar: [
+            { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
+        ]
     });
 
     this.editor = new ConsoleIO.App.Editor(this, {
@@ -31,7 +33,7 @@ ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
 
 ConsoleIO.App.Device.Preview.prototype.buttonClick = function buttonClick(btnId) {
     console.log('buttonClick', btnId);
-    if(btnId === 'refresh'){
+    if (btnId === 'refresh') {
         this.refresh();
     }
 };

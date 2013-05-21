@@ -9,7 +9,7 @@
 ConsoleIO.namespace("ConsoleIO.Service.Commands");
 
 ConsoleIO.Service.Commands = {
-    listFiles: function listFiles(device){
+    listFiles: function listFiles(device) {
         console.log('listFiles', device);
 
         ConsoleIO.Service.Socket.emit('deviceFiles', {
@@ -28,7 +28,7 @@ ConsoleIO.Service.Commands = {
                 "}())"
         });
     },
-    viewFile: function viewFile(device, url){
+    viewFile: function viewFile(device, url) {
         console.log('viewFile', device, url);
     }
 };

@@ -44,7 +44,7 @@ ConsoleIO.App.Editor = function EditorController(parent, model) {
 };
 
 ConsoleIO.App.Editor.prototype.render = function render(target) {
-    if(this.parent.setTitle){
+    if (this.parent.setTitle) {
         this.parent.setTitle(this.model.contextId || this.model.id, this.model.title);
     }
     this.editor = CodeMirror.fromTextArea(this.view.textArea, this.model.codeMirror);
