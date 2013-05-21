@@ -11,9 +11,9 @@ ConsoleIO.namespace("ConsoleIO.App.Device.Preview");
 ConsoleIO.App.Device.Preview = function PreviewController(parent, model){
     this.parent = parent;
     this.model = model;
-    this.title = "Preview";
 
     this.view = new ConsoleIO.View.Device.Preview(this, {
+        name: "Preview",
         toolbar: [{ id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }]
     });
 
@@ -26,7 +26,7 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model){
 
 ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
     this.view.render(target);
-    this.editor.render(target);
+    this.editor.render(this.view.tab);
 };
 
 ConsoleIO.App.Device.Preview.prototype.buttonClick = function buttonClick(btnId) {

@@ -11,15 +11,21 @@ ConsoleIO.namespace("ConsoleIO.App.Device.Console");
 ConsoleIO.App.Device.Console = function ConsoleController(parent, model){
     this.parent = parent;
     this.model = model;
-    this.title = "Console";
 
     this.view = new ConsoleIO.View.Device.Console(this, {
+        name: "Console",
         toolbar: [{ id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }]
     });
+
+    ConsoleIO.Service.Socket.on('device:console:'+ this.model.name, this.add, this);
 };
 
 ConsoleIO.App.Device.Console.prototype.render = function render(target) {
     this.view.render(target);
+};
+
+ConsoleIO.App.Device.Console.prototype.add = function add(data) {
+    this.view.add(data);
 };
 
 ConsoleIO.App.Device.Console.prototype.buttonClick = function buttonClick(btnId) {

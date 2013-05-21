@@ -20,15 +20,17 @@ ConsoleIO.App.Browser = function BrowserController(parent, model){
 
     ConsoleIO.Service.Socket.on('user:devices', this.add, this);
     ConsoleIO.Service.Socket.on('device:registered', this.add, this);
-    ConsoleIO.Service.Socket.on('device:offline', function(data){
-        console.log('device:offline', data);
-    }, this);
     ConsoleIO.Service.Socket.on('device:online', function(data){
         console.log('device:online', data);
+    }, this);
+    ConsoleIO.Service.Socket.on('device:offline', function(data){
+        console.log('device:offline', data);
     }, this);
 };
 
 ConsoleIO.App.Browser.prototype.add = function add(data) {
+    console.log('device:add', data);
+
     var name = data.browser + '-' + data.version;
 
     if(this.store.os.indexOf(data.os) === -1){

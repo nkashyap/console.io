@@ -8,12 +8,12 @@
 
 var detechDevice = require('./detectdevice');
 
-function Device(application, request, manager, number){
+function Device(application, request, manager){
     this.application = application;
     this.request = request;
     this.manager = manager;
     this.info = detechDevice.get(request.data);
-    this.number = this.request.cookies.guid || number;
+    this.number = this.request.cookies.guid;
     this.name = this.getName();
     this.isOnline = false;
 
@@ -21,8 +21,6 @@ function Device(application, request, manager, number){
         name: this.name,
         number: this.number
     });
-
-    this.online();
 }
 
 Device.prototype.getIdentity = function getIdentity(){
@@ -49,22 +47,22 @@ Device.prototype.getName = function getName(){
     return name.join("|");
 };
 
-Device.prototype.online = function online(){
+Device.prototype.online = function online(request){
+    this.request = request;
     this.isOnline = true;
     this.request.io.join(this.name);
-    this.emit('online');
+    this.manager.emit('device:online', this.getIdentity());
 };
 
 Device.prototype.offline = function offline(){
     this.isOnline = false;
     this.request.io.leave(this.name);
-    this.emit('offline');
+    this.manager.emit('device:offline', this.getIdentity());
 };
 
-Device.prototype.log = function(data){
-    this.broadcast('log', data);
+Device.prototype.console = function consoleLog(data){
+    this.broadcast('console:'+ this.name, data);
 };
-
 
 Device.prototype.emit = function emit(name, data){
     this.request.io.emit('device:' + name, data);

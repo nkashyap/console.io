@@ -11,9 +11,9 @@ ConsoleIO.namespace("ConsoleIO.App.Device.Status");
 ConsoleIO.App.Device.Status = function StatusController(parent, model){
     this.parent = parent;
     this.model = model;
-    this.title = "Status";
 
     this.view = new ConsoleIO.View.Device.Status(this, {
+        name: "Status",
         toolbar: [{ id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }]
     });
 };

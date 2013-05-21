@@ -10,19 +10,19 @@ function User(application, request, manager){
     this.application = application;
     this.request = request;
     this.manager = manager;
+    this.number = this.request.cookies.guid;
     this.devices = [];
     this.isOnline = false;
 
     this.emit('ready');
-    this.online();
 }
 
 User.prototype.subscribe = function subscribe(name){
     if(this.devices.indexOf(name) === -1){
         this.devices.push(name);
         this.request.io.join(name);
-        console.log('subscribe', name);
         this.emit('subscribed', { name: name });
+        console.log('subscribe', name);
     }
 };
 
@@ -31,19 +31,34 @@ User.prototype.unSubscribe = function unSubscribe(name){
     if(index > -1){
         this.devices.splice(index, 1);
         this.request.io.leave(name);
-        console.log('unSubscribe', name);
         this.emit('unSubscribed', { name: name });
+        console.log('unSubscribe', name);
     }
 };
 
-User.prototype.online = function online(){
+User.prototype.online = function online(request){
+    this.request = request;
     this.isOnline = true;
-    this.emit('online');
+
+    //subscribe again
+    this.devices.forEach(function(name){
+        this.request.io.join(name);
+        this.emit('subscribed', { name: name });
+    }, this);
+
+    //this.manager.emit('user:online');
+    //this.emit('online');
 };
 
 User.prototype.offline = function offline(){
     this.isOnline = false;
-    this.emit('offline');
+
+    //unsubscribe
+    this.devices.forEach(function(name){
+        this.request.io.leave(name);
+    }, this);
+
+    //this.emit('offline');
 };
 
 User.prototype.emit = function emit(name, data){

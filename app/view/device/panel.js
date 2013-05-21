@@ -17,16 +17,15 @@ ConsoleIO.View.Device.Panel = function PanelView(ctrl, model) {
 
 ConsoleIO.View.Device.Panel.prototype.render = function render(target){
     this.target = target;
-
     this.tabs = this.target.attachTabbar();
     this.tabs.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('tab'));
 };
 
-ConsoleIO.View.Device.Panel.prototype.add = function add(name, isActive){
-    this.tabs.addTab(name, name);
-    if(isActive){
-        this.tabs.setTabActive(name);
-    }
-
-    return this.tabs.cells(name);
-};
+//ConsoleIO.View.Device.Panel.prototype.add = function add(name, isActive){
+//    this.tabs.addTab(name, name);
+//    if(isActive){
+//        this.tabs.setTabActive(name);
+//    }
+//
+//    return this.tabs.cells(name);
+//};

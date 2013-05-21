@@ -40,8 +40,18 @@ ConsoleIO.Service.DHTMLXHelper = {
             }
         });
 
+        ConsoleIO.forEachProperty(config.prop, function(value, property){
+            if(value){
+                element[property] = value;
+            }
+        });
+
         if(config.target){
-            config.target.appendChild(element);
+            if(config.insert && config.insert === 'top'){
+                config.target.insertBefore(element, config.target.firstElementChild || config.target.firstChild);
+            }else{
+                config.target.appendChild(element);
+            }
         }
 
         return element;

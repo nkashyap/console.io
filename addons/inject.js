@@ -365,7 +365,7 @@
 
                 //Hook into ConsoleIO API
                 ConsoleIO.on('console', function (data) {
-                    Socket.emit('log', data);
+                    Socket.emit('console', data);
                 });
             });
         });

@@ -24,8 +24,8 @@ ConsoleIO.App.Device.Panel = function PanelController(parent, model){
 
 ConsoleIO.App.Device.Panel.prototype.render = function render(target) {
     this.view.render(target);
-    this.console.render(this.view.add(this.console.title, true));
-    this.source.render(this.view.add(this.source.title));
-    this.preview.render(this.view.add(this.preview.title));
-    this.status.render(this.view.add(this.status.title));
+    this.console.render(this.view.tabs);
+    this.source.render(this.view.tabs);
+    this.preview.render(this.view.tabs);
+    this.status.render(this.view.tabs);
 };

@@ -7,7 +7,8 @@
  */
 
 var Device = require('./device'),
-    User = require('./user');
+    User = require('./user'),
+    express = require('express.io');
 
 function Manager() {
 
@@ -16,17 +17,73 @@ function Manager() {
         users = {},
         self;
 
+    self = {
+        emit: function emit(name, data){
+            application.io.sockets.emit(name, data);
+        },
+        broadcast: function broadcast(room, name, data){
+            application.io.room(room).broadcast(name, data);
+        }
+    };
+
     function defineRouteHandler(list, name) {
         return function (request) {
-            var reference = list[request.sessionID];
+            var reference = list[request.cookies.guid];
             if (reference && reference[name]) {
                 reference[name](request.data);
             }
         };
     }
 
+    function hasGUIDCookie(document) {
+        if (document && document.cookie) {
+            var i,
+                cookieName,
+                cookieValue,
+                cookies = document.cookie.split(";");
+
+            for (i = 0; i < cookies.length; i++) {
+                cookieName = (cookies[i].substr(0, cookies[i].indexOf("="))).replace(/^\s+|\s+$/g, "");
+                cookieValue = cookies[i].substr(cookies[i].indexOf("=") + 1);
+
+                if (cookieName === 'guid') {
+                    return unescape(cookieValue);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    function setGUIDCookie(document) {
+        var guidCookie, expiryDate = new Date();
+
+        expiryDate.setDate(expiryDate.getDate() + 365);
+        guidCookie = "guid=" + escape(((new Date().getTime()) + "-" + Math.random()).replace(".", "")) + "; expires=" + expiryDate.toUTCString() + "; path=/";
+
+        if (document.setHeader) {
+            document.setHeader("Set-Cookie", [guidCookie]);
+        } else if (document.headers) {
+            document.headers.cookie = guidCookie;
+        }
+    }
+
+    function forEach(list, callback){
+        Object.getOwnPropertyNames(list).forEach(function(name){
+            callback(list[name]);
+        });
+    }
+
     function setUp(app) {
         application = app;
+
+        var originalHandleRequest = express.io.Manager.prototype.handleRequest;
+        express.io.Manager.prototype.handleRequest = function handleRequest(request, response) {
+            if(!hasGUIDCookie(request.headers)){
+                setGUIDCookie(response);
+            }
+            originalHandleRequest.call(application.io, request, response);
+        };
 
         // IO handlers
         // Setup a route for the ready event, and add session data.
@@ -36,7 +93,7 @@ function Manager() {
             setUp: function setUp(req) {
                 register('device', req);
             },
-            log: defineRouteHandler(devices, 'log')
+            console: defineRouteHandler(devices, 'console')
         });
 
         app.io.route('user', {
@@ -49,57 +106,40 @@ function Manager() {
         });
     }
 
-    self = {
-
-    };
-
-
-
-    function forEach(list, callback){
-        Object.getOwnPropertyNames(list).forEach(function(name){
-            callback(list[name]);
-        });
-    }
-
     function register(type, request) {
         if (type === 'device') {
-            var deviceReg = devices[request.sessionID];
+            var deviceReg = devices[request.cookies.guid];
             if (!deviceReg) {
-                deviceReg = new Device(application, request, self, Object.getOwnPropertyNames(devices).length + 1);
-                devices[request.sessionID] = deviceReg;
-
+                deviceReg = new Device(application, request, self);
+                devices[request.cookies.guid] = deviceReg;
                 deviceReg.emit('registered', deviceReg.getIdentity());
-//                forEach(users, function(user){
-//                    user.emit('registered', deviceReg.getIdentity());
-//                });
-            }else{
-                deviceReg.online();
             }
+            deviceReg.online(request);
         }
         else if (type === 'user') {
-            var userReg = users[request.sessionID];
+            var userReg = users[request.cookies.guid];
             if (!userReg) {
                 userReg = new User(application, request, self);
-                users[request.sessionID] = userReg;
-
-                forEach(devices, function(device){
-                    userReg.emit('devices', device.getIdentity());
-                });
-            }else{
-                userReg.online();
+                users[request.cookies.guid] = userReg;
             }
+
+            userReg.online(request);
+            forEach(devices, function(device){
+                userReg.emit('devices', device.getIdentity());
+            });
         }
     }
 
     function disconnect(request){
-        var deviceReg = devices[request.sessionID];
+        var deviceReg = devices[request.cookies.guid];
         if (deviceReg) {
             deviceReg.offline();
-        }else {
-            var userReg = users[request.sessionID];
-            if (userReg) {
-                userReg.offline();
-            }
+            return;
+        }
+
+        var userReg = users[request.cookies.guid];
+        if (userReg) {
+            userReg.offline();
         }
     }
 
