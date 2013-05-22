@@ -14,6 +14,7 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
 
     this.view = new ConsoleIO.View.Device.Preview(this, {
         name: "Preview",
+        guid: this.model.guid,
         toolbar: [
             { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
         ]

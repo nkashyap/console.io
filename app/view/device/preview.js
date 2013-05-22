@@ -14,12 +14,13 @@ ConsoleIO.View.Device.Preview = function PreviewView(ctrl, model) {
     this.target = null;
     this.toolbar = null;
     this.tab = null;
+    this.id = [this.model.name, this.model.guid].join("-");
 };
 
 ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
     this.target = target;
-    this.target.addTab(this.model.name, this.model.name);
-    this.tab = this.target.cells(this.model.name);
+    this.target.addTab(this.id, this.model.name);
+    this.tab = this.target.cells(this.id);
 
     this.toolbar = this.tab.attachToolbar();
     this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);

@@ -15,7 +15,7 @@
 
     Socket = {
         io: null,
-        name: null,
+        //name: null,
         config: null,
         forceReconnection: true,
         forceReconnectInterval: 5000,
@@ -56,7 +56,7 @@
 
         emit: function emit(name, data) {
             if (this.io && this.io.socket.connected) {
-                data.name = this.name;
+                //data.name = this.name;
                 this.io.emit('device:' + name, data);
             } else {
                 this.pending.push({ name: name, data: data });
@@ -119,11 +119,11 @@
         },
 
         onReady: function onReady(data) {
-            Socket.name = data.name;
+            //Socket.name = data.guid;
             Socket.subscribed = true;
 
-            showName(Socket.name);
-            console.log('Subscribed to', Socket.name);
+            showName(data.name + '|' + data.guid);
+            console.log('Subscribed to', data.guid);
 
             ConsoleIO.forEach(Socket.pending, function (item) {
                 Socket.emit(item.name, item.data);

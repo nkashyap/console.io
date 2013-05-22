@@ -24,11 +24,23 @@ function Manager() {
         broadcast: function broadcast(room, name, data){
             application.io.room(room).broadcast(name, data);
         },
+        getDevice: function getDevice(guid){
+            var device;
+            Object.getOwnPropertyNames(devices).every(function(name){
+                if(devices[name].guid === guid){
+                    device = devices[name];
+                    return false;
+                }
+                return true;
+            });
+
+            return device;
+        },
         emitRegisteredDevices: function emitRegisteredDevices(user){
             if(user){
                 forEach(devices, function(device){
                     var deviceConfig = device.getIdentity();
-                    deviceConfig.subscribed = user.isSubscribed(deviceConfig.name);
+                    deviceConfig.subscribed = user.isSubscribed(deviceConfig.guid);
                     user.emit('registeredDevice', deviceConfig);
                 });
             }
@@ -111,6 +123,9 @@ function Manager() {
             },
             getRegisteredDevices: function getRegisteredDevices(req){
                 self.emitRegisteredDevices(users[req.cookies.guid]);
+            },
+            getIncludedFiles: function getIncludedFiles(){
+
             },
             subscribe: defineRouteHandler(users, 'subscribe'),
             unSubscribe: defineRouteHandler(users, 'unSubscribe'),

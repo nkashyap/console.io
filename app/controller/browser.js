@@ -30,32 +30,32 @@ ConsoleIO.App.Browser = function BrowserController(parent, model) {
 };
 
 ConsoleIO.App.Browser.prototype.online = function online(data) {
-    var index = this.store.offline.indexOf(data.name);
+    var index = this.store.offline.indexOf(data.guid);
     if (index > -1) {
         this.store.offline.splice(index, 1);
     }
-    this.view.setIcon(data.name, 'online.png');
+    this.view.setIcon(data.guid, 'online.png');
 };
 
 ConsoleIO.App.Browser.prototype.offline = function offline(data) {
-    if (this.store.offline.indexOf(data.name) === -1) {
-        this.store.offline.push(data.name);
+    if (this.store.offline.indexOf(data.guid) === -1) {
+        this.store.offline.push(data.guid);
     }
-    this.view.setIcon(data.name, 'offline.png');
+    this.view.setIcon(data.guid, 'offline.png');
 };
 
 ConsoleIO.App.Browser.prototype.subscribed = function subscribed(data) {
-    if (this.store.subscribed.indexOf(data.name) === -1) {
-        this.store.subscribed.push(data.name);
+    if (this.store.subscribed.indexOf(data.guid) === -1) {
+        this.store.subscribed.push(data.guid);
     }
-    this.view.setIcon(data.name, 'subscribe.gif');
+    this.view.setIcon(data.guid, 'subscribe.gif');
 };
 
 ConsoleIO.App.Browser.prototype.unSubscribed = function unSubscribed(data) {
-    var index = this.store.subscribed.indexOf(data.name);
+    var index = this.store.subscribed.indexOf(data.guid);
     if (index > -1) {
         this.store.subscribed.splice(index, 1);
-        if (this.store.offline.indexOf(data.name) === -1) {
+        if (this.store.offline.indexOf(data.guid) === -1) {
             this.online(data);
         } else {
             this.offline(data);
@@ -77,7 +77,7 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
         this.store.browser.push(name);
     }
 
-    this.view.add(data.name, data.browser + '|' + data.number, name);
+    this.view.add(data.guid, data.browser, name);
 
     //set correct icon
     if (data.subscribed) {
@@ -90,7 +90,7 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
 };
 
 ConsoleIO.App.Browser.prototype.render = function render(target) {
-    this.parent.setTitle(this.model.contextId || this.model.id, this.model.title);
+    this.parent.setTitle(this.model.contextId || this.model.guid, this.model.title);
     this.view.render(target);
 };
 
@@ -111,9 +111,9 @@ ConsoleIO.App.Browser.prototype.buttonClick = function buttonClick(btnId) {
     }
 };
 
-ConsoleIO.App.Browser.prototype.subscribe = function subscribe(itemId) {
-    var index = this.store.subscribed.indexOf(itemId);
+ConsoleIO.App.Browser.prototype.subscribe = function subscribe(guid) {
+    var index = this.store.subscribed.indexOf(guid);
     if (index === -1) {
-        ConsoleIO.Service.Socket.emit('subscribe', itemId);
+        ConsoleIO.Service.Socket.emit('subscribe', guid);
     }
 };

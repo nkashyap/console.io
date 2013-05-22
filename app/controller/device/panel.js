@@ -12,10 +12,7 @@ ConsoleIO.App.Device.Panel = function PanelController(parent, model) {
     this.parent = parent;
     this.model = model;
 
-    this.view = new ConsoleIO.View.Device.Panel(this, {
-        name: this.model.name
-    });
-
+    this.view = new ConsoleIO.View.Device.Panel(this, this.model);
     this.console = new ConsoleIO.App.Device.Console(this, this.model);
     this.source = new ConsoleIO.App.Device.Source(this, this.model);
     this.preview = new ConsoleIO.App.Device.Preview(this, this.model);

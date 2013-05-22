@@ -43,8 +43,18 @@ ConsoleIO.View.Device.Explorer.prototype.render = function render(target) {
     }, this.ctrl);
 };
 
-ConsoleIO.View.Device.Explorer.prototype.add = function add(id, name, parentId) {
-    if (this.tree) {
+ConsoleIO.View.Device.Explorer.prototype.add = function add(id, name, parentId, icon) {
+    if (icon) {
+        this.tree.insertNewItem(parentId, id, name, 0, icon, icon, icon);
+    } else {
         this.tree.insertNewItem(parentId, id, name);
     }
+};
+
+ConsoleIO.View.Device.Explorer.prototype.setIcon = function setIcon(id, icon) {
+    this.tree.setItemImage(id, icon);
+};
+
+ConsoleIO.View.Device.Explorer.prototype.deleteItem = function deleteItem(id) {
+    this.tree.deleteItem(id);
 };

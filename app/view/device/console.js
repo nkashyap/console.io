@@ -15,15 +15,16 @@ ConsoleIO.View.Device.Console = function ConsoleView(ctrl, model) {
     this.tab = null;
     this.toolbar = null;
     this.container = null;
+    this.id = [this.model.name, this.model.guid].join("-");
     this.createElements();
 };
 
 ConsoleIO.View.Device.Console.prototype.render = function render(target) {
     this.target = target;
-    this.target.addTab(this.model.name, this.model.name);
-    this.target.setTabActive(this.model.name);
-    this.target.setContent(this.model.name, this.container);
-    this.tab = this.target.cells(this.model.name);
+    this.target.addTab(this.id, this.model.name);
+    this.target.setTabActive(this.id);
+    this.target.setContent(this.id, this.container);
+    this.tab = this.target.cells(this.id);
 
     this.toolbar = this.tab.attachToolbar();
     this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);

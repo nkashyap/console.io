@@ -14,6 +14,7 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
 
     this.view = new ConsoleIO.View.Device.Source(this, {
         name: "Source",
+        guid: this.model.guid,
         toolbar: [
             { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
         ]

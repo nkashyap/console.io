@@ -14,6 +14,7 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
 
     this.view = new ConsoleIO.View.Device.Status(this, {
         name: "Status",
+        guid: this.model.guid,
         toolbar: [
             { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
         ]

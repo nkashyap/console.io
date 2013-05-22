@@ -19,6 +19,7 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.view = new ConsoleIO.View.Device(this, this.model);
     this.explorer = new ConsoleIO.App.Device.Explorer(this, {
         name: this.model.name,
+        guid: this.model.guid,
         title: 'Files',
         contextId: 'explorer',
         width: 200,
@@ -26,9 +27,7 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
             { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
         ]
     });
-    this.panel = new ConsoleIO.App.Device.Panel(this, {
-        name: this.model.name
-    });
+    this.panel = new ConsoleIO.App.Device.Panel(this, this.model);
 };
 
 ConsoleIO.App.Device.prototype.render = function render(target) {
@@ -37,6 +36,6 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
     this.panel.render(this.view.getContextById(this.context.panel));
 };
 
-ConsoleIO.App.Device.prototype.setTitle = function setTitle(name, title) {
-    this.view.setTitle(this.context[name], title);
+ConsoleIO.App.Device.prototype.setTitle = function setTitle(contextId, title) {
+    this.view.setTitle(this.context[contextId], title);
 };

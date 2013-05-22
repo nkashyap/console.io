@@ -10,33 +10,33 @@ function User(application, request, manager){
     this.application = application;
     this.request = request;
     this.manager = manager;
-    this.number = this.request.cookies.guid;
-    this.devices = [];
+    this.guid = this.request.cookies.guid;
+    this.deviceGUIDs = [];
     this.isOnline = false;
 
     this.emit('ready');
 }
 
-User.prototype.isSubscribed = function isSubscribed(name){
-    return this.devices.indexOf(name) > -1;
+User.prototype.isSubscribed = function isSubscribed(guid){
+    return this.deviceGUIDs.indexOf(guid) > -1;
 };
 
-User.prototype.subscribe = function subscribe(name){
-    if(!this.isSubscribed(name)){
-        this.devices.push(name);
-        this.request.io.join(name);
-        this.emit('subscribed', { name: name });
-        console.log('subscribe', name);
+User.prototype.subscribe = function subscribe(guid){
+    if(!this.isSubscribed(guid)){
+        this.deviceGUIDs.push(guid);
+        this.request.io.join(guid);
+        this.emit('subscribed', this.manager.getDevice(guid).getIdentity());
+        console.log('subscribe', guid);
     }
 };
 
-User.prototype.unSubscribe = function unSubscribe(name){
-    var index = this.devices.indexOf(name);
+User.prototype.unSubscribe = function unSubscribe(guid){
+    var index = this.deviceGUIDs.indexOf(guid);
     if(index > -1){
-        this.devices.splice(index, 1);
-        this.request.io.leave(name);
-        this.emit('unSubscribed', { name: name });
-        console.log('unSubscribe', name);
+        this.deviceGUIDs.splice(index, 1);
+        this.request.io.leave(guid);
+        this.emit('unSubscribed', this.manager.getDevice(guid).getIdentity());
+        console.log('unSubscribe', guid);
     }
 };
 
@@ -45,9 +45,9 @@ User.prototype.online = function online(request){
     this.isOnline = true;
 
     //subscribe again
-    this.devices.forEach(function(name){
-        this.request.io.join(name);
-        this.emit('subscribed', { name: name });
+    this.deviceGUIDs.forEach(function(guid){
+        this.request.io.join(guid);
+        this.emit('subscribed', this.manager.getDevice(guid).getIdentity());
     }, this);
 
     //this.manager.emit('user:online');
@@ -58,8 +58,8 @@ User.prototype.offline = function offline(){
     this.isOnline = false;
 
     //unsubscribe
-    this.devices.forEach(function(name){
-        this.request.io.leave(name);
+    this.deviceGUIDs.forEach(function(guid){
+        this.request.io.leave(guid);
     }, this);
 
     //this.emit('offline');
@@ -70,7 +70,7 @@ User.prototype.emit = function emit(name, data){
 };
 
 User.prototype.broadcast = function broadcast(name, data){
-    this.request.io.room(this.request.sessionID).broadcast('user:' + name, data);
+    this.request.io.room(this.guid).broadcast('user:' + name, data);
 };
 
 module.exports = User;

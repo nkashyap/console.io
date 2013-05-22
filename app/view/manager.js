@@ -27,15 +27,15 @@ ConsoleIO.View.Manager.prototype.render = function render(target) {
     }, this.ctrl);
 };
 
-ConsoleIO.View.Manager.prototype.add = function add(name, isActive) {
-    this.tabs.addTab(name, name);
+ConsoleIO.View.Manager.prototype.add = function add(id, name, isActive) {
+    this.tabs.addTab(id, name);
     if (isActive) {
-        this.tabs.setTabActive(name);
+        this.tabs.setTabActive(id);
     }
 };
 
-ConsoleIO.View.Manager.prototype.remove = function remove(name) {
-    this.tabs.removeTab(name);
+ConsoleIO.View.Manager.prototype.remove = function remove(id) {
+    this.tabs.removeTab(id);
 };
 
 ConsoleIO.View.Manager.prototype.getContextById = function getContextById(contextId) {

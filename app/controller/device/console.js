@@ -14,12 +14,13 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
 
     this.view = new ConsoleIO.View.Device.Console(this, {
         name: "Console",
+        guid: this.model.guid,
         toolbar: [
             { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
         ]
     });
 
-    ConsoleIO.Service.Socket.on('device:console:' + this.model.name, this.add, this);
+    ConsoleIO.Service.Socket.on('device:console:' + this.model.guid, this.add, this);
 };
 
 ConsoleIO.App.Device.Console.prototype.render = function render(target) {
