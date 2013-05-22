@@ -32,8 +32,6 @@ ConsoleIO.Service.Socket = {
         if (this.io && this.io.socket.connected) {
             data = data || {};
             this.io.emit('user:' + name, data);
-        } else {
-            this.pending.push({ name: name, data: data });
         }
     },
 
