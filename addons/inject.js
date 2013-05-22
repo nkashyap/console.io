@@ -52,6 +52,7 @@
             this.io.on('device:ready', this.onReady);
             //this.io.on('unsubscribe', this.onUnSubscribe);
             this.io.on('device:command', this.onCommand);
+            this.io.on('device:filelist', this.onFileList);
         },
 
         emit: function emit(name, data) {
@@ -137,6 +138,38 @@
             //console.log('UnSubscribed from', Socket.name);
             //Socket.subscribed = false;
         //},
+
+        onFileList: function onFileList() {
+            var scripts = [],
+                styles = [],
+                origin = location.origin + '/';
+
+            ConsoleIO.forEach(ConsoleIO.toArray(document.scripts), function(script){
+                if(script.src){
+                    scripts.push(script.src.replace(origin,""));
+                }
+            });
+
+            if(scripts.length > 0){
+                Socket.emit('files', {
+                    type: 'javascript',
+                    files: scripts
+                });
+            }
+
+            ConsoleIO.forEach(ConsoleIO.toArray(document.getElementsByTagName('link')), function(style){
+                if(style.href){
+                    styles.push(style.href.replace(origin,""));
+                }
+            });
+
+            if(styles.length > 0){
+                Socket.emit('files', {
+                    type: 'style',
+                    files: styles
+                });
+            }
+        },
 
         onCommand: function onCommand(cmd) {
             var evalFun, result;

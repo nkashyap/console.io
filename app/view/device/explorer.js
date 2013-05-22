@@ -31,6 +31,7 @@ ConsoleIO.View.Device.Explorer.prototype.render = function render(target) {
 
     this.tree = this.target.attachTree();
     this.tree.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('tree'));
+    this.tree.setIconPath(ConsoleIO.Settings.iconPath);
     this.tree.enableHighlighting(true);
     this.tree.enableTreeImages(true);
     this.tree.enableTreeLines(true);

@@ -24,7 +24,7 @@ function Manager() {
         broadcast: function broadcast(room, name, data){
             application.io.room(room).broadcast(name, data);
         },
-        getDevice: function getDevice(guid){
+        getDeviceByGuid: function getDeviceByGuid(guid){
             var device;
             Object.getOwnPropertyNames(devices).every(function(name){
                 if(devices[name].guid === guid){
@@ -36,7 +36,7 @@ function Manager() {
 
             return device;
         },
-        emitRegisteredDevices: function emitRegisteredDevices(user){
+        notifyUserRegisteredDevices: function notifyUserRegisteredDevices(user){
             if(user){
                 forEach(devices, function(device){
                     var deviceConfig = device.getIdentity();
@@ -114,22 +114,25 @@ function Manager() {
             setUp: function setUp(req) {
                 register('device', req);
             },
-            console: defineRouteHandler(devices, 'console')
+            console: defineRouteHandler(devices, 'console'),
+            files: defineRouteHandler(devices, 'files')
         });
 
         app.io.route('user', {
             setUp: function setUp(req) {
                 register('user', req);
             },
-            getRegisteredDevices: function getRegisteredDevices(req){
-                self.emitRegisteredDevices(users[req.cookies.guid]);
+            reloadDevices: function reloadDevices(req){
+                self.notifyUserRegisteredDevices(users[req.cookies.guid]);
             },
-            getIncludedFiles: function getIncludedFiles(){
-
+            reloadFiles: function reloadFiles(req){
+                var device = self.getDeviceByGuid(req.data);
+                if(device){
+                    device.emit('filelist');
+                }
             },
             subscribe: defineRouteHandler(users, 'subscribe'),
-            unSubscribe: defineRouteHandler(users, 'unSubscribe'),
-            deviceFiles: defineRouteHandler(users, 'deviceFiles')
+            unSubscribe: defineRouteHandler(users, 'unSubscribe')
         });
     }
 
@@ -151,7 +154,7 @@ function Manager() {
             }
 
             userReg.online(request);
-            self.emitRegisteredDevices(userReg);
+            self.notifyUserRegisteredDevices(userReg);
         }
     }
 

@@ -63,6 +63,10 @@ Device.prototype.console = function consoleLog(data){
     this.broadcast('console:'+ this.guid, data);
 };
 
+Device.prototype.files = function files(data){
+    this.broadcast('files:' + this.guid, data);
+};
+
 Device.prototype.emit = function emit(name, data){
     this.request.io.emit('device:' + name, data);
 };

@@ -28,7 +28,7 @@ User.prototype.subscribe = function subscribe(guid){
     if(!this.isSubscribed(guid)){
         this.deviceGUIDs.push(guid);
         this.request.io.join(guid);
-        this.emit('subscribed', this.manager.getDevice(guid).getIdentity());
+        this.emit('subscribed', this.manager.getDeviceByGuid(guid).getIdentity());
         console.log('subscribe', guid);
     }
 };
@@ -38,7 +38,7 @@ User.prototype.unSubscribe = function unSubscribe(guid){
     if(index > -1){
         this.deviceGUIDs.splice(index, 1);
         this.request.io.leave(guid);
-        this.emit('unSubscribed', this.manager.getDevice(guid).getIdentity());
+        this.emit('unSubscribed', this.manager.getDeviceByGuid(guid).getIdentity());
         console.log('unSubscribe', guid);
     }
 };
@@ -50,7 +50,7 @@ User.prototype.online = function online(request){
     //subscribe again
     this.deviceGUIDs.forEach(function(guid){
         this.request.io.join(guid);
-        this.emit('subscribed', this.manager.getDevice(guid).getIdentity());
+        this.emit('subscribed', this.manager.getDeviceByGuid(guid).getIdentity());
     }, this);
 
     //this.manager.emit('user:online');

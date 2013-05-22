@@ -107,7 +107,7 @@ ConsoleIO.App.Browser.prototype.buttonClick = function buttonClick(btnId) {
             subscribed: []
         };
 
-        ConsoleIO.Service.Socket.emit('getRegisteredDevices');
+        ConsoleIO.Service.Socket.emit('reloadDevices');
     }
 };
 
