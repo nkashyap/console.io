@@ -14,7 +14,10 @@ function User(application, request, manager){
     this.deviceGUIDs = [];
     this.isOnline = false;
 
-    this.emit('ready');
+    this.emit('ready', {
+        name: this.guid,
+        guid: this.guid
+    });
 }
 
 User.prototype.isSubscribed = function isSubscribed(guid){

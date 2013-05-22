@@ -10,7 +10,8 @@ ConsoleIO.namespace("ConsoleIO.Service.Socket");
 
 ConsoleIO.Service.Socket = {
     io: null,
-    name: 'socket',
+    name: null,
+    guid: null,
     connectionMode: null,
 
     connect: function init() {
@@ -30,7 +31,6 @@ ConsoleIO.Service.Socket = {
     emit: function emit(name, data) {
         if (this.io && this.io.socket.connected) {
             data = data || {};
-            data.name = this.name;
             this.io.emit('user:' + name, data);
         } else {
             this.pending.push({ name: name, data: data });
@@ -39,13 +39,17 @@ ConsoleIO.Service.Socket = {
 
     on: function on(name, callback, scope) {
         this.io.on(name, function () {
-            callback.apply(scope, arguments);
+            callback.apply(scope || this, arguments);
         });
     },
 
     onConnect: function onConnect() {
         console.log('Connected to the Server');
         ConsoleIO.Service.Socket.emit('setUp');
+        ConsoleIO.Service.Socket.on('user:ready', function(data){
+            ConsoleIO.Service.Socket.name = data.name;
+            ConsoleIO.Service.Socket.guid = data.guid;
+        });
     },
 
     onConnecting: function onConnecting(mode) {
