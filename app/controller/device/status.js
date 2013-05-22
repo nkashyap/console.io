@@ -25,6 +25,10 @@ ConsoleIO.App.Device.Status.prototype.render = function render(target) {
     this.view.render(target);
 };
 
+ConsoleIO.App.Device.Status.prototype.activate = function activate(state) {
+    console.log('activate', this.model.guid, state);
+};
+
 ConsoleIO.App.Device.Status.prototype.buttonClick = function buttonClick(btnId) {
     console.log('buttonClick', btnId);
     if (btnId === 'refresh') {

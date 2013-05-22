@@ -11,7 +11,8 @@ ConsoleIO.namespace("ConsoleIO.App.Device.Console");
 ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
     this.parent = parent;
     this.model = model;
-
+    this.active = true;
+    this.store = [];
     this.view = new ConsoleIO.View.Device.Console(this, {
         name: "Console",
         guid: this.model.guid,
@@ -28,12 +29,23 @@ ConsoleIO.App.Device.Console.prototype.render = function render(target) {
 };
 
 ConsoleIO.App.Device.Console.prototype.add = function add(data) {
-    this.view.add(data);
+    if (this.active) {
+        this.view.add(data);
+    } else {
+        this.store.push(data);
+    }
+};
+
+ConsoleIO.App.Device.Console.prototype.activate = function activate(state) {
+    this.active = state;
+    if (this.active && this.store.length > 0) {
+        ConsoleIO.forEach(this.store, this.add, this);
+    }
 };
 
 ConsoleIO.App.Device.Console.prototype.buttonClick = function buttonClick(btnId) {
     console.log('buttonClick', btnId);
     if (btnId === 'refresh') {
-        this.refresh();
+        //this.refresh();
     }
 };

@@ -20,6 +20,7 @@ ConsoleIO.Service.DHTMLXHelper = {
                     break;
                 case 'twoState':
                     this.addButtonTwoState(item.id, index, item.text, item.imgEnabled, item.imgDisabled);
+                    this.setItemState(item.id, !!item.enabled);
                     break;
                 case 'select':
                     this.addButtonSelect(item.id, index, item.text, item.opts, item.imgEnabled, item.imgDisabled);

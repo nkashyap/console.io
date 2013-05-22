@@ -11,6 +11,7 @@ ConsoleIO.namespace("ConsoleIO.App.Device.Panel");
 ConsoleIO.App.Device.Panel = function PanelController(parent, model) {
     this.parent = parent;
     this.model = model;
+    this.activeTab = null;
 
     this.view = new ConsoleIO.View.Device.Panel(this, this.model);
     this.console = new ConsoleIO.App.Device.Console(this, this.model);
@@ -21,8 +22,27 @@ ConsoleIO.App.Device.Panel = function PanelController(parent, model) {
 
 ConsoleIO.App.Device.Panel.prototype.render = function render(target) {
     this.view.render(target);
-    this.console.render(this.view.tabs);
+    this.status.render(this.view.tabs);
     this.source.render(this.view.tabs);
     this.preview.render(this.view.tabs);
-    this.status.render(this.view.tabs);
+    this.console.render(this.view.tabs);
+};
+
+ConsoleIO.App.Device.Panel.prototype.tabClick = function tabClick(tabId) {
+    if (this.activeTab) {
+        this[this.activeTab].activate(false);
+    }
+    this.activeTab = (tabId.split('-')[0]).toLowerCase();
+    this[this.activeTab].activate(true);
+};
+
+ConsoleIO.App.Device.Panel.prototype.activate = function activate(state) {
+    if (!state) {
+        this.status.activate(state);
+        this.source.activate(state);
+        this.preview.activate(state);
+        this.console.activate(state);
+    } else if (this.activeTab) {
+        this[this.activeTab].activate(state);
+    }
 };

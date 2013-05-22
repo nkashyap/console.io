@@ -2,10 +2,6 @@ code {
     display: block;
 }
 
-.dhx_tabcontent_zone > div[tab_id=Console] > div[ida=dhxMainCont] {
-    overflow: auto !important;
-}
-
 .console-contents {
 }
 

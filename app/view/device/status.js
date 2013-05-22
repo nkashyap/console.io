@@ -20,6 +20,7 @@ ConsoleIO.View.Device.Status = function StatusView(ctrl, model) {
 ConsoleIO.View.Device.Status.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.id, this.model.name);
+    this.target.setTabActive(this.id);
     this.tab = this.target.cells(this.id);
 
     this.toolbar = this.tab.attachToolbar();

@@ -36,3 +36,9 @@ html, body {
 .editor .CodeMirror pre.CodeMirror-placeholder {
     color: #999;
 }
+
+.dhx_tabcontent_zone > div[tab_id^=Console] > div[ida=dhxMainCont],
+.dhx_tabcontent_zone > div[tab_id^=Preview] > div[ida=dhxMainCont],
+.dhx_tabcontent_zone > div[tab_id^=Source] > div[ida=dhxMainCont] {
+    overflow: auto !important;
+}

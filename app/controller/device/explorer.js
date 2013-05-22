@@ -29,35 +29,36 @@ ConsoleIO.App.Device.Explorer.prototype.render = function render(target) {
 
 ConsoleIO.App.Device.Explorer.prototype.getParentId = function getParentId(list, item) {
     var index = list.indexOf(item);
-    if(index > 0){
-        return (list.slice(0, index)).join('-');
+    if (index > 0) {
+        return (list.slice(0, index)).join('|');
     }
     return 0;
 };
 
 ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
-    ConsoleIO.forEach(data.files, function(file){
+    ConsoleIO.forEach(data.files, function (file) {
         file = file.split('?')[0];
 
-        var regex = new RegExp("((http|https)://)?([^/]+)",'img'),
+        var regex = new RegExp("((http|https)://)?([^/]+)", 'img'),
             path = file.match(regex);
 
-        ConsoleIO.forEach(path, function(name){
+        ConsoleIO.forEach(path, function (name) {
             var isJSFile = name.indexOf('.js') > -1,
                 isCSSFile = name.indexOf('.css') > -1,
                 isHttpFile = name.indexOf('http') > -1,
                 parentId = this.getParentId(path, name),
-                id = parentId ? parentId +'-'+ name : name;
+                id = parentId ? parentId + '|' + name : name;
 
-            if(isJSFile || isCSSFile){
-                if(this.store.files.indexOf(id) === -1){
+            if (isJSFile || isCSSFile) {
+                if (this.store.files.indexOf(id) === -1) {
                     this.store.files.push(id);
-                    this.view.add(id, name, parentId, isJSFile ? 'javascript.gif' : isCSSFile ? 'stylesheet.gif' : null);
+                    this.view.add(id, name, parentId, ConsoleIO.Constraint.ICONS[isJSFile ? 'JAVASCRIPT' : isCSSFile ? 'STYLESHEET' : 'FILE']);
                 }
-            }else{
-                if(this.store.folder.indexOf(id) === -1){
+            } else {
+                if (this.store.folder.indexOf(id) === -1) {
                     this.store.folder.push(id);
-                    this.view.add(id, name, parentId, isHttpFile? 'web.png': '../../' + ConsoleIO.Constraint.IMAGE_URL.get('tree') + '/folderOpen.gif');
+
+                    this.view.add(id, name, parentId, ConsoleIO.Constraint.ICONS[isHttpFile ? 'WEB' : 'FOLDEROPEN']);
                 }
             }
         }, this);
@@ -81,10 +82,13 @@ ConsoleIO.App.Device.Explorer.prototype.reloadFiles = function reloadFiles() {
 ConsoleIO.App.Device.Explorer.prototype.buttonClick = function buttonClick(btnId) {
     console.log('buttonClick', btnId);
     if (btnId === 'refresh') {
-       this.reloadFiles();
+        this.reloadFiles();
     }
 };
 
-ConsoleIO.App.Device.Explorer.prototype.viewFile = function viewFile(itemId) {
-    ConsoleIO.Service.Commands.viewFile(this.model.name, itemId);
+ConsoleIO.App.Device.Explorer.prototype.viewFile = function viewFile(fileId) {
+    ConsoleIO.Service.Socket.emit('fileSource', {
+        guid: this.model.guid,
+        url: '/' + fileId.replace(/[|]/igm,"/")
+    });
 };

@@ -22,7 +22,6 @@ ConsoleIO.View.Device.Console = function ConsoleView(ctrl, model) {
 ConsoleIO.View.Device.Console.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.id, this.model.name);
-    this.target.setTabActive(this.id);
     this.target.setContent(this.id, this.container);
     this.tab = this.target.cells(this.id);
 

@@ -34,21 +34,30 @@ ConsoleIO.App.Browser.prototype.online = function online(data) {
     if (index > -1) {
         this.store.offline.splice(index, 1);
     }
-    this.view.setIcon(data.guid, 'online.png');
+
+    if(this.isSubscribed(data.guid)){
+        this.subscribed(data);
+    }else{
+        this.view.setIcon(data.guid, ConsoleIO.Constraint.ICONS.ONLINE);
+    }
 };
 
 ConsoleIO.App.Browser.prototype.offline = function offline(data) {
     if (this.store.offline.indexOf(data.guid) === -1) {
         this.store.offline.push(data.guid);
     }
-    this.view.setIcon(data.guid, 'offline.png');
+    this.view.setIcon(data.guid, ConsoleIO.Constraint.ICONS.OFFLINE);
+};
+
+ConsoleIO.App.Browser.prototype.isSubscribed = function isSubscribed(guid) {
+    return this.store.subscribed.indexOf(guid) > -1;
 };
 
 ConsoleIO.App.Browser.prototype.subscribed = function subscribed(data) {
-    if (this.store.subscribed.indexOf(data.guid) === -1) {
+    if (!this.isSubscribed(data.guid)) {
         this.store.subscribed.push(data.guid);
     }
-    this.view.setIcon(data.guid, 'subscribe.gif');
+    this.view.setIcon(data.guid, ConsoleIO.Constraint.ICONS.SUBSCRIBE);
 };
 
 ConsoleIO.App.Browser.prototype.unSubscribed = function unSubscribed(data) {
@@ -67,13 +76,13 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
     var name = data.browser + '-' + data.version;
 
     if (this.store.os.indexOf(data.os) === -1) {
-        this.view.add(data.os, data.os, 0, data.os.toLowerCase() + '.png');
+        this.view.add(data.os, data.os, 0, ConsoleIO.Constraint.ICONS[data.os.toUpperCase()]);
         this.store.os.push(data.os);
     }
 
     if (this.store.browser.indexOf(name) === -1) {
-        this.view.add(data.browser, data.browser, data.os, data.browser.toLowerCase() + '.png');
-        this.view.add(name, data.version, data.browser, 'version.gif');
+        this.view.add(data.browser, data.browser, data.os, ConsoleIO.Constraint.ICONS[data.browser.toUpperCase()]);
+        this.view.add(name, data.version, data.browser, ConsoleIO.Constraint.ICONS.VERSION);
         this.store.browser.push(name);
     }
 
@@ -112,8 +121,15 @@ ConsoleIO.App.Browser.prototype.buttonClick = function buttonClick(btnId) {
 };
 
 ConsoleIO.App.Browser.prototype.subscribe = function subscribe(guid) {
-    var index = this.store.subscribed.indexOf(guid);
-    if (index === -1) {
+    if (!this.isSubscribed(guid)) {
         ConsoleIO.Service.Socket.emit('subscribe', guid);
     }
+};
+
+ConsoleIO.App.Browser.prototype.assignName = function assignName(guid, name) {
+    console.log(guid, name);
+//    ConsoleIO.Service.Socket.emit('assignDeviceName', {
+//        guid: guid,
+//        name: name
+//    });
 };

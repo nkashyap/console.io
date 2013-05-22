@@ -18,16 +18,16 @@ function Manager() {
         self;
 
     self = {
-        emit: function emit(name, data){
+        emit: function emit(name, data) {
             application.io.sockets.emit(name, data);
         },
-        broadcast: function broadcast(room, name, data){
+        broadcast: function broadcast(room, name, data) {
             application.io.room(room).broadcast(name, data);
         },
-        getDeviceByGuid: function getDeviceByGuid(guid){
+        getDeviceByGuid: function getDeviceByGuid(guid) {
             var device;
-            Object.getOwnPropertyNames(devices).every(function(name){
-                if(devices[name].guid === guid){
+            Object.getOwnPropertyNames(devices).every(function (name) {
+                if (devices[name].guid == guid) {
                     device = devices[name];
                     return false;
                 }
@@ -36,9 +36,9 @@ function Manager() {
 
             return device;
         },
-        notifyUserRegisteredDevices: function notifyUserRegisteredDevices(user){
-            if(user){
-                forEach(devices, function(device){
+        notifyUserRegisteredDevices: function notifyUserRegisteredDevices(user) {
+            if (user) {
+                forEach(devices, function (device) {
                     var deviceConfig = device.getIdentity();
                     deviceConfig.subscribed = user.isSubscribed(deviceConfig.guid);
                     user.emit('registeredDevice', deviceConfig);
@@ -89,8 +89,8 @@ function Manager() {
         }
     }
 
-    function forEach(list, callback){
-        Object.getOwnPropertyNames(list).forEach(function(name){
+    function forEach(list, callback) {
+        Object.getOwnPropertyNames(list).forEach(function (name) {
             callback(list[name]);
         });
     }
@@ -100,7 +100,7 @@ function Manager() {
 
         var originalHandleRequest = express.io.Manager.prototype.handleRequest;
         express.io.Manager.prototype.handleRequest = function handleRequest(request, response) {
-            if(!hasGUIDCookie(request.headers)){
+            if (!hasGUIDCookie(request.headers)) {
                 setGUIDCookie(response);
             }
             originalHandleRequest.call(application.io, request, response);
@@ -115,20 +115,34 @@ function Manager() {
                 register('device', req);
             },
             console: defineRouteHandler(devices, 'console'),
-            files: defineRouteHandler(devices, 'files')
+            files: defineRouteHandler(devices, 'files'),
+            content: defineRouteHandler(devices, 'content'),
+            source: defineRouteHandler(devices, 'source')
         });
 
         app.io.route('user', {
             setUp: function setUp(req) {
                 register('user', req);
             },
-            reloadDevices: function reloadDevices(req){
+            reloadDevices: function reloadDevices(req) {
                 self.notifyUserRegisteredDevices(users[req.cookies.guid]);
             },
-            reloadFiles: function reloadFiles(req){
+            reloadFiles: function reloadFiles(req) {
                 var device = self.getDeviceByGuid(req.data);
-                if(device){
-                    device.emit('filelist');
+                if (device) {
+                    device.emit('fileList');
+                }
+            },
+            reloadHTML: function reloadHTML(req) {
+                var device = self.getDeviceByGuid(req.data);
+                if (device) {
+                    device.emit('htmlContent');
+                }
+            },
+            fileSource: function fileSource(req) {
+                var device = self.getDeviceByGuid(req.data.guid);
+                if (device) {
+                    device.emit('fileSource', req.data);
                 }
             },
             subscribe: defineRouteHandler(users, 'subscribe'),
@@ -158,7 +172,7 @@ function Manager() {
         }
     }
 
-    function disconnect(request){
+    function disconnect(request) {
         var deviceReg = devices[request.cookies.guid];
         if (deviceReg) {
             deviceReg.offline();

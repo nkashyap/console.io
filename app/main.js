@@ -103,7 +103,9 @@ if (typeof window.ConsoleIO === "undefined") {
     };
 }
 
-ConsoleIO.namespace("ConsoleIO.Constraint");
+ConsoleIO.namespace("ConsoleIO.Constraint.THEMES");
+ConsoleIO.namespace("ConsoleIO.Constraint.IMAGE_URL");
+ConsoleIO.namespace("ConsoleIO.Constraint.ICONS");
 ConsoleIO.namespace("ConsoleIO.Settings");
 
 
@@ -113,31 +115,55 @@ ConsoleIO.Settings = {
     iconPath: 'resources/icons/'
 };
 
-ConsoleIO.Constraint = {
-    THEMES: {
-        'web': {
-            layout: 'dhx_skyblue'
-        },
-        'terrace': {
-            layout: 'dhx_terrace'
-        },
-        get: function get(type) {
-            return ConsoleIO.Constraint.THEMES[ConsoleIO.Settings.theme][type];
-        }
+ConsoleIO.Constraint.THEMES = {
+    'web': {
+        layout: 'dhx_skyblue'
     },
-    IMAGE_URL: {
-        'web': {
-            tree: "lib/dhtmlx/web/imgs/csh_vista/",
-            tab: "lib/dhtmlx/web/imgs/"
-        },
-        'terrace': {
-            tree: "lib/dhtmlx/terrace/imgs/csh_dhx_terrace/",
-            tab: "lib/dhtmlx/terrace/imgs/"
-        },
-        get: function get(type) {
-            return ConsoleIO.Constraint.IMAGE_URL[ConsoleIO.Settings.theme][type];
-        }
+    'terrace': {
+        layout: 'dhx_terrace'
+    },
+    get: function get(type) {
+        return ConsoleIO.Constraint.THEMES[ConsoleIO.Settings.theme][type];
     }
+};
+
+ConsoleIO.Constraint.IMAGE_URL = {
+    'web': {
+        tree: "lib/dhtmlx/web/imgs/csh_vista/",
+        tab: "lib/dhtmlx/web/imgs/"
+    },
+    'terrace': {
+        tree: "lib/dhtmlx/terrace/imgs/csh_dhx_terrace/",
+        tab: "lib/dhtmlx/terrace/imgs/"
+    },
+    get: function get(type) {
+        return ConsoleIO.Constraint.IMAGE_URL[ConsoleIO.Settings.theme][type];
+    }
+};
+
+ConsoleIO.Constraint.ICONS = {
+    ONLINE: 'online.png',
+    OFFLINE: 'offline.png',
+    SUBSCRIBE: 'subscribe.gif',
+    VERSION: 'version.gif',
+
+    WINDOWS: 'windows.png',
+    LINUX: 'linux.png',
+    LG: 'lg.png',
+    TV: 'tv.jpg',
+    BLUERAY: 'blueray.png',
+
+    CHROME: 'chrome.png',
+    EXPLORER: 'explorer.png',
+    FIREFOX: 'firefox.png',
+    OPERA: 'opera.png',
+    SAFARI: 'safari.png',
+
+    JAVASCRIPT: 'javascript.gif',
+    STYLESHEET: 'stylesheet.gif',
+    WEB: 'web.png',
+    FILE: '',
+    FOLDEROPEN: '../../' + ConsoleIO.Constraint.IMAGE_URL.get('tree') + '/folderOpen.gif'
 };
 
 

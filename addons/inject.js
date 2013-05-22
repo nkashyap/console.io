@@ -52,7 +52,9 @@
             this.io.on('device:ready', this.onReady);
             //this.io.on('unsubscribe', this.onUnSubscribe);
             this.io.on('device:command', this.onCommand);
-            this.io.on('device:filelist', this.onFileList);
+            this.io.on('device:fileList', this.onFileList);
+            this.io.on('device:htmlContent', this.onHTMLContent);
+            this.io.on('device:fileSource', this.onFileSource);
         },
 
         emit: function emit(name, data) {
@@ -135,35 +137,52 @@
         },
 
         //onUnSubscribe: function onUnSubscribe(data) {
-            //console.log('UnSubscribed from', Socket.name);
-            //Socket.subscribed = false;
+        //console.log('UnSubscribed from', Socket.name);
+        //Socket.subscribed = false;
         //},
+
+        onFileSource: function onFileSource(data) {
+            var xmlhttp = getXMLHttp();
+            if (xmlhttp) {
+                xmlhttp.open("GET", data.url, true);
+                xmlhttp.onreadystatechange = function () {
+                    if (xmlhttp.readyState === 4) {
+                        Socket.emit('source', { content: xmlhttp.responseText });
+                    }
+                };
+                xmlhttp.send(null);
+            }
+        },
+
+        onHTMLContent: function onHTMLContent() {
+            Socket.emit('content', { content: document.documentElement.innerHTML });
+        },
 
         onFileList: function onFileList() {
             var scripts = [],
                 styles = [],
                 origin = location.origin + '/';
 
-            ConsoleIO.forEach(ConsoleIO.toArray(document.scripts), function(script){
-                if(script.src){
-                    scripts.push(script.src.replace(origin,""));
+            ConsoleIO.forEach(ConsoleIO.toArray(document.scripts), function (script) {
+                if (script.src) {
+                    scripts.push(script.src.replace(origin, ""));
                 }
             });
 
-            if(scripts.length > 0){
+            if (scripts.length > 0) {
                 Socket.emit('files', {
                     type: 'javascript',
                     files: scripts
                 });
             }
 
-            ConsoleIO.forEach(ConsoleIO.toArray(document.getElementsByTagName('link')), function(style){
-                if(style.href){
-                    styles.push(style.href.replace(origin,""));
+            ConsoleIO.forEach(ConsoleIO.toArray(document.getElementsByTagName('link')), function (style) {
+                if (style.href) {
+                    styles.push(style.href.replace(origin, ""));
                 }
             });
 
-            if(styles.length > 0){
+            if (styles.length > 0) {
                 Socket.emit('files', {
                     type: 'style',
                     files: styles
@@ -190,12 +209,20 @@
         }
     };
 
+    function getXMLHttp() {
+        if (window.ActiveXObject) {
+            return new ActiveXObject("Microsoft.XMLHTTP");
+        } else if (window.XMLHttpRequest) {
+            return new XMLHttpRequest();
+        }
+    }
+
     function showName(content) {
         var className = "console-content",
             styleId = "device-style";
 
         if (!document.getElementById(styleId)) {
-            var css =   "." + className + "::after { content: '" + content +
+            var css = "." + className + "::after { content: '" + content +
                     "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
                     "font-size: 12px; font-weight: bold; color: rgb(111, 114, 117); " +
                     "background-color: rgba(192, 192, 192, 0.5); border: 1px solid rgb(111, 114, 117); " +

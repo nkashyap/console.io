@@ -44,7 +44,7 @@ ConsoleIO.Service.Socket = {
     onConnect: function onConnect() {
         console.log('Connected to the Server');
         ConsoleIO.Service.Socket.emit('setUp');
-        ConsoleIO.Service.Socket.on('user:ready', function(data){
+        ConsoleIO.Service.Socket.on('user:ready', function (data) {
             ConsoleIO.Service.Socket.name = data.name;
             ConsoleIO.Service.Socket.guid = data.guid;
         });
