@@ -27,7 +27,9 @@ ConsoleIO.App = function AppController() {
         width: 200,
         height: 250,
         toolbar: [
-            { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.SearchText,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Search
         ]
     });
 
@@ -40,12 +42,22 @@ ConsoleIO.App = function AppController() {
             readOnly: false
         },
         toolbar: [
-            { id: 'back', type: 'select', text: 'Back', opts: [], imgEnabled: 'back.gif', imgDisabled: 'back_dis.gif', tooltip: 'Back in History' },
-            { id: 'forward', type: 'select', text: 'Forward', opts: [], imgEnabled: 'forward.gif', imgDisabled: 'forward_dis.gif', tooltip: 'Forward in History' },
-            { type: 'separator' },
-            { id: 'clear', type: 'button', text: 'Clear', imgEnabled: 'clear.gif', tooltip: 'Clear Editor' },
-            { type: 'separator' },
-            { id: 'send', type: 'button', text: 'Send', imgEnabled: 'execute.png', imgDisabled: 'execute_dis.png', tooltip: 'Send command' }
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Open,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Save,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.SaveAs,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Cut,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Paste,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Undo,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Redo,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Clear,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Execute
         ]
     });
 

@@ -16,8 +16,11 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
         name: "Preview",
         guid: this.model.guid,
         toolbar: [
-            { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' },
-            { id: 'wordwrap', type: 'twoState', text: 'Word-Wrap', imgEnabled: 'word_wrap.gif', tooltip: 'Word Wrap', enabled: true }
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Preview
         ]
     });
     this.editor = new ConsoleIO.App.Editor(this, {});

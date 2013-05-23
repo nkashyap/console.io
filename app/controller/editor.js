@@ -25,7 +25,7 @@ ConsoleIO.App.Editor = function EditorController(parent, model) {
         matchBrackets: true,
         autoCloseBrackets: true,
         statementIndent: true,
-        lineWrapping: true,
+        lineWrapping: false,
         styleActiveLine: true,
         highlightSelectionMatches: true,
         continueComments: "Enter",

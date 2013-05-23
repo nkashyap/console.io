@@ -17,7 +17,16 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
         name: "Console",
         guid: this.model.guid,
         toolbar: [
-            { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Clear,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Export,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.PlayPause,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Info,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Log,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Warn,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Debug,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Error
         ]
     });
 

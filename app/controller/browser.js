@@ -35,9 +35,9 @@ ConsoleIO.App.Browser.prototype.online = function online(data) {
         this.store.offline.splice(index, 1);
     }
 
-    if(this.isSubscribed(data.guid)){
+    if (this.isSubscribed(data.guid)) {
         this.subscribed(data);
-    }else{
+    } else {
         this.view.setIcon(data.guid, ConsoleIO.Constraint.ICONS.ONLINE);
     }
 };

@@ -24,7 +24,9 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
         contextId: 'explorer',
         width: 200,
         toolbar: [
-            { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.SearchText,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Search
         ]
     });
     this.panel = new ConsoleIO.App.Device.Panel(this, this.model);

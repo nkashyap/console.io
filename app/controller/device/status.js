@@ -15,9 +15,7 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
     this.view = new ConsoleIO.View.Device.Status(this, {
         name: "Status",
         guid: this.model.guid,
-        toolbar: [
-            { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
-        ]
+        toolbar: [ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh]
     });
 
     ConsoleIO.Service.Socket.on('device:status:' + this.model.guid, this.add, this);
@@ -29,15 +27,15 @@ ConsoleIO.App.Device.Status.prototype.render = function render(target) {
 
 ConsoleIO.App.Device.Status.prototype.activate = function activate(state) {
     console.log('activate', this.model.guid, state);
-    if(state){
+    if (state) {
         this.refresh();
     }
 };
 
 ConsoleIO.App.Device.Status.prototype.add = function add(data) {
-    ConsoleIO.forEachProperty(data, function(value, property){
+    ConsoleIO.forEachProperty(data, function (value, property) {
         var name = '';
-        switch(property){
+        switch (property) {
             case 'cookie':
                 name = 'document.cookie = ';
                 break;
