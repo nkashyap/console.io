@@ -75,6 +75,10 @@ Device.prototype.source = function source(data) {
     this.broadcast('source:' + this.guid, data);
 };
 
+Device.prototype.status = function status(data) {
+    this.broadcast('status:' + this.guid, data);
+};
+
 Device.prototype.emit = function emit(name, data) {
     this.request.io.emit('device:' + name, data);
 };

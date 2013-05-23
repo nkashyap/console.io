@@ -55,6 +55,7 @@
             this.io.on('device:fileList', this.onFileList);
             this.io.on('device:htmlContent', this.onHTMLContent);
             this.io.on('device:fileSource', this.onFileSource);
+            this.io.on('device:status', this.onStatus);
         },
 
         emit: function emit(name, data) {
@@ -141,16 +142,36 @@
         //Socket.subscribed = false;
         //},
 
+        onStatus: function onStatus(data) {
+            Socket.emit('status', {
+                connectionMode: Socket.connectionMode,
+                navigator: ConsoleIO.Stringify.parse(window.navigator),
+                location: ConsoleIO.Stringify.parse(window.location),
+                history: ConsoleIO.Stringify.parse(window.history),
+                screen: ConsoleIO.Stringify.parse(window.screen),
+                cookie: ConsoleIO.Stringify.parse(document.cookie)
+            });
+        },
+
         onFileSource: function onFileSource(data) {
             var xmlhttp = getXMLHttp();
             if (xmlhttp) {
                 xmlhttp.open("GET", data.url, true);
                 xmlhttp.onreadystatechange = function () {
                     if (xmlhttp.readyState === 4) {
-                        Socket.emit('source', { content: xmlhttp.responseText });
+                        var content;
+                        if (xmlhttp.status === 200) {
+                            content = xmlhttp.responseText;
+                        } else {
+                            content = xmlhttp.statusText;
+                        }
+
+                        Socket.emit('source', { content: content });
                     }
                 };
                 xmlhttp.send(null);
+            }else{
+                Socket.emit('source', { content: 'XMLHttpRequest request not supported by the browser.' });
             }
         },
 

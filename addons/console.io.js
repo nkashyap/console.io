@@ -503,6 +503,7 @@ window.ConsoleIO = (function () {
             var value = '',
                 type = Utils.getObjectType(data);
 
+            simple = typeof simple === 'undefined' ? true : simple;
             level = level || 1;
 
             if (this.TYPES.indexOf(type) > -1) {
@@ -542,7 +543,7 @@ window.ConsoleIO = (function () {
             } else if (data === undefined) {
                 value = '"undefined"';
 
-            } else if (simple === undefined) {
+            } else if (simple) {
                 value = this.parseObject(type, data, level);
 
             } else {
@@ -659,6 +660,7 @@ window.ConsoleIO = (function () {
     window.console = Wrapper;
 
     return Utils.extend(Utils, {
-        native: native
+        native: native,
+        Stringify: Stringify
     });
 }());

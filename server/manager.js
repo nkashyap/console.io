@@ -117,7 +117,8 @@ function Manager() {
             console: defineRouteHandler(devices, 'console'),
             files: defineRouteHandler(devices, 'files'),
             content: defineRouteHandler(devices, 'content'),
-            source: defineRouteHandler(devices, 'source')
+            source: defineRouteHandler(devices, 'source'),
+            status: defineRouteHandler(devices, 'status')
         });
 
         app.io.route('user', {
@@ -143,6 +144,12 @@ function Manager() {
                 var device = self.getDeviceByGuid(req.data.guid);
                 if (device) {
                     device.emit('fileSource', req.data);
+                }
+            },
+            deviceStatus: function deviceStatus(req) {
+                var device = self.getDeviceByGuid(req.data);
+                if (device) {
+                    device.emit('status');
                 }
             },
             subscribe: defineRouteHandler(users, 'subscribe'),

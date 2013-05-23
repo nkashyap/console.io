@@ -56,5 +56,13 @@ ConsoleIO.Service.DHTMLXHelper = {
         }
 
         return element;
+    },
+
+    stripBrackets: function stripBrackets(data) {
+        var last = data.length - 1;
+        if (data.charAt(0) === '[' && data.charAt(last) === ']') {
+            return data.substring(1, last);
+        }
+        return data;
     }
 };

@@ -19,6 +19,8 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
             { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' }
         ]
     });
+
+    ConsoleIO.Service.Socket.on('device:status:' + this.model.guid, this.add, this);
 };
 
 ConsoleIO.App.Device.Status.prototype.render = function render(target) {
@@ -27,11 +29,37 @@ ConsoleIO.App.Device.Status.prototype.render = function render(target) {
 
 ConsoleIO.App.Device.Status.prototype.activate = function activate(state) {
     console.log('activate', this.model.guid, state);
+    if(state){
+        this.refresh();
+    }
 };
 
-ConsoleIO.App.Device.Status.prototype.buttonClick = function buttonClick(btnId) {
+ConsoleIO.App.Device.Status.prototype.add = function add(data) {
+    ConsoleIO.forEachProperty(data, function(value, property){
+        var name = '';
+        switch(property){
+            case 'cookie':
+                name = 'document.cookie = ';
+                break;
+            case 'connectionMode':
+                name = 'Socket.connectionMode = ';
+                break;
+        }
+
+        this.view.add(name + value);
+    }, this);
+};
+
+ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
+    this.view.clear();
+    ConsoleIO.Service.Socket.emit('deviceStatus', this.model.guid);
+};
+
+ConsoleIO.App.Device.Status.prototype.buttonClick = function buttonClick(btnId, state) {
     console.log('buttonClick', btnId);
-    if (btnId === 'refresh') {
-        this.refresh();
+    switch (btnId) {
+        case 'refresh':
+            this.refresh();
+            break;
     }
 };

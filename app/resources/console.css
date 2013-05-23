@@ -39,7 +39,9 @@ code {
 .type-profileEnd::after,
 .type-error::after,
 .type-trace::after,
-.type-clear::after {
+.type-clear::after,
+.type-command::after,
+.type-status::after {
     font-size: 11px;
     font-weight: bold;
 
@@ -275,6 +277,28 @@ code {
 
 .type-clear::after {
     content: "clear";
+    color: rgb(53, 117, 110);
+    background-color: rgba(159, 192, 189, 0.60);
+    border: 1px solid rgb(53, 117, 110);
+}
+
+.type-status {
+    border-top: 1px solid rgb(143, 172, 123);
+}
+
+.type-status::after {
+    content: "status";
+    color: rgb(143, 172, 123);
+    background-color: rgba(176, 223, 143, 0.60);
+    border: 1px solid rgb(143, 172, 123);
+}
+
+.type-command {
+    border-top: 1px solid rgb(53, 117, 110);
+}
+
+.type-command::after {
+    content: "command";
     color: rgb(53, 117, 110);
     background-color: rgba(159, 192, 189, 0.60);
     border: 1px solid rgb(53, 117, 110);

@@ -16,7 +16,9 @@ ConsoleIO.View.Device.Console = function ConsoleView(ctrl, model) {
     this.toolbar = null;
     this.container = null;
     this.id = [this.model.name, this.model.guid].join("-");
-    this.createElements();
+    this.container = ConsoleIO.Service.DHTMLXHelper.createElement({
+        attr: { 'class': 'console-contents' }
+    });
 };
 
 ConsoleIO.View.Device.Console.prototype.render = function render(target) {
@@ -34,30 +36,16 @@ ConsoleIO.View.Device.Console.prototype.render = function render(target) {
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
 };
 
-ConsoleIO.View.Device.Console.prototype.createElements = function createElements() {
-    this.container = ConsoleIO.Service.DHTMLXHelper.createElement({
-        attr: { 'class': 'console-contents' }
-    });
-};
-
-ConsoleIO.View.Device.Console.prototype.stripBrackets = function stripBrackets(data) {
-    var last = data.length - 1;
-    if (data.charAt(0) === '[' && data.charAt(last) === ']') {
-        return data.substring(1, last);
-    }
-    return data;
-};
-
 ConsoleIO.View.Device.Console.prototype.add = function add(data) {
     var tag = 'code',
         css = data.type,
         stackMessage,
         messagePreview,
-        message = this.stripBrackets(data.message);
+        message = ConsoleIO.Service.DHTMLXHelper.stripBrackets(data.message);
 
     // check if asset failed
     if (data.type === "assert") {
-        var asset = this.stripBrackets(message).split(",");
+        var asset = ConsoleIO.Service.DHTMLXHelper.stripBrackets(message).split(",");
         if (asset[0].toLowerCase() !== "true") {
             css = "assert-failed";
         }
@@ -79,7 +67,7 @@ ConsoleIO.View.Device.Console.prototype.add = function add(data) {
             .replace(/"/img, '')
             .replace(/%20/img, ' ');
 
-        stackMessage = this.stripBrackets(stack);
+        stackMessage = ConsoleIO.Service.DHTMLXHelper.stripBrackets(stack);
         messagePreview += '\n' + prettyPrintOne(stackMessage);
     }
 
