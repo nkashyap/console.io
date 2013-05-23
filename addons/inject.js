@@ -156,6 +156,7 @@
         onFileSource: function onFileSource(data) {
             var xmlhttp = getXMLHttp();
             if (xmlhttp) {
+                console.log(data.url);
                 xmlhttp.open("GET", data.url, true);
                 xmlhttp.onreadystatechange = function () {
                     if (xmlhttp.readyState === 4) {
@@ -182,7 +183,7 @@
         onFileList: function onFileList() {
             var scripts = [],
                 styles = [],
-                origin = location.origin + '/';
+                origin = (location.origin || location.href.replace(location.pathname, ""));
 
             ConsoleIO.forEach(ConsoleIO.toArray(document.scripts), function (script) {
                 if (script.src) {
