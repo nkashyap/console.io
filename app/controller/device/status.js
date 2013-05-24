@@ -15,7 +15,10 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
     this.view = new ConsoleIO.View.Device.Status(this, {
         name: "Status",
         guid: this.model.guid,
-        toolbar: [ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh]
+        toolbar: [
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload
+        ]
     });
 
     ConsoleIO.Service.Socket.on('device:status:' + this.model.guid, this.add, this);

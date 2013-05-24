@@ -20,7 +20,8 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
             ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Preview
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Preview,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload
         ]
     });
     this.editor = new ConsoleIO.App.Editor(this, {});

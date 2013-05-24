@@ -17,12 +17,13 @@ ConsoleIO.Model.DHTMLX = {
 
         Preview: { id: 'preview', type: 'button', text: 'Preview', imgEnabled: 'preview.gif', imgDisabled: 'preview_dis.gif', tooltip: 'Preview' },
 
-        SearchText: { id: 'searchText', type: 'input', value: '', width: 85, tooltip: 'Search' },
+        SearchText: { id: 'searchText', type: 'input', value: '', width: 80, tooltip: 'Search Test' },
         Search: { id: 'search', type: 'button', imgEnabled: 'search.gif', tooltip: 'Search' },
-        Execute: { id: 'execute', type: 'button', text: 'Execute', imgEnabled: 'execute.png', imgDisabled: 'execute_dis.png', tooltip: 'Execute command' },
+        Execute: { id: 'execute', type: 'button', text: 'Execute', imgEnabled: 'execute.png', imgDisabled: 'execute_dis.png', tooltip: 'Execute Script' },
 
         Clear: { id: 'clear', type: 'button', text: 'Clear', imgEnabled: 'clear.gif', tooltip: 'Clear' },
-        Refresh: { id: 'refresh', type: 'button', text: 'Reload', imgEnabled: 'refresh.gif', tooltip: 'Refresh' },
+        Refresh: { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' },
+        Reload: { id: 'reload', type: 'button', text: 'Reload', imgEnabled: 'reload.png', tooltip: 'Reload Browser' },
 
         Open: { id: 'open', type: 'button', text: 'Open', imgEnabled: 'open.gif', imgDisabled: 'open_dis.gif', tooltip: 'Open' },
         Save: { id: 'save', type: 'button', text: 'Save', imgEnabled: 'save.gif', imgDisabled: 'save_dis.gif', tooltip: 'Save' },

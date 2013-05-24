@@ -32,6 +32,10 @@ ConsoleIO.Service.DHTMLXHelper = {
                     this.addInput(item.id, index, item.value, item.width);
                     break;
             }
+
+            if(item.tooltip){
+                this.setItemToolTip(item.id, item.tooltip);
+            }
         }, toolbar);
     },
 

@@ -21,6 +21,7 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Clear,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Export,
             ConsoleIO.Model.DHTMLX.ToolBarItem.PlayPause,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Info,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Log,

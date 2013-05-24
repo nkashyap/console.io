@@ -19,7 +19,8 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
             ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Copy
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload
         ]
     });
 
