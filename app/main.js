@@ -112,7 +112,8 @@ ConsoleIO.namespace("ConsoleIO.Settings");
 ConsoleIO.Settings = {
     secure: false,
     theme: 'web',
-    iconPath: 'resources/icons/'
+    iconPath: 'resources/icons/',
+    reloadTabContentWhenActivated: true
 };
 
 ConsoleIO.Constraint.THEMES = {

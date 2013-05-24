@@ -35,7 +35,7 @@ ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
 };
 
 ConsoleIO.App.Device.Preview.prototype.activate = function activate(state) {
-    if (state) {
+    if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
         this.refresh();
     }
 };
