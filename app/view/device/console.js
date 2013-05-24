@@ -33,6 +33,10 @@ ConsoleIO.View.Device.Console.prototype.render = function render(target) {
         this.buttonClick(itemId);
     }, this.ctrl);
 
+    this.toolbar.attachEvent("onStateChange", function (itemId, state) {
+        this.buttonClick(itemId, state);
+    }, this.ctrl);
+
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
 };
 

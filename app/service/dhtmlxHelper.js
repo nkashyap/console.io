@@ -23,14 +23,30 @@ ConsoleIO.Service.DHTMLXHelper = {
                     this.setItemState(item.id, !!item.pressed);
                     break;
                 case 'select':
+                    if(item.opts === 'pagesizes'){
+                        item.opts = [];
+                        ConsoleIO.forEach(ConsoleIO.Settings.pageSize.list, function(number){
+                            item.opts.push([item.id + '-' + number, 'obj', number ]);
+                        });
+                        item.selected = item.id + '-' + ConsoleIO.Settings.pageSize.active;
+                    }
+
                     this.addButtonSelect(item.id, index, item.text, item.opts, item.imgEnabled, item.imgDisabled);
+
+                    if(item.selected){
+                        this.setListOptionSelected(item.id, item.selected);
+                    }
                     break;
                 case 'text':
                     this.addText(item.id, index, item.text);
                     break;
                 case 'input':
-                    this.addInput(item.id, index, item.value, item.width);
+                    this.addInput(item.id, index, item.value);
                     break;
+            }
+
+            if(item.width){
+                this.setWidth(item.id, item.width);
             }
 
             if(item.tooltip){

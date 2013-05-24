@@ -46,3 +46,20 @@ ConsoleIO.App.Device.Panel.prototype.activate = function activate(state) {
         this[this.activeTab].activate(state);
     }
 };
+
+ConsoleIO.App.Device.Panel.prototype.buttonClick = function buttonClick(tab, btnId, state) {
+    var handled = false;
+
+    switch (btnId) {
+        case 'refresh':
+            tab.refresh();
+            handled = true;
+            break;
+        case 'wordwrap':
+            tab.editor.setOption('lineWrapping', state);
+            handled = true;
+            break;
+    }
+
+    return handled;
+};

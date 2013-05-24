@@ -17,11 +17,13 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
         guid: this.model.guid,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
             ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Preview,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Preview
         ]
     });
     this.editor = new ConsoleIO.App.Editor(this, {});
@@ -49,13 +51,7 @@ ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
 };
 
 ConsoleIO.App.Device.Preview.prototype.buttonClick = function buttonClick(btnId, state) {
-    console.log('buttonClick', btnId, state);
-    switch (btnId) {
-        case 'refresh':
-            this.refresh();
-            break;
-        case 'wordwrap':
-            this.editor.setOption('lineWrapping', state);
-            break;
+    if(!this.parent.buttonClick(this, btnId, state)){
+        console.log('buttonClick', btnId);
     }
 };

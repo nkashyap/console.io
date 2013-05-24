@@ -113,7 +113,11 @@ ConsoleIO.Settings = {
     secure: false,
     theme: 'web',
     iconPath: 'resources/icons/',
-    reloadTabContentWhenActivated: true
+    reloadTabContentWhenActivated: true,
+    pageSize: {
+        active: 50,
+        list: [50,100,250,500]
+    }
 };
 
 ConsoleIO.Constraint.THEMES = {

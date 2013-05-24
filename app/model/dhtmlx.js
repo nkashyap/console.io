@@ -15,7 +15,9 @@ ConsoleIO.Model.DHTMLX = {
         Back: { id: 'back', type: 'select', text: 'Back', opts: [], imgEnabled: 'back.gif', imgDisabled: 'back_dis.gif', tooltip: 'Back in History' },
         Forward: { id: 'forward', type: 'select', text: 'Forward', opts: [], imgEnabled: 'forward.gif', imgDisabled: 'forward_dis.gif', tooltip: 'Forward in History' },
 
+        PageSize: { id: 'pagesize', type: 'select', text: 'PageSize', imgEnabled: 'pagesize.gif', tooltip: 'Page Size', width: 100, opts: 'pagesizes' },
         Preview: { id: 'preview', type: 'button', text: 'Preview', imgEnabled: 'preview.gif', imgDisabled: 'preview_dis.gif', tooltip: 'Preview' },
+        Configure: { id: 'setting', type: 'button', text: 'Configure', imgEnabled: 'settings.gif', tooltip: 'Configure' },
 
         SearchText: { id: 'searchText', type: 'input', value: '', width: 80, tooltip: 'Search Test' },
         Search: { id: 'search', type: 'button', imgEnabled: 'search.gif', tooltip: 'Search' },

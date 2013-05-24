@@ -17,7 +17,9 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
         guid: this.model.guid,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Configure
         ]
     });
 
@@ -29,7 +31,6 @@ ConsoleIO.App.Device.Status.prototype.render = function render(target) {
 };
 
 ConsoleIO.App.Device.Status.prototype.activate = function activate(state) {
-    console.log('activate', this.model.guid, state);
     if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
         this.refresh();
     }
@@ -50,10 +51,7 @@ ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
 };
 
 ConsoleIO.App.Device.Status.prototype.buttonClick = function buttonClick(btnId, state) {
-    console.log('buttonClick', btnId);
-    switch (btnId) {
-        case 'refresh':
-            this.refresh();
-            break;
+    if(!this.parent.buttonClick(this, btnId, state)){
+        console.log('buttonClick', btnId);
     }
 };

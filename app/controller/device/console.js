@@ -17,11 +17,12 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
         name: "Console",
         guid: this.model.guid,
         toolbar: [
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.PlayPause,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Clear,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Export,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.PlayPause,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.PageSize,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Info,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Log,
@@ -38,6 +39,13 @@ ConsoleIO.App.Device.Console.prototype.render = function render(target) {
     this.view.render(target);
 };
 
+ConsoleIO.App.Device.Console.prototype.activate = function activate(state) {
+    this.active = state;
+    if (this.active && this.store.length > 0) {
+        ConsoleIO.forEach(this.store, this.add, this);
+    }
+};
+
 ConsoleIO.App.Device.Console.prototype.add = function add(data) {
     if (this.active) {
         this.view.add(data);
@@ -46,16 +54,8 @@ ConsoleIO.App.Device.Console.prototype.add = function add(data) {
     }
 };
 
-ConsoleIO.App.Device.Console.prototype.activate = function activate(state) {
-    this.active = state;
-    if (this.active && this.store.length > 0) {
-        ConsoleIO.forEach(this.store, this.add, this);
-    }
-};
-
 ConsoleIO.App.Device.Console.prototype.buttonClick = function buttonClick(btnId, state) {
-    console.log('buttonClick', btnId);
-    if (btnId === 'refresh') {
-        //this.refresh();
+    if(!this.parent.buttonClick(this, btnId, state)){
+        console.log('buttonClick', btnId);
     }
 };

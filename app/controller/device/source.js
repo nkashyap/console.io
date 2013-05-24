@@ -17,10 +17,11 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
         guid: this.model.guid,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
             ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Copy
         ]
     });
 
@@ -56,13 +57,7 @@ ConsoleIO.App.Device.Source.prototype.refresh = function refresh() {
 };
 
 ConsoleIO.App.Device.Source.prototype.buttonClick = function buttonClick(btnId, state) {
-    console.log('buttonClick', btnId, state);
-    switch (btnId) {
-        case 'refresh':
-            this.refresh();
-            break;
-        case 'wordwrap':
-            this.editor.setOption('lineWrapping', state);
-            break;
+    if(!this.parent.buttonClick(this, btnId, state)){
+        console.log('buttonClick', btnId);
     }
 };
