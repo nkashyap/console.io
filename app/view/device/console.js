@@ -40,7 +40,7 @@ ConsoleIO.View.Device.Console.prototype.render = function render(target) {
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
 };
 
-ConsoleIO.View.Device.Console.prototype.add = function add(data) {
+ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData(data) {
     var tag = 'code',
         css = data.type,
         stackMessage,
@@ -79,19 +79,48 @@ ConsoleIO.View.Device.Console.prototype.add = function add(data) {
         tag = 'pre';
     }
 
-//    if (this.filters.indexOf(css) > -1) {
-//        css += ' hidden';
-//    }
+    return {
+        tag: tag,
+        className: 'console type-' + css,
+        message: (messagePreview || '.')
+    }
+};
+
+ConsoleIO.View.Device.Console.prototype.add = function add(data) {
+    var element = this.getElementData(data);
 
     ConsoleIO.Service.DHTMLXHelper.createElement({
-        tag: tag,
+        tag: element.tag,
         attr: {
-            'class': 'console type-' + css
+            'class': element.className
         },
         prop: {
-            innerHTML: (messagePreview || '.')
+            innerHTML: element.message
         },
         target: this.container,
         insert: 'top'
     });
+};
+
+ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
+    var fragment = document.createDocumentFragment();
+
+    ConsoleIO.forEach(store, function(item){
+        var element = this.getElementData(item);
+
+        ConsoleIO.Service.DHTMLXHelper.createElement({
+            tag: element.tag,
+            attr: {
+                'class': element.className
+            },
+            prop: {
+                innerHTML: element.message
+            },
+            target: fragment,
+            insert: 'top'
+        });
+
+    }, this);
+
+    this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);
 };

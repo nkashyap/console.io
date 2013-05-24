@@ -42,7 +42,7 @@ ConsoleIO.App.Device.Console.prototype.render = function render(target) {
 ConsoleIO.App.Device.Console.prototype.activate = function activate(state) {
     this.active = state;
     if (this.active && this.store.length > 0) {
-        ConsoleIO.forEach(this.store, this.add, this);
+        this.view.addBatch(this.store);
     }
 };
 

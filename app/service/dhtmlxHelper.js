@@ -55,8 +55,14 @@ ConsoleIO.Service.DHTMLXHelper = {
         }, toolbar);
     },
 
+    elements: {},
     createElement: function createElement(config) {
-        var element = document.createElement(config.tag || 'div');
+        config.tag = config.tag || 'div';
+        if(!this.elements[config.tag]){
+            this.elements[config.tag] = document.createElement(config.tag);
+        }
+
+        var element = this.elements[config.tag].cloneNode(false);
 
         ConsoleIO.forEachProperty(config.attr, function (value, property) {
             if (value) {
