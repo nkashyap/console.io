@@ -18,6 +18,7 @@ ConsoleIO.View.Device.Status = function StatusView(ctrl, model) {
     this.container = ConsoleIO.Service.DHTMLXHelper.createElement({
         attr: { 'class': 'status-contents' }
     });
+    this.labels = {};
 };
 
 ConsoleIO.View.Device.Status.prototype.render = function render(target) {
@@ -42,23 +43,56 @@ ConsoleIO.View.Device.Status.prototype.clear = function clear() {
     }
 };
 
-ConsoleIO.View.Device.Status.prototype.add = function add(data) {
-    var tag = 'pre',
-        messagePreview,
-        message = ConsoleIO.Service.DHTMLXHelper.stripBrackets(data);
-
-    // for Opera and Maple browser
-    message = message.replace(/%20/img, " ");
-    messagePreview = prettyPrintOne(message);
+ConsoleIO.View.Device.Status.prototype.addLabel = function addLabel(name) {
+    var id = this.id + '-' + name,
+        labelDiv = ConsoleIO.Service.DHTMLXHelper.createElement({
+            attr: {
+                'class': 'label'
+            },
+            prop: {
+                id: id
+            },
+            target: this.container
+        });
 
     ConsoleIO.Service.DHTMLXHelper.createElement({
-        tag: tag,
         attr: {
-            'class': 'console type-status'
+            'class': 'title'
         },
         prop: {
-            innerHTML: (messagePreview || '.')
+            innerHTML: name
         },
-        target: this.container
+        target: labelDiv
+    });
+
+    this.labels[id] = labelDiv;
+};
+
+ConsoleIO.View.Device.Status.prototype.add = function add(name, value, label) {
+    var property = ConsoleIO.Service.DHTMLXHelper.createElement({
+        attr: {
+            'class': 'property'
+        },
+        target: this.labels[this.id + '-' + label]
+    });
+
+    ConsoleIO.Service.DHTMLXHelper.createElement({
+        attr: {
+            'class': 'name'
+        },
+        prop: {
+            innerHTML: name
+        },
+        target: property
+    });
+
+    ConsoleIO.Service.DHTMLXHelper.createElement({
+        attr: {
+            'class': 'value'
+        },
+        prop: {
+            innerHTML: value
+        },
+        target: property
     });
 };

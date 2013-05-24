@@ -19,7 +19,7 @@ ConsoleIO.App.Device.Explorer = function ExplorerController(parent, model) {
     this.view = new ConsoleIO.View.Device.Explorer(this, this.model);
     ConsoleIO.Service.Socket.on('device:files:' + this.model.guid, this.add, this);
 
-    this.reloadFiles();
+    this.refresh();
 };
 
 ConsoleIO.App.Device.Explorer.prototype.render = function render(target) {
@@ -66,7 +66,7 @@ ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
     }, this);
 };
 
-ConsoleIO.App.Device.Explorer.prototype.reloadFiles = function reloadFiles() {
+ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
     ConsoleIO.forEach(this.store.folder, function (folder) {
         this.deleteItem(folder);
     }, this.view);
@@ -82,7 +82,7 @@ ConsoleIO.App.Device.Explorer.prototype.reloadFiles = function reloadFiles() {
 ConsoleIO.App.Device.Explorer.prototype.buttonClick = function buttonClick(btnId) {
     console.log('buttonClick', btnId);
     if (btnId === 'refresh') {
-        this.reloadFiles();
+        this.refresh();
     }
 };
 

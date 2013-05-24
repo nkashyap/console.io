@@ -34,17 +34,10 @@ ConsoleIO.App.Device.Status.prototype.activate = function activate(state) {
 
 ConsoleIO.App.Device.Status.prototype.add = function add(data) {
     ConsoleIO.forEachProperty(data, function (value, property) {
-        var name = '';
-        switch (property) {
-            case 'cookie':
-                name = 'document.cookie = ';
-                break;
-            case 'connectionMode':
-                name = 'Socket.connectionMode = ';
-                break;
-        }
-
-        this.view.add(name + value);
+        this.view.addLabel(property);
+        ConsoleIO.forEachProperty(value, function (config, name) {
+            this.view.add(name, config, property);
+        }, this);
     }, this);
 };
 

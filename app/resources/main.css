@@ -43,3 +43,37 @@ html, body {
 .dhx_tabcontent_zone > div[tab_id^=Source] > div[ida=dhxMainCont] {
     overflow: auto !important;
 }
+
+/* Status Tab*/
+.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .label {
+    border: 1px solid #a6dbff;
+    margin: 10px;
+    font-family: Tahoma;
+    font-size: 11px;
+    background: #a6dbff;
+}
+.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .title {
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 5px;
+}
+.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .property{
+    padding: 3px;
+}
+.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .property:nth-child(even) {
+    background: #FFF;
+}
+.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .property:nth-child(odd) {
+    background: #e8f2ff;
+}
+
+.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .name{
+    display: inline-block;
+    font-weight: bold;
+    width: 150px;
+    padding: 2px;
+}
+.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .value{
+    display: inline-block;
+    padding: 2px;
+}

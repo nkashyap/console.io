@@ -144,12 +144,15 @@
 
         onStatus: function onStatus(data) {
             Socket.emit('status', {
-                connectionMode: Socket.connectionMode,
-                navigator: ConsoleIO.Stringify.parse(window.navigator),
-                location: ConsoleIO.Stringify.parse(window.location),
-                history: ConsoleIO.Stringify.parse(window.history),
-                screen: ConsoleIO.Stringify.parse(window.screen),
-                cookie: ConsoleIO.Stringify.parse(document.cookie)
+                connection: {
+                    mode: Socket.connectionMode
+                },
+                document:{
+                    cookie: document.cookie
+                },
+                navigator: getBrowserInfo(window.navigator),
+                location: getBrowserInfo(window.location),
+                screen: getBrowserInfo(window.screen)
             });
         },
 
@@ -230,6 +233,23 @@
             }
         }
     };
+
+    function getBrowserInfo(obj) {
+        var returnObj = {}, dataTypes = [
+            '[object Arguments]', '[object Array]',
+            '[object String]', '[object Number]', '[object Boolean]',
+            '[object Error]', '[object ErrorEvent]',
+            '[object Object]'
+        ];
+
+        ConsoleIO.forEachProperty(obj, function(value, property){
+            if(obj.hasOwnProperty(property) && dataTypes.indexOf(ConsoleIO.getObjectType(value)) > -1){
+                returnObj[property] = ConsoleIO.Stringify.parse(value);
+            }
+        });
+
+        return returnObj;
+    }
 
     function getXMLHttp() {
         if (window.ActiveXObject) {

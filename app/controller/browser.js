@@ -103,20 +103,24 @@ ConsoleIO.App.Browser.prototype.render = function render(target) {
     this.view.render(target);
 };
 
+ConsoleIO.App.Browser.prototype.refresh = function refresh() {
+    ConsoleIO.forEach(this.store.os, function (os) {
+        this.deleteItem(os);
+    }, this.view);
+
+    this.store = {
+        os: [],
+        browser: [],
+        offline: [],
+        subscribed: []
+    };
+
+    ConsoleIO.Service.Socket.emit('reloadDevices');
+};
+
 ConsoleIO.App.Browser.prototype.buttonClick = function buttonClick(btnId) {
     if (btnId === 'refresh') {
-        ConsoleIO.forEach(this.store.os, function (os) {
-            this.deleteItem(os);
-        }, this.view);
-
-        this.store = {
-            os: [],
-            browser: [],
-            offline: [],
-            subscribed: []
-        };
-
-        ConsoleIO.Service.Socket.emit('reloadDevices');
+        this.refresh();
     }
 };
 

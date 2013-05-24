@@ -35,7 +35,7 @@ ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
 
 ConsoleIO.App.Device.Preview.prototype.activate = function activate(state) {
     if (state) {
-        this.reloadContent();
+        this.refresh();
     }
 };
 
@@ -43,7 +43,7 @@ ConsoleIO.App.Device.Preview.prototype.add = function add(data) {
     this.editor.add(data);
 };
 
-ConsoleIO.App.Device.Preview.prototype.reloadContent = function reloadContent() {
+ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
     ConsoleIO.Service.Socket.emit('reloadHTML', this.model.guid);
 };
 
@@ -51,7 +51,7 @@ ConsoleIO.App.Device.Preview.prototype.buttonClick = function buttonClick(btnId,
     console.log('buttonClick', btnId, state);
     switch (btnId) {
         case 'refresh':
-            this.reloadContent();
+            this.refresh();
             break;
         case 'wordwrap':
             this.editor.setOption('lineWrapping', state);

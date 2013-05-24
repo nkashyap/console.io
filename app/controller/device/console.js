@@ -52,7 +52,7 @@ ConsoleIO.App.Device.Console.prototype.activate = function activate(state) {
     }
 };
 
-ConsoleIO.App.Device.Console.prototype.buttonClick = function buttonClick(btnId) {
+ConsoleIO.App.Device.Console.prototype.buttonClick = function buttonClick(btnId, state) {
     console.log('buttonClick', btnId);
     if (btnId === 'refresh') {
         //this.refresh();
