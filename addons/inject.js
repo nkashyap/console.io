@@ -56,6 +56,7 @@
             this.io.on('device:htmlContent', this.onHTMLContent);
             this.io.on('device:fileSource', this.onFileSource);
             this.io.on('device:status', this.onStatus);
+            this.io.on('device:reload', this.onReload);
         },
 
         emit: function emit(name, data) {
@@ -147,7 +148,7 @@
                 connection: {
                     mode: Socket.connectionMode
                 },
-                document:{
+                document: {
                     cookie: document.cookie
                 },
                 navigator: getBrowserInfo(window.navigator),
@@ -170,13 +171,21 @@
                             content = xmlhttp.statusText;
                         }
 
-                        Socket.emit('source', { content: content });
+                        Socket.emit('source', { url: data.url, content: content });
                     }
                 };
                 xmlhttp.send(null);
-            }else{
-                Socket.emit('source', { content: 'XMLHttpRequest request not supported by the browser.' });
+            } else {
+                Socket.emit('source', { url: data.url, content: 'XMLHttpRequest request not supported by the browser.' });
             }
+        },
+
+        onReload: function onReload() {
+            setTimeout((function (url) {
+                return function () {
+                    window.location.assign(url);
+                };
+            }(location.href)), 1000);
         },
 
         onHTMLContent: function onHTMLContent() {
@@ -242,8 +251,8 @@
             '[object Object]'
         ];
 
-        ConsoleIO.forEachProperty(obj, function(value, property){
-            if(obj.hasOwnProperty(property) && dataTypes.indexOf(ConsoleIO.getObjectType(value)) > -1){
+        ConsoleIO.forEachProperty(obj, function (value, property) {
+            if (obj.hasOwnProperty(property) && dataTypes.indexOf(ConsoleIO.getObjectType(value)) > -1) {
                 returnObj[property] = ConsoleIO.Stringify.parse(value);
             }
         });

@@ -29,10 +29,17 @@ ConsoleIO.App.Device.Panel.prototype.render = function render(target) {
 };
 
 ConsoleIO.App.Device.Panel.prototype.tabClick = function tabClick(tabId) {
+    var newTab = (tabId.split('-')[0]).toLowerCase();
+
+    if (this.activeTab && this.activeTab === newTab) {
+        return;
+    }
+
     if (this.activeTab) {
         this[this.activeTab].activate(false);
     }
-    this.activeTab = (tabId.split('-')[0]).toLowerCase();
+
+    this.activeTab = newTab;
     this[this.activeTab].activate(true);
 };
 
@@ -51,12 +58,28 @@ ConsoleIO.App.Device.Panel.prototype.buttonClick = function buttonClick(tab, btn
     var handled = false;
 
     switch (btnId) {
+        case 'reload':
+            ConsoleIO.Service.Socket.emit('reloadDevice', this.model.guid);
+            handled = true;
+            break;
+
+        //common on Status, Source and Preview Tabs
         case 'refresh':
             tab.refresh();
             handled = true;
             break;
+
+        //common on Source and Preview Tabs
         case 'wordwrap':
             tab.editor.setOption('lineWrapping', state);
+            handled = true;
+            break;
+        case 'selectAll':
+            tab.editor.selectAll();
+            handled = true;
+            break;
+        case 'copy':
+            tab.editor.copy();
             handled = true;
             break;
     }

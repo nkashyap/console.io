@@ -115,7 +115,7 @@ ConsoleIO.App.Browser.prototype.refresh = function refresh() {
         subscribed: []
     };
 
-    ConsoleIO.Service.Socket.emit('reloadDevices');
+    ConsoleIO.Service.Socket.emit('refreshRegisteredDeviceList');
 };
 
 ConsoleIO.App.Browser.prototype.buttonClick = function buttonClick(btnId) {

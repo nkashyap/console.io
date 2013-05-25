@@ -55,6 +55,19 @@ ConsoleIO.App.Editor.prototype.setOption = function setOption(option, value) {
     this.editor.setOption(option, value);
 };
 
+ConsoleIO.App.Editor.prototype.getDoc = function getDoc() {
+    return this.editor.getDoc();
+};
+
+ConsoleIO.App.Editor.prototype.selectAll = function selectAll() {
+    var doc = this.getDoc();
+    doc.setSelection({line: 0, ch : 0}, {line: doc.lineCount(), ch : 0});
+};
+
+ConsoleIO.App.Editor.prototype.copy = function copy() {
+    return this.getDoc().copy();
+};
+
 ConsoleIO.App.Editor.prototype.add = function add(data) {
     this.editor.setValue(data.content);
 };

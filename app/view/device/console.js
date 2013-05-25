@@ -105,7 +105,7 @@ ConsoleIO.View.Device.Console.prototype.add = function add(data) {
 ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
     var fragment = document.createDocumentFragment();
 
-    ConsoleIO.forEach(store, function(item){
+    ConsoleIO.forEach(store, function (item) {
         var element = this.getElementData(item);
 
         ConsoleIO.Service.DHTMLXHelper.createElement({

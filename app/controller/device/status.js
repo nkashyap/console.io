@@ -51,7 +51,11 @@ ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
 };
 
 ConsoleIO.App.Device.Status.prototype.buttonClick = function buttonClick(btnId, state) {
-    if(!this.parent.buttonClick(this, btnId, state)){
+    if (!this.parent.buttonClick(this, btnId, state)) {
         console.log('buttonClick', btnId);
+        switch (btnId) {
+            case 'setting':
+                break;
+        }
     }
 };

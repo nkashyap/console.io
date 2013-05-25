@@ -51,7 +51,11 @@ ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
 };
 
 ConsoleIO.App.Device.Preview.prototype.buttonClick = function buttonClick(btnId, state) {
-    if(!this.parent.buttonClick(this, btnId, state)){
+    if (!this.parent.buttonClick(this, btnId, state)) {
         console.log('buttonClick', btnId);
+        switch (btnId) {
+            case 'preview':
+                break;
+        }
     }
 };

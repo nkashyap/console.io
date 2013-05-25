@@ -36,7 +36,7 @@ function Manager() {
 
             return device;
         },
-        notifyUserRegisteredDevices: function notifyUserRegisteredDevices(user) {
+        notifyRegisteredDevicesToUser: function notifyRegisteredDevicesToUser(user) {
             if (user) {
                 forEach(devices, function (device) {
                     var deviceConfig = device.getIdentity();
@@ -125,8 +125,14 @@ function Manager() {
             setUp: function setUp(req) {
                 register('user', req);
             },
-            reloadDevices: function reloadDevices(req) {
-                self.notifyUserRegisteredDevices(users[req.cookies.guid]);
+            refreshRegisteredDeviceList: function refreshRegisteredDeviceList(req) {
+                self.notifyRegisteredDevicesToUser(users[req.cookies.guid]);
+            },
+            reloadDevice: function reloadDevice(req){
+                var device = self.getDeviceByGuid(req.data);
+                if (device) {
+                    device.emit('reload');
+                }
             },
             reloadFiles: function reloadFiles(req) {
                 var device = self.getDeviceByGuid(req.data);
@@ -175,7 +181,7 @@ function Manager() {
             }
 
             userReg.online(request);
-            self.notifyUserRegisteredDevices(userReg);
+            self.notifyRegisteredDevicesToUser(userReg);
         }
     }
 

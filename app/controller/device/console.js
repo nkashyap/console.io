@@ -55,7 +55,20 @@ ConsoleIO.App.Device.Console.prototype.add = function add(data) {
 };
 
 ConsoleIO.App.Device.Console.prototype.buttonClick = function buttonClick(btnId, state) {
-    if(!this.parent.buttonClick(this, btnId, state)){
+    if (!this.parent.buttonClick(this, btnId, state)) {
         console.log('buttonClick', btnId);
+        //'pagesize':
+        switch (btnId) {
+            case 'playPause':
+            case 'clear':
+            case 'export':
+            case 'info':
+            case 'log':
+            case 'warn':
+            case 'debug':
+            case 'error':
+                break;
+
+        }
     }
 };
