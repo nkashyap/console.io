@@ -7,6 +7,7 @@
  */
 
 ConsoleIO.namespace("ConsoleIO.App.Editor");
+ConsoleIO.namespace("ConsoleIO.App.Editor.CopyDocument");
 
 ConsoleIO.App.Editor = function EditorController(parent, model) {
     this.parent = parent;
@@ -49,14 +50,23 @@ ConsoleIO.App.Editor.prototype.render = function render(target) {
     }
     this.editor = CodeMirror.fromTextArea(this.view.textArea, this.model.codeMirror);
     this.view.render(target);
-};
 
-ConsoleIO.App.Editor.prototype.setOption = function setOption(option, value) {
-    this.editor.setOption(option, value);
+    var scope = this;
+    this.editor.on("change", function onChange() {
+        scope.setUnDoRedoState();
+    });
 };
 
 ConsoleIO.App.Editor.prototype.getDoc = function getDoc() {
     return this.editor.getDoc();
+};
+
+ConsoleIO.App.Editor.prototype.add = function add(data) {
+    this.editor.setValue(data.content);
+};
+
+ConsoleIO.App.Editor.prototype.setOption = function setOption(option, value) {
+    this.editor.setOption(option, value);
 };
 
 ConsoleIO.App.Editor.prototype.selectAll = function selectAll() {
@@ -65,13 +75,84 @@ ConsoleIO.App.Editor.prototype.selectAll = function selectAll() {
 };
 
 ConsoleIO.App.Editor.prototype.copy = function copy() {
-    return this.getDoc().copy();
+    ConsoleIO.App.Editor.CopyDocument = this.getDoc().getSelection();
+    this.setUnDoRedoState();
 };
 
-ConsoleIO.App.Editor.prototype.add = function add(data) {
-    this.editor.setValue(data.content);
+ConsoleIO.App.Editor.prototype.cut = function cut() {
+    this.copy();
+    this.editor.replaceSelection("");
+    this.setUnDoRedoState();
+};
+
+ConsoleIO.App.Editor.prototype.paste = function paste() {
+    var doc = this.getDoc();
+    if (ConsoleIO.App.Editor.CopyDocument) {
+        if (doc.somethingSelected()) {
+            doc.replaceSelection(ConsoleIO.App.Editor.CopyDocument);
+        } else {
+            this.editor.setValue(this.editor.getValue() + ConsoleIO.App.Editor.CopyDocument);
+        }
+
+        doc.setCursor({line: doc.lineCount(), ch: 0});
+    }
+
+    this.setUnDoRedoState();
+};
+
+ConsoleIO.App.Editor.prototype.undo = function undo() {
+    this.editor.undo();
+    this.setUnDoRedoState();
+};
+
+ConsoleIO.App.Editor.prototype.redo = function redo() {
+    this.editor.redo();
+    this.setUnDoRedoState();
+};
+
+ConsoleIO.App.Editor.prototype.clear = function clear() {
+    this.editor.setValue("");
+    this.getDoc().clearHistory();
+    this.setUnDoRedoState();
+};
+
+ConsoleIO.App.Editor.prototype.setUnDoRedoState = function setUnDoRedoState() {
+    var history = this.getDoc().historySize();
+    this.view.toggleButton('undo', (history.undo > 0));
+    this.view.toggleButton('redo', (history.redo > 0));
 };
 
 ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, state) {
     console.log(btnId, state);
+    switch (btnId) {
+        case 'cut':
+            this.cut();
+            break;
+        case 'copy':
+            this.copy();
+            break;
+        case 'paste':
+            this.paste();
+            break;
+        case 'selectAll':
+            this.selectAll();
+            break;
+        case 'undo':
+            this.undo();
+            break;
+        case 'redo':
+            this.redo();
+            break;
+        case 'clear':
+            this.clear();
+            break;
+        case 'wordwrap':
+            this.setOption('lineWrapping', state);
+            break;
+        case 'execute':
+        case 'open':
+        case 'save':
+        case 'saveAs':
+            break;
+    }
 };

@@ -28,7 +28,7 @@ ConsoleIO.App.Device.Panel.prototype.render = function render(target) {
     this.console.render(this.view.tabs);
 };
 
-ConsoleIO.App.Device.Panel.prototype.tabClick = function tabClick(tabId) {
+ConsoleIO.App.Device.Panel.prototype.onTabClick = function onTabClick(tabId) {
     var newTab = (tabId.split('-')[0]).toLowerCase();
 
     if (this.activeTab && this.activeTab === newTab) {

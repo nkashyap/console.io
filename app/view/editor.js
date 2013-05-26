@@ -51,3 +51,11 @@ ConsoleIO.View.Editor.prototype.createElements = function createElements() {
         target: this.container
     });
 };
+
+ConsoleIO.View.Editor.prototype.toggleButton = function toggleButton(id, state) {
+    if (state) {
+        this.toolbar.enableItem(id);
+    } else {
+        this.toolbar.disableItem(id);
+    }
+};
