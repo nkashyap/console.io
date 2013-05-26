@@ -65,6 +65,10 @@ ConsoleIO.App = function AppController() {
         title: 'Manager',
         contextId: 'manager'
     });
+
+    ConsoleIO.Service.Socket.on('user:error', function(data){
+        console.log('user:error', data);
+    }, this);
 };
 
 ConsoleIO.App.prototype.render = function render() {

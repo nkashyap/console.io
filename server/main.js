@@ -32,6 +32,10 @@ function main() {
     app.use('/addons', express.static('addons'));
     //app.use('/inject.js', express.static('addons/inject.js'));
 
+    app.use('/userdata/export', function (req, res) {
+        res.download("./" + req.originalUrl);
+    });
+
     manager.setUp(app);
 
     // listen to port

@@ -160,7 +160,6 @@
         onFileSource: function onFileSource(data) {
             var xmlhttp = getXMLHttp();
             if (xmlhttp) {
-                console.log(data.url);
                 xmlhttp.open("GET", data.url, true);
                 xmlhttp.onreadystatechange = function () {
                     if (xmlhttp.readyState === 4) {

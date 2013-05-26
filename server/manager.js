@@ -158,6 +158,7 @@ function Manager() {
                     device.emit('status');
                 }
             },
+            exportHTML: defineRouteHandler(users, 'exportHTML'),
             subscribe: defineRouteHandler(users, 'subscribe'),
             unSubscribe: defineRouteHandler(users, 'unSubscribe')
         });

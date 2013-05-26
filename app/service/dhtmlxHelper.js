@@ -45,6 +45,10 @@ ConsoleIO.Service.DHTMLXHelper = {
                     break;
             }
 
+            if (item.disabled) {
+                this.disableItem(item.id);
+            }
+
             if (item.width) {
                 this.setWidth(item.id, item.width);
             }

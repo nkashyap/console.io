@@ -15,11 +15,12 @@ ConsoleIO.App.Manager = function ManagerController(parent, model) {
         guid: [],
         device: []
     };
-
+    this.exportFrame = null;
     this.view = new ConsoleIO.View.Manager(this, this.model);
 
     ConsoleIO.Service.Socket.on('user:subscribed', this.add, this);
     ConsoleIO.Service.Socket.on('user:unSubscribed', this.remove, this);
+    ConsoleIO.Service.Socket.on('user:exportReady', this.exportReady, this);
 };
 
 ConsoleIO.App.Manager.prototype.render = function render(target) {
@@ -54,6 +55,17 @@ ConsoleIO.App.Manager.prototype.remove = function remove(data) {
             return true;
         });
     }
+};
+
+ConsoleIO.App.Manager.prototype.exportReady = function exportReady(data) {
+    if (!this.exportFrame) {
+        this.exportFrame = ConsoleIO.Service.DHTMLXHelper.createElement({
+            tag: 'iframe',
+            target: document.body
+        });
+    }
+
+    this.exportFrame.src = data.file;
 };
 
 ConsoleIO.App.Manager.prototype.close = function close(guid) {

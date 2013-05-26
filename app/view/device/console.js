@@ -100,27 +100,55 @@ ConsoleIO.View.Device.Console.prototype.add = function add(data) {
         target: this.container,
         insert: 'top'
     });
+
+    this.removeOverflowElement();
 };
 
 ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
-    var fragment = document.createDocumentFragment();
+    var length = store.length;
+    if (length > 0) {
+        var fragment = document.createDocumentFragment();
 
-    ConsoleIO.forEach(store, function (item) {
-        var element = this.getElementData(item);
+        if (ConsoleIO.Settings.pageSize.active < length) {
+            store = store.slice(0, ConsoleIO.Settings.pageSize.active);
+        }
 
-        ConsoleIO.Service.DHTMLXHelper.createElement({
-            tag: element.tag,
-            attr: {
-                'class': element.className
-            },
-            prop: {
-                innerHTML: element.message
-            },
-            target: fragment,
-            insert: 'top'
-        });
+        ConsoleIO.forEach(store, function (item) {
+            var element = this.getElementData(item);
 
-    }, this);
+            ConsoleIO.Service.DHTMLXHelper.createElement({
+                tag: element.tag,
+                attr: {
+                    'class': element.className
+                },
+                prop: {
+                    innerHTML: element.message
+                },
+                target: fragment,
+                insert: 'top'
+            });
 
-    this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);
+        }, this);
+
+        this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);
+        this.removeOverflowElement();
+    }
+};
+
+ConsoleIO.View.Device.Console.prototype.getHTML = function getHTML() {
+    return this.container.innerHTML;
+};
+
+ConsoleIO.View.Device.Console.prototype.clear = function clear() {
+    while (this.container.firstChild) {
+        this.container.removeChild(this.container.firstChild);
+    }
+};
+
+ConsoleIO.View.Device.Console.prototype.removeOverflowElement = function removeOverflowElement() {
+    var length = this.container.childElementCount || this.container.children.length;
+    while(length > ConsoleIO.Settings.pageSize.active){
+        this.container.removeChild(this.container.lastElementChild || this.container.lastChild);
+        length--;
+    }
 };
