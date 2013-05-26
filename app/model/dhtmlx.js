@@ -28,8 +28,7 @@ ConsoleIO.Model.DHTMLX = {
         Reload: { id: 'reload', type: 'button', text: 'Reload', imgEnabled: 'reload.png', tooltip: 'Reload Browser' },
 
         Open: { id: 'open', type: 'select', text: 'Open', imgEnabled: 'open.gif', imgDisabled: 'open_dis.gif', tooltip: 'Open', opts: [] },
-        Save: { id: 'save', type: 'button', text: 'Save', imgEnabled: 'save.gif', imgDisabled: 'save_dis.gif', tooltip: 'Save', disabled: true },
-        SaveAs: { id: 'saveAs', type: 'button', text: 'Save As', imgEnabled: 'save_as.gif', imgDisabled: 'save_as_dis.gif', tooltip: 'Save As', disabled: true },
+        Save: { id: 'save', type: 'select', text: 'Save', imgEnabled: 'save.gif', imgDisabled: 'save_dis.gif', tooltip: 'Save', opts: [['saveAs', 'obj', 'Save As', 'save_as.gif']] },
         Export: { id: 'export', type: 'button', text: 'Export', imgEnabled: 'downloads.gif', tooltip: 'Export' },
 
         Undo: { id: 'undo', type: 'button', text: 'Undo', imgEnabled: 'undo.gif', imgDisabled: 'undo_dis.gif', tooltip: 'Undo', disabled: true },

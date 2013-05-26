@@ -44,7 +44,6 @@ ConsoleIO.App = function AppController() {
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Open,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Save,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.SaveAs,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Cut,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
