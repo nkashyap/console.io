@@ -31,7 +31,7 @@ ConsoleIO.View.Device.Status.prototype.render = function render(target) {
     this.toolbar = this.tab.attachToolbar();
     this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
     this.toolbar.attachEvent("onClick", function (itemId) {
-        this.buttonClick(itemId);
+        this.onButtonClick(itemId);
     }, this.ctrl);
 
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);

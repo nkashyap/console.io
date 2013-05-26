@@ -61,8 +61,8 @@ ConsoleIO.App.Device.Source.prototype.refresh = function refresh() {
     }
 };
 
-ConsoleIO.App.Device.Source.prototype.buttonClick = function buttonClick(btnId, state) {
-    if (!this.parent.buttonClick(this, btnId, state)) {
-        console.log('buttonClick', btnId);
+ConsoleIO.App.Device.Source.prototype.onButtonClick = function onButtonClick(btnId, state) {
+    if (!this.parent.onButtonClick(this, btnId, state)) {
+        console.log('onButtonClick', btnId);
     }
 };

@@ -28,11 +28,11 @@ ConsoleIO.View.Editor.prototype.render = function render(target) {
         this.toolbar = this.target.attachToolbar();
         this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
         this.toolbar.attachEvent("onClick", function (itemId) {
-            this.buttonClick(itemId);
+            this.onButtonClick(itemId);
         }, this.ctrl);
 
         this.toolbar.attachEvent("onStateChange", function (itemId, state) {
-            this.buttonClick(itemId, state);
+            this.onButtonClick(itemId, state);
         }, this.ctrl);
 
         ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);

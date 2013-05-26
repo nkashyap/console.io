@@ -92,9 +92,9 @@ ConsoleIO.App.Device.Console.prototype.onFilterChanged = function onFilterChange
     this.view.addBatch(this.store.added);
 };
 
-ConsoleIO.App.Device.Console.prototype.buttonClick = function buttonClick(btnId, state) {
-    if (!this.parent.buttonClick(this, btnId, state)) {
-        console.log('buttonClick', btnId);
+ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(btnId, state) {
+    if (!this.parent.onButtonClick(this, btnId, state)) {
+        console.log('onButtonClick', btnId);
 
         if (btnId.indexOf('pagesize-') === 0) {
             this.onPageSizeChanged(btnId);

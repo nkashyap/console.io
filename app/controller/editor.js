@@ -72,6 +72,6 @@ ConsoleIO.App.Editor.prototype.add = function add(data) {
     this.editor.setValue(data.content);
 };
 
-ConsoleIO.App.Editor.prototype.buttonClick = function buttonClick(btnId, state) {
+ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, state) {
     console.log(btnId, state);
 };

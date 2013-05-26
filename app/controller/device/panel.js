@@ -54,7 +54,7 @@ ConsoleIO.App.Device.Panel.prototype.activate = function activate(state) {
     }
 };
 
-ConsoleIO.App.Device.Panel.prototype.buttonClick = function buttonClick(tab, btnId, state) {
+ConsoleIO.App.Device.Panel.prototype.onButtonClick = function onButtonClick(tab, btnId, state) {
     var handled = false;
 
     switch (btnId) {
