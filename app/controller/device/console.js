@@ -13,6 +13,7 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
     this.model = model;
     this.active = true;
     this.paused = false;
+    this.filters = [];
     this.store = {
         added: [],
         queue: []
@@ -28,6 +29,7 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Export,
             ConsoleIO.Model.DHTMLX.ToolBarItem.PageSize,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.FilterLabel,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Info,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Log,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Warn,
@@ -65,14 +67,41 @@ ConsoleIO.App.Device.Console.prototype.addBatch = function addBatch() {
     }
 };
 
+ConsoleIO.App.Device.Console.prototype.isFiltered = function isFiltered(data) {
+    return this.filters.length === 0 || (this.filters.length > 0 && this.filters.indexOf(data.type) > -1);
+};
+
+
+ConsoleIO.App.Device.Console.prototype.onPageSizeChanged = function onPageSizeChanged(btnId) {
+    ConsoleIO.Settings.pageSize.active = btnId.split("-")[1];
+    this.view.clear();
+    this.view.addBatch(this.store.added);
+};
+
+ConsoleIO.App.Device.Console.prototype.onFilterChanged = function onFilterChanged(btnId, state) {
+    var filter = btnId.split("-")[1],
+        index = this.filters.indexOf(filter);
+
+    if (state && index === -1) {
+        this.filters.push(filter);
+    } else if (index > -1) {
+        this.filters.splice(index, 1);
+    }
+
+    this.view.clear();
+    this.view.addBatch(this.store.added);
+};
+
 ConsoleIO.App.Device.Console.prototype.buttonClick = function buttonClick(btnId, state) {
     if (!this.parent.buttonClick(this, btnId, state)) {
         console.log('buttonClick', btnId);
 
         if (btnId.indexOf('pagesize-') === 0) {
-            ConsoleIO.Settings.pageSize.active = btnId.split("-")[1];
-            this.view.clear();
-            this.view.addBatch(this.store.added);
+            this.onPageSizeChanged(btnId);
+
+        } else if (btnId.indexOf('filter-') === 0) {
+            this.onFilterChanged(btnId, state);
+
         } else {
             switch (btnId) {
                 case 'playPause':
@@ -89,12 +118,6 @@ ConsoleIO.App.Device.Console.prototype.buttonClick = function buttonClick(btnId,
                         name: this.model.name,
                         content: this.view.getHTML()
                     });
-                    break;
-                case 'info':
-                case 'log':
-                case 'warn':
-                case 'debug':
-                case 'error':
                     break;
             }
         }

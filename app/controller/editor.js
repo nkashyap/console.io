@@ -61,7 +61,7 @@ ConsoleIO.App.Editor.prototype.getDoc = function getDoc() {
 
 ConsoleIO.App.Editor.prototype.selectAll = function selectAll() {
     var doc = this.getDoc();
-    doc.setSelection({line: 0, ch : 0}, {line: doc.lineCount(), ch : 0});
+    doc.setSelection({line: 0, ch: 0}, {line: doc.lineCount(), ch: 0});
 };
 
 ConsoleIO.App.Editor.prototype.copy = function copy() {

@@ -89,6 +89,10 @@ ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData
 };
 
 ConsoleIO.View.Device.Console.prototype.add = function add(data) {
+    if (!this.ctrl.isFiltered(data)) {
+        return false;
+    }
+
     var element = this.getElementData(data);
 
     ConsoleIO.Service.DHTMLXHelper.createElement({
@@ -116,8 +120,11 @@ ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
         }
 
         ConsoleIO.forEach(store, function (item) {
-            var element = this.getElementData(item);
+            if (!this.ctrl.isFiltered(item)) {
+                return false;
+            }
 
+            var element = this.getElementData(item);
             ConsoleIO.Service.DHTMLXHelper.createElement({
                 tag: element.tag,
                 attr: {
@@ -149,7 +156,7 @@ ConsoleIO.View.Device.Console.prototype.clear = function clear() {
 
 ConsoleIO.View.Device.Console.prototype.removeOverflowElement = function removeOverflowElement() {
     var length = this.container.childElementCount || this.container.children.length;
-    while(length > ConsoleIO.Settings.pageSize.active){
+    while (length > ConsoleIO.Settings.pageSize.active) {
         this.container.removeChild(this.container.lastElementChild || this.container.lastChild);
         length--;
     }
