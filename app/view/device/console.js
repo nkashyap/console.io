@@ -14,10 +14,12 @@ ConsoleIO.View.Device.Console = function ConsoleView(ctrl, model) {
     this.target = null;
     this.tab = null;
     this.toolbar = null;
-    this.container = null;
     this.id = [this.model.name, this.model.guid].join("-");
     this.container = ConsoleIO.Service.DHTMLXHelper.createElement({
-        attr: { 'class': 'console-contents' }
+        attr: {
+            id: 'console-' + this.id,
+            'class': 'console-contents'
+        }
     });
 };
 

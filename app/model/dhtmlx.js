@@ -20,7 +20,7 @@ ConsoleIO.Model.DHTMLX = {
         Configure: { id: 'setting', type: 'button', text: 'Configure', imgEnabled: 'settings.gif', tooltip: 'Configure', disabled: true },
 
         SearchText: { id: 'searchText', type: 'input', value: '', width: 80, tooltip: 'Search Test', disabled: true },
-        Search: { id: 'search', type: 'button', imgEnabled: 'search.gif', tooltip: 'Search', disabled: true },
+        Search: { id: 'search', type: 'button', imgEnabled: 'search.gif', imgDisabled: 'search_dis.gif', tooltip: 'Search', disabled: true },
         Execute: { id: 'execute', type: 'button', text: 'Execute', imgEnabled: 'execute.png', imgDisabled: 'execute_dis.png', tooltip: 'Execute Script', disabled: true },
 
         Clear: { id: 'clear', type: 'button', text: 'Clear', imgEnabled: 'clear.gif', tooltip: 'Clear' },
@@ -42,10 +42,10 @@ ConsoleIO.Model.DHTMLX = {
 
         PlayPause: { id: 'playPause', type: 'twoState', text: 'Play/Pause', imgEnabled: 'play.gif', tooltip: 'Play/Pause', pressed: false },
         WordWrap: { id: 'wordwrap', type: 'twoState', text: 'Word-Wrap', imgEnabled: 'word_wrap.gif', tooltip: 'Word Wrap', pressed: false },
-        Info: { id: 'info', type: 'twoState', text: 'Info', imgEnabled: 'word_wrap.gif', tooltip: 'Info', pressed: false, disabled: true },
-        Log: { id: 'log', type: 'twoState', text: 'Log', imgEnabled: 'word_wrap.gif', tooltip: 'Log', pressed: false, disabled: true },
-        Warn: { id: 'warn', type: 'twoState', text: 'Warn', imgEnabled: 'word_wrap.gif', tooltip: 'Warn', pressed: false, disabled: true },
-        Debug: { id: 'debug', type: 'twoState', text: 'Debug', imgEnabled: 'word_wrap.gif', tooltip: 'Debug', pressed: false, disabled: true },
-        Error: { id: 'error', type: 'twoState', text: 'Error', imgEnabled: 'word_wrap.gif', tooltip: 'Error', pressed: false, disabled: true }
+        Info: { id: 'info', type: 'twoState', text: 'Info', imgEnabled: 'info.gif', tooltip: 'Info', pressed: false },
+        Log: { id: 'log', type: 'twoState', text: 'Log', imgEnabled: 'log.png', tooltip: 'Log', pressed: false },
+        Warn: { id: 'warn', type: 'twoState', text: 'Warn', imgEnabled: 'warn.png', tooltip: 'Warn', pressed: false },
+        Debug: { id: 'debug', type: 'twoState', text: 'Debug', imgEnabled: 'debug.gif', tooltip: 'Debug', pressed: false },
+        Error: { id: 'error', type: 'twoState', text: 'Error', imgEnabled: 'error.gif', tooltip: 'Error', pressed: false }
     }
 };
