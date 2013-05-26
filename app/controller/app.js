@@ -81,3 +81,7 @@ ConsoleIO.App.prototype.render = function render() {
 ConsoleIO.App.prototype.setTitle = function setTitle(name, title) {
     this.view.setTitle(this.context[name], title);
 };
+
+ConsoleIO.App.prototype.getActiveDeviceGuid = function getActiveDeviceGuid() {
+    return this.manager.getActiveDeviceGuid();
+};

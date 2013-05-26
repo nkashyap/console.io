@@ -129,11 +129,3 @@ ConsoleIO.App.Browser.prototype.subscribe = function subscribe(guid) {
         ConsoleIO.Service.Socket.emit('subscribe', guid);
     }
 };
-
-ConsoleIO.App.Browser.prototype.assignName = function assignName(guid, name) {
-    console.log(guid, name);
-//    ConsoleIO.Service.Socket.emit('assignDeviceName', {
-//        guid: guid,
-//        name: name
-//    });
-};

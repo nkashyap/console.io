@@ -11,6 +11,7 @@ ConsoleIO.namespace("ConsoleIO.App.Manager");
 ConsoleIO.App.Manager = function ManagerController(parent, model) {
     this.parent = parent;
     this.model = model;
+    this.activeTab = null;
     this.store = {
         guid: [],
         device: []
@@ -45,6 +46,10 @@ ConsoleIO.App.Manager.prototype.remove = function remove(data) {
         this.store.guid.splice(index, 1);
         this.view.remove(data.guid);
 
+        if (this.activeTab === data.guid) {
+            this.activeTab = null;
+        }
+
         ConsoleIO.every(this.store.device, function (device, index) {
             if (device.guid === data.guid) {
                 //device.destroy();
@@ -71,4 +76,12 @@ ConsoleIO.App.Manager.prototype.exportReady = function exportReady(data) {
 ConsoleIO.App.Manager.prototype.close = function close(guid) {
     ConsoleIO.Service.Socket.emit('unSubscribe', guid);
     //this.remove(itemId);
+};
+
+ConsoleIO.App.Manager.prototype.onTabClick = function onTabClick(tabId) {
+    this.activeTab = tabId;
+};
+
+ConsoleIO.App.Manager.prototype.getActiveDeviceGuid = function getActiveDeviceGuid() {
+    return this.activeTab;
 };

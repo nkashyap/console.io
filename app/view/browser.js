@@ -37,28 +37,10 @@ ConsoleIO.View.Browser.prototype.render = function render(target) {
     this.tree.enableTreeImages(true);
     this.tree.enableTreeLines(true);
     this.tree.enableIEImageFix(true);
-    this.tree.enableItemEditor(true);
     this.tree.attachEvent("onDblClick", function (itemId) {
         if (!scope.tree.hasChildren(itemId)) {
             scope.ctrl.subscribe(itemId);
-            return true;
         }
-        return false;
-    });
-
-    this.tree.attachEvent("onEdit", function (state, itemId, tree, value) {
-        if (!scope.tree.hasChildren(itemId)) {
-            if (!scope.ctrl.isSubscribed(itemId)) {
-                scope.ctrl.subscribe(itemId);
-                return false;
-            }
-
-            if (state === 2) {
-                scope.ctrl.assignName(itemId, value);
-            }
-            return true;
-        }
-        return false;
     });
 };
 

@@ -158,6 +158,12 @@ function Manager() {
                     device.emit('status');
                 }
             },
+            execute: function execute(req) {
+                var device = self.getDeviceByGuid(req.data.guid);
+                if (device) {
+                    device.emit('command', req.data.code);
+                }
+            },
             exportHTML: defineRouteHandler(users, 'exportHTML'),
             subscribe: defineRouteHandler(users, 'subscribe'),
             unSubscribe: defineRouteHandler(users, 'unSubscribe')

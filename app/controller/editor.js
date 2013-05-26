@@ -112,14 +112,26 @@ ConsoleIO.App.Editor.prototype.redo = function redo() {
 
 ConsoleIO.App.Editor.prototype.clear = function clear() {
     this.editor.setValue("");
-    this.getDoc().clearHistory();
+    //this.getDoc().clearHistory();
     this.setUnDoRedoState();
 };
 
+ConsoleIO.App.Editor.prototype.command = function command() {
+    var cmd = this.editor.getValue();
+    if (cmd) {
+        ConsoleIO.Service.Socket.emit('execute', {
+            guid: this.parent.getActiveDeviceGuid(),
+            code: cmd
+        });
+    }
+};
+
 ConsoleIO.App.Editor.prototype.setUnDoRedoState = function setUnDoRedoState() {
-    var history = this.getDoc().historySize();
-    this.view.toggleButton('undo', (history.undo > 0));
-    this.view.toggleButton('redo', (history.redo > 0));
+    if (this.model.toolbar) {
+        var history = this.getDoc().historySize();
+        this.view.toggleButton('undo', (history.undo > 0));
+        this.view.toggleButton('redo', (history.redo > 0));
+    }
 };
 
 ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, state) {
@@ -150,6 +162,8 @@ ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, sta
             this.setOption('lineWrapping', state);
             break;
         case 'execute':
+            this.command();
+            break;
         case 'open':
         case 'save':
         case 'saveAs':
