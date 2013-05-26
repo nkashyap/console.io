@@ -164,6 +164,7 @@ function Manager() {
                     device.emit('command', req.data.code);
                 }
             },
+            loadScript: defineRouteHandler(users, 'loadScript'),
             exportHTML: defineRouteHandler(users, 'exportHTML'),
             subscribe: defineRouteHandler(users, 'subscribe'),
             unSubscribe: defineRouteHandler(users, 'unSubscribe')
@@ -207,7 +208,7 @@ function Manager() {
 
     return {
         setUp: setUp
-    }
+    };
 }
 
 module.exports = Manager();

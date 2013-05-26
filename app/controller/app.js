@@ -69,6 +69,9 @@ ConsoleIO.App = function AppController() {
     ConsoleIO.Service.Socket.on('user:error', function (data) {
         console.log('user:error', data);
     }, this);
+
+    ConsoleIO.Service.Socket.on('user:listScripts', this.listScripts, this);
+    ConsoleIO.Service.Socket.on('user:scriptContent', this.add, this);
 };
 
 ConsoleIO.App.prototype.render = function render() {
@@ -80,6 +83,14 @@ ConsoleIO.App.prototype.render = function render() {
 
 ConsoleIO.App.prototype.setTitle = function setTitle(name, title) {
     this.view.setTitle(this.context[name], title);
+};
+
+ConsoleIO.App.prototype.listScripts = function listScripts(files) {
+    this.editor.listScripts(files);
+};
+
+ConsoleIO.App.prototype.add = function add(data) {
+    this.editor.add(data);
 };
 
 ConsoleIO.App.prototype.getActiveDeviceGuid = function getActiveDeviceGuid() {

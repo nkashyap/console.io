@@ -57,6 +57,10 @@ ConsoleIO.App.Editor.prototype.render = function render(target) {
     });
 };
 
+ConsoleIO.App.Editor.prototype.listScripts = function listScripts(data) {
+    this.view.listScripts(data);
+};
+
 ConsoleIO.App.Editor.prototype.getDoc = function getDoc() {
     return this.editor.getDoc();
 };
@@ -136,6 +140,13 @@ ConsoleIO.App.Editor.prototype.setUnDoRedoState = function setUnDoRedoState() {
 
 ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, state) {
     console.log(btnId, state);
+    if (btnId.indexOf('script-') === 0) {
+        ConsoleIO.Service.Socket.emit('loadScript', {
+            name: btnId.split("-")[1]
+        });
+        return;
+    }
+
     switch (btnId) {
         case 'cut':
             this.cut();
@@ -164,7 +175,6 @@ ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, sta
         case 'execute':
             this.command();
             break;
-        case 'open':
         case 'save':
         case 'saveAs':
             break;

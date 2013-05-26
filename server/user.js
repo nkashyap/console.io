@@ -54,6 +54,7 @@ User.prototype.online = function online(request) {
         this.emit('subscribed', this.manager.getDeviceByGuid(guid).getIdentity());
     }, this);
 
+    this.listScripts();
     //this.manager.emit('user:online');
     //this.emit('online');
 };
@@ -76,31 +77,45 @@ User.prototype.exportHTML = function exportHTML(data) {
 
     fs.readFile(cssFile, null, function (err, cssData) {
         if (err) {
-            scope.emit('error', {
-                message: 'Reading CSS file: ' + cssFile
-            });
+            scope.emit('error', { message: 'Reading CSS file: ' + cssFile });
 
         } else {
-            var content = '<html><head><title>' + data.name +
-                '</title><style>' + cssData +
-                '</style></head><body>' + data.content +
-                '</body></html>';
+            var content = ['<html><head><title>', data.name, '</title><style>', cssData, '</style></head><body>', data.content, '</body></html>'].join("");
 
             fs.writeFile("./" + htmlFile, content, function (err) {
                 if (err) {
-                    scope.emit('error', {
-                        message: 'Saving HTML file: ' + htmlFile
-                    });
+                    scope.emit('error', { message: 'Saving HTML file: ' + htmlFile });
                 } else {
-                    scope.emit('exportReady', {
-                        file: htmlFile
-                    });
+                    scope.emit('exportReady', { file: htmlFile });
                 }
             });
         }
     });
 };
 
+User.prototype.listScripts = function listScripts() {
+    var scope = this;
+    fs.readdir('./userdata/scripts', function (err, files) {
+        if (err) {
+            scope.emit('error', { message: 'Reading Scripts: ./userdata/scripts' });
+        } else {
+            scope.emit('listScripts', files);
+        }
+    });
+};
+
+User.prototype.loadScript = function loadScript(data) {
+    var scope = this,
+        file = './userdata/scripts/' + data.name;
+
+    fs.readFile(file, 'utf8', function (err, content) {
+        if (err) {
+            scope.emit('error', { message: 'Reading JS file: ' + file });
+        } else {
+            scope.emit('scriptContent', { content: content });
+        }
+    });
+};
 
 User.prototype.emit = function emit(name, data) {
     this.request.io.emit('user:' + name, data);

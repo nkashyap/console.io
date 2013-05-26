@@ -60,6 +60,7 @@ ConsoleIO.Service.DHTMLXHelper = {
     },
 
     elements: {},
+
     createElement: function createElement(config) {
         config.tag = config.tag || 'div';
         if (!this.elements[config.tag]) {

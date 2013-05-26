@@ -39,6 +39,17 @@ ConsoleIO.View.Editor.prototype.render = function render(target) {
     }
 };
 
+ConsoleIO.View.Editor.prototype.listScripts = function listScripts(data) {
+    var scope = this;
+    this.toolbar.forEachListOption('open', function (id) {
+        scope.toolbar.removeListOption('open', id);
+    });
+
+    ConsoleIO.forEach(data, function (file, index) {
+        scope.toolbar.addListOption('open', 'script-' + file, index, 'button', file, ConsoleIO.Constraint.ICONS.JAVASCRIPT);
+    }, this);
+};
+
 ConsoleIO.View.Editor.prototype.createElements = function createElements() {
     this.container = ConsoleIO.Service.DHTMLXHelper.createElement({
         attr: { 'class': 'editor' },
