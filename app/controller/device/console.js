@@ -14,6 +14,7 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
     this.active = true;
     this.paused = false;
     this.filters = [];
+    this.searchRegex = null;
     this.store = {
         added: [],
         queue: []
@@ -28,6 +29,9 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Clear,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Export,
             ConsoleIO.Model.DHTMLX.ToolBarItem.PageSize,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.SearchText,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Search,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.FilterLabel,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Info,
@@ -67,10 +71,26 @@ ConsoleIO.App.Device.Console.prototype.addBatch = function addBatch() {
     }
 };
 
+ConsoleIO.App.Device.Console.prototype.applySearch = function applySearch() {
+    this.searchRegex = this.view.getValue('searchText');
+    if (this.searchRegex) {
+        if (this.searchRegex[0] !== "\\") {
+            this.searchRegex = new RegExp("\\b" + this.searchRegex, "img");
+        } else {
+            this.searchRegex = new RegExp(this.searchRegex, "img");
+        }
+    }
+    this.view.clear();
+    this.view.addBatch(this.store.added);
+};
+
+ConsoleIO.App.Device.Console.prototype.isSearchFiltered = function isSearchFiltered(data) {
+    return this.searchRegex ? data.message.search(this.searchRegex) > -1 : true;
+};
+
 ConsoleIO.App.Device.Console.prototype.isFiltered = function isFiltered(data) {
     return this.filters.length === 0 || (this.filters.length > 0 && this.filters.indexOf(data.type) > -1);
 };
-
 
 ConsoleIO.App.Device.Console.prototype.onPageSizeChanged = function onPageSizeChanged(btnId) {
     ConsoleIO.Settings.pageSize.active = btnId.split("-")[1];
@@ -111,7 +131,9 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
                 case 'clear':
                     this.view.clear();
                     break;
-
+                case 'search':
+                    this.applySearch();
+                    break;
                 case 'export':
                     ConsoleIO.Service.Socket.emit('exportHTML', {
                         guid: this.model.guid,

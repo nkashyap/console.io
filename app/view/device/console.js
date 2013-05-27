@@ -89,7 +89,7 @@ ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData
 };
 
 ConsoleIO.View.Device.Console.prototype.add = function add(data) {
-    if (!this.ctrl.isFiltered(data)) {
+    if (!this.ctrl.isFiltered(data) || !this.ctrl.isSearchFiltered(data)) {
         return false;
     }
 
@@ -120,7 +120,7 @@ ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
         }
 
         ConsoleIO.forEach(store, function (item) {
-            if (!this.ctrl.isFiltered(item)) {
+            if (!this.ctrl.isFiltered(item) || !this.ctrl.isSearchFiltered(item)) {
                 return false;
             }
 
@@ -146,6 +146,10 @@ ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
 
 ConsoleIO.View.Device.Console.prototype.getHTML = function getHTML() {
     return this.container.innerHTML;
+};
+
+ConsoleIO.View.Device.Console.prototype.getValue = function getValue(id) {
+    return this.toolbar.getValue(id);
 };
 
 ConsoleIO.View.Device.Console.prototype.clear = function clear() {

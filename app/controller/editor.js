@@ -53,7 +53,7 @@ ConsoleIO.App.Editor.prototype.render = function render(target) {
 
     var scope = this;
     this.editor.on("change", function () {
-        scope.onChange();
+        scope.updateButtonState();
     });
 };
 
@@ -88,13 +88,13 @@ ConsoleIO.App.Editor.prototype.selectAll = function selectAll() {
 
 ConsoleIO.App.Editor.prototype.copy = function copy() {
     ConsoleIO.App.Editor.CopyDocument = this.getDoc().getSelection();
-    this.setUnDoRedoState();
+    this.updateButtonState();
 };
 
 ConsoleIO.App.Editor.prototype.cut = function cut() {
     this.copy();
     this.editor.replaceSelection("");
-    this.setUnDoRedoState();
+    this.updateButtonState();
 };
 
 ConsoleIO.App.Editor.prototype.paste = function paste() {
@@ -109,25 +109,25 @@ ConsoleIO.App.Editor.prototype.paste = function paste() {
         doc.setCursor({line: doc.lineCount(), ch: 0});
     }
 
-    this.setUnDoRedoState();
+    this.updateButtonState();
 };
 
 ConsoleIO.App.Editor.prototype.undo = function undo() {
     this.editor.undo();
-    this.setUnDoRedoState();
+    this.updateButtonState();
 };
 
 ConsoleIO.App.Editor.prototype.redo = function redo() {
     this.editor.redo();
-    this.setUnDoRedoState();
+    this.updateButtonState();
 };
 
 ConsoleIO.App.Editor.prototype.clear = function clear() {
     this.editor.setValue("");
+    this.getDoc().markClean();
     this.fileName = null;
     //this.getDoc().clearHistory();
-    this.setUnDoRedoState();
-    this.view.toggleButton('save', false);
+    this.updateButtonState();
 };
 
 ConsoleIO.App.Editor.prototype.save = function save(saveAs) {
@@ -158,21 +158,13 @@ ConsoleIO.App.Editor.prototype.command = function command() {
     }
 };
 
-ConsoleIO.App.Editor.prototype.setUnDoRedoState = function setUnDoRedoState() {
+ConsoleIO.App.Editor.prototype.updateButtonState = function updateButtonState() {
     if (this.model.toolbar) {
-        var history = this.getDoc().historySize();
-        this.view.toggleButton('undo', (history.undo > 0));
+        var history = this.getDoc().historySize();        this.view.toggleButton('undo', (history.undo > 0));
         this.view.toggleButton('redo', (history.redo > 0));
+        this.view.toggleButton('save', !this.getDoc().isClean());
     }
 };
-
-ConsoleIO.App.Editor.prototype.onChange = function onChange() {
-    if (!this.getDoc().isClean()) {
-        this.view.toggleButton('save', true);
-    }
-    this.setUnDoRedoState();
-};
-
 
 ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (btnId.indexOf('script-') === 0) {

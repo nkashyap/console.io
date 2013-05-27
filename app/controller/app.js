@@ -27,9 +27,9 @@ ConsoleIO.App = function AppController() {
         width: 200,
         height: 250,
         toolbar: [
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.SearchText,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Search
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh
+            //ConsoleIO.Model.DHTMLX.ToolBarItem.SearchText,
+            //ConsoleIO.Model.DHTMLX.ToolBarItem.Search
         ]
     });
 

@@ -15,12 +15,12 @@ ConsoleIO.Model.DHTMLX = {
         //Back: { id: 'back', type: 'select', text: 'Back', opts: [], imgEnabled: 'back.gif', imgDisabled: 'back_dis.gif', tooltip: 'Back in History' },
         //Forward: { id: 'forward', type: 'select', text: 'Forward', opts: [], imgEnabled: 'forward.gif', imgDisabled: 'forward_dis.gif', tooltip: 'Forward in History' },
 
-        PageSize: { id: 'pagesize', type: 'select', text: 'PageSize', imgEnabled: 'pagesize.gif', tooltip: 'Page Size', width: 100, opts: 'pagesizes' },
+        PageSize: { id: 'pagesize', type: 'select', text: 'PageSize', imgEnabled: 'pagesize.gif', tooltip: 'Page Size', width: 90, opts: 'pagesizes' },
         Preview: { id: 'preview', type: 'button', text: 'Preview', imgEnabled: 'preview.gif', imgDisabled: 'preview_dis.gif', tooltip: 'Preview', disabled: true },
         Configure: { id: 'setting', type: 'button', text: 'Configure', imgEnabled: 'settings.gif', tooltip: 'Configure', disabled: true },
 
-        SearchText: { id: 'searchText', type: 'input', value: '', width: 80, tooltip: 'Search Test', disabled: true },
-        Search: { id: 'search', type: 'button', imgEnabled: 'search.gif', imgDisabled: 'search_dis.gif', tooltip: 'Search', disabled: true },
+        SearchText: { id: 'searchText', type: 'input', value: '', width: 100, tooltip: 'Search Text' },
+        Search: { id: 'search', type: 'button', imgEnabled: 'search.gif', imgDisabled: 'search_dis.gif', tooltip: 'Search' },
         Execute: { id: 'execute', type: 'button', text: 'Execute', imgEnabled: 'execute.png', imgDisabled: 'execute_dis.png', tooltip: 'Execute Script' },
 
         Clear: { id: 'clear', type: 'button', text: 'Clear', imgEnabled: 'clear.gif', tooltip: 'Clear' },
