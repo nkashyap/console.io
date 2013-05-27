@@ -40,6 +40,13 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
     ConsoleIO.forEachProperty(data, function (value, property) {
         this.view.addLabel(property);
         ConsoleIO.forEachProperty(value, function (config, name) {
+            if (name === 'More') {
+                config = config.join(", ");
+                if (!config) {
+                    return;
+                }
+            }
+
             this.view.add(name, config, property);
         }, this);
     }, this);

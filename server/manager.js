@@ -128,7 +128,7 @@ function Manager() {
             refreshRegisteredDeviceList: function refreshRegisteredDeviceList(req) {
                 self.notifyRegisteredDevicesToUser(users[req.cookies.guid]);
             },
-            reloadDevice: function reloadDevice(req){
+            reloadDevice: function reloadDevice(req) {
                 var device = self.getDeviceByGuid(req.data);
                 if (device) {
                     device.emit('reload');
@@ -164,6 +164,7 @@ function Manager() {
                     device.emit('command', req.data.code);
                 }
             },
+            saveScript: defineRouteHandler(users, 'saveScript'),
             loadScript: defineRouteHandler(users, 'loadScript'),
             exportHTML: defineRouteHandler(users, 'exportHTML'),
             subscribe: defineRouteHandler(users, 'subscribe'),

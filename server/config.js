@@ -30,7 +30,7 @@ module.exports = {
             enable: [],
             disable: [],
             set: [
-               { 'log level': 3 }
+                { 'log level': 3 }
             ]
         },
         production: {

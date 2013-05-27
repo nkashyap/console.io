@@ -55,8 +55,6 @@ User.prototype.online = function online(request) {
     }, this);
 
     this.listScripts();
-    //this.manager.emit('user:online');
-    //this.emit('online');
 };
 
 User.prototype.offline = function offline() {
@@ -66,8 +64,6 @@ User.prototype.offline = function offline() {
     this.deviceGUIDs.forEach(function (guid) {
         this.request.io.leave(guid);
     }, this);
-
-    //this.emit('offline');
 };
 
 User.prototype.exportHTML = function exportHTML(data) {
@@ -112,7 +108,20 @@ User.prototype.loadScript = function loadScript(data) {
         if (err) {
             scope.emit('error', { message: 'Reading JS file: ' + file });
         } else {
-            scope.emit('scriptContent', { content: content });
+            scope.emit('scriptContent', { name: data.name, content: content });
+        }
+    });
+};
+
+User.prototype.saveScript = function saveScript(data) {
+    var scope = this,
+        file = './userdata/scripts/' + (data.name.indexOf('.js') > 0 ? data.name : data.name + '.js');
+
+    fs.writeFile(file, data.content, function (err) {
+        if (err) {
+            scope.emit('error', { message: 'Writing JS file: ' + file });
+        } else {
+            scope.emit('scriptSaved', { name: data.name });
         }
     });
 };

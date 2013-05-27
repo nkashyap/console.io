@@ -50,17 +50,20 @@ html, body {
     margin: 10px;
     font-family: Tahoma;
     font-size: 11px;
-    background: #a6dbff;
+    display: table;
+    width: 97%;
 }
 
 .dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .title {
     font-weight: bold;
     text-transform: uppercase;
     padding: 5px;
+    background: #a6dbff;
+    display: table-caption;
 }
 
 .dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .property {
-    padding: 3px;
+    display: table-row;
 }
 
 .dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .property:nth-child(even) {
@@ -72,13 +75,14 @@ html, body {
 }
 
 .dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .name {
-    display: inline-block;
+    display: table-cell;
     font-weight: bold;
-    width: 150px;
-    padding: 2px;
+    padding: 5px;
+    width: 20%;
 }
 
 .dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .value {
-    display: inline-block;
-    padding: 2px;
+    display: table-cell;
+    padding: 5px;
+    width: 80%;
 }

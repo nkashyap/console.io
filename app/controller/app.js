@@ -71,6 +71,8 @@ ConsoleIO.App = function AppController() {
 
     ConsoleIO.Service.Socket.on('user:listScripts', this.listScripts, this);
     ConsoleIO.Service.Socket.on('user:scriptContent', this.add, this);
+    ConsoleIO.Service.Socket.on('user:scriptSaved', this.scriptSaved, this);
+
 };
 
 ConsoleIO.App.prototype.render = function render() {
@@ -86,6 +88,11 @@ ConsoleIO.App.prototype.setTitle = function setTitle(name, title) {
 
 ConsoleIO.App.prototype.listScripts = function listScripts(files) {
     this.editor.listScripts(files);
+};
+
+ConsoleIO.App.prototype.scriptSaved = function scriptSaved(file) {
+    this.editor.fileName = file.name;
+    this.editor.addScript(file);
 };
 
 ConsoleIO.App.prototype.add = function add(data) {

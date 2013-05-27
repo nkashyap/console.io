@@ -36,7 +36,7 @@ ConsoleIO.App.Editor = function EditorController(parent, model) {
             "Ctrl-Q": "toggleComment"
         }
     }, this.model.codeMirror);
-
+    this.fileName = null;
     this.view = new ConsoleIO.View.Editor(this, {
         guid: this.model.guid,
         placeholder: this.model.placeholder,
@@ -52,8 +52,8 @@ ConsoleIO.App.Editor.prototype.render = function render(target) {
     this.view.render(target);
 
     var scope = this;
-    this.editor.on("change", function onChange() {
-        scope.setUnDoRedoState();
+    this.editor.on("change", function () {
+        scope.onChange();
     });
 };
 
@@ -61,11 +61,19 @@ ConsoleIO.App.Editor.prototype.listScripts = function listScripts(data) {
     this.view.listScripts(data);
 };
 
+ConsoleIO.App.Editor.prototype.addScript = function addScript(data) {
+    this.view.addScript(data);
+};
+
 ConsoleIO.App.Editor.prototype.getDoc = function getDoc() {
     return this.editor.getDoc();
 };
 
 ConsoleIO.App.Editor.prototype.add = function add(data) {
+    if (data.name) {
+        this.fileName = data.name;
+    }
+
     this.editor.setValue(data.content);
 };
 
@@ -116,8 +124,28 @@ ConsoleIO.App.Editor.prototype.redo = function redo() {
 
 ConsoleIO.App.Editor.prototype.clear = function clear() {
     this.editor.setValue("");
+    this.fileName = null;
     //this.getDoc().clearHistory();
     this.setUnDoRedoState();
+    this.view.toggleButton('save', false);
+};
+
+ConsoleIO.App.Editor.prototype.save = function save(saveAs) {
+    var fileName = null,
+        cmd = this.editor.getValue();
+
+    if (this.fileName) {
+        fileName = saveAs ? prompt("Save file as:", "") : this.fileName;
+    } else {
+        fileName = prompt("Enter a new file name:", "");
+    }
+
+    if (fileName !== null) {
+        ConsoleIO.Service.Socket.emit('saveScript', {
+            content: cmd,
+            name: fileName
+        });
+    }
 };
 
 ConsoleIO.App.Editor.prototype.command = function command() {
@@ -138,8 +166,15 @@ ConsoleIO.App.Editor.prototype.setUnDoRedoState = function setUnDoRedoState() {
     }
 };
 
+ConsoleIO.App.Editor.prototype.onChange = function onChange() {
+    if (!this.getDoc().isClean()) {
+        this.view.toggleButton('save', true);
+    }
+    this.setUnDoRedoState();
+};
+
+
 ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, state) {
-    console.log(btnId, state);
     if (btnId.indexOf('script-') === 0) {
         ConsoleIO.Service.Socket.emit('loadScript', {
             name: btnId.split("-")[1]
@@ -176,7 +211,10 @@ ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, sta
             this.command();
             break;
         case 'save':
+            this.save(false);
+            break;
         case 'saveAs':
+            this.save(true);
             break;
     }
 };

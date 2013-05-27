@@ -50,6 +50,14 @@ ConsoleIO.View.Editor.prototype.listScripts = function listScripts(data) {
     }, this);
 };
 
+ConsoleIO.View.Editor.prototype.addScript = function addScript(data) {
+    var id = 'script-' + data.name,
+        index = this.toolbar.getAllListOptions('open').length;
+
+    this.toolbar.removeListOption('open', id);
+    this.toolbar.addListOption('open', id, index, 'button', data.name, ConsoleIO.Constraint.ICONS.JAVASCRIPT);
+};
+
 ConsoleIO.View.Editor.prototype.createElements = function createElements() {
     this.container = ConsoleIO.Service.DHTMLXHelper.createElement({
         attr: { 'class': 'editor' },
@@ -64,9 +72,11 @@ ConsoleIO.View.Editor.prototype.createElements = function createElements() {
 };
 
 ConsoleIO.View.Editor.prototype.toggleButton = function toggleButton(id, state) {
-    if (state) {
-        this.toolbar.enableItem(id);
-    } else {
-        this.toolbar.disableItem(id);
+    if (this.toolbar) {
+        if (state) {
+            this.toolbar.enableItem(id);
+        } else {
+            this.toolbar.disableItem(id);
+        }
     }
 };
