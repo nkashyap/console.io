@@ -105,7 +105,7 @@ Note: All multilines code should be wrapped within self executable function. E.G
  * Update Readme with full feature list
 
 #Copyright and license
- MIT-LICENSE
+ MIT LICENSE 
 
 #Reference
  * [Javascript Stacktrace] (https://github.com/eriwen/javascript-stacktrace)
@@ -113,4 +113,4 @@ Note: All multilines code should be wrapped within self executable function. E.G
  * [express.io] (https://github.com/techpines/express.io)
  * [Socket.io] (http://socket.io/#how-to-use)
  * [prettify] (https://code.google.com/p/google-code-prettify/)
- * [dhtmlx] (http://dhtmlx.com/)
+ * [dhtmlx] (http://dhtmlx.com/) [GPL LICENSE]
