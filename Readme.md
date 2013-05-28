@@ -112,3 +112,5 @@ Note: All multilines code should be wrapped within self executable function. E.G
  * [codemirror] (http://codemirror.net/)
  * [express.io] (https://github.com/techpines/express.io)
  * [Socket.io] (http://socket.io/#how-to-use)
+ * [prettify] (https://code.google.com/p/google-code-prettify/)
+ * [dhtmlx] (http://dhtmlx.com/)
