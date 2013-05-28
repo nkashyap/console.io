@@ -42,6 +42,8 @@ window.ConfigIO = {
 
 Visit http://NodeServerURL:Port/ for ConsoleIO interface
 
+![Screen shot](https://raw.github.com/nkashyap/console.io/master/console.io.PNG)
+
 #Console.IO Editor
 
 You can execute commands on remote client from Console.IO. You can execute single & multilines javascript code.
@@ -106,7 +108,7 @@ Note: All multilines code should be wrapped within self executable function. E.G
  MIT-LICENSE
 
 #Reference
- [Javascript Stacktrace] (https://github.com/eriwen/javascript-stacktrace)
- [codemirror] (http://codemirror.net/)
- [express.io] (https://github.com/techpines/express.io)
- [Socket.io] (http://socket.io/#how-to-use)
+ * [Javascript Stacktrace] (https://github.com/eriwen/javascript-stacktrace)
+ * [codemirror] (http://codemirror.net/)
+ * [express.io] (https://github.com/techpines/express.io)
+ * [Socket.io] (http://socket.io/#how-to-use)
