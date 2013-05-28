@@ -23,12 +23,3 @@ ConsoleIO.View.Device.Panel.prototype.render = function render(target) {
         this.onTabClick(tabId);
     }, this.ctrl);
 };
-
-//ConsoleIO.View.Device.Panel.prototype.add = function add(name, isActive){
-//    this.tabs.addTab(name, name);
-//    if(isActive){
-//        this.tabs.setTabActive(name);
-//    }
-//
-//    return this.tabs.cells(name);
-//};

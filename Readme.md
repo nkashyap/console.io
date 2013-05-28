@@ -1,40 +1,55 @@
 # Console.IO
 
 Console.IO is a Node.JS project. Its provide Remote Web Console for websites, Javascript, Smart Tv, mobile phones apps.
-It uses rxpress.io & socket.io to provide real time response from the browsers.
+It uses express.io & socket.io to provide real time response from the browsers.
 
 Its works pretty much on all modern browsers, mobile devices, Smart TVs, etc
 
-## Install express.io
+## Install express.io (execute install.bat)
 
 ```bash
 npm install express.io
 ```
 
-## Start server
+## Start server (execute start.bat)
 
 ```bash
 node ./server/main.js
 ```
 
-## Include following scripts in your website or javascript application
+## Include console.io in your web page
 
-Include following file 
+include inject.js scripts with config parameters
 
 ```html
 <script type="text/javascript" src="inject.js?url=http://NodeServerURL:Port&secure=false"></script>
 ```
 
-Then goto following url to access web console http://NodeServerURL:Port/
+OR create a create ConfigIO global object with config options
+
+```html
+<script type="text/javascript" src="configIO.js"></script>
+<script type="text/javascript" src="inject.js"></script>
+```
+
+configIO.js
+```html
+window.ConfigIO = {
+	url: 'http://nodeserver:port/',
+	secure: false
+};
+```
+
+Visit http://NodeServerURL:Port/ for ConsoleIO interface
 
 #Console.IO Editor
 
 You can execute commands on remote client from Console.IO. You can execute single & multilines javascript code.
 
 Shortcuts: 
-Ctrl+Enter: execute command
-Ctrl+Space: autocomplate
-Ctrl-Q: toggle comments
+* Ctrl+Enter: execute command
+* Ctrl+Space: autocomplate
+* Ctrl-Q: toggle comments
 
 Note: All multilines code should be wrapped within self executable function. E.G
 ```html
@@ -42,6 +57,20 @@ Note: All multilines code should be wrapped within self executable function. E.G
  .......
 }())
 ```
+
+#Console.IO Device and Tabs
+* Files: Show all attached javascript and css files in the web page
+* Status: Device Status and some basic information
+* Source: Double click on a file in file explorer to view file content
+* Preview: HTML dom structure
+* Console: Remote console 
+	* Pause incomming logs
+	* Clear logs
+	* Export logs
+	* Change page size
+	* Search word or use regex to filter logs
+	* Filter logs by type
+
 
 #Console API methods supported
  * console.assert(x)

@@ -71,8 +71,8 @@ ConsoleIO.App.Device.Console.prototype.addBatch = function addBatch() {
     }
 };
 
-ConsoleIO.App.Device.Console.prototype.applySearch = function applySearch() {
-    this.searchRegex = this.view.getValue('searchText');
+ConsoleIO.App.Device.Console.prototype.applySearch = function applySearch(value) {
+    this.searchRegex = typeof value === 'undefined' ? this.view.getValue('searchText') : value;
     if (this.searchRegex) {
         if (this.searchRegex[0] !== "\\") {
             this.searchRegex = new RegExp("\\b" + this.searchRegex, "img");
