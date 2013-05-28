@@ -40,7 +40,7 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
     ConsoleIO.forEachProperty(data, function (value, property) {
         this.view.addLabel(property);
         ConsoleIO.forEachProperty(value, function (config, name) {
-            this.view.add(name, config, property);
+            this.view.add(name, config.replace(/"/igm,""), property);
         }, this);
     }, this);
 };
