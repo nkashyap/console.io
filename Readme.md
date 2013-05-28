@@ -42,7 +42,7 @@ window.ConfigIO = {
 
 Visit http://NodeServerURL:Port/ for ConsoleIO interface
 
-![Screen shot](https://raw.github.com/nkashyap/console.io/master/console.io.PNG)
+![Screen shot](https://raw.github.com/nkashyap/console.io/master/console.io.png)
 
 #Console.IO Editor
 
