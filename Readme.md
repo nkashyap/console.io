@@ -66,7 +66,7 @@ Note: All multilines code should be wrapped within self executable function. E.G
 * Source: Double click on a file in file explorer to view file content
 * Preview: HTML dom structure
 * Console: Remote console 
-	* Pause incomming logs
+	* Pause incoming logs
 	* Clear logs
 	* Export logs
 	* Change page size
