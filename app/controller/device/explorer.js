@@ -89,6 +89,6 @@ ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(b
 ConsoleIO.App.Device.Explorer.prototype.viewFile = function viewFile(fileId) {
     ConsoleIO.Service.Socket.emit('fileSource', {
         guid: this.model.guid,
-        url: '/' + fileId.replace(/[|]/igm, "/")
+        url: (fileId.indexOf("http") === -1 ? '/' : '') + fileId.replace(/[|]/igm, "/")
     });
 };
