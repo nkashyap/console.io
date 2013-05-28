@@ -47,7 +47,7 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
                 }
             }
 
-			this.view.add(name, config.replace(/"/igm,""), property);
+			this.view.add(name, typeof config === 'string' ? config.replace(/"/igm,"") : config, property);
         }, this);
     }, this);
 };
