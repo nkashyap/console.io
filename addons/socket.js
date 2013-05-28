@@ -193,6 +193,10 @@ window.SocketIO = (function () {
                         Socket.emit('source', { url: data.url, content: content });
                     }
                 };
+                //xmlhttp.onload  = function (e) { ConsoleIO.native.log('onload',e); };
+                xmlhttp.onerror = function (e) {
+                    Socket.emit('source', { url: data.url, content: 'XMLHttpRequest Error: Possibally Access-Control-Allow-Origin security issue.' });
+                };
                 xmlhttp.send(null);
             } else {
                 Socket.emit('source', { url: data.url, content: 'XMLHttpRequest request not supported by the browser.' });
@@ -283,11 +287,16 @@ window.SocketIO = (function () {
     }
 
     function getXMLHttp() {
-        if (window.ActiveXObject) {
-            return new ActiveXObject("Microsoft.XMLHTTP");
-        } else if (window.XMLHttpRequest) {
-            return new XMLHttpRequest();
+        var xhr;
+        if (window.XMLHttpRequest) {
+            xhr = new XMLHttpRequest();
+            xhr.withCredentials = false;
+        } else if (window.XDomainRequest) {
+            xhr = new XDomainRequest();
+        } else if (window.ActiveXObject) {
+            xhr = new ActiveXObject("Microsoft.XMLHTTP");
         }
+        return xhr;
     }
 
     function showName(content) {
