@@ -15,7 +15,8 @@
 
     Socket = {
         io: null,
-        //name: null,
+        name: null,
+        guid: null,
         config: null,
         forceReconnection: true,
         forceReconnectInterval: 5000,
@@ -49,13 +50,16 @@
             this.io.on('connect_failed', this.onConnectFailed);
             this.io.on('reconnect_failed', this.onReconnectFailed);
             this.io.on('error', this.onError);
+
             this.io.on('device:ready', this.onReady);
-            //this.io.on('unsubscribe', this.onUnSubscribe);
+            this.io.on('device:online', this.onOnline);
+            this.io.on('device:offline', this.onOffline);
             this.io.on('device:command', this.onCommand);
             this.io.on('device:fileList', this.onFileList);
             this.io.on('device:htmlContent', this.onHTMLContent);
             this.io.on('device:fileSource', this.onFileSource);
             this.io.on('device:status', this.onStatus);
+            this.io.on('device:reload', this.onReload);
         },
 
         emit: function emit(name, data) {
@@ -123,31 +127,51 @@
         },
 
         onReady: function onReady(data) {
-            //Socket.name = data.guid;
-            Socket.subscribed = true;
+            Socket.name = data.name;
+            Socket.guid = data.guid;
 
             showName(data.name + '|' + data.guid);
-            console.log('Subscribed to', data.guid);
-
-            ConsoleIO.forEach(Socket.pending, function (item) {
-                Socket.emit(item.name, item.data);
-            });
-            Socket.pending = [];
+            console.log('Ready', Socket.name);
 
             Socket.forceReconnect();
         },
 
-        //onUnSubscribe: function onUnSubscribe(data) {
-        //console.log('UnSubscribed from', Socket.name);
-        //Socket.subscribed = false;
-        //},
+        onOnline: function onOnline(data) {
+            if (!Socket.guid) {
+                Socket.name = data.name;
+                Socket.guid = data.guid;
+                showName(data.name + '|' + data.guid);
+            }
+
+            if (data.guid === Socket.guid) {
+                console.log('Online', Socket.name);
+                Socket.subscribed = true;
+                ConsoleIO.forEach(Socket.pending, function (item) {
+                    Socket.emit(item.name, item.data);
+                });
+                Socket.pending = [];
+            }
+        },
+
+        onOffline: function onOffline(data) {
+            if (!Socket.guid) {
+                Socket.name = data.name;
+                Socket.guid = data.guid;
+                showName(data.name + '|' + data.guid);
+            }
+
+            if (data.guid === Socket.guid) {
+                console.log('Offline', Socket.name);
+                Socket.subscribed = false;
+            }
+        },
 
         onStatus: function onStatus(data) {
             Socket.emit('status', {
                 connection: {
                     mode: Socket.connectionMode
                 },
-                document:{
+                document: {
                     cookie: document.cookie
                 },
                 navigator: getBrowserInfo(window.navigator),
@@ -159,7 +183,6 @@
         onFileSource: function onFileSource(data) {
             var xmlhttp = getXMLHttp();
             if (xmlhttp) {
-                console.log(data.url);
                 xmlhttp.open("GET", data.url, true);
                 xmlhttp.onreadystatechange = function () {
                     if (xmlhttp.readyState === 4) {
@@ -170,13 +193,21 @@
                             content = xmlhttp.statusText;
                         }
 
-                        Socket.emit('source', { content: content });
+                        Socket.emit('source', { url: data.url, content: content });
                     }
                 };
                 xmlhttp.send(null);
-            }else{
-                Socket.emit('source', { content: 'XMLHttpRequest request not supported by the browser.' });
+            } else {
+                Socket.emit('source', { url: data.url, content: 'XMLHttpRequest request not supported by the browser.' });
             }
+        },
+
+        onReload: function onReload() {
+            setTimeout((function (url) {
+                return function () {
+                    window.location.assign(url);
+                };
+            }(location.href)), 1000);
         },
 
         onHTMLContent: function onHTMLContent() {
@@ -235,16 +266,19 @@
     };
 
     function getBrowserInfo(obj) {
-        var returnObj = {}, dataTypes = [
-            '[object Arguments]', '[object Array]',
-            '[object String]', '[object Number]', '[object Boolean]',
-            '[object Error]', '[object ErrorEvent]',
-            '[object Object]'
-        ];
+        var returnObj = { More: [] },
+            dataTypes = [
+                '[object Arguments]', '[object Array]',
+                '[object String]', '[object Number]', '[object Boolean]',
+                '[object Error]', '[object ErrorEvent]',
+                '[object Object]'
+            ];
 
-        ConsoleIO.forEachProperty(obj, function(value, property){
-            if(obj.hasOwnProperty(property) && dataTypes.indexOf(ConsoleIO.getObjectType(value)) > -1){
+        ConsoleIO.forEachProperty(obj, function (value, property) {
+            if (dataTypes.indexOf(ConsoleIO.getObjectType(value)) > -1) {
                 returnObj[property] = ConsoleIO.Stringify.parse(value);
+            } else {
+                returnObj.More.push(property);
             }
         });
 

@@ -79,8 +79,8 @@ ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
     ConsoleIO.Service.Socket.emit('reloadFiles', this.model.guid);
 };
 
-ConsoleIO.App.Device.Explorer.prototype.buttonClick = function buttonClick(btnId) {
-    console.log('buttonClick', btnId);
+ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(btnId) {
+    console.log('onButtonClick', btnId);
     if (btnId === 'refresh') {
         this.refresh();
     }

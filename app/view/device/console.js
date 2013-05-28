@@ -14,10 +14,12 @@ ConsoleIO.View.Device.Console = function ConsoleView(ctrl, model) {
     this.target = null;
     this.tab = null;
     this.toolbar = null;
-    this.container = null;
     this.id = [this.model.name, this.model.guid].join("-");
     this.container = ConsoleIO.Service.DHTMLXHelper.createElement({
-        attr: { 'class': 'console-contents' }
+        attr: {
+            id: 'console-' + this.id,
+            'class': 'console-contents'
+        }
     });
 };
 
@@ -30,11 +32,11 @@ ConsoleIO.View.Device.Console.prototype.render = function render(target) {
     this.toolbar = this.tab.attachToolbar();
     this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
     this.toolbar.attachEvent("onClick", function (itemId) {
-        this.buttonClick(itemId);
+        this.onButtonClick(itemId);
     }, this.ctrl);
 
     this.toolbar.attachEvent("onStateChange", function (itemId, state) {
-        this.buttonClick(itemId, state);
+        this.onButtonClick(itemId, state);
     }, this.ctrl);
 
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
@@ -87,6 +89,10 @@ ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData
 };
 
 ConsoleIO.View.Device.Console.prototype.add = function add(data) {
+    if (!this.ctrl.isFiltered(data) || !this.ctrl.isSearchFiltered(data)) {
+        return false;
+    }
+
     var element = this.getElementData(data);
 
     ConsoleIO.Service.DHTMLXHelper.createElement({
@@ -100,27 +106,62 @@ ConsoleIO.View.Device.Console.prototype.add = function add(data) {
         target: this.container,
         insert: 'top'
     });
+
+    this.removeOverflowElement();
 };
 
 ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
-    var fragment = document.createDocumentFragment();
+    var length = store.length;
+    if (length > 0) {
+        var fragment = document.createDocumentFragment();
 
-    ConsoleIO.forEach(store, function(item){
-        var element = this.getElementData(item);
+        if (ConsoleIO.Settings.pageSize.active < length) {
+            store = store.slice(0, ConsoleIO.Settings.pageSize.active);
+        }
 
-        ConsoleIO.Service.DHTMLXHelper.createElement({
-            tag: element.tag,
-            attr: {
-                'class': element.className
-            },
-            prop: {
-                innerHTML: element.message
-            },
-            target: fragment,
-            insert: 'top'
-        });
+        ConsoleIO.forEach(store, function (item) {
+            if (!this.ctrl.isFiltered(item) || !this.ctrl.isSearchFiltered(item)) {
+                return false;
+            }
 
-    }, this);
+            var element = this.getElementData(item);
+            ConsoleIO.Service.DHTMLXHelper.createElement({
+                tag: element.tag,
+                attr: {
+                    'class': element.className
+                },
+                prop: {
+                    innerHTML: element.message
+                },
+                target: fragment,
+                insert: 'top'
+            });
 
-    this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);
+        }, this);
+
+        this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);
+        this.removeOverflowElement();
+    }
+};
+
+ConsoleIO.View.Device.Console.prototype.getHTML = function getHTML() {
+    return this.container.innerHTML;
+};
+
+ConsoleIO.View.Device.Console.prototype.getValue = function getValue(id) {
+    return this.toolbar.getValue(id);
+};
+
+ConsoleIO.View.Device.Console.prototype.clear = function clear() {
+    while (this.container.firstChild) {
+        this.container.removeChild(this.container.firstChild);
+    }
+};
+
+ConsoleIO.View.Device.Console.prototype.removeOverflowElement = function removeOverflowElement() {
+    var length = this.container.childElementCount || this.container.children.length;
+    while (length > ConsoleIO.Settings.pageSize.active) {
+        this.container.removeChild(this.container.lastElementChild || this.container.lastChild);
+        length--;
+    }
 };

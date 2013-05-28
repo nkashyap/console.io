@@ -25,6 +25,10 @@ ConsoleIO.View.Manager.prototype.render = function render(target) {
     this.tabs.attachEvent('onTabClose', function (id) {
         this.close(id);
     }, this.ctrl);
+
+    this.tabs.attachEvent("onTabClick", function (tabId) {
+        this.onTabClick(tabId);
+    }, this.ctrl);
 };
 
 ConsoleIO.View.Manager.prototype.add = function add(id, name, isActive) {

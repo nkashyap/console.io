@@ -16,6 +16,11 @@ function Device(application, request, manager) {
     this.guid = this.request.cookies.guid;
     this.name = this.request.cookies.deviceName || this.getName();
     this.isOnline = false;
+    this.timeStamp = {
+        registered: (new Date()).toLocaleTimeString(),
+        connected: null,
+        dataReceived: null
+    };
 
     this.emit('ready', {
         name: this.name,
@@ -50,6 +55,7 @@ Device.prototype.online = function online(request) {
     this.request = request;
     this.isOnline = true;
     this.request.io.join(this.guid);
+    this.timeStamp.connected = (new Date()).toLocaleTimeString();
     this.manager.emit('device:online', this.getIdentity());
 };
 
@@ -60,6 +66,7 @@ Device.prototype.offline = function offline() {
 };
 
 Device.prototype.console = function consoleLog(data) {
+    this.timeStamp.dataReceived = (new Date()).toLocaleTimeString();
     this.broadcast('console:' + this.guid, data);
 };
 
@@ -76,6 +83,11 @@ Device.prototype.source = function source(data) {
 };
 
 Device.prototype.status = function status(data) {
+    data.connection.online = this.isOnline;
+    data.connection.registered = this.timeStamp.registered;
+    data.connection.connected = this.timeStamp.connected;
+    data.connection.dataReceived = this.timeStamp.dataReceived;
+
     this.broadcast('status:' + this.guid, data);
 };
 
@@ -86,6 +98,5 @@ Device.prototype.emit = function emit(name, data) {
 Device.prototype.broadcast = function broadcast(name, data) {
     this.request.io.room(this.guid).broadcast('device:' + name, data);
 };
-
 
 module.exports = Device;

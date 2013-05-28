@@ -1,69 +1,40 @@
-# ConsoleJS
+# Console.IO
 
-ConsoleJS is a Node.JS project. Its provide Remote Web Console for websites, Javascript, Smart Tv, mobile phones apps.
-It uses socket.io to provide real time response from the browsers.
+Console.IO is a Node.JS project. Its provide Remote Web Console for websites, Javascript, Smart Tv, mobile phones apps.
+It uses rxpress.io & socket.io to provide real time response from the browsers.
 
 Its works pretty much on all modern browsers, mobile devices, Smart TVs, etc
 
-## Install Socket.io
+## Install express.io
 
 ```bash
-npm install socket.io
+npm install express.io
 ```
 
 ## Start server
 
 ```bash
-node Server\Start.js
+node ./server/main.js
 ```
 
 ## Include following scripts in your website or javascript application
 
-Basic ConsoleJS support for cross-browsers
+Include following file 
 
 ```html
-<script type="text/javascript" src="http://NodeServerURL:Port/Client/ConsoleJS.js"></script>
-<script type="text/javascript" src="http://NodeServerURL:Port/Client/Browser.js"></script>
-```
-
-ConsoleJS with sockets for remote logging
-
-```html
-<script type="text/javascript" src="http://NodeServerURL:Port/socket.io/socket.io.js"></script>
-<script type="text/javascript" src="http://NodeServerURL:Port/Client/Socket.js"></script>
-```
-
-ConsoleJS with web logging
-
-```html
-<script type="text/javascript" src="http://NodeServerURL:Port/Client/Web.js"></script>
-...
-<link rel="stylesheet" href="http://NodeServerURL:Port/Client/Web.css" type="text/css">
-<link rel="stylesheet" href="http://NodeServerURL:Port/Shared/console.css" type="text/css">
-```
-
-Include files in following order 
-
-```html
-<script type="text/javascript" src="http://NodeServerURL:Port/socket.io/socket.io.js"></script>
-<script type="text/javascript" src="http://NodeServerURL:Port/Client/ConsoleJS.js"></script>
-<script type="text/javascript" src="http://NodeServerURL:Port/Client/Browser.js"></script>
-<script type="text/javascript" src="http://NodeServerURL:Port/Client/Socket.js"></script>
-<script type="text/javascript" src="http://NodeServerURL:Port/Client/Web.js"></script>
-...
-<link rel="stylesheet" href="http://NodeServerURL:Port/Client/Web.css" type="text/css">
-<link rel="stylesheet" href="http://NodeServerURL:Port/Shared/console.css" type="text/css">
+<script type="text/javascript" src="inject.js?url=http://NodeServerURL:Port&secure=false"></script>
 ```
 
 Then goto following url to access web console http://NodeServerURL:Port/
 
-![Screen shot](https://raw.github.com/nkashyap/ConsoleJS/master/consoleJS.PNG)
+#Console.IO Editor
 
-#ConsoleJS Editor
+You can execute commands on remote client from Console.IO. You can execute single & multilines javascript code.
 
-You can execute commands on remote client from ConsoleJS. You can execute single & multilines javascript code.
-
-Shortcuts: Ctrl+Enter to execute command and Ctrl+Space for autocomplate
+Shortcuts: 
+Ctrl+Enter: execute command
+Ctrl+Space: autocomplate
+Ctrl-Q: toggle comments
 
 Note: All multilines code should be wrapped within self executable function. E.G
 ```html
@@ -99,8 +70,6 @@ Note: All multilines code should be wrapped within self executable function. E.G
 
 #TODO
  * Change it into npm module
- * Move browser detect into server
- * refactor code to use express.io
  * Load addons dynamically (e.g web, socket, etc)
  * Update Readme with full feature list
 
@@ -109,5 +78,6 @@ Note: All multilines code should be wrapped within self executable function. E.G
 
 #Reference
  [Javascript Stacktrace] (https://github.com/eriwen/javascript-stacktrace)
-
+ [codemirror] (http://codemirror.net/)
+ [express.io] (https://github.com/techpines/express.io)
  [Socket.io] (http://socket.io/#how-to-use)

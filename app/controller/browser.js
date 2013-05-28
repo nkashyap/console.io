@@ -115,10 +115,10 @@ ConsoleIO.App.Browser.prototype.refresh = function refresh() {
         subscribed: []
     };
 
-    ConsoleIO.Service.Socket.emit('reloadDevices');
+    ConsoleIO.Service.Socket.emit('refreshRegisteredDeviceList');
 };
 
-ConsoleIO.App.Browser.prototype.buttonClick = function buttonClick(btnId) {
+ConsoleIO.App.Browser.prototype.onButtonClick = function onButtonClick(btnId) {
     if (btnId === 'refresh') {
         this.refresh();
     }
@@ -128,12 +128,4 @@ ConsoleIO.App.Browser.prototype.subscribe = function subscribe(guid) {
     if (!this.isSubscribed(guid)) {
         ConsoleIO.Service.Socket.emit('subscribe', guid);
     }
-};
-
-ConsoleIO.App.Browser.prototype.assignName = function assignName(guid, name) {
-    console.log(guid, name);
-//    ConsoleIO.Service.Socket.emit('assignDeviceName', {
-//        guid: guid,
-//        name: name
-//    });
 };

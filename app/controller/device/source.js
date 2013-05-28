@@ -11,6 +11,7 @@ ConsoleIO.namespace("ConsoleIO.App.Device.Source");
 ConsoleIO.App.Device.Source = function SourceController(parent, model) {
     this.parent = parent;
     this.model = model;
+    this.url = null;
 
     this.view = new ConsoleIO.View.Device.Source(this, {
         name: "Source",
@@ -46,18 +47,22 @@ ConsoleIO.App.Device.Source.prototype.activate = function activate(state) {
 };
 
 ConsoleIO.App.Device.Source.prototype.add = function add(data) {
+    this.url = data.url;
     this.editor.add(data);
     this.view.setActive();
 };
 
 ConsoleIO.App.Device.Source.prototype.refresh = function refresh() {
-    //ConsoleIO.Service.Socket.emit('reloadSource', {
-    // guid: this.model.guid
-    // });
+    if (this.url) {
+        ConsoleIO.Service.Socket.emit('fileSource', {
+            guid: this.model.guid,
+            url: this.url
+        });
+    }
 };
 
-ConsoleIO.App.Device.Source.prototype.buttonClick = function buttonClick(btnId, state) {
-    if(!this.parent.buttonClick(this, btnId, state)){
-        console.log('buttonClick', btnId);
+ConsoleIO.App.Device.Source.prototype.onButtonClick = function onButtonClick(btnId, state) {
+    if (!this.parent.onButtonClick(this, btnId, state)) {
+        console.log('onButtonClick', btnId);
     }
 };

@@ -28,15 +28,34 @@ ConsoleIO.View.Editor.prototype.render = function render(target) {
         this.toolbar = this.target.attachToolbar();
         this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
         this.toolbar.attachEvent("onClick", function (itemId) {
-            this.buttonClick(itemId);
+            this.onButtonClick(itemId);
         }, this.ctrl);
 
         this.toolbar.attachEvent("onStateChange", function (itemId, state) {
-            this.buttonClick(itemId, state);
+            this.onButtonClick(itemId, state);
         }, this.ctrl);
 
         ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
     }
+};
+
+ConsoleIO.View.Editor.prototype.listScripts = function listScripts(data) {
+    var scope = this;
+    this.toolbar.forEachListOption('open', function (id) {
+        scope.toolbar.removeListOption('open', id);
+    });
+
+    ConsoleIO.forEach(data, function (file, index) {
+        scope.toolbar.addListOption('open', 'script-' + file, index, 'button', file, ConsoleIO.Constraint.ICONS.JAVASCRIPT);
+    }, this);
+};
+
+ConsoleIO.View.Editor.prototype.addScript = function addScript(data) {
+    var id = 'script-' + data.name,
+        index = this.toolbar.getAllListOptions('open').length;
+
+    this.toolbar.removeListOption('open', id);
+    this.toolbar.addListOption('open', id, index, 'button', data.name, ConsoleIO.Constraint.ICONS.JAVASCRIPT);
 };
 
 ConsoleIO.View.Editor.prototype.createElements = function createElements() {
@@ -50,4 +69,14 @@ ConsoleIO.View.Editor.prototype.createElements = function createElements() {
         attr: { placeholder: this.model.placeholder },
         target: this.container
     });
+};
+
+ConsoleIO.View.Editor.prototype.toggleButton = function toggleButton(id, state) {
+    if (this.toolbar) {
+        if (state) {
+            this.toolbar.enableItem(id);
+        } else {
+            this.toolbar.disableItem(id);
+        }
+    }
 };

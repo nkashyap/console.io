@@ -27,9 +27,9 @@ ConsoleIO.App = function AppController() {
         width: 200,
         height: 250,
         toolbar: [
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.SearchText,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Search
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh
+            //ConsoleIO.Model.DHTMLX.ToolBarItem.SearchText,
+            //ConsoleIO.Model.DHTMLX.ToolBarItem.Search
         ]
     });
 
@@ -44,7 +44,6 @@ ConsoleIO.App = function AppController() {
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Open,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Save,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.SaveAs,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Cut,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
@@ -65,6 +64,15 @@ ConsoleIO.App = function AppController() {
         title: 'Manager',
         contextId: 'manager'
     });
+
+    ConsoleIO.Service.Socket.on('user:error', function (data) {
+        console.log('user:error', data);
+    }, this);
+
+    ConsoleIO.Service.Socket.on('user:listScripts', this.listScripts, this);
+    ConsoleIO.Service.Socket.on('user:scriptContent', this.add, this);
+    ConsoleIO.Service.Socket.on('user:scriptSaved', this.scriptSaved, this);
+
 };
 
 ConsoleIO.App.prototype.render = function render() {
@@ -76,4 +84,21 @@ ConsoleIO.App.prototype.render = function render() {
 
 ConsoleIO.App.prototype.setTitle = function setTitle(name, title) {
     this.view.setTitle(this.context[name], title);
+};
+
+ConsoleIO.App.prototype.listScripts = function listScripts(files) {
+    this.editor.listScripts(files);
+};
+
+ConsoleIO.App.prototype.scriptSaved = function scriptSaved(file) {
+    this.editor.fileName = file.name;
+    this.editor.addScript(file);
+};
+
+ConsoleIO.App.prototype.add = function add(data) {
+    this.editor.add(data);
+};
+
+ConsoleIO.App.prototype.getActiveDeviceGuid = function getActiveDeviceGuid() {
+    return this.manager.getActiveDeviceGuid();
 };

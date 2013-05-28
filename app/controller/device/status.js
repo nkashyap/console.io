@@ -40,7 +40,14 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
     ConsoleIO.forEachProperty(data, function (value, property) {
         this.view.addLabel(property);
         ConsoleIO.forEachProperty(value, function (config, name) {
-            this.view.add(name, config.replace(/"/igm,""), property);
+            if (name === 'More') {
+                config = config.join(", ");
+                if (!config) {
+                    return;
+                }
+            }
+
+			this.view.add(name, config.replace(/"/igm,""), property);
         }, this);
     }, this);
 };
@@ -50,8 +57,12 @@ ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
     ConsoleIO.Service.Socket.emit('deviceStatus', this.model.guid);
 };
 
-ConsoleIO.App.Device.Status.prototype.buttonClick = function buttonClick(btnId, state) {
-    if(!this.parent.buttonClick(this, btnId, state)){
-        console.log('buttonClick', btnId);
+ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btnId, state) {
+    if (!this.parent.onButtonClick(this, btnId, state)) {
+        console.log('onButtonClick', btnId);
+        switch (btnId) {
+            case 'setting':
+                break;
+    }
     }
 };

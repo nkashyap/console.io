@@ -23,9 +23,9 @@ ConsoleIO.Service.DHTMLXHelper = {
                     this.setItemState(item.id, !!item.pressed);
                     break;
                 case 'select':
-                    if(item.opts === 'pagesizes'){
+                    if (item.opts === 'pagesizes') {
                         item.opts = [];
-                        ConsoleIO.forEach(ConsoleIO.Settings.pageSize.list, function(number){
+                        ConsoleIO.forEach(ConsoleIO.Settings.pageSize.list, function (number) {
                             item.opts.push([item.id + '-' + number, 'obj', number ]);
                         });
                         item.selected = item.id + '-' + ConsoleIO.Settings.pageSize.active;
@@ -33,7 +33,7 @@ ConsoleIO.Service.DHTMLXHelper = {
 
                     this.addButtonSelect(item.id, index, item.text, item.opts, item.imgEnabled, item.imgDisabled);
 
-                    if(item.selected){
+                    if (item.selected) {
                         this.setListOptionSelected(item.id, item.selected);
                     }
                     break;
@@ -45,20 +45,25 @@ ConsoleIO.Service.DHTMLXHelper = {
                     break;
             }
 
-            if(item.width){
+            if (item.disabled) {
+                this.disableItem(item.id);
+            }
+
+            if (item.width) {
                 this.setWidth(item.id, item.width);
             }
 
-            if(item.tooltip){
+            if (item.tooltip) {
                 this.setItemToolTip(item.id, item.tooltip);
             }
         }, toolbar);
     },
 
     elements: {},
+
     createElement: function createElement(config) {
         config.tag = config.tag || 'div';
-        if(!this.elements[config.tag]){
+        if (!this.elements[config.tag]) {
             this.elements[config.tag] = document.createElement(config.tag);
         }
 

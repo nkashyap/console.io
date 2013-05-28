@@ -116,7 +116,7 @@ ConsoleIO.Settings = {
     reloadTabContentWhenActivated: true,
     pageSize: {
         active: 50,
-        list: [50,100,250,500]
+        list: [50, 100, 250, 500]
     }
 };
 
@@ -189,7 +189,10 @@ ConsoleIO.ready(function () {
         CodeMirror.commands.submit = function submit(cm) {
             var cmd = cm.getValue();
             if (cmd) {
-                ConsoleIO.App.Socket.request(cmd);
+                ConsoleIO.Service.Socket.emit('execute', {
+                    guid: ConsoleIO.myApp.getActiveDeviceGuid(),
+                    code: cmd
+                });
             }
         };
 

@@ -50,8 +50,12 @@ ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
     ConsoleIO.Service.Socket.emit('reloadHTML', this.model.guid);
 };
 
-ConsoleIO.App.Device.Preview.prototype.buttonClick = function buttonClick(btnId, state) {
-    if(!this.parent.buttonClick(this, btnId, state)){
-        console.log('buttonClick', btnId);
+ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(btnId, state) {
+    if (!this.parent.onButtonClick(this, btnId, state)) {
+        console.log('onButtonClick', btnId);
+        switch (btnId) {
+            case 'preview':
+                break;
+        }
     }
 };
