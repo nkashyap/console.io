@@ -33,21 +33,24 @@ Device.prototype.getIdentity = function getIdentity() {
         name: this.name,
         guid: this.guid,
         online: this.isOnline,
-        browser: this.info.name,
-        os: this.info.os,
+        browser: this.info.browser,
+        platform: this.info.platform,
+        manufacture: this.info.manufacture,
         version: this.info.version
     };
 };
 
 Device.prototype.getName = function getName() {
-    var name = [this.info.name || 'Unknown'];
+    var name = [this.info.browser || 'Unknown'];
     if (this.info.version) {
         name.push(this.info.version);
     }
-    if (this.info.os) {
-        name.push(this.info.os);
+    if (this.info.platform) {
+        name.push(this.info.platform);
     }
-
+    if (this.info.manufacture) {
+        name.push(this.info.manufacture);
+    }
     return name.join("|");
 };
 

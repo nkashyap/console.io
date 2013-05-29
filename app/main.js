@@ -152,11 +152,20 @@ ConsoleIO.Constraint.ICONS = {
     SUBSCRIBE: 'subscribe.gif',
     VERSION: 'version.gif',
 
-    WINDOWS: 'windows.png',
-    LINUX: 'linux.png',
+    //TODO update icons
+    PC: 'windows.png',
+    //WINDOWS: 'windows.png',
+    //LINUX: 'linux.png',
     LG: 'lg.png',
     TV: 'tv.jpg',
     BLUERAY: 'blueray.png',
+
+    //TODO update icons
+    GOOGLE: 'chrome.png',
+    MICROSOFT: 'explorer.png',
+    MOZILLA: 'firefox.png',
+    OPERA: 'opera.png',
+    APPLE: 'safari.png',
 
     CHROME: 'chrome.png',
     EXPLORER: 'explorer.png',

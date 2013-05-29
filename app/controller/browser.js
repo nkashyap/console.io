@@ -12,7 +12,8 @@ ConsoleIO.App.Browser = function BrowserController(parent, model) {
     this.parent = parent;
     this.model = model;
     this.store = {
-        os: [],
+        platform: [],
+        manufacture: [],
         browser: [],
         offline: [],
         subscribed: []
@@ -75,13 +76,19 @@ ConsoleIO.App.Browser.prototype.unSubscribed = function unSubscribed(data) {
 ConsoleIO.App.Browser.prototype.add = function add(data) {
     var name = data.browser + '-' + data.version;
 
-    if (this.store.os.indexOf(data.os) === -1) {
-        this.view.add(data.os, data.os, 0, ConsoleIO.Constraint.ICONS[data.os.toUpperCase()]);
-        this.store.os.push(data.os);
+
+    if (this.store.platform.indexOf(data.platform) === -1) {
+        this.view.add(data.platform, data.platform, 0, ConsoleIO.Constraint.ICONS[data.platform.toUpperCase()]);
+        this.store.platform.push(data.platform);
+    }
+
+    if (this.store.manufacture.indexOf(data.manufacture) === -1) {
+        this.view.add(data.manufacture, data.manufacture, data.platform, ConsoleIO.Constraint.ICONS[data.manufacture.toUpperCase()]);
+        this.store.manufacture.push(data.manufacture);
     }
 
     if (this.store.browser.indexOf(name) === -1) {
-        this.view.add(data.browser, data.browser, data.os, ConsoleIO.Constraint.ICONS[data.browser.toUpperCase()]);
+        this.view.add(data.browser, data.browser, data.manufacture, ConsoleIO.Constraint.ICONS[data.browser.toUpperCase()]);
         this.view.add(name, data.version, data.browser, ConsoleIO.Constraint.ICONS.VERSION);
         this.store.browser.push(name);
     }
@@ -104,12 +111,12 @@ ConsoleIO.App.Browser.prototype.render = function render(target) {
 };
 
 ConsoleIO.App.Browser.prototype.refresh = function refresh() {
-    ConsoleIO.forEach(this.store.os, function (os) {
-        this.deleteItem(os);
+    ConsoleIO.forEach(this.store.os, function (platform) {
+        this.deleteItem(platform);
     }, this.view);
 
     this.store = {
-        os: [],
+        platform: [],
         browser: [],
         offline: [],
         subscribed: []
