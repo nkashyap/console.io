@@ -1,9 +1,9 @@
 # Console.IO
 
-Console.IO is a Node.JS project. Its provide Remote Web Console for websites, Javascript, Smart Tv, mobile phones apps.
+Console.IO is a Node.JS project. It provides Remote Web Console for websites, Javascript, Smart Tv, mobile phones apps.
 It uses express.io & socket.io to provide real time response from the browsers.
 
-Its works pretty much on all modern browsers, mobile devices, Smart TVs, etc
+It works pretty much on all modern browsers, mobile devices, Smart TVs, etc
 
 ## Install express.io (execute install.bat)
 
