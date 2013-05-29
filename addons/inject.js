@@ -196,9 +196,12 @@
         var config = window.ConfigIO ? window.ConfigIO : getServerParams(),
             scripts = [
                 config.url + "/addons/console.io.js",
-                config.url + "/socket.io/socket.io.js",
                 config.url + "/addons/socket.js"
             ];
+			
+		if(!window.io){
+			scripts.push(config.url + "/socket.io/socket.io.js");
+		}
 
         if (config.web) {
             scripts.push(config.url + "/addons/web.js");
