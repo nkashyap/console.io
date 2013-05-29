@@ -1,18 +1,23 @@
 /**
- * Created with JetBrains WebStorm.
- * User: nisheeth
- * Date: 14/01/13
- * Time: 15:31
- * To change this template use File | Settings | File Templates.
+ * ConsoleIO server main module
+ *
+ * @public
+ * @name main
+ * @function main
+ * @requires module:express.io
+ * @requires module:config
+ * @requires module:configure
+ * @requires module:manager
+ *
+ * @author Nisheeth Kashyap <nisheeth.k.kashyap@gmail.com>
  */
 
 function main() {
     var express = require('express.io'),
         config = require('./config'),
         configure = require('./configure'),
-        manager = require('./manager');
-
-    var app = express().http().io();
+        manager = require('./manager'),
+        app = express().http().io();
 
     // configuration
     configure(app, 'development', config.express);
@@ -30,19 +35,21 @@ function main() {
 
     //console app routes
     app.use('/addons', express.static('addons'));
-    //app.use('/inject.js', express.static('addons/inject.js'));
 
+    //userdata app routes
     app.use('/userdata/export', function (req, res) {
         res.download("./" + req.originalUrl);
     });
 
+    // initialize connection manager
     manager.setUp(app);
 
     // listen to port
     app.listen(app.get('port-number'));
 
-    //log info
+    //display remote ui url information
     console.log(app.get('title') + ' is run at ' + (app.get('https') == true ? 'https' : 'http') + '://localhost:' + app.get('port-number'));
 }
 
+// execute and export it as NodeJS module
 module.exports = main();

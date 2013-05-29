@@ -1,11 +1,44 @@
 /**
- * Created with JetBrains WebStorm.
- * User: nisheeth
- * Date: 12/04/13
- * Time: 09:09
- * To change this template use File | Settings | File Templates.
+ * ConsoleIO server use module defined in this file
+ * to apply server configuration to different node modules e.g express and socket.io
+ *
+ * @author Nisheeth Kashyap <nisheeth.k.kashyap@gmail.com>
  */
 
+
+/**
+ * Apply configuration to modules like express, socket.io
+ *
+ * @private
+ * @function configApp
+ * @param {object} appObj module object
+ * @param {string} property config property to set
+ * @param {object} config list os properties to set
+ */
+function configApp(appObj, property, configs) {
+    if (property === 'set') {
+        configs.forEach(function (value) {
+            Object.getOwnPropertyNames(value).forEach(function (item) {
+                appObj[property](item, value[item]);
+            });
+        });
+    } else {
+        /** apply to list of properties **/
+        configs.forEach(function (value) {
+            appObj[property](value);
+        });
+    }
+}
+
+/**
+ * Apply configuration to modules like express, socket.io
+ *
+ * @public
+ * @function configure
+ * @param {object} appObj module object
+ * @param {string} env node server run environment
+ * @param {object} config configuration object
+  */
 function configure(appObj, env, config) {
     var envConfig = config[env],
         properties = ['set', 'enable', 'disable'];
@@ -19,18 +52,5 @@ function configure(appObj, env, config) {
     });
 }
 
-function configApp(appObj, property, configs) {
-    if (property === 'set') {
-        configs.forEach(function (value) {
-            Object.getOwnPropertyNames(value).forEach(function (item) {
-                appObj[property](item, value[item]);
-            });
-        });
-    } else {
-        configs.forEach(function (value) {
-            appObj[property](value);
-        });
-    }
-}
-
+// export it as NodeJS module
 module.exports = configure;
