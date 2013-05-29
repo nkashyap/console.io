@@ -39,9 +39,12 @@ function Manager() {
         notifyRegisteredDevicesToUser: function notifyRegisteredDevicesToUser(user) {
             if (user) {
                 forEach(devices, function (device) {
+                    //subscribe again if device is online
                     var deviceConfig = device.getIdentity();
-                    deviceConfig.subscribed = user.isSubscribed(deviceConfig.guid);
-                    user.emit('registeredDevice', deviceConfig);
+                    if(deviceConfig.online){
+                        deviceConfig.subscribed = user.isSubscribed(deviceConfig.guid);
+                        user.emit('registeredDevice', deviceConfig);
+                    }
                 });
             }
         }
