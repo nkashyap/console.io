@@ -13,7 +13,7 @@
  * @function configApp
  * @param {object} appObj module object
  * @param {string} property config property to set
- * @param {object} config list os properties to set
+ * @param {object} configs list os properties to set
  */
 function configApp(appObj, property, configs) {
     if (property === 'set') {
@@ -52,5 +52,8 @@ function configure(appObj, env, config) {
     });
 }
 
-// export it as NodeJS module
+/**
+ * Export configure as module
+ * @module configure
+ */
 module.exports = configure;

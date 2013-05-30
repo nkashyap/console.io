@@ -197,5 +197,8 @@ var detectDevice = {
     }
 };
 
-// export it as NodeJS module
+/**
+ * Export detectDevice as module
+ * @module detectDevice
+ */
 module.exports = detectDevice;

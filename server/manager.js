@@ -40,7 +40,7 @@ function Manager() {
             if (user) {
                 forEach(devices, function (device) {
                     //subscribe again if device is online
-                    var deviceConfig = device.getIdentity();
+                    var deviceConfig = device.getInformation();
                     if(deviceConfig.online){
                         deviceConfig.subscribed = user.isSubscribed(deviceConfig.guid);
                         user.emit('registeredDevice', deviceConfig);
@@ -181,7 +181,7 @@ function Manager() {
             if (!deviceReg) {
                 deviceReg = new Device(application, request, self);
                 devices[request.cookies.guid] = deviceReg;
-                self.emit('device:registered', deviceReg.getIdentity());
+                self.emit('device:registered', deviceReg.getInformation());
             }
             deviceReg.online(request);
         }

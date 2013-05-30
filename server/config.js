@@ -74,5 +74,8 @@ var config = {
     }
 };
 
-// export it as NodeJS module
+/**
+ * Export config object as module
+ * @module config
+ */
 module.exports = config;
