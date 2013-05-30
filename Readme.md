@@ -103,6 +103,7 @@ Note: All multilines code should be wrapped within self executable function. E.G
  * Change it into npm module
  * Load addons dynamically (e.g web, socket, etc)
  * Update Readme with full feature list
+ * Add SSL support
 
 #Copyright and license
  MIT LICENSE 
