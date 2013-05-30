@@ -1,0 +1,183 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Console.io by nkashyap</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/nkashyap/console.io">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/nkashyap/console.io/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/nkashyap/console.io/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Console.io</h1>
+          <p>JavaScript Remote Web Console (enhanced version of ConsoleJS)</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/nkashyap">nkashyap</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>
+<a name="consoleio" class="anchor" href="#consoleio"><span class="octicon octicon-link"></span></a>Console.IO</h1>
+
+<p>Console.IO is a Node.JS project. It provides Remote Web Console for websites, Javascript, Smart Tv, mobile phones apps.
+It uses express.io &amp; socket.io to provide real time response from the browsers.</p>
+
+<p>It works pretty much on all modern browsers, mobile devices, Smart TVs, etc</p>
+
+<h2>
+<a name="install-expressio-execute-installbat" class="anchor" href="#install-expressio-execute-installbat"><span class="octicon octicon-link"></span></a>Install express.io (execute install.bat)</h2>
+
+<div class="highlight"><pre>npm install express.io
+</pre></div>
+
+<h2>
+<a name="start-server-execute-startbat" class="anchor" href="#start-server-execute-startbat"><span class="octicon octicon-link"></span></a>Start server (execute start.bat)</h2>
+
+<div class="highlight"><pre>node ./server/main.js
+</pre></div>
+
+<h2>
+<a name="include-consoleio-in-your-web-page" class="anchor" href="#include-consoleio-in-your-web-page"><span class="octicon octicon-link"></span></a>Include console.io in your web page</h2>
+
+<p>include inject.js scripts with config parameters</p>
+
+<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js?url=http://NodeServerURL:Port&amp;secure=false"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</pre></div>
+
+<p>OR create a create ConfigIO global object with config options</p>
+
+<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"configIO.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</pre></div>
+
+<p>configIO.js</p>
+
+<div class="highlight"><pre>window.ConfigIO = {
+    url: 'http://nodeserver:port/',
+    secure: false
+};
+</pre></div>
+
+<p>Visit http://NodeServerURL:Port/ for ConsoleIO interface</p>
+
+<p><img src="https://raw.github.com/nkashyap/console.io/master/console.io.png" alt="Screen shot"></p>
+
+<h1>
+<a name="consoleio-editor" class="anchor" href="#consoleio-editor"><span class="octicon octicon-link"></span></a>Console.IO Editor</h1>
+
+<p>You can execute commands on remote client from Console.IO. You can execute single &amp; multilines javascript code.</p>
+
+<p>Shortcuts: </p>
+
+<ul>
+<li>Ctrl+Enter: execute command</li>
+<li>Ctrl+Space: autocomplate</li>
+<li>Ctrl-Q: toggle comments</li>
+</ul><p>Note: All multilines code should be wrapped within self executable function. E.G</p>
+
+<div class="highlight"><pre>(function doSomeThing(){
+ .......
+}())
+</pre></div>
+
+<h1>
+<a name="consoleio-device-and-tabs" class="anchor" href="#consoleio-device-and-tabs"><span class="octicon octicon-link"></span></a>Console.IO Device and Tabs</h1>
+
+<ul>
+<li>Files: Show all attached javascript and css files in the web page</li>
+<li>Status: Device Status and some basic information</li>
+<li>Source: Double click on a file in file explorer to view file content</li>
+<li>Preview: HTML dom structure</li>
+<li>Console: Remote console 
+
+<ul>
+<li>Pause incoming logs</li>
+<li>Clear logs</li>
+<li>Export logs</li>
+<li>Change page size</li>
+<li>Search word or use regex to filter logs</li>
+<li>Filter logs by type</li>
+</ul>
+</li>
+</ul><h1>
+<a name="console-api-methods-supported" class="anchor" href="#console-api-methods-supported"><span class="octicon octicon-link"></span></a>Console API methods supported</h1>
+
+<ul>
+<li>console.assert(x)</li>
+<li>console.count(key)</li>
+<li>console.time(name, reset)</li>
+<li>console.timeEnd(name)</li>
+<li>console.debug(arguments...)</li>
+<li>console.warn(arguments...)</li>
+<li>console.info(arguments...)</li>
+<li>console.log(arguments...)</li>
+<li>console.dir(object)</li>
+<li>console.dirxml(HTML Element)</li>
+<li>console.error(error)</li>
+<li>console.exception(error)</li>
+<li>console.trace()</li>
+</ul><h1>
+<a name="coming-soon" class="anchor" href="#coming-soon"><span class="octicon octicon-link"></span></a>Coming soon...</h1>
+
+<ul>
+<li>console.group()</li>
+<li>console.groupCollapsed()</li>
+<li>console.groupEnd()</li>
+<li>console.markTimeline()</li>
+<li>console.timestamp()</li>
+<li>console.profiles</li>
+<li>console.profile()</li>
+<li>console.profileEnd()</li>
+</ul><h1>
+<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h1>
+
+<ul>
+<li>Change it into npm module</li>
+<li>Load addons dynamically (e.g web, socket, etc)</li>
+<li>Update Readme with full feature list</li>
+</ul><h1>
+<a name="copyright-and-license" class="anchor" href="#copyright-and-license"><span class="octicon octicon-link"></span></a>Copyright and license</h1>
+
+<p>MIT LICENSE </p>
+
+<h1>
+<a name="reference" class="anchor" href="#reference"><span class="octicon octicon-link"></span></a>Reference</h1>
+
+<ul>
+<li><a href="https://github.com/eriwen/javascript-stacktrace">Javascript Stacktrace</a></li>
+<li><a href="http://codemirror.net/">codemirror</a></li>
+<li><a href="https://github.com/techpines/express.io">express.io</a></li>
+<li><a href="http://socket.io/#how-to-use">Socket.io</a></li>
+<li><a href="https://code.google.com/p/google-code-prettify/">prettify</a></li>
+<li>
+<a href="http://dhtmlx.com/">dhtmlx</a> [GPL LICENSE]</li>
+</ul>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
