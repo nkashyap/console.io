@@ -133,7 +133,7 @@ var detectDevice = {
                 {  userAgent: config.userAgent, search: /\biPad\b/i, identity: "Tablet" },
                 {  userAgent: config.userAgent, search: /\biPhone\b/i, identity: "Mobile" },
                 {  userAgent: config.userAgent, search: /\biPod\b/i, identity: "Media" },
-                {  userAgent: config.userAgent, search: /\bPlaystation\b/i, identity: "Playstation" },
+                {  userAgent: config.userAgent, search: /\bPlaystation\b/i, identity: "Console" },
 
                 {  platform: config.platform, search: /\bWin|Mac|Linux/i, identity: "PC" }
             ],
