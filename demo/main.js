@@ -8,7 +8,6 @@
 var domReady = false;
 
 function init() {
-
     "use strict";
 
     if (domReady) {
@@ -50,5 +49,4 @@ function init() {
     }, 3000);
 }
 
-setTimeout(init, 3000);
-//ConsoleIO.ready(init);
+window.ConsoleIOInject.ready(init);

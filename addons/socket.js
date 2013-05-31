@@ -61,7 +61,6 @@ window.SocketIO = (function () {
 
         emit: function emit(name, data) {
             if (this.io && this.io.socket.connected) {
-                //data.name = this.name;
                 this.io.emit('device:' + name, data);
             } else {
                 this.pending.push({ name: name, data: data });

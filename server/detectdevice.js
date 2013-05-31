@@ -114,6 +114,11 @@ var detectDevice = {
      */
     getStore: function getStore(config) {
 
+        // Maple browser
+        config.userAgent = config.userAgent.replace(/%20/img, " ");
+        config.appVersion = config.appVersion.replace(/%20/img, " ");
+        config.platform = config.platform.replace(/%20/img, " ");
+
         /**
          * data store object
          * @typedef {Object} dataStore
@@ -127,7 +132,7 @@ var detectDevice = {
             /** platform data store array **/
             platform: [
                 {  userAgent: config.userAgent, search: /\bSTB|Media|TechnikaTK500SDTR212\b/i, identity: "STB" },
-                {  userAgent: config.userAgent, search: /\bTV|NETTV|SmartTV|Technika22|DTV_[a-z0-9]+\b/i, identity: "TV" },
+                {  userAgent: config.userAgent, search: /\bTV|NETTV|SmartHub|SmartTV|Technika22|Maple|DTV_[a-z0-9]+\b/i, identity: "TV" },
                 {  userAgent: config.userAgent, search: /\bAndroid.*Chrome\/[.0-9]* Mobile/i, identity: "Mobile" },
                 {  userAgent: config.userAgent, search: /\bAndroid.*Chrome\/[.0-9]* (?!Mobile)/i, identity: "Tablet" },
                 {  userAgent: config.userAgent, search: /\biPad\b/i, identity: "Tablet" },
@@ -142,7 +147,7 @@ var detectDevice = {
             manufacture: [
                 {  userAgent: config.userAgent, search: /\bLGE\b/i, identity: "LG" },
                 {  userAgent: config.userAgent, search: /\bPhilips\b/i, identity: "Philips" },
-                {  userAgent: config.userAgent, search: /\bSamsung\b/i, identity: "Samsung" },
+                {  userAgent: config.userAgent, search: /\bSmartHub|Samsung|Maple\b/i, identity: "Samsung" },
                 {  userAgent: config.userAgent, search: /\bToshiba\b/i, identity: "Toshiba" },
                 {  userAgent: config.userAgent, search: /\bTesco\b/i, identity: "Tesco" },
                 {  userAgent: config.userAgent, search: /\bPlaystation\b/i, identity: "Sony" },
@@ -158,7 +163,7 @@ var detectDevice = {
             /** browser data store array **/
             browser: [
                 {  userAgent: config.userAgent, search: /\bNetCast\b/i, identity: "NetCast" },
-                {  userAgent: config.userAgent, search: /\bMaple\b/i, identity: "Maple" },
+                {  userAgent: config.userAgent, search: /\bMaple/i, identity: "Maple" },
                 {  userAgent: config.userAgent, search: /\bNETTV\b/i, identity: "NetTV" },
                 {  userAgent: config.userAgent, search: /\bToshibaTP\b/i, identity: "ToshibaTP" },
                 {  userAgent: config.userAgent, search: /\bEspial Browser\b/i, identity: "Espial" },
@@ -177,10 +182,10 @@ var detectDevice = {
 
             /** version data store array **/
             version: [
-                {  userAgent: config.userAgent, search: /\b2010\b/i, identity: "2010" },
-                {  userAgent: config.userAgent, search: /\b2011|TL868|NETTV\/3.1\b/i, identity: "2011" },
-                {  userAgent: config.userAgent, search: /\b2012|RL953|NETTV\/3.0|NETTV\/3.2|NETTV\/4.0\b/i, identity: "2012" },
-                {  userAgent: config.userAgent, search: /\b2013\b/i, identity: "2013" },
+                {  userAgent: config.userAgent, search: /2010/i, identity: "2010" },
+                {  userAgent: config.userAgent, search: /2011|TL868|NETTV\/3.1/i, identity: "2011" },
+                {  userAgent: config.userAgent, search: /2012|RL953|NETTV\/3.0|NETTV\/3.2|NETTV\/4.0/i, identity: "2012" },
+                {  userAgent: config.userAgent, search: /2013/i, identity: "2013" },
 
                 {  userAgent: config.userAgent, versionSearch: /\bTesco-Technika22-|Tesco-TechnikaTK500SDTR/i },
                 {  userAgent: config.userAgent, versionSearch: /\bEspial Browser\/\b/i },

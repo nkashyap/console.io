@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-(function () {
+window.ConsoleIOInject = (function () {
 
     "use strict";
 
@@ -133,7 +133,6 @@
         function onScriptLoaded(scriptURL) {
             var finished = true;
             loadedScripts[scriptURL] = true;
-
             for (var fileURL in loadedScripts) {
                 if (!loadedScripts[fileURL]) {
                     finished = false;
@@ -197,9 +196,6 @@
                     file: filePath,
                     line: lineNo
                 });
-            } else {
-                //TODO use web plugin to log it
-                document.body.innerHTML = [error, filePath, lineNo].join(" : ");
             }
             return false;
         }
@@ -207,24 +203,42 @@
         return result;
     }
 
+    function setUp(config) {
+        ConsoleIO.extend(ConsoleIO, {
+            require: require,
+            ready: ready
+        });
+
+        //Hook into ConsoleIO API
+        ConsoleIO.on('console', function (data) {
+            window.SocketIO.emit('console', data);
+        });
+
+        window.SocketIO.init(config);
+    }
+
     // Load required Scripts
     ready(function init() {
         if (domReady) {
             return;
         }
-
         domReady = true;
 
         var scripts = [],
-            config = (typeof window.ConfigIO !== 'undefined') ? window.ConfigIO : getServerParams();
+            config = window.ConfigIO ? window.ConfigIO : getServerParams();
 
         // fix the ordering for Opera
         if (!window.io) {
             scripts.push(config.url + "/socket.io/socket.io.js");
         }
+        // fix the samsung to load all script up front
+        if (!window.ConsoleIO) {
+            scripts.push(config.url + "/addons/console.io.js");
+        }
 
-        scripts.push(config.url + "/addons/console.io.js");
-        scripts.push(config.url + "/addons/socket.js");
+        if (!window.SocketIO) {
+            scripts.push(config.url + "/addons/socket.js");
+        }
 
         if (config.web) {
             scripts.push(config.url + "/addons/web.js");
@@ -232,20 +246,19 @@
 
         //Request console.io.js file to get connect.sid cookie from the server
         //Socket.io use connection cookie
-        require(scripts, function () {
-            ConsoleIO.extend(ConsoleIO, {
-                require: require,
-                ready: ready
+        if(scripts.length > 0){
+            require(scripts, function(){
+                setUp(config);
             });
-
-            window.SocketIO.init(config);
-
-            //Hook into ConsoleIO API
-            ConsoleIO.on('console', function (data) {
-                window.SocketIO.emit('console', data);
-            });
-        });
+        }else{
+            setUp(config);
+        }
     });
 
     window.onerror = onErrorFn;
+
+    return {
+        require: require,
+        ready: ready
+    }
 }());
