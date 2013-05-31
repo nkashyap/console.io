@@ -26,7 +26,7 @@ ConsoleIO.Service.DHTMLXHelper = {
                     if (item.opts === 'pagesizes') {
                         item.opts = [];
                         ConsoleIO.forEach(ConsoleIO.Settings.pageSize.list, function (number) {
-                            item.opts.push([item.id + '-' + number, 'obj', number ]);
+                            item.opts.push([item.id + '-' + number, 'obj', number]);
                         });
                         item.selected = item.id + '-' + ConsoleIO.Settings.pageSize.active;
                     }

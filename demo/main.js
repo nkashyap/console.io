@@ -39,6 +39,10 @@ function init() {
         ],
         length = Commands.length;
 
+    var isEventSet = false,
+        connectionMode = document.getElementById('ConnectionMode'),
+        log = document.getElementById('log');
+
     setInterval(function () {
         if (currentIndex < length) {
             eval(Commands[currentIndex++]);
@@ -46,7 +50,30 @@ function init() {
         } else {
             currentIndex = 0;
         }
+
+        if (SocketIO) {
+            var info = [
+                "Name: " + SocketIO.name,
+                "guid: " + SocketIO.guid,
+                "mode: " + SocketIO.connectionMode,
+                "connected: " + SocketIO.io.socket.connected,
+                "subscribed: " + SocketIO.subscribed,
+                "pending: " + SocketIO.pending.length,
+                "forceReconnection: " + SocketIO.setInterval
+            ].join(", ");
+
+            connectionMode.innerHTML = info;
+        }
+
+        if(!isEventSet && ConsoleIO){
+            ConsoleIO.on('console', function(data){
+                var li = document.createElement('li');
+                li.innerHTML = data.type + ': '+ data.message;
+                log.insertBefore(li, log.firstElementChild || log.firstChild);
+            });
+            isEventSet = true;
+        }
     }, 3000);
 }
 
-window.ConsoleIOInject.ready(init);
+window.InjectIO.ready(init);

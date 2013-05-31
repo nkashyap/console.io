@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-window.ConsoleIOInject = (function () {
+window.InjectIO = (function () {
 
     "use strict";
 
@@ -151,7 +151,6 @@ window.ConsoleIOInject = (function () {
         }
     }
 
-
     function ready(callback) {
         function DOMContentLoaded() {
             if (document.addEventListener) {
@@ -246,11 +245,11 @@ window.ConsoleIOInject = (function () {
 
         //Request console.io.js file to get connect.sid cookie from the server
         //Socket.io use connection cookie
-        if(scripts.length > 0){
-            require(scripts, function(){
+        if (scripts.length > 0) {
+            require(scripts, function () {
                 setUp(config);
             });
-        }else{
+        } else {
             setUp(config);
         }
     });

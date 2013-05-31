@@ -45,7 +45,7 @@ ConsoleIO.View.Browser.prototype.render = function render(target) {
 };
 
 ConsoleIO.View.Browser.prototype.add = function add(id, name, parentId, icon) {
-    if(!this.tree.getParentId(id)){
+    if (!this.tree.getParentId(id)) {
         if (icon) {
             this.tree.insertNewItem(parentId, id, name, 0, icon, icon, icon);
         } else {

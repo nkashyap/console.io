@@ -39,7 +39,7 @@ ConsoleIO.View.Device.Console.prototype.render = function render(target) {
         this.onButtonClick(itemId, state);
     }, this.ctrl);
 
-    this.toolbar.attachEvent("onEnter", function(itemId, value){
+    this.toolbar.attachEvent("onEnter", function (itemId, value) {
         this.applySearch(value);
     }, this.ctrl);
 

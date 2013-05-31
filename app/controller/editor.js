@@ -160,7 +160,8 @@ ConsoleIO.App.Editor.prototype.command = function command() {
 
 ConsoleIO.App.Editor.prototype.updateButtonState = function updateButtonState() {
     if (this.model.toolbar) {
-        var history = this.getDoc().historySize();        this.view.toggleButton('undo', (history.undo > 0));
+        var history = this.getDoc().historySize();
+        this.view.toggleButton('undo', (history.undo > 0));
         this.view.toggleButton('redo', (history.redo > 0));
         this.view.toggleButton('save', !this.getDoc().isClean());
     }

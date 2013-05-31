@@ -68,14 +68,19 @@ window.SocketIO = (function () {
         },
 
         forceReconnect: function forceReconnect() {
-            if (this.forceReconnection && !this.setInterval) {
-                this.setInterval = window.setInterval(function () {
-                    if (!Socket.io.socket.connected || (Socket.io.socket.connected && !Socket.subscribed)) {
-                        Socket.io.socket.disconnect();
-                        Socket.io.socket.reconnect();
-                    }
-                }, this.forceReconnectInterval);
+            if (!this.forceReconnection || this.setInterval) {
+                return false;
             }
+
+            this.setInterval = window.setInterval(function () {
+                if (!Socket.io.socket.connected || (Socket.io.socket.connected && !Socket.subscribed)) {
+                    console.log('forceReconnect reconnecting', Socket.name);
+                    Socket.io.socket.disconnect();
+                    Socket.io.socket.reconnect();
+                    window.clearInterval(Socket.setInterval);
+                    Socket.setInterval = null;
+                }
+            }, this.forceReconnectInterval);
         },
 
         onConnect: function onConnect() {
@@ -90,6 +95,8 @@ window.SocketIO = (function () {
                 opera: !!window.opera,
                 params: Socket.config
             });
+
+            Socket.forceReconnect();
         },
 
         onConnecting: function onConnecting(mode) {
@@ -99,7 +106,9 @@ window.SocketIO = (function () {
 
         onReconnect: function onReconnect(mode, attempts) {
             Socket.connectionMode = mode;
+            Socket.subscribed = true;
             console.log('Reconnected to the Server after' + attempts + ' attempts.');
+            Socket.forceReconnect();
         },
 
         onReconnecting: function onReconnecting() {
@@ -147,6 +156,8 @@ window.SocketIO = (function () {
                 });
                 Socket.pending = [];
             }
+
+            Socket.forceReconnect();
         },
 
         onOffline: function onOffline(data) {
@@ -162,7 +173,7 @@ window.SocketIO = (function () {
             }
         },
 
-        onStatus: function onStatus(data) {
+        onStatus: function onStatus() {
             Socket.emit('status', {
                 connection: {
                     mode: Socket.connectionMode
@@ -203,6 +214,7 @@ window.SocketIO = (function () {
         },
 
         onReload: function onReload() {
+            console.log('executing reload command');
             setTimeout((function (url) {
                 return function () {
                     window.location.assign(url);
@@ -247,6 +259,7 @@ window.SocketIO = (function () {
         },
 
         onCommand: function onCommand(cmd) {
+            console.log('executing script');
             var evalFun, result;
             try {
                 //Function first argument is Deprecated
