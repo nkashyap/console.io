@@ -173,6 +173,7 @@ ConsoleIO.Constraint.ICONS = {
     MOZILLA: 'mozilla.png',
     GOOGLE: 'google.png',
     APPLE: 'apple.png',
+    "OPERA SOFTWARE": 'opera.png',
 
     //Browser icons
     CHROME: 'chrome.png',

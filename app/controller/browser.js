@@ -15,6 +15,7 @@ ConsoleIO.App.Browser = function BrowserController(parent, model) {
         platform: [],
         manufacture: [],
         browser: [],
+        version: [],
         offline: [],
         subscribed: []
     };
@@ -76,7 +77,6 @@ ConsoleIO.App.Browser.prototype.unSubscribed = function unSubscribed(data) {
 ConsoleIO.App.Browser.prototype.add = function add(data) {
     var name = data.browser + '-' + data.version;
 
-
     if (this.store.platform.indexOf(data.platform) === -1) {
         this.view.add(data.platform, data.platform, 0, ConsoleIO.Constraint.ICONS[data.platform.toUpperCase()]);
         this.store.platform.push(data.platform);
@@ -87,10 +87,14 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
         this.store.manufacture.push(data.manufacture);
     }
 
-    if (this.store.browser.indexOf(name) === -1) {
+    if (this.store.browser.indexOf(data.browser) === -1) {
         this.view.add(data.browser, data.browser, data.manufacture, ConsoleIO.Constraint.ICONS[data.browser.toUpperCase()]);
+        this.store.browser.push(data.browser);
+    }
+
+    if (this.store.version.indexOf(name) === -1) {
         this.view.add(name, data.version, data.browser, ConsoleIO.Constraint.ICONS.VERSION);
-        this.store.browser.push(name);
+        this.store.version.push(name);
     }
 
     this.view.add(data.guid, data.browser, name);

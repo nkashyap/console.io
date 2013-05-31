@@ -152,7 +152,7 @@ var detectDevice = {
                 {  vendor: config.vendor, search: /\bGoogle\b/i, identity: "Google" },
                 {  vendor: config.vendor, search: /\bApple\b/i, identity: "Apple" },
 
-                {  property: config.opera, identity: "Opera" }
+                {  property: config.opera, identity: "Opera Software" }
             ],
 
             /** browser data store array **/

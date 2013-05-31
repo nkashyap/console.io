@@ -87,19 +87,21 @@
         node.async = true;
 
         if (node.readyState === "complete") {
-            setTimeout(callback, 1);
+            setTimeout(function () {
+                callback(url);
+            }, 1);
         }
 
         function onScriptLoad() {
             if (node.attachEvent) {
                 if (node.readyState === "complete") {
                     node.detachEvent('onreadystatechange', onScriptLoad);
+                    callback(url);
                 }
             } else {
                 node.removeEventListener('load', onScriptLoad, false);
+                callback(url);
             }
-
-            callback();
         }
 
         function onScriptError() {
@@ -113,28 +115,43 @@
             node.addEventListener('error', onScriptError, false);
         }
 
+        // IE onload handler
+        node.onload = onScriptLoad;
         node.src = url;
         head.appendChild(node);
     }
 
     function require(urls, callback) {
         if (typeof urls === 'string') {
-            requireScript(urls, callback);
-        } else {
-            var i,
-                loaded = 0,
-                length = urls.length;
+            urls = [urls];
+        }
 
-            for (i = 0; i < length; i++) {
-                requireScript(urls[i], function () {
-                    loaded++;
-                    if (loaded === length) {
-                        callback();
-                    }
-                });
+        var i, url,
+            length = urls.length,
+            loadedScripts = {};
+
+        function onScriptLoaded(scriptURL) {
+            var finished = true;
+            loadedScripts[scriptURL] = true;
+
+            for (var fileURL in loadedScripts) {
+                if (!loadedScripts[fileURL]) {
+                    finished = false;
+                }
+            }
+
+            if (finished) {
+                callback();
             }
         }
+
+        for (i = 0; i < length; i++) {
+            url = urls[i];
+            loadedScripts[url] = false;
+            requireScript(url, onScriptLoaded);
+        }
     }
+
 
     function ready(callback) {
         function DOMContentLoaded() {
@@ -174,16 +191,21 @@
         // Treat return value as window.onerror itself does,
         // Only do our handling if not surpressed.
         if (result !== true) {
-            SocketIO.emit('error', {
-                message: error,
-                file: filePath,
-                line: lineNo
-            });
+            if (typeof window.SocketIO !== 'undefined') {
+                window.SocketIO.emit('error', {
+                    message: error,
+                    file: filePath,
+                    line: lineNo
+                });
+            } else {
+                //TODO use web plugin to log it
+                document.body.innerHTML = [error, filePath, lineNo].join(" : ");
+            }
             return false;
         }
 
         return result;
-    };
+    }
 
     // Load required Scripts
     ready(function init() {
@@ -193,15 +215,16 @@
 
         domReady = true;
 
-        var config = window.ConfigIO ? window.ConfigIO : getServerParams(),
-            scripts = [
-                config.url + "/addons/console.io.js",
-                config.url + "/addons/socket.js"
-            ];
-			
-		if(!window.io){
-			scripts.push(config.url + "/socket.io/socket.io.js");
-		}
+        var scripts = [],
+            config = (typeof window.ConfigIO !== 'undefined') ? window.ConfigIO : getServerParams();
+
+        // fix the ordering for Opera
+        if (!window.io) {
+            scripts.push(config.url + "/socket.io/socket.io.js");
+        }
+
+        scripts.push(config.url + "/addons/console.io.js");
+        scripts.push(config.url + "/addons/socket.js");
 
         if (config.web) {
             scripts.push(config.url + "/addons/web.js");
@@ -215,11 +238,11 @@
                 ready: ready
             });
 
-            SocketIO.init(config);
+            window.SocketIO.init(config);
 
             //Hook into ConsoleIO API
             ConsoleIO.on('console', function (data) {
-                SocketIO.emit('console', data);
+                window.SocketIO.emit('console', data);
             });
         });
     });
