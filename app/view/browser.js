@@ -45,10 +45,12 @@ ConsoleIO.View.Browser.prototype.render = function render(target) {
 };
 
 ConsoleIO.View.Browser.prototype.add = function add(id, name, parentId, icon) {
-    if (icon) {
-        this.tree.insertNewItem(parentId, id, name, 0, icon, icon, icon);
-    } else {
-        this.tree.insertNewItem(parentId, id, name);
+    if(!this.tree.getParentId(id)){
+        if (icon) {
+            this.tree.insertNewItem(parentId, id, name, 0, icon, icon, icon);
+        } else {
+            this.tree.insertNewItem(parentId, id, name);
+        }
     }
 };
 

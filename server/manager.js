@@ -41,10 +41,8 @@ function Manager() {
                 forEach(devices, function (device) {
                     //subscribe again if device is online
                     var deviceConfig = device.getInformation();
-                    if(deviceConfig.online){
                         deviceConfig.subscribed = user.isSubscribed(deviceConfig.guid);
-                        user.emit('registeredDevice', deviceConfig);
-                    }
+                    user.emit('registeredDevice', deviceConfig);
                 });
             }
         }

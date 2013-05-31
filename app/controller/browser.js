@@ -115,13 +115,15 @@ ConsoleIO.App.Browser.prototype.render = function render(target) {
 };
 
 ConsoleIO.App.Browser.prototype.refresh = function refresh() {
-    ConsoleIO.forEach(this.store.os, function (platform) {
+    ConsoleIO.forEach(this.store.platform, function (platform) {
         this.deleteItem(platform);
     }, this.view);
 
     this.store = {
         platform: [],
+        manufacture: [],
         browser: [],
+        version: [],
         offline: [],
         subscribed: []
     };
