@@ -5,6 +5,16 @@ It uses express.io & socket.io to provide real time response from the browsers.
 
 It works pretty much on all modern browsers, mobile devices, Smart TVs, etc
 
+Tested on: 
+* Toshiba TV (2011, 2012)
+* LG NetCast TV (2011, 2012, 2013)
+* Philips NetTV (2011, 2012)
+* Samsung TV (2010, 2011, 2012, 2013)
+* Technika Avtrex STB
+* Firefox, Safari, Opera, Chrome and IE
+* iPhone, iPod, iPad, Android browser, windows 8 phone etc
+
+
 ## Install express.io (execute install.bat)
 
 ```bash
