@@ -54,7 +54,7 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
 
 ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
     this.view.clear();
-    ConsoleIO.Service.Socket.emit('deviceStatus', this.model.guid);
+    ConsoleIO.Service.Socket.emit('deviceStatus', { guid: this.model.guid });
 };
 
 ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btnId, state) {

@@ -113,7 +113,7 @@ Device.prototype.getInformation = function getInformation() {
 /**
  * Get device Name based on device information
  *
- * @private
+ * @public
  * @method getName
  * @returns {string} device name
  */
@@ -140,51 +140,141 @@ Device.prototype.getName = function getName() {
     return name.join("|");
 };
 
-
+/**
+ * Set device status to online
+ *
+ * @public
+ * @method online
+ * @param {object} request express.io request object
+ */
 Device.prototype.online = function online(request) {
+    /**
+     * When browser in refreshed/reloaded then
+     * express.io creates new request object of
+     * the same client and assign connect.sid cookie
+     * this method register new request for future communication
+     */
     this.request = request;
+
+    /** set online flag to true **/
     this.isOnline = true;
+
+    /** join the room **/
     this.request.io.join(this.guid);
+
+    /** update connection time **/
     this.timeStamp.connected = (new Date()).toLocaleTimeString();
+
+    /**
+     * device:online event is emitted at application level
+     * and is received by all connected clients
+     *
+     * @event Device#device:online
+     * @type {object}
+     */
     this.manager.emit('device:online', this.getInformation());
 };
 
+/**
+ * Set device status to offline
+ *
+ * @public
+ * @method offline
+ */
 Device.prototype.offline = function offline() {
+
+    /** set online flag to false **/
     this.isOnline = false;
+
+    /** leave the room **/
     this.request.io.leave(this.guid);
+
+    /**
+     * device:offline event is emitted at application level
+     * and is received by all connected clients
+     *
+     * @event Device#device:offline
+     * @type {object}
+     */
     this.manager.emit('device:offline', this.getInformation());
 };
 
-Device.prototype.console = function consoleLog(data) {
+/**
+ * broadcast commands sent from device
+ *
+ * @public
+ * @method command
+ * @param {string} name event name
+ * @param {object} data response parameter object
+ */
+Device.prototype.command = function command(name, data) {
+
+    /** update dataReceived timestamp **/
     this.timeStamp.dataReceived = (new Date()).toLocaleTimeString();
-    this.broadcast('console:' + this.guid, data);
+
+    /**
+     * device:name event is broadcast in the room
+     * and is received by all clients subscribed to the room
+     *
+     * @event Device#device:name
+     * @type {object}
+     */
+    this.broadcast(name + ':' + this.guid, data);
 };
 
-Device.prototype.files = function files(data) {
-    this.broadcast('files:' + this.guid, data);
-};
-
-Device.prototype.content = function content(data) {
-    this.broadcast('content:' + this.guid, data);
-};
-
-Device.prototype.source = function source(data) {
-    this.broadcast('source:' + this.guid, data);
-};
-
+/**
+ * broadcast device status event
+ *
+ * @public
+ * @method status
+ * @param {object} data response parameter object
+ */
 Device.prototype.status = function status(data) {
+
+    /** extend response to add device information **/
+    data.device = {
+        name: this.name,
+        guid: this.guid
+    };
+
+    /** extend connection information to include timestamps **/
     data.connection.online = this.isOnline;
     data.connection.registered = this.timeStamp.registered;
     data.connection.connected = this.timeStamp.connected;
     data.connection.dataReceived = this.timeStamp.dataReceived;
 
+    /**
+     * device:name event is broadcast in the room
+     * and is received by all clients subscribed to the room
+     *
+     * @event Device#device:status
+     * @type {object}
+     */
     this.broadcast('status:' + this.guid, data);
 };
 
+
+/**
+ * emits events
+ *
+ * @public
+ * @method emit
+ * @param {string} name event name
+ * @param {object} data response parameter object
+ */
 Device.prototype.emit = function emit(name, data) {
     this.request.io.emit('device:' + name, data);
 };
 
+/**
+ * broadcast events are broadcast in the room
+ * and is received by all clients subscribed to the room
+ *
+ * @public
+ * @method broadcast
+ * @param {string} name event name
+ * @param {object} data response parameter object
+ */
 Device.prototype.broadcast = function broadcast(name, data) {
     this.request.io.room(this.guid).broadcast('device:' + name, data);
 };

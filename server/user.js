@@ -51,7 +51,7 @@ User.prototype.online = function online(request) {
     //subscribe again if device is online
     this.deviceGUIDs.forEach(function (guid) {
         var device = this.manager.getDeviceByGuid(guid).getInformation();
-        if(device.online){
+        if (device.online) {
             this.request.io.join(guid);
             this.emit('subscribed', device);
         }

@@ -74,7 +74,7 @@ ConsoleIO.App.Editor.prototype.add = function add(data) {
         this.fileName = data.name;
     }
 
-    this.editor.setValue(data.content.replace(/%20/img," "));
+    this.editor.setValue(data.content.replace(/%20/img, " "));
 };
 
 ConsoleIO.App.Editor.prototype.setOption = function setOption(option, value) {

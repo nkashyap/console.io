@@ -127,19 +127,22 @@ window.InjectIO = (function () {
         }
 
         var i, url,
+            finished = false,
             length = urls.length,
             loadedScripts = {};
 
         function onScriptLoaded(scriptURL) {
-            var finished = true;
+            var done = true;
             loadedScripts[scriptURL] = true;
             for (var fileURL in loadedScripts) {
                 if (!loadedScripts[fileURL]) {
-                    finished = false;
+                    done = false;
                 }
             }
 
-            if (finished) {
+            // sometime callback is called twice even though script is already loaded
+            if (!finished && done) {
+                finished = true;
                 callback();
             }
         }
@@ -259,5 +262,5 @@ window.InjectIO = (function () {
     return {
         require: require,
         ready: ready
-    }
+    };
 }());

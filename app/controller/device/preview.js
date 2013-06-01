@@ -47,7 +47,7 @@ ConsoleIO.App.Device.Preview.prototype.add = function add(data) {
 };
 
 ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
-    ConsoleIO.Service.Socket.emit('reloadHTML', this.model.guid);
+    ConsoleIO.Service.Socket.emit('reloadHTML', { guid: this.model.guid });
 };
 
 ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(btnId, state) {

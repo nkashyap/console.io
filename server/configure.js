@@ -38,7 +38,7 @@ function configApp(appObj, property, configs) {
  * @param {object} appObj module object
  * @param {string} env node server run environment
  * @param {object} config configuration object
-  */
+ */
 function configure(appObj, env, config) {
     var envConfig = config[env],
         properties = ['set', 'enable', 'disable'];
