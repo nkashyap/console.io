@@ -131,13 +131,13 @@ var detectDevice = {
 
             /** platform data store array **/
             platform: [
-                {  userAgent: config.userAgent, search: /\bSTB|Media|TechnikaTK500SDTR212\b/i, identity: "STB" },
+                {  userAgent: config.userAgent, search: /\bSTB|NetCast.Media|Technika Media Streamer|TechnikaTK500SDTR212\b/i, identity: "STB" },
                 {  userAgent: config.userAgent, search: /\bTV|NETTV|SmartHub|SmartTV|Technika22|Maple|DTV_[a-z0-9]+\b/i, identity: "TV" },
                 {  userAgent: config.userAgent, search: /\bAndroid.*Chrome\/[.0-9]* Mobile/i, identity: "Mobile" },
                 {  userAgent: config.userAgent, search: /\bAndroid.*Chrome\/[.0-9]* (?!Mobile)/i, identity: "Tablet" },
                 {  userAgent: config.userAgent, search: /\biPad\b/i, identity: "Tablet" },
-                {  userAgent: config.userAgent, search: /\biPhone\b/i, identity: "Mobile" },
                 {  userAgent: config.userAgent, search: /\biPod\b/i, identity: "Media" },
+                {  userAgent: config.userAgent, search: /\biPhone|IEMobile\b/i, identity: "Mobile" },
                 {  userAgent: config.userAgent, search: /\bPlaystation\b/i, identity: "Console" },
 
                 {  platform: config.platform, search: /\bWin|Mac|Linux/i, identity: "PC" }
@@ -182,10 +182,10 @@ var detectDevice = {
 
             /** version data store array **/
             version: [
-                {  userAgent: config.userAgent, search: /2010/i, identity: "2010" },
-                {  userAgent: config.userAgent, search: /2011|TL868|NETTV\/3.1/i, identity: "2011" },
-                {  userAgent: config.userAgent, search: /2012|RL953|NETTV\/3.0|NETTV\/3.2|NETTV\/4.0/i, identity: "2012" },
-                {  userAgent: config.userAgent, search: /2013/i, identity: "2013" },
+                {  userAgent: config.userAgent, search: /2010\b/i, identity: "2010" },
+                {  userAgent: config.userAgent, search: /2011|TL868|NETTV\/3.1\b/i, identity: "2011" },
+                {  userAgent: config.userAgent, search: /2012|RL953|NETTV\/3.0|NETTV\/3.2|NETTV\/4.0\b/i, identity: "2012" },
+                {  userAgent: config.userAgent, search: /2013\b/i, identity: "2013" },
 
                 {  userAgent: config.userAgent, versionSearch: /\bTesco-Technika22-|Tesco-TechnikaTK500SDTR/i },
                 {  userAgent: config.userAgent, versionSearch: /\bEspial Browser\/\b/i },

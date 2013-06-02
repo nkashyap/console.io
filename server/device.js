@@ -238,10 +238,12 @@ Device.prototype.status = function status(data) {
     };
 
     /** extend connection information to include timestamps **/
-    data.connection.online = this.isOnline;
-    data.connection.registered = this.timeStamp.registered;
-    data.connection.connected = this.timeStamp.connected;
-    data.connection.dataReceived = this.timeStamp.dataReceived;
+    this.manager.extend(data.connection, {
+        online: this.isOnline,
+        registered: this.timeStamp.registered,
+        connected: this.timeStamp.connected,
+        dataReceived: this.timeStamp.dataReceived
+    });
 
     /**
      * device:name event is broadcast in the room

@@ -75,29 +75,31 @@ ConsoleIO.App.Browser.prototype.unSubscribed = function unSubscribed(data) {
 };
 
 ConsoleIO.App.Browser.prototype.add = function add(data) {
-    var name = data.browser + '-' + data.version;
+    var manufacture = data.platform + '-' + data.manufacture,
+        browser = manufacture + '-' + data.browser,
+        version = browser + '-' + data.version;
 
     if (this.store.platform.indexOf(data.platform) === -1) {
-        this.view.add(data.platform, data.platform, 0, ConsoleIO.Constraint.ICONS[data.platform.toUpperCase()]);
         this.store.platform.push(data.platform);
+        this.view.add(data.platform, data.platform, 0, ConsoleIO.Constraint.ICONS[data.platform.toUpperCase()]);
     }
 
-    if (this.store.manufacture.indexOf(data.manufacture) === -1) {
-        this.view.add(data.manufacture, data.manufacture, data.platform, ConsoleIO.Constraint.ICONS[data.manufacture.toUpperCase()]);
-        this.store.manufacture.push(data.manufacture);
+    if (this.store.manufacture.indexOf(manufacture) === -1) {
+        this.store.manufacture.push(manufacture);
+        this.view.add(manufacture, data.manufacture, data.platform, ConsoleIO.Constraint.ICONS[data.manufacture.toUpperCase()]);
     }
 
-    if (this.store.browser.indexOf(data.browser) === -1) {
-        this.view.add(data.browser, data.browser, data.manufacture, ConsoleIO.Constraint.ICONS[data.browser.toUpperCase()]);
-        this.store.browser.push(data.browser);
+    if (this.store.browser.indexOf(browser) === -1) {
+        this.store.browser.push(browser);
+        this.view.add(browser, data.browser, manufacture, ConsoleIO.Constraint.ICONS[data.browser.toUpperCase()]);
     }
 
-    if (this.store.version.indexOf(name) === -1) {
-        this.view.add(name, data.version, data.browser, ConsoleIO.Constraint.ICONS.VERSION);
-        this.store.version.push(name);
+    if (this.store.version.indexOf(version) === -1) {
+        this.store.version.push(version);
+        this.view.add(version, data.version, browser, ConsoleIO.Constraint.ICONS.VERSION);
     }
 
-    this.view.add(data.guid, data.browser, name);
+    this.view.add(data.guid, data.browser, version);
 
     //set correct icon
     if (data.subscribed) {

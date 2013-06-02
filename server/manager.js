@@ -1,16 +1,18 @@
 /**
- * Created with IntelliJ IDEA.
- * User: nisheeth
- * Date: 19/05/13
- * Time: 17:06
- * To change this template use File | Settings | File Templates.
+ * ConsoleIO connection manager server module
+ *
+ * @public
+ * @name Manager
+ * @function Manager
+ * @requires module:device
+ * @requires module:user
+ *
+ * @author Nisheeth Kashyap <nisheeth.k.kashyap@gmail.com>
  */
-
 function Manager() {
 
     var Device = require('./device'),
         User = require('./user'),
-        express = require('express.io'),
         application = null,
         devices = {},
         users = {},
@@ -21,6 +23,16 @@ function Manager() {
             Object.getOwnPropertyNames(list).forEach(function (name) {
                 callback(list[name]);
             });
+        },
+
+        extend: function extend(target, source) {
+            target = target || {};
+
+            Object.getOwnPropertyNames(source).forEach(function (name) {
+                target[name] = source[name];
+            });
+
+            return target;
         },
 
         defineRouteHandler: function defineRouteHandler(list, name) {
@@ -57,6 +69,7 @@ function Manager() {
                 devices[request.cookies.guid] = deviceReg;
                 manage.emit('device:registered', deviceReg.getInformation());
             }
+
             deviceReg.online(request);
         },
 
@@ -104,60 +117,16 @@ function Manager() {
             if (userReg) {
                 manage.forEach(devices, function (device) {
                     var deviceConfig = device.getInformation();
-                    deviceConfig.subscribed = userReg.isSubscribed(deviceConfig.guid);
-                    userReg.emit('registeredDevice', deviceConfig);
+                    userReg.emit('registeredDevice', manage.extend(deviceConfig, {
+                        subscribed: userReg.isSubscribed(deviceConfig.guid)
+                    }));
                 });
             }
         }
     };
 
-    function hasGUIDCookie(document) {
-        if (document && document.cookie) {
-            var i,
-                cookieName,
-                cookieValue,
-                cookies = document.cookie.split(";");
-
-            for (i = 0; i < cookies.length; i++) {
-                cookieName = (cookies[i].substr(0, cookies[i].indexOf("="))).replace(/^\s+|\s+$/g, "");
-                cookieValue = cookies[i].substr(cookies[i].indexOf("=") + 1);
-
-                if (cookieName === 'guid') {
-                    return unescape(cookieValue);
-                }
-            }
-        }
-
-        return null;
-    }
-
-    function setGUIDCookie(document) {
-        var guidCookie, expiryDate = new Date();
-
-        expiryDate.setDate(expiryDate.getDate() + 365);
-        guidCookie = "guid=" + escape(((new Date().getTime()) + "-" + Math.random()).replace(".", "")) + "; expires=" + expiryDate.toUTCString() + "; path=/";
-
-        if (document.setHeader) {
-            document.setHeader("Set-Cookie", [guidCookie]);
-        } else if (document.headers) {
-            document.headers.cookie = guidCookie;
-        }
-    }
-
-    function setUpCookieHandler() {
-        var originalHandleRequest = express.io.Manager.prototype.handleRequest;
-        express.io.Manager.prototype.handleRequest = function handleRequest(request, response) {
-            if (!hasGUIDCookie(request.headers)) {
-                setGUIDCookie(response);
-            }
-            originalHandleRequest.call(application.io, request, response);
-        };
-    }
-
     function setUp(app) {
         application = app;
-
-        setUpCookieHandler();
 
         // IO handlers
         // Setup a route for the ready event, and add session data.
@@ -192,7 +161,6 @@ function Manager() {
             unSubscribe: manage.defineRouteHandler(users, 'unSubscribe')
         });
     }
-
 
     return {
         setUp: setUp

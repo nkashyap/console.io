@@ -40,8 +40,7 @@ function init() {
         length = Commands.length;
 
     var isEventSet = false,
-        connectionMode = document.getElementById('ConnectionMode'),
-        log = document.getElementById('log');
+        connectionMode = document.getElementById('ConnectionMode');
 
     setInterval(function () {
         if (currentIndex < length) {
@@ -65,11 +64,9 @@ function init() {
             connectionMode.innerHTML = info;
         }
 
-        if(!isEventSet && ConsoleIO){
-            ConsoleIO.on('console', function(data){
-                var li = document.createElement('li');
-                li.innerHTML = data.type + ': '+ data.message;
-                log.insertBefore(li, log.firstElementChild || log.firstChild);
+        if (!isEventSet && ConsoleIO) {
+            ConsoleIO.on('console', function (data) {
+                window.InjectIO.debug(data.type + ': ' + data.message);
             });
             isEventSet = true;
         }

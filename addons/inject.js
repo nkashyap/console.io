@@ -86,7 +86,8 @@ window.InjectIO = (function () {
         node.charset = 'utf-8';
         node.async = true;
 
-        if (node.readyState === "complete") {
+        //IEMobile readyState "loaded" instead of "complete"
+        if (node.readyState === "complete" || node.readyState === "loaded") {
             setTimeout(function () {
                 callback(url);
             }, 1);
@@ -94,7 +95,8 @@ window.InjectIO = (function () {
 
         function onScriptLoad() {
             if (node.attachEvent) {
-                if (node.readyState === "complete") {
+                //IEMobile readyState "loaded" instead of "complete"
+                if (node.readyState === "complete" || node.readyState === "loaded") {
                     node.detachEvent('onreadystatechange', onScriptLoad);
                     callback(url);
                 }
@@ -109,14 +111,15 @@ window.InjectIO = (function () {
         }
 
         if (node.attachEvent && !(node.attachEvent.toString && node.attachEvent.toString().indexOf('[native code') < 0) && !window.opera) {
+            // IE onload handler
+            node.onload = onScriptLoad;
             node.attachEvent('onreadystatechange', onScriptLoad);
+
         } else {
             node.addEventListener('load', onScriptLoad, false);
             node.addEventListener('error', onScriptError, false);
         }
 
-        // IE onload handler
-        node.onload = onScriptLoad;
         node.src = url;
         head.appendChild(node);
     }
@@ -205,18 +208,35 @@ window.InjectIO = (function () {
         return result;
     }
 
+    function debug(msg) {
+        var log = document.getElementById('log') || document.body, li;
+        if (log) {
+            li = document.createElement('li');
+            li.innerHTML = msg;
+            log.insertBefore(li, log.firstElementChild || log.firstChild);
+        }
+    }
+
     function setUp(config) {
-        ConsoleIO.extend(ConsoleIO, {
-            require: require,
-            ready: ready
-        });
+        if (typeof window.ConsoleIO !== 'undefined') {
+            window.ConsoleIO.extend(window.ConsoleIO, {
+                debug: debug,
+                require: require,
+                ready: ready
+            });
 
-        //Hook into ConsoleIO API
-        ConsoleIO.on('console', function (data) {
-            window.SocketIO.emit('console', data);
-        });
+            //Hook into ConsoleIO API
+            window.ConsoleIO.on('console', function (data) {
+                window.SocketIO.emit('console', data);
+            });
 
-        window.SocketIO.init(config);
+            window.SocketIO.init(config);
+        } else {
+            debug("Console.IO dependencies are missing!" +
+                " If you are using inject.js to load dependencies" +
+                " then it is possible that your browser doesn't support" +
+                " dynamic script injection. Please include all files explicitly");
+        }
     }
 
     // Load required Scripts
@@ -227,7 +247,7 @@ window.InjectIO = (function () {
         domReady = true;
 
         var scripts = [],
-            config = window.ConfigIO ? window.ConfigIO : getServerParams();
+            config = typeof window.ConfigIO !== 'undefined' ? window.ConfigIO : getServerParams();
 
         // fix the ordering for Opera
         if (!window.io) {
@@ -260,6 +280,7 @@ window.InjectIO = (function () {
     window.onerror = onErrorFn;
 
     return {
+        debug: debug,
         require: require,
         ready: ready
     };
