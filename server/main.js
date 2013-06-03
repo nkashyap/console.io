@@ -8,6 +8,8 @@
  * @requires module:config
  * @requires module:configure
  * @requires module:manager
+ * @requires module:cluster
+ * @requires module:redis
  *
  * @author Nisheeth Kashyap <nisheeth.k.kashyap@gmail.com>
  */
