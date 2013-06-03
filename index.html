@@ -41,8 +41,8 @@
         <h1>
 <a name="consoleio" class="anchor" href="#consoleio"><span class="octicon octicon-link"></span></a>Console.IO</h1>
 
-<p>Console.IO is a Node.JS project. It provides Remote Web Console for websites, Javascript, Smart Tv, mobile phones apps.
-It uses express.io &amp; socket.io to provide real time response from the browsers.</p>
+<p>Console.IO is a NodeJS project. It provides Remote Web Console for websites and web applications.
+It uses express.io (express &amp; socket.io) to provide user real time experience.</p>
 
 <p>It works pretty much on all modern browsers, mobile devices, Smart TVs, etc</p>
 
@@ -54,7 +54,7 @@ It uses express.io &amp; socket.io to provide real time response from the browse
 <li>Philips NetTV (2011, 2012)</li>
 <li>Samsung TV (2010, 2011, 2012, 2013)</li>
 <li>Technika Avtrex STB</li>
-<li>Firefox, Safari, Opera, Chrome and IE</li>
+<li>Firefox, Safari, Opera, Chrome, Maple and IE</li>
 <li>iPhone, iPod, iPad, Android browser, windows 8 phone etc</li>
 </ul><h2>
 <a name="install-expressio-execute-installbat" class="anchor" href="#install-expressio-execute-installbat"><span class="octicon octicon-link"></span></a>Install express.io (execute install.bat)</h2>
@@ -69,7 +69,19 @@ It uses express.io &amp; socket.io to provide real time response from the browse
 </pre></div>
 
 <h2>
-<a name="include-consoleio-in-your-web-page" class="anchor" href="#include-consoleio-in-your-web-page"><span class="octicon octicon-link"></span></a>Include console.io in your web page</h2>
+<a name="scale-consoleio-server" class="anchor" href="#scale-consoleio-server"><span class="octicon octicon-link"></span></a>Scale Console.IO server</h2>
+
+<p>Console.IO use socket.io and in order to scale socket.io you need to run redis server (/redis/redis-server.exe).
+And also change following value in server/config.js before starting the Console.IO server</p>
+
+<div class="highlight"><pre>redis: {
+        enable: true, // <span class="err">&lt;</span>- true to enable socket.io scaling
+        process: 6 // number of process to run
+    }
+</pre></div>
+
+<h2>
+<a name="include-consoleio-in-your-web-page" class="anchor" href="#include-consoleio-in-your-web-page"><span class="octicon octicon-link"></span></a>Include Console.IO in your web page</h2>
 
 <p>include inject.js scripts with config parameters</p>
 
@@ -90,12 +102,20 @@ It uses express.io &amp; socket.io to provide real time response from the browse
 };
 </pre></div>
 
+<p>OR you can include all files individually</p>
+
+<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server/socket.io&gt;/socket.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/console.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/socket.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/inject.js?url=http://NodeServerURL:Port"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</pre></div>
+
 <p>Visit http://NodeServerURL:Port/ for ConsoleIO interface</p>
 
 <p><img src="https://raw.github.com/nkashyap/console.io/master/console.io.png" alt="Screen shot"></p>
 
-<h1>
-<a name="consoleio-editor" class="anchor" href="#consoleio-editor"><span class="octicon octicon-link"></span></a>Console.IO Editor</h1>
+<h2>
+<a name="consoleio-editor" class="anchor" href="#consoleio-editor"><span class="octicon octicon-link"></span></a>Console.IO Editor</h2>
 
 <p>You can execute commands on remote client from Console.IO. You can execute single &amp; multilines javascript code.</p>
 
@@ -112,8 +132,8 @@ It uses express.io &amp; socket.io to provide real time response from the browse
 }())
 </pre></div>
 
-<h1>
-<a name="consoleio-device-and-tabs" class="anchor" href="#consoleio-device-and-tabs"><span class="octicon octicon-link"></span></a>Console.IO Device and Tabs</h1>
+<h2>
+<a name="consoleio-device-and-tabs" class="anchor" href="#consoleio-device-and-tabs"><span class="octicon octicon-link"></span></a>Console.IO Device and Tabs</h2>
 
 <ul>
 <li>Files: Show all attached javascript and css files in the web page</li>
@@ -131,8 +151,8 @@ It uses express.io &amp; socket.io to provide real time response from the browse
 <li>Filter logs by type</li>
 </ul>
 </li>
-</ul><h1>
-<a name="console-api-methods-supported" class="anchor" href="#console-api-methods-supported"><span class="octicon octicon-link"></span></a>Console API methods supported</h1>
+</ul><h2>
+<a name="console-api-methods-supported" class="anchor" href="#console-api-methods-supported"><span class="octicon octicon-link"></span></a>Console API methods supported</h2>
 
 <ul>
 <li>console.assert(x)</li>
@@ -148,8 +168,8 @@ It uses express.io &amp; socket.io to provide real time response from the browse
 <li>console.error(error)</li>
 <li>console.exception(error)</li>
 <li>console.trace()</li>
-</ul><h1>
-<a name="coming-soon" class="anchor" href="#coming-soon"><span class="octicon octicon-link"></span></a>Coming soon...</h1>
+</ul><h2>
+<a name="coming-soon" class="anchor" href="#coming-soon"><span class="octicon octicon-link"></span></a>Coming soon...</h2>
 
 <ul>
 <li>console.group()</li>
@@ -160,21 +180,21 @@ It uses express.io &amp; socket.io to provide real time response from the browse
 <li>console.profiles</li>
 <li>console.profile()</li>
 <li>console.profileEnd()</li>
-</ul><h1>
-<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h1>
+</ul><h2>
+<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h2>
 
 <ul>
 <li>Change it into npm module</li>
 <li>Load addons dynamically (e.g web, socket, etc)</li>
 <li>Update Readme with full feature list</li>
 <li>Add SSL support</li>
-</ul><h1>
-<a name="copyright-and-license" class="anchor" href="#copyright-and-license"><span class="octicon octicon-link"></span></a>Copyright and license</h1>
+</ul><h2>
+<a name="copyright-and-license" class="anchor" href="#copyright-and-license"><span class="octicon octicon-link"></span></a>Copyright and license</h2>
 
 <p>MIT LICENSE </p>
 
-<h1>
-<a name="reference" class="anchor" href="#reference"><span class="octicon octicon-link"></span></a>Reference</h1>
+<h2>
+<a name="reference" class="anchor" href="#reference"><span class="octicon octicon-link"></span></a>Reference</h2>
 
 <ul>
 <li><a href="https://github.com/eriwen/javascript-stacktrace">Javascript Stacktrace</a></li>
