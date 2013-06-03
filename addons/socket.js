@@ -107,7 +107,7 @@ window.SocketIO = (function () {
         onReconnect: function onReconnect(mode, attempts) {
             Socket.connectionMode = mode;
             Socket.subscribed = true;
-            console.log('Reconnected to the Server after' + attempts + ' attempts.');
+            console.log('Reconnected to the Server after ' + attempts + ' attempts.');
             Socket.forceReconnect();
         },
 

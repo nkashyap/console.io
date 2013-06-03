@@ -111,7 +111,7 @@ window.InjectIO = (function () {
         }
 
         if (node.attachEvent && !(node.attachEvent.toString && node.attachEvent.toString().indexOf('[native code') < 0) && !window.opera) {
-            // IE onload handler
+            // IE onload handler, this will also cause callback to be called twice
             node.onload = onScriptLoad;
             node.attachEvent('onreadystatechange', onScriptLoad);
 
@@ -137,13 +137,14 @@ window.InjectIO = (function () {
         function onScriptLoaded(scriptURL) {
             var done = true;
             loadedScripts[scriptURL] = true;
+
             for (var fileURL in loadedScripts) {
                 if (!loadedScripts[fileURL]) {
                     done = false;
                 }
             }
 
-            // sometime callback is called twice even though script is already loaded
+            // In IE callback is called twice even though script is already loaded
             if (!finished && done) {
                 finished = true;
                 callback();
@@ -201,6 +202,8 @@ window.InjectIO = (function () {
                     file: filePath,
                     line: lineNo
                 });
+            } else {
+                debug([error, filePath, lineNo].join("; "));
             }
             return false;
         }
@@ -209,7 +212,14 @@ window.InjectIO = (function () {
     }
 
     function debug(msg) {
-        var log = document.getElementById('log') || document.body, li;
+        var log = document.getElementById('log'), li;
+
+        if (!log && document.body) {
+            log = document.createElement('ul');
+            log.setAttribute('id', 'log');
+            document.body.insertBefore(log, document.body.firstElementChild || document.body.firstChild);
+        }
+
         if (log) {
             li = document.createElement('li');
             li.innerHTML = msg;
