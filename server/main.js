@@ -18,10 +18,9 @@ function main() {
         config = require('./config'),
         configure = require('./configure'),
         cluster = require('cluster'),
-        redis = require('redis'),
-        numCPUs = require('os').cpus().length;
+        redis = require('redis');
 
-    // This is what the workers will do.
+    // server worker process
     function Workers() {
         var app = express().http().io(),
             manager = require('./manager');
@@ -33,7 +32,7 @@ function main() {
         configure(app.io, 'production', config.io);
 
         // Setup the redis store for scalable io.
-        if (config.redis) {
+        if (config.redis.enable) {
             app.io.set('store', new express.io.RedisStore({
                 redisPub: redis.createClient(),
                 redisSub: redis.createClient(),
@@ -114,8 +113,8 @@ function main() {
 
 
     // Start forking if you are the master.
-    if (cluster.isMaster && config.redis) {
-        for (var i = 0; i < numCPUs; i++) {
+    if (cluster.isMaster && config.redis.enable) {
+        while (config.redis.process--) {
             cluster.fork();
         }
     } else {
