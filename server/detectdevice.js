@@ -135,7 +135,7 @@ var detectDevice = {
                 {  userAgent: config.userAgent, search: /\bTV|NETTV|SmartHub|SmartTV|Technika22|Maple|DTV_[a-z0-9]+\b/i, identity: "TV" },
                 {  userAgent: config.userAgent, search: /\bAndroid.*Chrome\/[.0-9]* Mobile/i, identity: "Mobile" },
                 {  userAgent: config.userAgent, search: /\bAndroid.*Chrome\/[.0-9]* (?!Mobile)/i, identity: "Tablet" },
-                {  userAgent: config.userAgent, search: /\biPad\b/i, identity: "Tablet" },
+                {  userAgent: config.userAgent, search: /\biPad|GT-P1000\b/i, identity: "Tablet" },
                 {  userAgent: config.userAgent, search: /\biPod\b/i, identity: "Media" },
                 {  userAgent: config.userAgent, search: /\biPhone|IEMobile\b/i, identity: "Mobile" },
                 {  userAgent: config.userAgent, search: /\bPlaystation\b/i, identity: "Console" },
@@ -153,6 +153,7 @@ var detectDevice = {
                 {  userAgent: config.userAgent, search: /\bPlaystation\b/i, identity: "Sony" },
                 {  userAgent: config.userAgent, search: /\bMSIE\b/i, identity: "Microsoft" },
                 {  userAgent: config.userAgent, search: /\bFirefox\b/i, identity: "Mozilla" },
+                {  userAgent: config.userAgent, search: /\bAndroid\b/i, identity: "Android" },
 
                 {  vendor: config.vendor, search: /\bGoogle\b/i, identity: "Google" },
                 {  vendor: config.vendor, search: /\bApple\b/i, identity: "Apple" },
@@ -169,6 +170,7 @@ var detectDevice = {
                 {  userAgent: config.userAgent, search: /\bEspial Browser\b/i, identity: "Espial" },
                 {  userAgent: config.userAgent, search: /\bTechnika22|TechnikaTK500SDTR212\b/i, identity: "MStar" },
                 {  userAgent: config.userAgent, search: /\bOreganMediaBrowser\b/i, identity: "Oregan Media" },
+                {  userAgent: config.userAgent, search: /\bGINGERBREAD\b/i, identity: "Gingerbread" },
 
                 {  userAgent: config.userAgent, search: /\bPlaystation\b/i, identity: "Playstation" },
                 {  userAgent: config.userAgent, search: /\bChrome\b/i, identity: "Chrome" },

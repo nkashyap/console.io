@@ -173,9 +173,11 @@ ConsoleIO.Constraint.ICONS = {
     MOZILLA: 'mozilla.png',
     GOOGLE: 'google.png',
     APPLE: 'apple.png',
+    ANDROID: 'android.png',
     "OPERA SOFTWARE": 'opera.png',
 
     //Browser icons
+    GINGERBREAD: 'gingerbread.jpg',
     CHROME: 'chrome.png',
     IE: 'explorer.png',
     FIREFOX: 'firefox.png',
@@ -194,6 +196,7 @@ ConsoleIO.Constraint.ICONS = {
     STYLESHEET: 'stylesheet.gif',
     WEB: 'web.png',
     FILE: '',
+    UNKNOWN: 'unknown.png',
     FOLDEROPEN: '../../' + ConsoleIO.Constraint.IMAGE_URL.get('tree') + '/folderOpen.gif'
 };
 

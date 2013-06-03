@@ -81,17 +81,17 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
 
     if (this.store.platform.indexOf(data.platform) === -1) {
         this.store.platform.push(data.platform);
-        this.view.add(data.platform, data.platform, 0, ConsoleIO.Constraint.ICONS[data.platform.toUpperCase()]);
+        this.view.add(data.platform, data.platform, 0, ConsoleIO.Constraint.ICONS[data.platform.toUpperCase()] || ConsoleIO.Constraint.ICONS.UNKNOWN);
     }
 
     if (this.store.manufacture.indexOf(manufacture) === -1) {
         this.store.manufacture.push(manufacture);
-        this.view.add(manufacture, data.manufacture, data.platform, ConsoleIO.Constraint.ICONS[data.manufacture.toUpperCase()]);
+        this.view.add(manufacture, data.manufacture, data.platform, ConsoleIO.Constraint.ICONS[data.manufacture.toUpperCase()] || ConsoleIO.Constraint.ICONS.UNKNOWN);
     }
 
     if (this.store.browser.indexOf(browser) === -1) {
         this.store.browser.push(browser);
-        this.view.add(browser, data.browser, manufacture, ConsoleIO.Constraint.ICONS[data.browser.toUpperCase()]);
+        this.view.add(browser, data.browser, manufacture, ConsoleIO.Constraint.ICONS[data.browser.toUpperCase()] || ConsoleIO.Constraint.ICONS.UNKNOWN);
     }
 
     if (this.store.version.indexOf(version) === -1) {
