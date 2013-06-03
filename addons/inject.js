@@ -94,15 +94,16 @@ window.InjectIO = (function () {
         }
 
         function onScriptLoad() {
-            if (node.attachEvent) {
+            if (node.removeEventListener) {
+                node.removeEventListener('load', onScriptLoad, false);
+                callback(url);
+
+            } else if (node.attachEvent) {
                 //IEMobile readyState "loaded" instead of "complete"
                 if (node.readyState === "complete" || node.readyState === "loaded") {
                     node.detachEvent('onreadystatechange', onScriptLoad);
                     callback(url);
                 }
-            } else {
-                node.removeEventListener('load', onScriptLoad, false);
-                callback(url);
             }
         }
 
@@ -110,14 +111,14 @@ window.InjectIO = (function () {
             node.removeEventListener('error', onScriptError, false);
         }
 
-        if (node.attachEvent && !(node.attachEvent.toString && node.attachEvent.toString().indexOf('[native code') < 0) && !window.opera) {
+        if (node.addEventListener) {
+            node.addEventListener('load', onScriptLoad, false);
+            node.addEventListener('error', onScriptError, false);
+
+        } else if (node.attachEvent && !(node.attachEvent.toString && node.attachEvent.toString().indexOf('[native code') < 0) && !window.opera) {
             // IE onload handler, this will also cause callback to be called twice
             node.onload = onScriptLoad;
             node.attachEvent('onreadystatechange', onScriptLoad);
-
-        } else {
-            node.addEventListener('load', onScriptLoad, false);
-            node.addEventListener('error', onScriptError, false);
         }
 
         node.src = url;
@@ -137,7 +138,6 @@ window.InjectIO = (function () {
         function onScriptLoaded(scriptURL) {
             var done = true;
             loadedScripts[scriptURL] = true;
-
             for (var fileURL in loadedScripts) {
                 if (!loadedScripts[fileURL]) {
                     done = false;

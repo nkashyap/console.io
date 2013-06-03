@@ -62,8 +62,10 @@ window.SocketIO = (function () {
         emit: function emit(name, data) {
             if (this.io && this.io.socket.connected) {
                 this.io.emit('device:' + name, data);
+                return true;
             } else {
                 this.pending.push({ name: name, data: data });
+                return false;
             }
         },
 
@@ -81,6 +83,17 @@ window.SocketIO = (function () {
                     Socket.setInterval = null;
                 }
             }, this.forceReconnectInterval);
+        },
+
+        clearPendingQueue: function clearPendingQueue() {
+            var queue = [];
+            ConsoleIO.forEach(Socket.pending, function (item) {
+                var state = Socket.emit(item.name, item.data);
+                if(!state){
+                    queue.push(item);
+                }
+            });
+            Socket.pending = queue;
         },
 
         onConnect: function onConnect() {
@@ -107,6 +120,7 @@ window.SocketIO = (function () {
         onReconnect: function onReconnect(mode, attempts) {
             Socket.connectionMode = mode;
             Socket.subscribed = true;
+            Socket.clearPendingQueue();
             console.log('Reconnected to the Server after ' + attempts + ' attempts.');
             Socket.forceReconnect();
         },
@@ -149,12 +163,9 @@ window.SocketIO = (function () {
             }
 
             if (data.guid === Socket.guid) {
-                console.log('Online', Socket.name);
                 Socket.subscribed = true;
-                ConsoleIO.forEach(Socket.pending, function (item) {
-                    Socket.emit(item.name, item.data);
-                });
-                Socket.pending = [];
+                Socket.clearPendingQueue();
+                console.log('Online', Socket.name);
             }
 
             Socket.forceReconnect();
