@@ -8,9 +8,7 @@
 
 window.ConsoleIO = (function () {
 
-    //"use strict";
-
-    var native = window.console,
+    var nativeConsole = window.console,
         Utils,
         Formatter,
         Stack,
@@ -82,9 +80,9 @@ window.ConsoleIO = (function () {
         },
 
         off: function off(eventName, callback) {
-            var callbacks = events[eventName];
+            var index, callbacks = events[eventName];
             if (callbacks) {
-                var index = callbacks.indexOf(callback);
+                index = callbacks.indexOf(callback);
                 if (index > -1) {
                     callbacks.splice(index, 1);
                 }
@@ -615,10 +613,10 @@ window.ConsoleIO = (function () {
 
 
     //IE Fix
-    if (Function.prototype.bind && native && typeof native.log === "object") {
+    if (Function.prototype.bind && nativeConsole && typeof nativeConsole.log === "object") {
         Utils.forEach(["log", "info", "warn", "error", "assert", "dir", "clear", "profile", "profileEnd"],
             function (method) {
-                native[method] = this.bind(native[method], native);
+                nativeConsole[method] = this.bind(nativeConsole[method], nativeConsole);
             },
             Function.prototype.call
         );
@@ -634,12 +632,12 @@ window.ConsoleIO = (function () {
     }
 
     function logger(type, args, value, callStack) {
-        if (native && nativeEnabled) {
-            if (native[type]) {
+        if (nativeConsole && nativeEnabled) {
+            if (nativeConsole[type]) {
                 if (withoutScope.indexOf(type) > -1) {
-                    native[type](args);
+                    nativeConsole[type](args);
                 } else {
-                    native[type].apply(native, args);
+                    nativeConsole[type].apply(nativeConsole, args);
                 }
             }
         }
@@ -660,7 +658,7 @@ window.ConsoleIO = (function () {
     window.console = Wrapper;
 
     return Utils.extend(Utils, {
-        native: native,
+        console: nativeConsole,
         Stringify: Stringify
     });
 }());
