@@ -1,1 +1,1 @@
-npm install express.io
+npm install express.io hiredis redis

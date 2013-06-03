@@ -19,6 +19,7 @@
  * @property {Array}   io.production.enable     - io production enable configuration
  * @property {Array}   io.production.disable    - io production disable configuration
  * @property {object}  io.production.set        - io production env setters
+ * @property {boolean} redis                    - true to scale console.io server
  *
  * @author Nisheeth Kashyap <nisheeth.k.kashyap@gmail.com>
  */
@@ -71,7 +72,10 @@ var config = {
                 { 'log level': 1 }
             ]
         }
-    }
+    },
+
+    /** redis configurations **/
+    redis: false
 };
 
 /**
