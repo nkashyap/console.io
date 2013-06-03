@@ -1,7 +1,7 @@
 # Console.IO
 
-Console.IO is a Node.JS project. It provides Remote Web Console for websites, Javascript, Smart Tv, mobile phones apps.
-It uses express.io & socket.io to provide real time response from the browsers.
+Console.IO is a NodeJS project. It provides Remote Web Console for websites and web applications.
+It uses express.io (express & socket.io) to provide user real time experience.
 
 It works pretty much on all modern browsers, mobile devices, Smart TVs, etc
 
@@ -11,7 +11,7 @@ Tested on:
 * Philips NetTV (2011, 2012)
 * Samsung TV (2010, 2011, 2012, 2013)
 * Technika Avtrex STB
-* Firefox, Safari, Opera, Chrome and IE
+* Firefox, Safari, Opera, Chrome, Maple and IE
 * iPhone, iPod, iPad, Android browser, windows 8 phone etc
 
 
@@ -27,7 +27,19 @@ npm install express.io
 node ./server/main.js
 ```
 
-## Include console.io in your web page
+##Scale Console.IO server
+
+Console.IO use socket.io and in order to scale socket.io you need to run redis server (/redis/redis-server.exe).
+And also change following value in server/config.js before starting the Console.IO server
+
+```html
+redis: {
+        enable: true, // <- true to enable socket.io scaling
+        process: 6 // number of process to run
+    }
+```
+
+## Include Console.IO in your web page
 
 include inject.js scripts with config parameters
 
@@ -50,11 +62,21 @@ window.ConfigIO = {
 };
 ```
 
+OR you can include all files individually
+
+```html
+<script type="text/javascript" src="<Local Folder OR Node Server/socket.io>/socket.io.js"></script>
+<script type="text/javascript" src="<Local Folder OR Node Server>/console.io.js"></script>
+<script type="text/javascript" src="<Local Folder OR Node Server>/socket.js"></script>
+<script type="text/javascript" src="<Local Folder OR Node Server>/inject.js?url=http://NodeServerURL:Port"></script>
+```
+
+
 Visit http://NodeServerURL:Port/ for ConsoleIO interface
 
 ![Screen shot](https://raw.github.com/nkashyap/console.io/master/console.io.png)
 
-#Console.IO Editor
+##Console.IO Editor
 
 You can execute commands on remote client from Console.IO. You can execute single & multilines javascript code.
 
@@ -70,7 +92,7 @@ Note: All multilines code should be wrapped within self executable function. E.G
 }())
 ```
 
-#Console.IO Device and Tabs
+##Console.IO Device and Tabs
 * Files: Show all attached javascript and css files in the web page
 * Status: Device Status and some basic information
 * Source: Double click on a file in file explorer to view file content
@@ -84,7 +106,7 @@ Note: All multilines code should be wrapped within self executable function. E.G
 	* Filter logs by type
 
 
-#Console API methods supported
+##Console API methods supported
  * console.assert(x)
  * console.count(key)
  * console.time(name, reset)
@@ -99,7 +121,7 @@ Note: All multilines code should be wrapped within self executable function. E.G
  * console.exception(error)
  * console.trace()
 
-#Coming soon...
+##Coming soon...
  * console.group()
  * console.groupCollapsed()
  * console.groupEnd()
@@ -109,16 +131,16 @@ Note: All multilines code should be wrapped within self executable function. E.G
  * console.profile()
  * console.profileEnd()
 
-#TODO
+##TODO
  * Change it into npm module
  * Load addons dynamically (e.g web, socket, etc)
  * Update Readme with full feature list
  * Add SSL support
 
-#Copyright and license
+##Copyright and license
  MIT LICENSE 
 
-#Reference
+##Reference
  * [Javascript Stacktrace] (https://github.com/eriwen/javascript-stacktrace)
  * [codemirror] (http://codemirror.net/)
  * [express.io] (https://github.com/techpines/express.io)
