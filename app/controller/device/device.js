@@ -41,3 +41,7 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
 ConsoleIO.App.Device.prototype.setTitle = function setTitle(contextId, title) {
     this.view.setTitle(this.context[contextId], title);
 };
+
+ConsoleIO.App.Device.prototype.activate = function activate(state) {
+    this.panel.activate(state);
+};

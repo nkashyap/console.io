@@ -51,7 +51,7 @@ ConsoleIO.App.Manager.prototype.remove = function remove(data) {
         }
 
         ConsoleIO.every(this.store.device, function (device, index) {
-            if (device.guid === data.guid) {
+            if (device.model.guid === data.guid) {
                 //device.destroy();
                 this.splice(index, 1);
                 return false;
@@ -79,9 +79,40 @@ ConsoleIO.App.Manager.prototype.close = function close(guid) {
 };
 
 ConsoleIO.App.Manager.prototype.onTabClick = function onTabClick(tabId) {
+    if (this.activeTab && this.activeTab === tabId) {
+        return;
+    }
+
+    var device;
+    if (this.activeTab) {
+        device = this.getDevice(this.activeTab);
+        if (device) {
+            device.activate(false);
+        }
+    }
+
     this.activeTab = tabId;
+    device = this.getDevice(this.activeTab);
+    if (device) {
+        device.activate(true);
+    }
 };
 
 ConsoleIO.App.Manager.prototype.getActiveDeviceGuid = function getActiveDeviceGuid() {
     return this.activeTab;
+};
+
+ConsoleIO.App.Manager.prototype.getDevice = function getDevice(guid) {
+    var device;
+
+    ConsoleIO.every(this.store.device, function (item) {
+        if (item.model.guid === guid) {
+            device = item;
+            return false;
+        }
+
+        return true;
+    }, this);
+
+    return device;
 };
