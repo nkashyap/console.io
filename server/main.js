@@ -113,7 +113,6 @@ function main() {
         console.log(app.get('title') + ' is run at ' + (app.get('https') === true ? 'https' : 'http') + '://localhost:' + app.get('port-number'));
     }
 
-
     // Start forking if you are the master.
     if (cluster.isMaster && config.redis.enable) {
         while (config.redis.process--) {

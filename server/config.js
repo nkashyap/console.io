@@ -78,7 +78,7 @@ var config = {
 
     /** redis configurations **/
     redis: {
-        enable: true,
+        enable: false,
         process: 6
     }
 };
