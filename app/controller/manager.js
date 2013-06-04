@@ -47,18 +47,21 @@ ConsoleIO.App.Manager.prototype.remove = function remove(data) {
         this.view.remove(data.guid);
 
         if (this.activeTab === data.guid) {
-            this.activeTab = null;
+            this.activeTab = this.store.guid[0];
+            if (this.activeTab) {
+                this.view.setActive(this.activeTab);
+            }
         }
 
         ConsoleIO.every(this.store.device, function (device, index) {
             if (device.model.guid === data.guid) {
                 //device.destroy();
-                this.splice(index, 1);
+                this.store.device.splice(index, 1);
                 return false;
             }
 
             return true;
-        });
+        }, this);
     }
 };
 

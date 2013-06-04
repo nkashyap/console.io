@@ -45,3 +45,7 @@ ConsoleIO.View.Manager.prototype.remove = function remove(id) {
 ConsoleIO.View.Manager.prototype.getContextById = function getContextById(contextId) {
     return this.tabs ? this.tabs.cells(contextId) : null;
 };
+
+ConsoleIO.View.Manager.prototype.setActive = function setActive(id) {
+    this.tabs.setTabActive(id);
+};
