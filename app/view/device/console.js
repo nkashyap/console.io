@@ -17,8 +17,7 @@ ConsoleIO.View.Device.Console = function ConsoleView(ctrl, model) {
     this.id = [this.model.name, this.model.guid].join("-");
     this.container = ConsoleIO.Service.DHTMLXHelper.createElement({
         attr: {
-            id: 'console-' + this.id,
-            'class': 'console-contents'
+            id: 'console-' + this.id
         }
     });
 };
@@ -89,7 +88,7 @@ ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData
         tag: tag,
         className: 'console type-' + css,
         message: (messagePreview || '.')
-    }
+    };
 };
 
 ConsoleIO.View.Device.Console.prototype.add = function add(data) {

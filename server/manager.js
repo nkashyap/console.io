@@ -217,6 +217,11 @@ function Manager() {
             refreshRegisteredDeviceList: notifyRegisteredDevicesToUser,
 
             /**
+             * User command to config client device WebIO console
+             */
+            consoleConfig: defineUserCommandRouteHandler('configure', true),
+
+            /**
              * User command to reload client device
              */
             reloadDevice: defineUserCommandRouteHandler('reload'),

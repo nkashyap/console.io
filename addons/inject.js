@@ -125,6 +125,17 @@ window.InjectIO = (function () {
         head.appendChild(node);
     }
 
+    function requireStyle(url) {
+        var link = document.createElement('link'),
+            head = document.getElementsByTagName('head')[0];
+
+        link.type = 'text/css';
+        link.rel = 'stylesheet';
+        link.media = 'all';
+        link.href = url;
+        head.appendChild(link);
+    }
+
     function require(urls, callback) {
         if (typeof urls === 'string') {
             urls = [urls];
@@ -194,12 +205,12 @@ window.InjectIO = (function () {
         }
 
         // Treat return value as window.onerror itself does,
-        // Only do our handling if not surpressed.
+        // Only do our handling if not suppressed.
         if (result !== true) {
             if (typeof window.SocketIO !== 'undefined' && window.SocketIO.isConnected()) {
                 window.SocketIO.emit('console', {
                     type: 'error',
-                    message: error + ';\nfileName: '+ filePath +';\nlineNo: '+ lineNo
+                    message: error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo
                 });
             } else {
                 debug([error, filePath, lineNo].join("; "));
@@ -235,11 +246,14 @@ window.InjectIO = (function () {
             });
 
             //Hook into ConsoleIO API
-            window.ConsoleIO.on('console', function (data) {
-                window.SocketIO.emit('console', data);
-            });
+            if (window.SocketIO) {
+                window.SocketIO.init(config);
+            }
 
-            window.SocketIO.init(config);
+            if (window.WebIO) {
+                window.WebIO.init(config);
+            }
+
         } else {
             debug("Console.IO dependencies are missing!" +
                 " If you are using inject.js to load dependencies" +
@@ -273,6 +287,7 @@ window.InjectIO = (function () {
 
         if (config.web) {
             scripts.push(config.url + "/addons/web.js");
+            requireStyle(config.url + "/resources/console.css");
         }
 
         //Request console.io.js file to get connect.sid cookie from the server

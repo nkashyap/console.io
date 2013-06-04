@@ -26,6 +26,11 @@ window.SocketIO = (function () {
             this.config = config;
             this.io = window.io.connect(config.url, { secure: (config.secure == 'true') });
 
+            // set console.io event
+            ConsoleIO.on('console', function (data) {
+                Socket.emit('console', data);
+            });
+
             // Fix for old Opera and Maple browsers
             (function overrideJsonPolling(io) {
                 var original = io.Transport["jsonp-polling"].prototype.post;
@@ -66,6 +71,14 @@ window.SocketIO = (function () {
             } else {
                 this.pending.push({ name: name, data: data });
                 return false;
+            }
+        },
+
+        on: function on(name, callback, scope) {
+            if (this.io) {
+                this.io.on(name, function () {
+                    callback.apply(scope || this, arguments);
+                });
             }
         },
 
@@ -238,7 +251,19 @@ window.SocketIO = (function () {
         },
 
         onHTMLContent: function onHTMLContent() {
+            var parentNode,
+                webLog = document.getElementById('console-log');
+
+            if (webLog) {
+                parentNode = webLog.parentNode;
+                parentNode.removeChild(webLog);
+            }
+
             Socket.emit('content', { content: document.documentElement.innerHTML });
+
+            if (webLog) {
+                parentNode.appendChild(webLog);
+            }
         },
 
         onFileList: function onFileList() {

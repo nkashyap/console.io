@@ -1,5 +1,5 @@
 html, body {
-    background-color: #a9a9a9;
+    background-color: white;
     margin: 0;
     padding: 0;
 }
@@ -16,7 +16,7 @@ li {
     margin: 0;
     padding: 5px;
     font-size: 14px;
-    background-color: #d3d3d3;
+    background-color: white;
     color: black;
     margin: 5px;
 }

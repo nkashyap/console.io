@@ -114,25 +114,26 @@ ConsoleIO.App.Device.Console.prototype.onFilterChanged = function onFilterChange
 
 ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
-        console.log('onButtonClick', btnId);
-
         if (btnId.indexOf('pagesize-') === 0) {
             this.onPageSizeChanged(btnId);
-
+            this.notify();
         } else if (btnId.indexOf('filter-') === 0) {
             this.onFilterChanged(btnId, state);
-
+            this.notify();
         } else {
             switch (btnId) {
                 case 'playPause':
                     this.paused = state;
                     this.addBatch();
+                    this.notify();
                     break;
                 case 'clear':
                     this.view.clear();
+                    this.notify(true);
                     break;
                 case 'search':
                     this.applySearch();
+                    this.notify();
                     break;
                 case 'export':
                     ConsoleIO.Service.Socket.emit('exportHTML', {
@@ -144,4 +145,15 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
             }
         }
     }
+};
+
+ConsoleIO.App.Device.Console.prototype.notify = function notify(clearAll) {
+    ConsoleIO.Service.Socket.emit('consoleConfig', {
+        guid: this.model.guid,
+        pageSize: ConsoleIO.Settings.pageSize.active,
+        filters: this.filters,
+        search: this.searchRegex,
+        paused: this.paused,
+        clear: !!clearAll
+    });
 };
