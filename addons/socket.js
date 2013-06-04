@@ -89,11 +89,15 @@ window.SocketIO = (function () {
             var queue = [];
             ConsoleIO.forEach(Socket.pending, function (item) {
                 var state = Socket.emit(item.name, item.data);
-                if(!state){
+                if (!state) {
                     queue.push(item);
                 }
             });
             Socket.pending = queue;
+        },
+
+        isConnected: function isConnected() {
+            return Socket.io && Socket.io.socket ? Socket.io.socket.connected : false;
         },
 
         onConnect: function onConnect() {

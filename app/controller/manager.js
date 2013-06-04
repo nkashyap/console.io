@@ -55,7 +55,6 @@ ConsoleIO.App.Manager.prototype.remove = function remove(data) {
 
         ConsoleIO.every(this.store.device, function (device, index) {
             if (device.model.guid === data.guid) {
-                //device.destroy();
                 this.store.device.splice(index, 1);
                 return false;
             }

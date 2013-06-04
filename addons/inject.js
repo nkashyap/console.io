@@ -196,11 +196,10 @@ window.InjectIO = (function () {
         // Treat return value as window.onerror itself does,
         // Only do our handling if not surpressed.
         if (result !== true) {
-            if (typeof window.SocketIO !== 'undefined') {
-                window.SocketIO.emit('error', {
-                    message: error,
-                    file: filePath,
-                    line: lineNo
+            if (typeof window.SocketIO !== 'undefined' && window.SocketIO.isConnected()) {
+                window.SocketIO.emit('console', {
+                    type: 'error',
+                    message: error + ';\nfileName: '+ filePath +';\nlineNo: '+ lineNo
                 });
             } else {
                 debug([error, filePath, lineNo].join("; "));
