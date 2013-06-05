@@ -136,6 +136,21 @@ window.InjectIO = (function () {
         head.appendChild(link);
     }
 
+    function remove(url) {
+        var tag = url.indexOf('.js') > -1 ? 'script' : url.indexOf('.css') > -1 ? 'link' : null,
+            elements, attr;
+
+        if(tag){
+            attr = tag === 'script' ? 'src' : 'href';
+            elements = document.getElementsByTagName(tag);
+            ConsoleIO.forEach(ConsoleIO.toArray(elements), function(element){
+                if(element.getAttribute(attr).indexOf(url) > -1){
+                    element.parentNode.removeChild(element);
+                }
+            });
+        }
+    }
+
     function require(urls, callback) {
         if (typeof urls === 'string') {
             urls = [urls];
@@ -242,6 +257,9 @@ window.InjectIO = (function () {
             window.ConsoleIO.extend(window.ConsoleIO, {
                 debug: debug,
                 require: require,
+                requireScript: requireScript,
+                requireStyle: requireStyle,
+                remove: remove,
                 ready: ready
             });
 
@@ -286,7 +304,9 @@ window.InjectIO = (function () {
         }
 
         if (config.web) {
-            scripts.push(config.url + "/addons/web.js");
+            if(!window.WebIO){
+                scripts.push(config.url + "/addons/web.js");
+            }
             requireStyle(config.url + "/resources/console.css");
         }
 

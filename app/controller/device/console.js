@@ -148,11 +148,11 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
 };
 
 ConsoleIO.App.Device.Console.prototype.notify = function notify(clearAll) {
-    ConsoleIO.Service.Socket.emit('consoleConfig', {
+    ConsoleIO.Service.Socket.emit('pluginControl', {
         guid: this.model.guid,
         pageSize: ConsoleIO.Settings.pageSize.active,
         filters: this.filters,
-        search: this.searchRegex,
+        search: this.view.getValue('searchText'),
         paused: this.paused,
         clear: !!clearAll
     });

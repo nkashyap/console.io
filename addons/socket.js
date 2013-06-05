@@ -62,6 +62,7 @@ window.SocketIO = (function () {
             this.io.on('device:fileSource', this.onFileSource);
             this.io.on('device:status', this.onStatus);
             this.io.on('device:reload', this.onReload);
+            this.io.on('device:plugin', this.onPlugin);
         },
 
         emit: function emit(name, data) {
@@ -250,6 +251,23 @@ window.SocketIO = (function () {
             }(location.href)), 1000);
         },
 
+        onPlugin: function onPlugin(data) {
+            if (data.WebIO) {
+                if (!window.WebIO && data.WebIO.enabled) {
+                    ConsoleIO.requireStyle(Socket.config.url + "/resources/console.css");
+                    ConsoleIO.requireScript(Socket.config.url + "/addons/web.js", function () {
+                        if (window.WebIO) {
+                            window.WebIO.init(Socket.config);
+                        }
+                    });
+                } else if (window.WebIO && !data.WebIO.enabled) {
+                    window.WebIO.destroy();
+                    ConsoleIO.remove("resources/console.css");
+                    ConsoleIO.remove("addons/web.js");
+                }
+            }
+        },
+
         onHTMLContent: function onHTMLContent() {
             var parentNode,
                 webLog = document.getElementById('console-log');
@@ -356,7 +374,7 @@ window.SocketIO = (function () {
             styleId = "device-style";
 
         if (!document.getElementById(styleId)) {
-            var css = "." + className + "::after { content: '" + content +
+            var css = "." + className + "::after { content: 'Console.IO:" + content +
                     "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
                     "font-size: 12px; font-weight: bold; color: rgb(111, 114, 117); " +
                     "background-color: rgba(192, 192, 192, 0.5); border: 1px solid rgb(111, 114, 117); " +

@@ -9,6 +9,7 @@
 window.WebIO = (function () {
 
     "use strict";
+    var log;
 
     function Controller(config) {
         this.store = {
@@ -19,20 +20,24 @@ window.WebIO = (function () {
         this.config = ConsoleIO.extend({
             docked: false,
             position: 'bottom',
-            pageSize: 50,
             height: '400px',
-            width: '99%',
+            width: '99%'
+        }, config);
 
+        this.control = {
+            pageSize: 50,
             filters: [],
             paused: false,
             search: null
-        }, config);
+        };
 
         this.view = new View(this);
 
         // set events
         if (SocketIO) {
-            SocketIO.on('device:configure', this.configure, this);
+            SocketIO.on('device:pluginConfig', this.syncConfig, this);
+            SocketIO.on('device:pluginControl', this.syncControl, this);
+            SocketIO.emit('plugin', { name: 'WebIO', enabled: true });
         }
     }
 
@@ -40,30 +45,39 @@ window.WebIO = (function () {
         this.view.render(target);
     };
 
-    Controller.prototype.configure = function configure(data) {
+    Controller.prototype.destroy = function destroy() {
+        SocketIO.emit('plugin', { name: 'WebIO', enabled: false });
+        this.view.destroy();
+    };
+
+    Controller.prototype.syncControl = function syncControl(data) {
         if (data.clear) {
             this.view.clear();
         } else {
-            this.config.paused = data.paused;
-            this.config.filters = data.filters;
+            this.control.paused = data.paused;
+            this.control.filters = data.filters;
 
-            if (data.pageSize !== this.config.pageSize) {
-                this.config.pageSize = data.pageSize;
+            if (data.pageSize !== this.control.pageSize) {
+                this.control.pageSize = data.pageSize;
             }
 
-            if (data.search !== this.config.search) {
+            if (data.search !== this.control.search) {
                 this.applySearch(data.search);
             }
 
             this.view.clear();
             this.view.addBatch(this.store.added);
             this.addBatch();
-
         }
     };
 
+    Controller.prototype.syncConfig = function syncConfig(data) {
+        this.config = ConsoleIO.extend(this.config, data);
+        this.view.reload();
+    };
+
     Controller.prototype.add = function add(data) {
-        if (!this.config.paused) {
+        if (!this.control.paused) {
             this.store.added.push(data);
             this.view.add(data);
         } else {
@@ -72,7 +86,7 @@ window.WebIO = (function () {
     };
 
     Controller.prototype.addBatch = function addBatch() {
-        if (!this.config.paused) {
+        if (!this.control.paused) {
             this.view.addBatch(this.store.queue);
             this.store.added = this.store.added.concat(this.store.queue);
             this.store.queue = [];
@@ -80,22 +94,22 @@ window.WebIO = (function () {
     };
 
     Controller.prototype.applySearch = function applySearch(value) {
-        this.config.search = typeof value !== 'undefined' ? value : null;
-        if (this.config.search) {
-            if (this.config.search[0] !== "\\") {
-                this.config.search = new RegExp("\\b" + this.config.search, "img");
+        this.control.search = typeof value !== 'undefined' ? value : null;
+        if (this.control.search) {
+            if (this.control.search[0] !== "\\") {
+                this.control.search = new RegExp("\\b" + this.control.search, "img");
             } else {
-                this.config.search = new RegExp(this.config.search, "img");
+                this.control.search = new RegExp(this.control.search, "img");
             }
         }
     };
 
     Controller.prototype.isSearchFiltered = function isSearchFiltered(data) {
-        return this.config.search ? data.message.search(this.config.search) > -1 : true;
+        return this.control.search ? data.message.search(this.control.search) > -1 : true;
     };
 
     Controller.prototype.isFiltered = function isFiltered(data) {
-        return this.config.filters.length === 0 || (this.config.filters.length > 0 && this.config.filters.indexOf(data.type) > -1);
+        return this.control.filters.length === 0 || (this.control.filters.length > 0 && this.control.filters.indexOf(data.type) > -1);
     };
 
 
@@ -111,8 +125,20 @@ window.WebIO = (function () {
         this.createContainer();
     };
 
+    View.prototype.reload = function reload() {
+        this.clear();
+        this.container.parentNode.removeChild(this.container);
+        this.createContainer();
+    };
+
+    View.prototype.destroy = function destroy() {
+        this.clear();
+        this.container.parentNode.removeChild(this.container);
+    };
+
     View.prototype.createContainer = function createContainer() {
-        var styles = [  'background-color: rgba(219, 255, 232, 0.3)',
+        var styles = [
+            'background-color: rgba(219, 255, 232, 0.3)',
             'overflow: auto',
             'margin: 5px',
             '-o-box-shadow: 0 0 5px 1px #888',
@@ -260,8 +286,8 @@ window.WebIO = (function () {
         if (length > 0) {
             var fragment = document.createDocumentFragment();
 
-            if (this.ctrl.config.pageSize < length) {
-                store = store.slice(0, this.ctrl.config.pageSize);
+            if (this.ctrl.control.pageSize < length) {
+                store = store.slice(0, this.ctrl.control.pageSize);
             }
 
             ConsoleIO.forEach(store, function (item) {
@@ -297,23 +323,32 @@ window.WebIO = (function () {
 
     View.prototype.removeOverflowElement = function removeOverflowElement() {
         var length = this.container.childElementCount || this.container.children.length;
-        while (length > this.ctrl.config.pageSize) {
+        while (length > this.ctrl.control.pageSize) {
             this.container.removeChild(this.container.lastElementChild || this.container.lastChild);
             length--;
         }
     };
 
+
+    function logConsole(data) {
+        log.add(data);
+    }
+
     function init(config) {
-        var log = new Controller(config);
+        log = new Controller(config);
         log.render(document.body);
 
         //Hook into ConsoleIO API
-        ConsoleIO.on('console', function (data) {
-            log.add(data);
-        });
+        ConsoleIO.on('console', logConsole);
+    }
+
+    function destroy() {
+        ConsoleIO.off('console', logConsole);
+        log.destroy();
     }
 
     return {
-        init: init
+        init: init,
+        destroy: destroy
     };
 }());
