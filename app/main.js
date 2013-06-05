@@ -117,15 +117,25 @@ ConsoleIO.Settings = {
     pageSize: {
         active: 50,
         list: [50, 100, 250, 500]
+    },
+    WebIO: {
+        docked: false,
+        position: 'bottom',
+        height: '400px',
+        width: '99%'
     }
 };
 
 ConsoleIO.Constraint.THEMES = {
     'web': {
-        layout: 'dhx_skyblue'
+        layout: 'dhx_skyblue',
+        grid: 'dhx_skyblue',
+        win: 'dhx_skyblue'
     },
     'terrace': {
-        layout: 'dhx_terrace'
+        layout: 'dhx_terrace',
+        grid: 'dhx_terrace',
+        win: 'dhx_terrace'
     },
     get: function get(type) {
         return ConsoleIO.Constraint.THEMES[ConsoleIO.Settings.theme][type];
@@ -135,11 +145,15 @@ ConsoleIO.Constraint.THEMES = {
 ConsoleIO.Constraint.IMAGE_URL = {
     'web': {
         tree: "lib/dhtmlx/web/imgs/csh_vista/",
-        tab: "lib/dhtmlx/web/imgs/"
+        tab: "lib/dhtmlx/web/imgs/",
+        win: "lib/dhtmlx/web/imgs/",
+        grid: "lib/dhtmlx/web/imgs/"
     },
     'terrace': {
         tree: "lib/dhtmlx/terrace/imgs/csh_dhx_terrace/",
-        tab: "lib/dhtmlx/terrace/imgs/"
+        tab: "lib/dhtmlx/terrace/imgs/",
+        win: "lib/dhtmlx/terrace/imgs/",
+        grid: "lib/dhtmlx/terrace/imgs/"
     },
     get: function get(type) {
         return ConsoleIO.Constraint.IMAGE_URL[ConsoleIO.Settings.theme][type];
@@ -199,7 +213,6 @@ ConsoleIO.Constraint.ICONS = {
     UNKNOWN: 'unknown.png',
     FOLDEROPEN: '../../' + ConsoleIO.Constraint.IMAGE_URL.get('tree') + '/folderOpen.gif'
 };
-
 
 ConsoleIO.ready(function () {
     if (ConsoleIO.domReady) {

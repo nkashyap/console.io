@@ -16,7 +16,10 @@ ConsoleIO.View.Device.Status = function StatusView(ctrl, model) {
     this.tab = null;
     this.id = [this.model.name, this.model.guid].join("-");
     this.container = ConsoleIO.Service.DHTMLXHelper.createElement({
-        attr: { 'class': 'status-contents' }
+        attr: {
+            'class': 'status-contents',
+            id: this.id
+        }
     });
     this.labels = {};
 };

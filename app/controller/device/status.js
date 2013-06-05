@@ -19,7 +19,9 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Configure
+            ConsoleIO.Model.DHTMLX.ToolBarItem.NameLabel,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.DeviceName,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.SetName
         ]
     });
 

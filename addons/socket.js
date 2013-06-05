@@ -256,12 +256,11 @@ window.SocketIO = (function () {
                 if (!window.WebIO && data.WebIO.enabled) {
                     ConsoleIO.requireStyle(Socket.config.url + "/resources/console.css");
                     ConsoleIO.requireScript(Socket.config.url + "/addons/web.js", function () {
-                        if (window.WebIO) {
-                            window.WebIO.init(Socket.config);
-                        }
+                        var config = ConsoleIO.extend({}, Socket.config);
+                        window.WebIO.init(ConsoleIO.extend(config, data.WebIO));
                     });
                 } else if (window.WebIO && !data.WebIO.enabled) {
-                    window.WebIO.destroy();
+                    window.WebIO = window.WebIO.destroy();
                     ConsoleIO.remove("resources/console.css");
                     ConsoleIO.remove("addons/web.js");
                 }
