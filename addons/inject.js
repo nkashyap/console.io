@@ -13,6 +13,33 @@ window.InjectIO = (function () {
     var domReady = false,
         onErrorHandler = window.onerror;
 
+    /* COOKIES OBJECT */
+//    var Cookies = {
+//        // Initialize by splitting the array of Cookies
+//        init: function () {
+//            ConsoleIO.forEach(document.cookie.split('; '), function (cookie) {
+//                var cookiePair = cookie.split('=');
+//                this[cookiePair[0]] = cookiePair[1];
+//            }, this);
+//        },
+//        // Create Function: Pass name of cookie, value, and days to expire
+//        create: function (name, value, days) {
+//            if (days) {
+//                var date = new Date();
+//                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+//                var expires = "; expires=" + date.toGMTString();
+//            }
+//            else var expires = "";
+//            document.cookie = name + "=" + value + expires + "; path=/";
+//            this[name] = value;
+//        },
+//        // Erase cookie by name
+//        erase: function (name) {
+//            this.create(name, '', -1);
+//            this[name] = undefined;
+//        }
+//    };
+
     function getServerParams() {
         var i = 0,
             script,
@@ -140,11 +167,11 @@ window.InjectIO = (function () {
         var tag = url.indexOf('.js') > -1 ? 'script' : url.indexOf('.css') > -1 ? 'link' : null,
             elements, attr;
 
-        if(tag){
+        if (tag) {
             attr = tag === 'script' ? 'src' : 'href';
             elements = document.getElementsByTagName(tag);
-            ConsoleIO.forEach(ConsoleIO.toArray(elements), function(element){
-                if(element.getAttribute(attr).indexOf(url) > -1){
+            ConsoleIO.forEach(ConsoleIO.toArray(elements), function (element) {
+                if (element.getAttribute(attr).indexOf(url) > -1) {
                     element.parentNode.removeChild(element);
                 }
             });
@@ -254,7 +281,10 @@ window.InjectIO = (function () {
 
     function setUp(config) {
         if (typeof window.ConsoleIO !== 'undefined') {
+//            Cookies.init();
+
             window.ConsoleIO.extend(window.ConsoleIO, {
+//                Cookies: Cookies,
                 debug: debug,
                 require: require,
                 requireScript: requireScript,
@@ -304,7 +334,7 @@ window.InjectIO = (function () {
         }
 
         if (config.web) {
-            if(!window.WebIO){
+            if (!window.WebIO) {
                 scripts.push(config.url + "/addons/web.js");
             }
             requireStyle(config.url + "/resources/console.css");

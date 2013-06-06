@@ -99,3 +99,7 @@ ConsoleIO.View.Device.Status.prototype.add = function add(name, value, label) {
         target: property
     });
 };
+
+ConsoleIO.View.Device.Status.prototype.getValue = function getValue(id) {
+    return this.toolbar.getValue(id);
+};

@@ -119,9 +119,10 @@ ConsoleIO.Settings = {
         list: [50, 100, 250, 500]
     },
     WebIO: {
+        remoteControl: false,
         docked: false,
         position: 'bottom',
-        height: '400px',
+        height: '300px',
         width: '99%'
     }
 };

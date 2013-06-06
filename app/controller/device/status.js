@@ -19,9 +19,9 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.NameLabel,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.DeviceName,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.SetName
+            ConsoleIO.Model.DHTMLX.ToolBarItem.DeviceNameLabel,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.DeviceNameText,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.DeviceNameSet
         ]
     });
 
@@ -61,9 +61,12 @@ ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
 
 ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
-        console.log('onButtonClick', btnId);
         switch (btnId) {
-            case 'setting':
+            case 'DeviceNameSet':
+                ConsoleIO.Service.Socket.emit('deviceName', {
+                    guid: this.model.guid,
+                    name: this.view.getValue('DeviceNameText')
+                });
                 break;
         }
     }

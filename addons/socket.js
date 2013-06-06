@@ -63,6 +63,7 @@ window.SocketIO = (function () {
             this.io.on('device:status', this.onStatus);
             this.io.on('device:reload', this.onReload);
             this.io.on('device:plugin', this.onPlugin);
+            this.io.on('device:name', this.onName);
         },
 
         emit: function emit(name, data) {
@@ -167,6 +168,7 @@ window.SocketIO = (function () {
             Socket.name = data.name;
             Socket.guid = data.guid;
 
+            //ConsoleIO.Cookies.create("deviceName", data.name, 365);
             showName(data.name + '|' + data.guid);
             console.log('Ready', Socket.name);
 
@@ -200,6 +202,17 @@ window.SocketIO = (function () {
                 console.log('Offline', Socket.name);
                 Socket.subscribed = false;
             }
+        },
+
+        onName: function onName(data) {
+//            if (!data.name) {
+//                ConsoleIO.Cookies.erase('deviceName');
+//            } else {
+//                ConsoleIO.Cookies.create('deviceName', data.name, 365);
+//            }
+//            Socket.name = data.name;
+//            document.getElementById("device-style").parentNode.removeChild(document.getElementById("device-style"));
+//            showName(data.name + '|' + data.guid);
         },
 
         onStatus: function onStatus() {
@@ -334,6 +347,7 @@ window.SocketIO = (function () {
             }
         }
     };
+
 
     function getBrowserInfo(obj) {
         var returnObj = { More: [] },

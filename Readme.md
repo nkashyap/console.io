@@ -18,7 +18,7 @@ Tested on:
 ## Install express.io (execute install.bat)
 
 ```bash
-npm install express.io
+npm install express.io redis
 ```
 
 ## Start server (execute start.bat)
@@ -44,7 +44,7 @@ redis: {
 include inject.js scripts with config parameters
 
 ```html
-<script type="text/javascript" src="inject.js?url=http://NodeServerURL:Port&secure=false"></script>
+<script type="text/javascript" src="inject.js?url=http://NodeServerURL:Port&secure=false&web=true&..."></script>
 ```
 
 OR create a create ConfigIO global object with config options
@@ -57,8 +57,20 @@ OR create a create ConfigIO global object with config options
 configIO.js
 ```html
 window.ConfigIO = {
+    //URL to connect back
 	url: 'http://nodeserver:port/',
-	secure: false
+
+	// SSL is not supported yet
+	secure: false,
+
+	// set it to true to enable WebIO (web console)  (optional)
+	web: true,
+
+    // WebIO config (optional)
+	docked: false,
+    position: 'bottom',
+    height: '300px',
+    width: '99%'
 };
 ```
 
@@ -68,13 +80,19 @@ OR you can include all files individually
 <script type="text/javascript" src="<Local Folder OR Node Server/socket.io>/socket.io.js"></script>
 <script type="text/javascript" src="<Local Folder OR Node Server>/console.io.js"></script>
 <script type="text/javascript" src="<Local Folder OR Node Server>/socket.js"></script>
+<script type="text/javascript" src="<Local Folder OR Node Server>/web.js"></script>
 <script type="text/javascript" src="<Local Folder OR Node Server>/inject.js?url=http://NodeServerURL:Port"></script>
 ```
-
 
 Visit http://NodeServerURL:Port/ for ConsoleIO interface
 
 ![Screen shot](https://raw.github.com/nkashyap/console.io/master/console.io.png)
+
+Note:
+* ![Online icons](https://raw.github.com/nkashyap/console.io/master/app/resources/icons/online.png) Device is registered and connected.
+* ![Offline icons](https://raw.github.com/nkashyap/console.io/master/app/resources/icons/offline.png) Device is registered but offline.
+* ![Subscribe icons](https://raw.github.com/nkashyap/console.io/master/app/resources/icons/subscribe.gif) Device is subscribed (double click on Online icon to subscribe).
+* ![WebIO icons](https://raw.github.com/nkashyap/console.io/master/app/resources/icons/console.gif) WebIO (web console) icon to enable/disable WebIO remotely.
 
 ##Console.IO Editor
 
@@ -105,6 +123,17 @@ Note: All multilines code should be wrapped within self executable function. E.G
 	* Search word or use regex to filter logs
 	* Filter logs by type
 
+##Console.IO WebIO (web console)
+* Control it remotely
+	* Pause incoming logs
+	* Clear logs
+	* Change page size
+	* Search word or use regex to filter logs
+	* Filter logs by type
+* TODO
+    * Ability to configure height, width, position & remote control.
+    * Control logging speed
+    * Scroll through logs (Smart Tv/mobile/tablets)
 
 ##Console API methods supported
  * console.assert(x)
@@ -133,9 +162,9 @@ Note: All multilines code should be wrapped within self executable function. E.G
 
 ##TODO
  * Change it into npm module
- * Load addons dynamically (e.g web, socket, etc)
  * Update Readme with full feature list
  * Add SSL support
+ * Add JSDoc & Unit Tests
 
 ##Copyright and license
  MIT LICENSE 

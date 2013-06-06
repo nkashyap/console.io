@@ -35,7 +35,7 @@ window.WebIO = (function () {
 
         // set events
         if (SocketIO) {
-            //SocketIO.on('device:pluginConfig', this.syncConfig, this);
+            SocketIO.on('device:pluginConfig', this.syncConfig, this);
             SocketIO.on('device:pluginControl', this.syncControl, this);
             SocketIO.emit('plugin', { name: 'WebIO', enabled: true });
         }
@@ -71,10 +71,10 @@ window.WebIO = (function () {
         }
     };
 
-//    Controller.prototype.syncConfig = function syncConfig(data) {
-//        this.config = ConsoleIO.extend(this.config, data);
-//        this.view.reload();
-//    };
+    Controller.prototype.syncConfig = function syncConfig(data) {
+        this.config = ConsoleIO.extend(this.config, data);
+        this.view.reload();
+    };
 
     Controller.prototype.add = function add(data) {
         if (!this.control.paused) {

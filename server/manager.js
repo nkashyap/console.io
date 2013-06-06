@@ -228,14 +228,19 @@ function Manager() {
             plugin: defineUserCommandRouteHandler('plugin', true),
 
             /**
-             * User command to control client device WebIO console
+             * User command to control WebIO console on client device
              */
             pluginControl: defineUserCommandRouteHandler('pluginControl', true),
 
             /**
-             * User command to control client device WebIO console
+             * User command to configure WebIO console on client device
              */
-            //pluginConfig: defineUserCommandRouteHandler('pluginConfig', true),
+            pluginConfig: defineUserCommandRouteHandler('pluginConfig', true),
+
+            /**
+             * User command to control WebIO console on client device
+             */
+            deviceName: defineUserCommandRouteHandler('name', true),
 
             /**
              * User command to reload client device
