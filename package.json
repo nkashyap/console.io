@@ -1,10 +1,32 @@
 {
-    "author": "Nisheeth Kashyap",
-    "name": "Console.IO",
-    "version": "0.0.1",
+    "name": "xconsole.io",
+    "version": "0.0.2",
+    "description": "Javascript Remote Web Console",
+    "author": {
+        "name": "Nisheeth Kashyap",
+        "email": "nisheeth.k.kashyap@gmail.com"
+    },
+    "keywords": [
+        "console",
+        "console.io",
+        "debugger",
+        "javascript"
+    ],
     "dependencies": {
-        "express.io": "latest"
+        "express.io": "latest",
+        "redis": ">=0.8.3"
     },
     "main": "./server/main.js",
-    "private": true
+    "bin": {
+        "consoleio": "./bin/consoleio.js"
+    },
+    "engines": {
+        "node": "*"
+    },
+    "preferGlobal": true,
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/nkashyap/console.io.git"
+    },
+    "readmeFilename": "README.md"
 }
