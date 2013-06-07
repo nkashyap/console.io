@@ -15,27 +15,27 @@ Tested on:
 * iPhone, iPod, iPad, Android browser, windows 8 phone etc
 
 
-# Install as Node NPM package
-## Install Console.IO
+## Install as Node NPM package
+### Install Console.IO
 
 ```bash
 npm install -g xconsole.io
 ```
 
-## Start Console.IO server
+### Start Console.IO server
 
 ```bash
 consoleio
 ```
 
-# Install from Source
-## Install express.io (execute install.bat)
+## Install from Source
+### Install express.io (execute install.bat)
 
 ```bash
 npm install express.io redis
 ```
 
-## Start server (execute start.bat)
+### Start server (execute start.bat)
 
 ```bash
 node ./server/main.js
