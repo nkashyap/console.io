@@ -15,33 +15,31 @@ Tested on:
 * iPhone, iPod, iPad, Android browser, windows 8 phone etc
 
 
-## Install as Node NPM package
-### Install Console.IO
+### Install as Node NPM package
+#### Install Console.IO
 
 ```bash
 npm install -g xconsole.io
 ```
-
-### Start Console.IO server
+#### Start Console.IO server
 
 ```bash
 consoleio
 ```
 
-## Install from Source
-### Install express.io (execute install.bat)
+### Install from Source
+#### Install express.io (execute install.bat)
 
 ```bash
 npm install express.io redis
 ```
-
-### Start server (execute start.bat)
+#### Start server (execute start.bat)
 
 ```bash
 node ./server/main.js
 ```
 
-##Scale Console.IO server
+### Scale Console.IO server
 
 Console.IO use socket.io and in order to scale socket.io you need to run redis server (/redis/redis-server.exe).
 And also change following value in server/config.js before starting the Console.IO server
@@ -53,7 +51,7 @@ redis: {
     }
 ```
 
-## Include Console.IO in your web page
+### Include Console.IO in your web page
 
 include inject.js scripts with config parameters
 
@@ -108,7 +106,7 @@ Note:
 * ![Subscribe icons](https://raw.github.com/nkashyap/console.io/master/app/resources/icons/subscribe.gif) Device is subscribed (double click on Online icon to subscribe).
 * ![WebIO icons](https://raw.github.com/nkashyap/console.io/master/app/resources/icons/console.gif) WebIO (web console) icon to enable/disable WebIO remotely.
 
-##Console.IO Editor
+### Console.IO Editor
 
 You can execute commands on remote client from Console.IO. You can execute single & multilines javascript code.
 
@@ -124,7 +122,7 @@ Note: All multilines code should be wrapped within self executable function. E.G
 }())
 ```
 
-##Console.IO Device and Tabs
+### Console.IO Device and Tabs
 * Files: Show all attached javascript and css files in the web page
 * Status: Device Status and some basic information
 * Source: Double click on a file in file explorer to view file content
@@ -137,7 +135,7 @@ Note: All multilines code should be wrapped within self executable function. E.G
 	* Search word or use regex to filter logs
 	* Filter logs by type
 
-##Console.IO WebIO (web console)
+### Console.IO WebIO (web console)
 * Control it remotely
 	* Pause incoming logs
 	* Clear logs
@@ -149,7 +147,7 @@ Note: All multilines code should be wrapped within self executable function. E.G
     * Control logging speed
     * Scroll through logs (Smart Tv/mobile/tablets)
 
-##Console API methods supported
+### Console API methods supported
  * console.assert(x)
  * console.count(key)
  * console.time(name, reset)
@@ -164,7 +162,7 @@ Note: All multilines code should be wrapped within self executable function. E.G
  * console.exception(error)
  * console.trace()
 
-##Coming soon...
+### Coming soon...
  * console.group()
  * console.groupCollapsed()
  * console.groupEnd()
@@ -174,15 +172,15 @@ Note: All multilines code should be wrapped within self executable function. E.G
  * console.profile()
  * console.profileEnd()
 
-##TODO
+### TODO
  * Update Readme with full feature list
  * Add SSL support
  * Add JSDoc & Unit Tests
 
-##Copyright and license
+### Copyright and license
  MIT LICENSE 
 
-##Reference
+### Reference
  * [Javascript Stacktrace] (https://github.com/eriwen/javascript-stacktrace)
  * [codemirror] (http://codemirror.net/)
  * [express.io] (https://github.com/techpines/express.io)
