@@ -59,7 +59,7 @@ It uses express.io (express &amp; socket.io) to provide user real time experienc
 </ul><h2>
 <a name="install-expressio-execute-installbat" class="anchor" href="#install-expressio-execute-installbat"><span class="octicon octicon-link"></span></a>Install express.io (execute install.bat)</h2>
 
-<div class="highlight"><pre>npm install express.io
+<div class="highlight"><pre>npm install express.io redis
 </pre></div>
 
 <h2>
@@ -85,7 +85,7 @@ And also change following value in server/config.js before starting the Console.
 
 <p>include inject.js scripts with config parameters</p>
 
-<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js?url=http://NodeServerURL:Port&amp;secure=false"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js?url=http://NodeServerURL:Port&amp;secure=false&amp;web=true&amp;..."</span><span class="nt">&gt;&lt;/script&gt;</span>
 </pre></div>
 
 <p>OR create a create ConfigIO global object with config options</p>
@@ -97,8 +97,20 @@ And also change following value in server/config.js before starting the Console.
 <p>configIO.js</p>
 
 <div class="highlight"><pre>window.ConfigIO = {
+    //URL to connect back
     url: 'http://nodeserver:port/',
-    secure: false
+
+    // SSL is not supported yet
+    secure: false,
+
+    // set it to true to enable WebIO (web console)  (optional)
+    web: true,
+
+    // WebIO config (optional)
+    docked: false,
+    position: 'bottom',
+    height: '300px',
+    width: '99%'
 };
 </pre></div>
 
@@ -107,6 +119,7 @@ And also change following value in server/config.js before starting the Console.
 <div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server/socket.io&gt;/socket.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/console.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/socket.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/web.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/inject.js?url=http://NodeServerURL:Port"</span><span class="nt">&gt;&lt;/script&gt;</span>
 </pre></div>
 
@@ -114,7 +127,18 @@ And also change following value in server/config.js before starting the Console.
 
 <p><img src="https://raw.github.com/nkashyap/console.io/master/console.io.png" alt="Screen shot"></p>
 
-<h2>
+<p>Note:</p>
+
+<ul>
+<li>
+<img src="https://raw.github.com/nkashyap/console.io/master/app/resources/icons/online.png" alt="Online icons"> Device is registered and connected.</li>
+<li>
+<img src="https://raw.github.com/nkashyap/console.io/master/app/resources/icons/offline.png" alt="Offline icons"> Device is registered but offline.</li>
+<li>
+<img src="https://raw.github.com/nkashyap/console.io/master/app/resources/icons/subscribe.gif" alt="Subscribe icons"> Device is subscribed (double click on Online icon to subscribe).</li>
+<li>
+<img src="https://raw.github.com/nkashyap/console.io/master/app/resources/icons/console.gif" alt="WebIO icons"> WebIO (web console) icon to enable/disable WebIO remotely.</li>
+</ul><h2>
 <a name="consoleio-editor" class="anchor" href="#consoleio-editor"><span class="octicon octicon-link"></span></a>Console.IO Editor</h2>
 
 <p>You can execute commands on remote client from Console.IO. You can execute single &amp; multilines javascript code.</p>
@@ -152,6 +176,28 @@ And also change following value in server/config.js before starting the Console.
 </ul>
 </li>
 </ul><h2>
+<a name="consoleio-webio-web-console" class="anchor" href="#consoleio-webio-web-console"><span class="octicon octicon-link"></span></a>Console.IO WebIO (web console)</h2>
+
+<ul>
+<li>Control it remotely
+
+<ul>
+<li>Pause incoming logs</li>
+<li>Clear logs</li>
+<li>Change page size</li>
+<li>Search word or use regex to filter logs</li>
+<li>Filter logs by type</li>
+</ul>
+</li>
+<li>TODO
+
+<ul>
+<li>Ability to configure height, width, position &amp; remote control.</li>
+<li>Control logging speed</li>
+<li>Scroll through logs (Smart Tv/mobile/tablets)</li>
+</ul>
+</li>
+</ul><h2>
 <a name="console-api-methods-supported" class="anchor" href="#console-api-methods-supported"><span class="octicon octicon-link"></span></a>Console API methods supported</h2>
 
 <ul>
@@ -185,9 +231,9 @@ And also change following value in server/config.js before starting the Console.
 
 <ul>
 <li>Change it into npm module</li>
-<li>Load addons dynamically (e.g web, socket, etc)</li>
 <li>Update Readme with full feature list</li>
 <li>Add SSL support</li>
+<li>Add JSDoc &amp; Unit Tests</li>
 </ul><h2>
 <a name="copyright-and-license" class="anchor" href="#copyright-and-license"><span class="octicon octicon-link"></span></a>Copyright and license</h2>
 
