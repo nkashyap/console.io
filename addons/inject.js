@@ -14,31 +14,31 @@ window.InjectIO = (function () {
         onErrorHandler = window.onerror;
 
     /* COOKIES OBJECT */
-//    var Cookies = {
-//        // Initialize by splitting the array of Cookies
-//        init: function () {
-//            ConsoleIO.forEach(document.cookie.split('; '), function (cookie) {
-//                var cookiePair = cookie.split('=');
-//                this[cookiePair[0]] = cookiePair[1];
-//            }, this);
-//        },
-//        // Create Function: Pass name of cookie, value, and days to expire
-//        create: function (name, value, days) {
-//            if (days) {
-//                var date = new Date();
-//                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-//                var expires = "; expires=" + date.toGMTString();
-//            }
-//            else var expires = "";
-//            document.cookie = name + "=" + value + expires + "; path=/";
-//            this[name] = value;
-//        },
-//        // Erase cookie by name
-//        erase: function (name) {
-//            this.create(name, '', -1);
-//            this[name] = undefined;
-//        }
-//    };
+    var Cookies = {
+        // Initialize by splitting the array of Cookies
+        init: function () {
+            ConsoleIO.forEach(document.cookie.split('; '), function (cookie) {
+                var cookiePair = cookie.split('=');
+                this[cookiePair[0]] = cookiePair[1];
+            }, this);
+        },
+        // Create Function: Pass name of cookie, value, and days to expire
+        create: function (name, value, days) {
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                var expires = "; expires=" + date.toGMTString();
+            }
+            else var expires = "";
+            document.cookie = name + "=" + value + expires + "; path=/";
+            this[name] = value;
+        },
+        // Erase cookie by name
+        erase: function (name) {
+            this.create(name, '', -1);
+            this[name] = undefined;
+        }
+    };
 
     function getServerParams() {
         var i = 0,
@@ -284,7 +284,7 @@ window.InjectIO = (function () {
 //            Cookies.init();
 
             window.ConsoleIO.extend(window.ConsoleIO, {
-//                Cookies: Cookies,
+                Cookies: Cookies,
                 debug: debug,
                 require: require,
                 requireScript: requireScript,

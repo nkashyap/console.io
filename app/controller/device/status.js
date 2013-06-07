@@ -62,10 +62,10 @@ ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
 ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
         switch (btnId) {
-            case 'DeviceNameSet':
+            case 'deviceNameSet':
                 ConsoleIO.Service.Socket.emit('deviceName', {
                     guid: this.model.guid,
-                    name: this.view.getValue('DeviceNameText')
+                    name: this.view.getValue('deviceNameText')
                 });
                 break;
         }

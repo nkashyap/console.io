@@ -99,7 +99,7 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
         this.view.add(version, data.version, browser, ConsoleIO.Constraint.ICONS.VERSION);
     }
 
-    this.view.add(data.guid, data.browser, version);
+    this.view.add(data.guid, data.name.indexOf('|') > -1 ? data.browser : data.name, version);
 
     //set correct icon
     if (data.subscribed) {

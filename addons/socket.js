@@ -168,7 +168,7 @@ window.SocketIO = (function () {
             Socket.name = data.name;
             Socket.guid = data.guid;
 
-            //ConsoleIO.Cookies.create("deviceName", data.name, 365);
+            ConsoleIO.Cookies.create("deviceName", data.name, 365);
             showName(data.name + '|' + data.guid);
             console.log('Ready', Socket.name);
 
@@ -205,14 +205,14 @@ window.SocketIO = (function () {
         },
 
         onName: function onName(data) {
-//            if (!data.name) {
-//                ConsoleIO.Cookies.erase('deviceName');
-//            } else {
-//                ConsoleIO.Cookies.create('deviceName', data.name, 365);
-//            }
-//            Socket.name = data.name;
-//            document.getElementById("device-style").parentNode.removeChild(document.getElementById("device-style"));
-//            showName(data.name + '|' + data.guid);
+            if (!data.name) {
+                ConsoleIO.Cookies.erase('deviceName');
+            }
+
+            Socket.name = data.name;
+            ConsoleIO.Cookies.create('deviceName', Socket.name, 365);
+            document.getElementById("device-style").parentNode.removeChild(document.getElementById("device-style"));
+            showName(data.name + '|' + data.guid);
         },
 
         onStatus: function onStatus() {
