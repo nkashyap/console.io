@@ -37,6 +37,10 @@ ConsoleIO.View.Device.Status.prototype.render = function render(target) {
         this.onButtonClick(itemId);
     }, this.ctrl);
 
+    this.toolbar.attachEvent("onStateChange", function (itemId, state) {
+        this.onButtonClick(itemId, state);
+    }, this.ctrl);
+
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
 };
 
@@ -102,4 +106,10 @@ ConsoleIO.View.Device.Status.prototype.add = function add(name, value, label) {
 
 ConsoleIO.View.Device.Status.prototype.getValue = function getValue(id) {
     return this.toolbar.getValue(id);
+};
+
+ConsoleIO.View.Device.Status.prototype.setItemState = function setItemState(id, state) {
+    if (this.toolbar) {
+        this.toolbar.setItemState(id, state);
+    }
 };

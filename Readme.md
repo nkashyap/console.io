@@ -39,10 +39,27 @@ npm install express.io redis
 node ./server/main.js
 ```
 
-### Scale Console.IO server
+## Configure Console.IO
+All server side configurations are defined in server/config.js file.
+If you have install using npm -g then you will find it in C:\Users\[USERNAME]\AppData\Roaming\npm\node_modules\xconsole.io\server folder
 
+### Server Port
+You can change default (8082) port number
+
+```html
+express: {
+    production: {
+        ...
+        { 'port-number': 8082 },
+        { 'secret-key': 'console.io' },
+        ...
+    }
+}
+```
+
+### Scaling server
 Console.IO use socket.io and in order to scale socket.io you need to run redis server (/redis/redis-server.exe).
-And also change following value in server/config.js before starting the Console.IO server
+And also change following value in config file before starting the Console.IO server
 
 ```html
 redis: {

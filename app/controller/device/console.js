@@ -13,7 +13,6 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
     this.model = model;
     this.active = true;
     this.paused = false;
-    this.webIO = this.model.plugins.WebIO ? this.model.plugins.WebIO.enabled : false;
     this.filters = [];
     this.searchRegex = null;
     this.store = {
@@ -26,7 +25,6 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
             ConsoleIO.Model.DHTMLX.ToolBarItem.PlayPause,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.WebIO,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Clear,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Export,
@@ -45,19 +43,10 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
     });
 
     ConsoleIO.Service.Socket.on('device:console:' + this.model.guid, this.add, this);
-    ConsoleIO.Service.Socket.on('device:plugin:' + this.model.guid, this.plugin, this);
 };
 
 ConsoleIO.App.Device.Console.prototype.render = function render(target) {
     this.view.render(target);
-    this.view.setItemState('webIO', this.webIO);
-};
-
-ConsoleIO.App.Device.Console.prototype.plugin = function plugin(plugin) {
-    if (plugin.name === 'WebIO') {
-        this.webIO = plugin.enabled;
-        this.view.setItemState('webIO', this.webIO);
-    }
 };
 
 ConsoleIO.App.Device.Console.prototype.activate = function activate(state) {
@@ -146,17 +135,6 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
                     this.applySearch();
                     this.notify();
                     break;
-                case 'webIO':
-                    if (this.webIO !== state) {
-                        this.webIO = state;
-                        ConsoleIO.Service.Socket.emit('plugin', {
-                            guid: this.model.guid,
-                            WebIO: ConsoleIO.extend({
-                                enabled: state
-                            }, ConsoleIO.Settings.WebIO)
-                        });
-                    }
-                    break;
                 case 'export':
                     ConsoleIO.Service.Socket.emit('exportHTML', {
                         guid: this.model.guid,
@@ -170,7 +148,7 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
 };
 
 ConsoleIO.App.Device.Console.prototype.notify = function notify(clearAll) {
-    if (this.webIO) {
+    if (this.model.plugins.WebIO.enabled) {
         ConsoleIO.Service.Socket.emit('pluginControl', {
             guid: this.model.guid,
             pageSize: ConsoleIO.Settings.pageSize.active,

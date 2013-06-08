@@ -168,9 +168,3 @@ ConsoleIO.View.Device.Console.prototype.removeOverflowElement = function removeO
         length--;
     }
 };
-
-ConsoleIO.View.Device.Console.prototype.setItemState = function setItemState(id, state) {
-    if (this.toolbar) {
-        this.toolbar.setItemState(id, state);
-    }
-};
