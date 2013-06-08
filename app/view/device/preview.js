@@ -14,6 +14,8 @@ ConsoleIO.View.Device.Preview = function PreviewView(ctrl, model) {
     this.target = null;
     this.toolbar = null;
     this.tab = null;
+    this.dhxWins = null;
+    this.previewFrame = null;
     this.id = [this.model.name, this.model.guid].join("-");
 };
 
@@ -33,4 +35,34 @@ ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
     }, this.ctrl);
 
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
+
+    this.previewFrame = ConsoleIO.Service.DHTMLXHelper.createElement({
+        tag: 'iframe',
+        attr: {
+            height: '100%',
+            width: '100%'
+        },
+        target: document.body
+    });
+
+    this.dhxWins = new dhtmlXWindows();
+    this.dhxWins.enableAutoViewport(false);
+    this.dhxWins.attachViewportTo(document.body);
+    this.dhxWins.setSkin(ConsoleIO.Constraint.THEMES.get('win'));
+    this.dhxWins.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('win'));
+
+};
+
+ConsoleIO.View.Device.Preview.prototype.preview = function preview(data) {
+    if (this.dhxWins) {
+        this.previewFrame.src = "data:text/html;charset=utf-8," + escape(data.content);
+
+        var win = this.dhxWins.createWindow("preview", 20, 30, 800, 600);
+        win.setText("Preview");
+        win.button('park').hide();
+        win.keepInViewport(true);
+        win.centerOnScreen();
+        win.setModal(true);
+        win.attachObject(this.previewFrame);
+    }
 };

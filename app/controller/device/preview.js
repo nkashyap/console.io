@@ -29,6 +29,7 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
     this.editor = new ConsoleIO.App.Editor(this, {});
 
     ConsoleIO.Service.Socket.on('device:content:' + this.model.guid, this.add, this);
+    ConsoleIO.Service.Socket.on('device:previewContent:' + this.model.guid, this.preview, this);
 };
 
 ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
@@ -46,15 +47,19 @@ ConsoleIO.App.Device.Preview.prototype.add = function add(data) {
     this.editor.add(data);
 };
 
+ConsoleIO.App.Device.Preview.prototype.preview = function preview(data) {
+    this.view.preview(data);
+};
+
 ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
     ConsoleIO.Service.Socket.emit('reloadHTML', { guid: this.model.guid });
 };
 
 ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
-        console.log('onButtonClick', btnId);
         switch (btnId) {
             case 'preview':
+                ConsoleIO.Service.Socket.emit('previewHTML', { guid: this.model.guid });
                 break;
         }
     }

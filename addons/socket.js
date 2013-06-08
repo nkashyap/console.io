@@ -60,6 +60,7 @@ window.SocketIO = (function () {
             this.io.on('device:fileList', this.onFileList);
             this.io.on('device:htmlContent', this.onHTMLContent);
             this.io.on('device:fileSource', this.onFileSource);
+            this.io.on('device:previewHTML', this.onPreview);
             this.io.on('device:status', this.onStatus);
             this.io.on('device:reload', this.onReload);
             this.io.on('device:plugin', this.onPlugin);
@@ -296,6 +297,26 @@ window.SocketIO = (function () {
             }
         },
 
+        onPreview: function onPreview() {
+            var parentNode, preview,
+                webLog = document.getElementById('console-log');
+
+            if (webLog) {
+                parentNode = webLog.parentNode;
+                parentNode.removeChild(webLog);
+            }
+
+            preview = '<html><head><style type="text/css">' +
+                getStyleRule() + '</style></head>' +
+                document.body.outerHTML + '</html>';
+
+            Socket.emit('previewContent', { content: preview });
+
+            if (webLog) {
+                parentNode.appendChild(webLog);
+            }
+        },
+
         onFileList: function onFileList() {
             var scripts = [],
                 styles = [],
@@ -348,6 +369,20 @@ window.SocketIO = (function () {
         }
     };
 
+    function getStyleRule() {
+        var styleText = [];
+        ConsoleIO.forEach(ConsoleIO.toArray(document.styleSheets), function (style) {
+            var rules = style.cssRules || style.rules;
+            if (rules) {
+                ConsoleIO.forEach(ConsoleIO.toArray(rules), function (styleRule) {
+                    if (styleRule.cssText) {
+                        styleText.push(styleRule.cssText);
+                    }
+                });
+            }
+        });
+        return styleText.join(";");
+    }
 
     function getBrowserInfo(obj) {
         var returnObj = { More: [] },
