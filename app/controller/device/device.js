@@ -38,6 +38,10 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
     this.panel.render(this.view.getContextById(this.context.panel));
 };
 
+ConsoleIO.App.Device.prototype.update = function update(data) {
+    this.parent.update(data);
+};
+
 ConsoleIO.App.Device.prototype.setTitle = function setTitle(contextId, title) {
     this.view.setTitle(this.context[contextId], title);
 };

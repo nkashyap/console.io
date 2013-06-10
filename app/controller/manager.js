@@ -40,6 +40,12 @@ ConsoleIO.App.Manager.prototype.add = function add(data) {
     }
 };
 
+ConsoleIO.App.Manager.prototype.update = function update(data) {
+    if (this.store.guid.indexOf(data.guid) > -1) {
+        this.view.update(data.guid, data.name);
+    }
+};
+
 ConsoleIO.App.Manager.prototype.remove = function remove(data) {
     var index = this.store.guid.indexOf(data.guid);
     if (index > -1) {

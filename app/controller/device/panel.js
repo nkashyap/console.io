@@ -28,6 +28,10 @@ ConsoleIO.App.Device.Panel.prototype.render = function render(target) {
     this.console.render(this.view.tabs);
 };
 
+ConsoleIO.App.Device.Panel.prototype.update = function update(data) {
+    this.parent.update(data);
+};
+
 ConsoleIO.App.Device.Panel.prototype.onTabClick = function onTabClick(tabId) {
     var newTab = (tabId.split('-')[0]).toLowerCase();
 

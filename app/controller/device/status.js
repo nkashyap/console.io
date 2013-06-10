@@ -13,6 +13,7 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
     this.model = model;
     this.model.plugins.WebIO = this.model.plugins.WebIO || { enabled: false };
 
+    ConsoleIO.Model.DHTMLX.ToolBarItem.DeviceNameText.value = this.model.name;
     this.view = new ConsoleIO.View.Device.Status(this, {
         name: "Status",
         guid: this.model.guid,
@@ -74,10 +75,15 @@ ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btn
     if (!this.parent.onButtonClick(this, btnId, state)) {
         switch (btnId) {
             case 'deviceNameSet':
-                ConsoleIO.Service.Socket.emit('deviceName', {
-                    guid: this.model.guid,
-                    name: this.view.getValue('deviceNameText')
-                });
+                var name = this.view.getValue('deviceNameText');
+                if (!!name) {
+                    ConsoleIO.Service.Socket.emit('deviceName', {
+                        guid: this.model.guid,
+                        name: name
+                    });
+                    this.model.name = name;
+                    this.parent.update(this.model);
+                }
                 break;
             case 'webIO':
                 if (this.model.plugins.WebIO.enabled !== state) {

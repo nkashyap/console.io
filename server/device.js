@@ -150,6 +150,30 @@ Device.prototype.getName = function getName() {
 };
 
 /**
+ * Set device Name
+ *
+ * @public
+ * @method setName
+ * @param {object} data device property object data.name & data.guid
+ */
+Device.prototype.setName = function setName(data) {
+
+    /** set device name **/
+    this.name = data.name;
+
+    /**
+     * name event.
+     *
+     * @event Device#name
+     * @type {object}
+     * @property {string} name - device name
+     * @property {string} guid - device GUID
+     */
+    this.emit('name', data);
+};
+
+
+/**
  * Set device status to online
  *
  * @public

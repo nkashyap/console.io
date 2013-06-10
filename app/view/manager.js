@@ -38,6 +38,10 @@ ConsoleIO.View.Manager.prototype.add = function add(id, name, isActive) {
     }
 };
 
+ConsoleIO.View.Manager.prototype.update = function update(id, name) {
+    this.tabs.setLabel(id, name);
+};
+
 ConsoleIO.View.Manager.prototype.remove = function remove(id) {
     this.tabs.removeTab(id);
 };

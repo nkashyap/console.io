@@ -54,6 +54,18 @@ ConsoleIO.View.Browser.prototype.add = function add(id, name, parentId, icon) {
     }
 };
 
+ConsoleIO.View.Browser.prototype.addOrUpdate = function addOrUpdate(id, name, parentId, icon) {
+    if (this.tree.getParentId(id)) {
+        this.tree.deleteItem(id);
+    }
+
+    if (icon) {
+        this.tree.insertNewItem(parentId, id, name, 0, icon, icon, icon);
+    } else {
+        this.tree.insertNewItem(parentId, id, name);
+    }
+};
+
 ConsoleIO.View.Browser.prototype.setIcon = function setIcon(id, icon) {
     this.tree.setItemImage(id, icon);
 };

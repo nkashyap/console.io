@@ -82,6 +82,12 @@ function Manager() {
         }
     }
 
+    function changeDeviceName(request) {
+        var device = getDeviceByGuid(request.data.guid);
+        device.setName(request.data);
+        emit('device:registered', device.getInformation());
+    }
+
     function registerDevice(request) {
         var deviceReg = devices[request.cookies.guid];
         if (!deviceReg) {
@@ -132,6 +138,7 @@ function Manager() {
         defineRouteHandler: defineRouteHandler,
         defineDeviceCommandRouteHandler: defineDeviceCommandRouteHandler,
         defineUserCommandRouteHandler: defineUserCommandRouteHandler,
+        changeDeviceName: changeDeviceName,
         registerDevice: registerDevice,
         registerUser: registerUser,
         disconnect: disconnect,
@@ -229,6 +236,11 @@ function Manager() {
             refreshRegisteredDeviceList: notifyRegisteredDevicesToUser,
 
             /**
+             * User command to set device name
+             */
+            deviceName: changeDeviceName,
+
+            /**
              * User command to add/remove plugin from client device
              */
             plugin: defineUserCommandRouteHandler('plugin', true),
@@ -242,11 +254,6 @@ function Manager() {
              * User command to configure WebIO console on client device
              */
             pluginConfig: defineUserCommandRouteHandler('pluginConfig', true),
-
-            /**
-             * User command to control WebIO console on client device
-             */
-            deviceName: defineUserCommandRouteHandler('name', true),
 
             /**
              * User command to reload client device
