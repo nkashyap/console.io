@@ -32,7 +32,7 @@
       <section>
         <div id="title">
           <h1>Console.io</h1>
-          <p>JavaScript Remote Web Console (enhanced version of ConsoleJS)</p>
+          <p>JavaScript Remote Web Console</p>
           <hr>
           <span class="credits left">Project maintained by <a href="https://github.com/nkashyap">nkashyap</a></span>
           <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
@@ -56,54 +56,32 @@ It uses express.io (express &amp; socket.io) to provide user real time experienc
 <li>Technika Avtrex STB</li>
 <li>Firefox, Safari, Opera, Chrome, Maple and IE</li>
 <li>iPhone, iPod, iPad, Android browser, windows 8 phone etc</li>
-</ul><h1>
-<a name="install-as-node-npm-package" class="anchor" href="#install-as-node-npm-package"><span class="octicon octicon-link"></span></a>Install as Node NPM package</h1>
+</ul><h3>
+<a name="node-npm-package" class="anchor" href="#node-npm-package"><span class="octicon octicon-link"></span></a>Node NPM package</h3>
 
-<h2>
-<a name="install-consoleio" class="anchor" href="#install-consoleio"><span class="octicon octicon-link"></span></a>Install Console.IO</h2>
+<h4>
+<a name="install-and-start-consoleio-server" class="anchor" href="#install-and-start-consoleio-server"><span class="octicon octicon-link"></span></a>Install and start Console.IO server</h4>
 
 <div class="highlight"><pre>npm install -g xconsole.io
+consoleio
 </pre></div>
 
-<h2>
-<a name="start-consoleio-server" class="anchor" href="#start-consoleio-server"><span class="octicon octicon-link"></span></a>Start Console.IO server</h2>
+<h3>
+<a name="install-from-source" class="anchor" href="#install-from-source"><span class="octicon octicon-link"></span></a>Install from Source</h3>
 
-<div class="highlight"><pre>consoleio
-</pre></div>
-
-<h1>
-<a name="install-from-source" class="anchor" href="#install-from-source"><span class="octicon octicon-link"></span></a>Install from Source</h1>
-
-<h2>
-<a name="install-expressio-execute-installbat" class="anchor" href="#install-expressio-execute-installbat"><span class="octicon octicon-link"></span></a>Install express.io (execute install.bat)</h2>
+<h4>
+<a name="install-and-start-or-execute-installbat-and-startbat-window-user-only" class="anchor" href="#install-and-start-or-execute-installbat-and-startbat-window-user-only"><span class="octicon octicon-link"></span></a>Install and start or execute install.bat and start.bat (window user only)</h4>
 
 <div class="highlight"><pre>npm install express.io redis
+node ./server/main.js
 </pre></div>
 
-<h2>
-<a name="start-server-execute-startbat" class="anchor" href="#start-server-execute-startbat"><span class="octicon octicon-link"></span></a>Start server (execute start.bat)</h2>
-
-<div class="highlight"><pre>node ./server/main.js
-</pre></div>
-
-<h2>
-<a name="scale-consoleio-server" class="anchor" href="#scale-consoleio-server"><span class="octicon octicon-link"></span></a>Scale Console.IO server</h2>
-
-<p>Console.IO use socket.io and in order to scale socket.io you need to run redis server (/redis/redis-server.exe).
-And also change following value in server/config.js before starting the Console.IO server</p>
-
-<div class="highlight"><pre>redis: {
-        enable: true, // <span class="err">&lt;</span>- true to enable socket.io scaling
-        process: 6 // number of process to run
-    }
-</pre></div>
-
-<h2>
-<a name="include-consoleio-in-your-web-page" class="anchor" href="#include-consoleio-in-your-web-page"><span class="octicon octicon-link"></span></a>Include Console.IO in your web page</h2>
+<h3>
+<a name="include-scripts-in-your-web-page" class="anchor" href="#include-scripts-in-your-web-page"><span class="octicon octicon-link"></span></a>Include scripts in your web page</h3>
 
 <p>include inject.js scripts with config parameters</p>
 
-<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js?url=http://NodeServerURL:Port&amp;secure=false&amp;web=true&amp;..."</span><span class="nt">&gt;&lt;/script&gt;</span>
+<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js?url=http://nodeserver:port&amp;secure=false&amp;web=true&amp;..."</span><span class="nt">&gt;&lt;/script&gt;</span>
 </pre></div>
 
 <p>OR create a create ConfigIO global object with config options</p>
@@ -138,10 +116,10 @@ And also change following value in server/config.js before starting the Console.
 <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/console.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/socket.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/web.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/inject.js?url=http://NodeServerURL:Port"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/inject.js?url=http://nodeserver:port"</span><span class="nt">&gt;&lt;/script&gt;</span>
 </pre></div>
 
-<p>Visit http://NodeServerURL:Port/ for ConsoleIO interface</p>
+<p>Visit http://nodeserver:port/ for ConsoleIO interface</p>
 
 <p><img src="https://raw.github.com/nkashyap/console.io/master/console.io.png" alt="Screen shot"></p>
 
@@ -156,8 +134,8 @@ And also change following value in server/config.js before starting the Console.
 <img src="https://raw.github.com/nkashyap/console.io/master/app/resources/icons/subscribe.gif" alt="Subscribe icons"> Device is subscribed (double click on Online icon to subscribe).</li>
 <li>
 <img src="https://raw.github.com/nkashyap/console.io/master/app/resources/icons/console.gif" alt="WebIO icons"> WebIO (web console) icon to enable/disable WebIO remotely.</li>
-</ul><h2>
-<a name="consoleio-editor" class="anchor" href="#consoleio-editor"><span class="octicon octicon-link"></span></a>Console.IO Editor</h2>
+</ul><h3>
+<a name="consoleio-editor" class="anchor" href="#consoleio-editor"><span class="octicon octicon-link"></span></a>Console.IO Editor</h3>
 
 <p>You can execute commands on remote client from Console.IO. You can execute single &amp; multilines javascript code.</p>
 
@@ -174,8 +152,8 @@ And also change following value in server/config.js before starting the Console.
 }())
 </pre></div>
 
-<h2>
-<a name="consoleio-device-and-tabs" class="anchor" href="#consoleio-device-and-tabs"><span class="octicon octicon-link"></span></a>Console.IO Device and Tabs</h2>
+<h3>
+<a name="consoleio-device-and-tabs" class="anchor" href="#consoleio-device-and-tabs"><span class="octicon octicon-link"></span></a>Console.IO Device and Tabs</h3>
 
 <ul>
 <li>Files: Show all attached javascript and css files in the web page</li>
@@ -193,8 +171,8 @@ And also change following value in server/config.js before starting the Console.
 <li>Filter logs by type</li>
 </ul>
 </li>
-</ul><h2>
-<a name="consoleio-webio-web-console" class="anchor" href="#consoleio-webio-web-console"><span class="octicon octicon-link"></span></a>Console.IO WebIO (web console)</h2>
+</ul><h3>
+<a name="consoleio-webio-web-console" class="anchor" href="#consoleio-webio-web-console"><span class="octicon octicon-link"></span></a>Console.IO WebIO (web console)</h3>
 
 <ul>
 <li>Control it remotely
@@ -215,8 +193,8 @@ And also change following value in server/config.js before starting the Console.
 <li>Scroll through logs (Smart Tv/mobile/tablets)</li>
 </ul>
 </li>
-</ul><h2>
-<a name="console-api-methods-supported" class="anchor" href="#console-api-methods-supported"><span class="octicon octicon-link"></span></a>Console API methods supported</h2>
+</ul><h3>
+<a name="console-api-methods-supported" class="anchor" href="#console-api-methods-supported"><span class="octicon octicon-link"></span></a>Console API methods supported</h3>
 
 <ul>
 <li>console.assert(x)</li>
@@ -232,8 +210,7 @@ And also change following value in server/config.js before starting the Console.
 <li>console.error(error)</li>
 <li>console.exception(error)</li>
 <li>console.trace()</li>
-</ul><h2>
-<a name="coming-soon" class="anchor" href="#coming-soon"><span class="octicon octicon-link"></span></a>Coming soon...</h2>
+<li>TODO
 
 <ul>
 <li>console.group()</li>
@@ -244,20 +221,55 @@ And also change following value in server/config.js before starting the Console.
 <li>console.profiles</li>
 <li>console.profile()</li>
 <li>console.profileEnd()</li>
+</ul>
+</li>
 </ul><h2>
-<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h2>
+<a name="configure-consoleio-server" class="anchor" href="#configure-consoleio-server"><span class="octicon octicon-link"></span></a>Configure Console.IO Server</h2>
+
+<p>All server side configurations are defined in server/config.js file.
+If you have install using npm -g then you will find it in C:\Users[USERNAME]\AppData\Roaming\npm\node_modules\xconsole.io\server folder</p>
+
+<h3>
+<a name="server-port" class="anchor" href="#server-port"><span class="octicon octicon-link"></span></a>Server Port</h3>
+
+<p>You can change default (8082) port number</p>
+
+<div class="highlight"><pre>express: {
+    production: {
+        ...
+        { 'port-number': 8082 },
+        { 'secret-key': 'console.io' },
+        ...
+    }
+}
+</pre></div>
+
+<h3>
+<a name="scaling-server" class="anchor" href="#scaling-server"><span class="octicon octicon-link"></span></a>Scaling server</h3>
+
+<p>Console.IO use socket.io and in order to scale socket.io you need to run redis server (/redis/redis-server.exe).
+And also change following value in config file before starting the Console.IO server</p>
+
+<div class="highlight"><pre>redis: {
+        enable: true, // <span class="err">&lt;</span>- true to enable socket.io scaling
+        process: 6 // number of process to run
+    }
+</pre></div>
+
+<h3>
+<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h3>
 
 <ul>
 <li>Update Readme with full feature list</li>
 <li>Add SSL support</li>
 <li>Add JSDoc &amp; Unit Tests</li>
-</ul><h2>
-<a name="copyright-and-license" class="anchor" href="#copyright-and-license"><span class="octicon octicon-link"></span></a>Copyright and license</h2>
+</ul><h3>
+<a name="copyright-and-license" class="anchor" href="#copyright-and-license"><span class="octicon octicon-link"></span></a>Copyright and license</h3>
 
 <p>MIT LICENSE </p>
 
-<h2>
-<a name="reference" class="anchor" href="#reference"><span class="octicon octicon-link"></span></a>Reference</h2>
+<h3>
+<a name="reference" class="anchor" href="#reference"><span class="octicon octicon-link"></span></a>Reference</h3>
 
 <ul>
 <li><a href="https://github.com/eriwen/javascript-stacktrace">Javascript Stacktrace</a></li>
