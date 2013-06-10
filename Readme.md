@@ -15,65 +15,28 @@ Tested on:
 * iPhone, iPod, iPad, Android browser, windows 8 phone etc
 
 
-### Install as Node NPM package
-#### Install Console.IO
+### Node NPM package
+#### Install and start Console.IO server
 
 ```bash
 npm install -g xconsole.io
-```
-#### Start Console.IO server
-
-```bash
 consoleio
 ```
 
 ### Install from Source
-#### Install express.io (execute install.bat)
+#### Install and start or execute install.bat and start.bat (window user only)
 
 ```bash
 npm install express.io redis
-```
-#### Start server (execute start.bat)
-
-```bash
 node ./server/main.js
 ```
 
-## Configure Console.IO
-All server side configurations are defined in server/config.js file.
-If you have install using npm -g then you will find it in C:\Users\[USERNAME]\AppData\Roaming\npm\node_modules\xconsole.io\server folder
-
-### Server Port
-You can change default (8082) port number
-
-```html
-express: {
-    production: {
-        ...
-        { 'port-number': 8082 },
-        { 'secret-key': 'console.io' },
-        ...
-    }
-}
-```
-
-### Scaling server
-Console.IO use socket.io and in order to scale socket.io you need to run redis server (/redis/redis-server.exe).
-And also change following value in config file before starting the Console.IO server
-
-```html
-redis: {
-        enable: true, // <- true to enable socket.io scaling
-        process: 6 // number of process to run
-    }
-```
-
-### Include Console.IO in your web page
+### Include scripts in your web page
 
 include inject.js scripts with config parameters
 
 ```html
-<script type="text/javascript" src="inject.js?url=http://NodeServerURL:Port&secure=false&web=true&..."></script>
+<script type="text/javascript" src="inject.js?url=http://nodeserver:port&secure=false&web=true&..."></script>
 ```
 
 OR create a create ConfigIO global object with config options
@@ -110,10 +73,10 @@ OR you can include all files individually
 <script type="text/javascript" src="<Local Folder OR Node Server>/console.io.js"></script>
 <script type="text/javascript" src="<Local Folder OR Node Server>/socket.js"></script>
 <script type="text/javascript" src="<Local Folder OR Node Server>/web.js"></script>
-<script type="text/javascript" src="<Local Folder OR Node Server>/inject.js?url=http://NodeServerURL:Port"></script>
+<script type="text/javascript" src="<Local Folder OR Node Server>/inject.js?url=http://nodeserver:port"></script>
 ```
 
-Visit http://NodeServerURL:Port/ for ConsoleIO interface
+Visit http://nodeserver:port/ for ConsoleIO interface
 
 ![Screen shot](https://raw.github.com/nkashyap/console.io/master/console.io.png)
 
@@ -178,16 +141,44 @@ Note: All multilines code should be wrapped within self executable function. E.G
  * console.error(error)
  * console.exception(error)
  * console.trace()
+ * TODO
+    * console.group()
+    * console.groupCollapsed()
+    * console.groupEnd()
+    * console.markTimeline()
+    * console.timestamp()
+    * console.profiles
+    * console.profile()
+    * console.profileEnd()
 
-### Coming soon...
- * console.group()
- * console.groupCollapsed()
- * console.groupEnd()
- * console.markTimeline()
- * console.timestamp()
- * console.profiles
- * console.profile()
- * console.profileEnd()
+## Configure Console.IO Server
+All server side configurations are defined in server/config.js file.
+If you have install using npm -g then you will find it in C:\Users\[USERNAME]\AppData\Roaming\npm\node_modules\xconsole.io\server folder
+
+### Server Port
+You can change default (8082) port number
+
+```html
+express: {
+    production: {
+        ...
+        { 'port-number': 8082 },
+        { 'secret-key': 'console.io' },
+        ...
+    }
+}
+```
+
+### Scaling server
+Console.IO use socket.io and in order to scale socket.io you need to run redis server (/redis/redis-server.exe).
+And also change following value in config file before starting the Console.IO server
+
+```html
+redis: {
+        enable: true, // <- true to enable socket.io scaling
+        process: 6 // number of process to run
+    }
+```
 
 ### TODO
  * Update Readme with full feature list
