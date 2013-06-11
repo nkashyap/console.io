@@ -260,7 +260,11 @@ window.SocketIO = (function () {
             console.log('executing reload command');
             setTimeout((function (url) {
                 return function () {
-                    window.location.assign(url);
+                    if (window.location.reload) {
+                        window.location.reload(true);
+                    } else {
+                        window.location.assign(url);
+                    }
                 };
             }(location.href)), 1000);
         },
@@ -381,7 +385,7 @@ window.SocketIO = (function () {
                 });
             }
         });
-        return styleText.join(";");
+        return styleText.join(" ");
     }
 
     function getBrowserInfo(obj) {
