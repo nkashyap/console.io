@@ -412,7 +412,8 @@ window.SocketIO = (function () {
         var xhr;
         if (window.XMLHttpRequest) {
             xhr = new XMLHttpRequest();
-            xhr.withCredentials = false;
+            // throw error in smart TV browsers
+            //xhr.withCredentials = false;
         } else if (window.XDomainRequest) {
             xhr = new XDomainRequest();
         } else if (window.ActiveXObject) {
