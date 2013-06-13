@@ -34,18 +34,24 @@ var config = {
             set: [
                 { 'title': 'Console.IO Dev' },
                 { 'port-number': 8082 },
-                { 'secret-key': 'console.io-dev' },
-                { 'https': false }
+                { 'session-key': 'console.io-dev' }
             ]
         },
         production: {
             set: [
                 { 'title': 'Console.IO' },
                 { 'port-number': 8082 },
-                { 'secret-key': 'console.io' },
-                { 'https': false }
+                { 'session-key': 'console.io' }
             ]
         }
+    },
+
+    /** https configurations **/
+    https: {
+        enable: true,
+        key: './certificates/server.key',
+        certificate: './certificates/server.crt',
+        ca: './certificates/ca.crt'
     },
 
     /** socket.io configurations **/

@@ -24,7 +24,7 @@ window.SocketIO = (function () {
 
         init: function init(config) {
             this.config = config;
-            this.io = window.io.connect(config.url, { secure: (config.secure == 'true') });
+            this.io = window.io.connect(config.url, { secure: (typeof config.secure === 'boolean' ? config.secure : config.secure == 'true') });
 
             // set console.io event
             ConsoleIO.on('console', function (data) {

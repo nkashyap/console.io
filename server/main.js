@@ -19,13 +19,31 @@ function main() {
     var express = require('express.io'),
         config = require('./config'),
         configure = require('./configure'),
+        fs = require('fs'),
         cluster = require('cluster'),
         redis = require('redis');
 
     // server worker process
     function Workers() {
-        var app = express().http().io(),
-            manager = require('./manager');
+        var app, opts = {}, manager = require('./manager');
+
+        if (config.https.enable) {
+            opts.key = fs.readFileSync(config.https.key);
+            opts.cert = fs.readFileSync(config.https.certificate);
+
+            // This is necessary only if the client uses the self-signed certificate.
+            if (config.https.ca) {
+                opts.ca = fs.readFileSync(config.https.ca);
+            }
+
+            if (opts.requestCert) {
+                opts.requestCert = config.https.requestCert;
+            }
+
+            app = express().https(opts).io();
+        } else {
+            app = express().http().io();
+        }
 
         // configuration
         configure(app, 'development', config.express);
@@ -44,7 +62,7 @@ function main() {
 
         // Setup your sessions, just like normal.
         app.use(express.cookieParser());
-        app.use(express.session({ secret: app.get('secret-key') }));
+        app.use(express.session({ secret: app.get('session-key') }));
 
         //admin app routes
         app.use('/', express.static('app'));
@@ -110,7 +128,7 @@ function main() {
         }(express, app));
 
         //display remote ui url information
-        console.log(app.get('title') + ' is run at ' + (app.get('https') === true ? 'https' : 'http') + '://localhost:' + app.get('port-number'));
+        console.log(app.get('title') + ' is run at ' + (config.https.enable ? 'https' : 'http') + '://localhost:' + app.get('port-number'));
     }
 
     // Start forking if you are the master.

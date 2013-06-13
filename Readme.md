@@ -36,7 +36,7 @@ node ./server/main.js
 include inject.js scripts with config parameters
 
 ```html
-<script type="text/javascript" src="inject.js?url=http://nodeserver:port&secure=false&web=true&..."></script>
+<script type="text/javascript" src="inject.js?url=http://nodeserver:port&web=true&..."></script>
 ```
 
 OR create a create ConfigIO global object with config options
@@ -51,9 +51,6 @@ configIO.js
 window.ConfigIO = {
     //URL to connect back
 	url: 'http://nodeserver:port/',
-
-	// SSL is not supported yet
-	secure: false,
 
 	// set it to true to enable WebIO (web console)  (optional)
 	web: true,
@@ -163,11 +160,34 @@ express: {
     production: {
         ...
         { 'port-number': 8082 },
-        { 'secret-key': 'console.io' },
+        { 'session-key': 'console.io' },
         ...
     }
 }
 ```
+
+### SSL Support
+
+Change following in server side config file to enable server to run over SSL and use "https" instead of "http" to inject files on client.
+To generate your own SSL Certificate please check this [How to generate custom SSL certificates](http://forum.synology.com/wiki/index.php/How_to_generate_custom_SSL_certificates).
+
+```html
+var config = {
+    .....
+    https: {
+        enable: true, // change true/false to enable and disable SSL
+        key: './certificates/server.key',
+        certificate: './certificates/server.crt',
+        ca: './certificates/ca.crt'
+    },
+    .....
+}
+```
+
+```html
+<script type="text/javascript" src="inject.js?url=https://nodeserver:port&web=true&..."></script>
+```
+
 
 ### Scaling server
 Console.IO use socket.io and in order to scale socket.io you need to run redis server (/redis/redis-server.exe).
@@ -182,7 +202,6 @@ redis: {
 
 ### TODO
  * Update Readme with full feature list
- * Add SSL support
  * Add JSDoc & Unit Tests
 
 ### Copyright and license
@@ -195,3 +214,4 @@ redis: {
  * [Socket.io] (http://socket.io/#how-to-use)
  * [prettify] (https://code.google.com/p/google-code-prettify/)
  * [dhtmlx] (http://dhtmlx.com/) [GPL LICENSE]
+ * [OpenSSL] (http://www.openssl.org/)

@@ -281,7 +281,7 @@ window.InjectIO = (function () {
 
     function setUp(config) {
         if (typeof window.ConsoleIO !== 'undefined') {
-//            Cookies.init();
+            Cookies.init();
 
             window.ConsoleIO.extend(window.ConsoleIO, {
                 Cookies: Cookies,

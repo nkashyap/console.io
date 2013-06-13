@@ -110,7 +110,6 @@ ConsoleIO.namespace("ConsoleIO.Settings");
 
 
 ConsoleIO.Settings = {
-    secure: false,
     theme: 'web',
     iconPath: 'resources/icons/',
     reloadTabContentWhenActivated: true,
