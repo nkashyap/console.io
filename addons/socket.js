@@ -374,14 +374,29 @@ window.SocketIO = (function () {
     };
 
     function getStyleRule() {
-        var styleText = [];
+        var styleText = [],
+            regex = new RegExp("((http|https)://)?([^/]+)", 'img');
+
         ConsoleIO.forEach(ConsoleIO.toArray(document.styleSheets), function (style) {
             try {
-                var rules = style.cssRules || style.rules;
+                var rules = style.cssRules || style.rules,
+                    href = style.href.match(regex);
+
+                href.pop();
+
                 if (rules) {
                     ConsoleIO.forEach(ConsoleIO.toArray(rules), function (styleRule) {
-                        if (styleRule.cssText) {
-                            styleText.push(styleRule.cssText);
+                        var cssText = styleRule.cssText,
+                            baseURL = href.concat();
+
+                        if (cssText) {
+                            //TODO this only check only for 1 level up
+                            if (cssText.indexOf("../") > -1) {
+                                baseURL.pop();
+                                cssText = cssText.replace("..", baseURL.join("/"));
+                            }
+
+                            styleText.push(cssText);
                         }
                     });
                 }
@@ -391,13 +406,17 @@ window.SocketIO = (function () {
         return styleText.join(" ");
     }
 
-    function getStyledElement(element) {
+    function getStyledElement(element, clone) {
         element = element || document.body;
-        ConsoleIO.forEach(ConsoleIO.toArray(element.children), function (child) {
-            getStyledElement(child);
+        clone = clone || element.cloneNode(true);
+
+        ConsoleIO.forEach(ConsoleIO.toArray(element.children), function (child, index) {
+            getStyledElement(child, clone.children[index]);
         });
-        element.setAttribute('style', getAppliedStyles(element));
-        return element;
+
+        clone.setAttribute('style', (element.style.display !== 'none') ? getAppliedStyles(element) : 'display:none;');
+
+        return clone;
     }
 
     function getAppliedStyles(element) {

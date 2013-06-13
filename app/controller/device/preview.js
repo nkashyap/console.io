@@ -48,6 +48,7 @@ ConsoleIO.App.Device.Preview.prototype.add = function add(data) {
 };
 
 ConsoleIO.App.Device.Preview.prototype.preview = function preview(data) {
+    this.view.toggleButton('preview', true);
     this.view.preview(data);
 };
 
@@ -59,6 +60,7 @@ ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(bt
     if (!this.parent.onButtonClick(this, btnId, state)) {
         switch (btnId) {
             case 'preview':
+                this.view.toggleButton('preview', false);
                 ConsoleIO.Service.Socket.emit('previewHTML', { guid: this.model.guid });
                 break;
         }

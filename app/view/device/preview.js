@@ -50,12 +50,21 @@ ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
     this.dhxWins.attachViewportTo(document.body);
     this.dhxWins.setSkin(ConsoleIO.Constraint.THEMES.get('win'));
     this.dhxWins.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('win'));
+};
 
+ConsoleIO.View.Device.Preview.prototype.toggleButton = function toggleButton(id, state) {
+    if (this.toolbar) {
+        if (state) {
+            this.toolbar.enableItem(id);
+        } else {
+            this.toolbar.disableItem(id);
+        }
+    }
 };
 
 ConsoleIO.View.Device.Preview.prototype.preview = function preview(data) {
     if (this.dhxWins) {
-        this.previewFrame.src = "data:text/html;charset=utf-8," + escape(data.content);
+        this.previewFrame.src = "data:text/html," + escape(data.content);
 
         var win = this.dhxWins.createWindow("preview", 20, 30, 800, 600);
         win.setText("Preview");
