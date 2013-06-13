@@ -17,7 +17,7 @@ ConsoleIO.Model.DHTMLX = {
 
         PageSize: { id: 'pagesize', type: 'select', text: 'PageSize', imgEnabled: 'pagesize.gif', tooltip: 'Page Size', width: 90, opts: 'pagesizes' },
         Preview: { id: 'preview', type: 'button', text: 'Preview', imgEnabled: 'preview.gif', imgDisabled: 'preview_dis.gif', tooltip: 'Preview' },
-        ScreenShot: { id: 'screenShot', type: 'button', text: 'ScreenShot', imgEnabled: 'preview.gif', imgDisabled: 'preview_dis.gif', tooltip: 'ScreenShot' },
+        ScreenShot: { id: 'screenShot', type: 'button', text: 'ScreenShot', imgEnabled: 'screenshot.png', imgDisabled: 'screenshot_dis.png', tooltip: 'ScreenShot' },
 
         DeviceNameLabel: { id: 'deviceNameLabel', type: 'text', text: 'Device Name:', tooltip: 'Device Name' },
         DeviceNameText: { id: 'deviceNameText', type: 'input', value: '', width: 120, tooltip: 'Enter Device Name' },
