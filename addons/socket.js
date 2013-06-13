@@ -324,9 +324,21 @@ window.SocketIO = (function () {
 
         onCaptureScreen: function onCaptureScreen() {
             window.ConsoleIO.requireScript(Socket.config.url + "/addons/html2canvas.js", function () {
+                var parentNode,
+                    webLog = document.getElementById('console-log');
+
+                if (webLog) {
+                    parentNode = webLog.parentNode;
+                    parentNode.removeChild(webLog);
+                }
+
                 window.html2canvas(document.body, {
+                    logging: true,
                     onrendered: function (canvas) {
                         Socket.emit('screenShot', { screen: canvas.toDataURL() });
+                        if (webLog) {
+                            parentNode.appendChild(webLog);
+                        }
                     }
                 });
             });
