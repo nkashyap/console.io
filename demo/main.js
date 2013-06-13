@@ -44,7 +44,6 @@ function init() {
     setInterval(function () {
         if (currentIndex < length) {
             eval(Commands[currentIndex++]);
-            eval(Commands[currentIndex++]);
         } else {
             currentIndex = 0;
         }
@@ -62,7 +61,7 @@ function init() {
 
             connectionMode.innerHTML = info;
         }
-    }, 3000);
+    }, 2000);
 }
 
 window.InjectIO.ready(init);

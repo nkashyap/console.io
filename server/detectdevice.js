@@ -137,7 +137,7 @@ var detectDevice = {
                 {  userAgent: config.userAgent, search: /\bAndroid.*Chrome\/[.0-9]* (?!Mobile)/i, identity: "Tablet" },
                 {  userAgent: config.userAgent, search: /\biPad|GT-P1000\b/i, identity: "Tablet" },
                 {  userAgent: config.userAgent, search: /\biPod\b/i, identity: "Media" },
-                {  userAgent: config.userAgent, search: /\biPhone|IEMobile\b/i, identity: "Mobile" },
+                {  userAgent: config.userAgent, search: /\biPhone|IEMobile|Mobile\b/i, identity: "Mobile" },
                 {  userAgent: config.userAgent, search: /\bPlaystation\b/i, identity: "Console" },
 
                 {  platform: config.platform, search: /\bWin|Mac|Linux/i, identity: "PC" }
@@ -171,6 +171,7 @@ var detectDevice = {
                 {  userAgent: config.userAgent, search: /\bTechnika22|TechnikaTK500SDTR212\b/i, identity: "MStar" },
                 {  userAgent: config.userAgent, search: /\bOreganMediaBrowser\b/i, identity: "Oregan Media" },
                 {  userAgent: config.userAgent, search: /\bGINGERBREAD\b/i, identity: "Gingerbread" },
+                {  userAgent: config.userAgent, search: /\bGalaxy|Nexus\b/i, identity: "Galaxy Nexus" },
 
                 {  userAgent: config.userAgent, search: /\bPlaystation\b/i, identity: "Playstation" },
                 {  userAgent: config.userAgent, search: /\bChrome\b/i, identity: "Chrome" },
