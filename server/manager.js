@@ -203,6 +203,12 @@ function Manager() {
             previewContent: defineDeviceCommandRouteHandler('command', 'previewContent'),
 
             /**
+             * Device content event routes handler.
+             * sent Screen Shot of the page
+             */
+            screenShot: defineDeviceCommandRouteHandler('command', 'screenShot'),
+
+            /**
              * Device source event routes handler.
              * gives source content of the file
              */
@@ -274,6 +280,11 @@ function Manager() {
              * User command to get HTML preview content from client device
              */
             previewHTML: defineUserCommandRouteHandler('previewHTML'),
+
+            /**
+             * User command to get screen shot of client device
+             */
+            captureScreen: defineUserCommandRouteHandler('captureScreen'),
 
             /**
              * User command to get file source from client device

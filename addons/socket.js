@@ -61,6 +61,7 @@ window.SocketIO = (function () {
             this.io.on('device:htmlContent', this.onHTMLContent);
             this.io.on('device:fileSource', this.onFileSource);
             this.io.on('device:previewHTML', this.onPreview);
+            this.io.on('device:captureScreen', this.onCaptureScreen);
             this.io.on('device:status', this.onStatus);
             this.io.on('device:reload', this.onReload);
             this.io.on('device:plugin', this.onPlugin);
@@ -319,6 +320,16 @@ window.SocketIO = (function () {
             if (webLog) {
                 parentNode.appendChild(webLog);
             }
+        },
+
+        onCaptureScreen: function onCaptureScreen() {
+            window.ConsoleIO.requireScript(Socket.config.url + "/addons/html2canvas.js", function () {
+                window.html2canvas(document.body, {
+                    onrendered: function (canvas) {
+                        Socket.emit('screenShot', { screen: canvas.toDataURL() });
+                    }
+                });
+            });
         },
 
         onFileList: function onFileList() {

@@ -75,3 +75,17 @@ ConsoleIO.View.Device.Preview.prototype.preview = function preview(data) {
         win.attachObject(this.previewFrame);
     }
 };
+
+ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
+    if (this.dhxWins) {
+        this.previewFrame.src = data.screen;
+
+        var win = this.dhxWins.createWindow("screen", 20, 30, 800, 600);
+        win.setText("ScreenShot");
+        win.button('park').hide();
+        win.keepInViewport(true);
+        win.centerOnScreen();
+        win.setModal(true);
+        win.attachObject(this.previewFrame);
+    }
+};

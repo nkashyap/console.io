@@ -23,13 +23,15 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Preview
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Preview,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.ScreenShot
         ]
     });
     this.editor = new ConsoleIO.App.Editor(this, {});
 
     ConsoleIO.Service.Socket.on('device:content:' + this.model.guid, this.add, this);
     ConsoleIO.Service.Socket.on('device:previewContent:' + this.model.guid, this.preview, this);
+    ConsoleIO.Service.Socket.on('device:screenShot:' + this.model.guid, this.screenShot, this);
 };
 
 ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
@@ -52,6 +54,11 @@ ConsoleIO.App.Device.Preview.prototype.preview = function preview(data) {
     this.view.preview(data);
 };
 
+ConsoleIO.App.Device.Preview.prototype.screenShot = function screenShot(data) {
+    this.view.toggleButton('screenShot', true);
+    this.view.screenShot(data);
+};
+
 ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
     ConsoleIO.Service.Socket.emit('reloadHTML', { guid: this.model.guid });
 };
@@ -62,6 +69,10 @@ ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(bt
             case 'preview':
                 this.view.toggleButton('preview', false);
                 ConsoleIO.Service.Socket.emit('previewHTML', { guid: this.model.guid });
+                break;
+            case 'screenShot':
+                this.view.toggleButton('screenShot', false);
+                ConsoleIO.Service.Socket.emit('captureScreen', { guid: this.model.guid });
                 break;
         }
     }
