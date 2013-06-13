@@ -105,7 +105,33 @@ window.InjectIO = (function () {
         return params;
     }
 
+    function isLoaded(url) {
+        var tag = url.indexOf('.js') > -1 ? 'script' : url.indexOf('.css') > -1 ? 'link' : null,
+            elements, element, attr, value, i = 0;
+
+        if (tag) {
+            attr = tag === 'script' ? 'src' : 'href';
+            elements = document.getElementsByTagName(tag);
+            for (; element = elements[i++];) {
+                value = element.getAttribute(attr) || '';
+                if (value.indexOf(url) > -1) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     function requireScript(url, callback) {
+
+        if (isLoaded(url)) {
+            setTimeout(function(){
+                callback(url);
+            }, 100);
+            return false;
+        }
+
         var node = document.createElement('script'),
             head = document.getElementsByTagName('head')[0];
 
@@ -153,6 +179,10 @@ window.InjectIO = (function () {
     }
 
     function requireStyle(url) {
+        if (isLoaded(url)) {
+            return false;
+        }
+
         var link = document.createElement('link'),
             head = document.getElementsByTagName('head')[0];
 
@@ -321,22 +351,14 @@ window.InjectIO = (function () {
             config = typeof window.ConfigIO !== 'undefined' ? window.ConfigIO : getServerParams();
 
         // fix the ordering for Opera
-        if (!window.io) {
-            scripts.push(config.url + "/socket.io/socket.io.js");
-        }
-        // fix the samsung to load all script up front
-        if (!window.ConsoleIO) {
-            scripts.push(config.url + "/addons/console.io.js");
-        }
+        scripts.push(config.url + "/socket.io/socket.io.js");
 
-        if (!window.SocketIO) {
-            scripts.push(config.url + "/addons/socket.js");
-        }
+        // fix the samsung to load all script up front
+        scripts.push(config.url + "/addons/console.io.js");
+        scripts.push(config.url + "/addons/socket.js");
 
         if (config.web) {
-            if (!window.WebIO) {
-                scripts.push(config.url + "/addons/web.js");
-            }
+            scripts.push(config.url + "/addons/web.js");
             requireStyle(config.url + "/resources/console.css");
         }
 
