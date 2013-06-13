@@ -97,6 +97,13 @@ function Device(application, request, manager) {
      * @property {string} guid - device GUID
      */
     this.emit('ready', { name: this.name, guid: this.guid });
+
+    /**
+     * Server log
+     */
+    if (!this.device.browser) {
+        console.log("Unknown Browser", this.device, request.data);
+    }
 }
 
 /**
