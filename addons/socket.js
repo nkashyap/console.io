@@ -266,7 +266,7 @@ window.SocketIO = (function () {
                         window.location.assign(url);
                     }
                 };
-            }(location.href)), 1000);
+            }(location.href)), 500);
         },
 
         onPlugin: function onPlugin(data) {
@@ -312,7 +312,7 @@ window.SocketIO = (function () {
 
             preview = '<html><head><style type="text/css">' +
                 getStyleRule() + '</style></head>' +
-                document.body.outerHTML + '</html>';
+                getStyledElement().outerHTML + '</html>';
 
             Socket.emit('previewContent', { content: preview });
 
@@ -376,16 +376,55 @@ window.SocketIO = (function () {
     function getStyleRule() {
         var styleText = [];
         ConsoleIO.forEach(ConsoleIO.toArray(document.styleSheets), function (style) {
-            var rules = style.cssRules || style.rules;
-            if (rules) {
-                ConsoleIO.forEach(ConsoleIO.toArray(rules), function (styleRule) {
-                    if (styleRule.cssText) {
-                        styleText.push(styleRule.cssText);
-                    }
-                });
+            try {
+                var rules = style.cssRules || style.rules;
+                if (rules) {
+                    ConsoleIO.forEach(ConsoleIO.toArray(rules), function (styleRule) {
+                        if (styleRule.cssText) {
+                            styleText.push(styleRule.cssText);
+                        }
+                    });
+                }
+            } catch (e) {
             }
         });
         return styleText.join(" ");
+    }
+
+    function getStyledElement(element) {
+        element = element || document.body;
+        ConsoleIO.forEach(ConsoleIO.toArray(element.children), function (child) {
+            getStyledElement(child);
+        });
+        element.setAttribute('style', getAppliedStyles(element));
+        return element;
+    }
+
+    function getAppliedStyles(element) {
+        var win = document.defaultView || window,
+            styleNode = [];
+
+        if (win.getComputedStyle) {
+            /* Modern browsers */
+            var styles = win.getComputedStyle(element, '');
+            ConsoleIO.forEach(ConsoleIO.toArray(styles), function (style) {
+                styleNode.push(style + ':' + styles.getPropertyValue(style));
+            });
+
+        } else if (element.currentStyle) {
+            /* IE */
+            ConsoleIO.forEachProperty(element.currentStyle, function (value, style) {
+                styleNode.push(style + ':' + value);
+            });
+
+        } else {
+            /* Ancient browser..*/
+            ConsoleIO.forEach(ConsoleIO.toArray(element.style), function (style) {
+                styleNode.push(style + ':' + element.style[style]);
+            });
+        }
+
+        return styleNode.join("; ");
     }
 
     function getBrowserInfo(obj) {
@@ -413,7 +452,11 @@ window.SocketIO = (function () {
         if (window.XMLHttpRequest) {
             xhr = new XMLHttpRequest();
             // throw error in smart TV browsers
-            //xhr.withCredentials = false;
+            try {
+                xhr.withCredentials = false;
+            } catch (e) {
+            }
+
         } else if (window.XDomainRequest) {
             xhr = new XDomainRequest();
         } else if (window.ActiveXObject) {
