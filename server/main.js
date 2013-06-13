@@ -28,12 +28,15 @@ function main() {
         var app, opts = {}, manager = require('./manager');
 
         if (config.https.enable) {
-            opts.key = fs.readFileSync(config.https.key);
-            opts.cert = fs.readFileSync(config.https.certificate);
-
-            // This is necessary only if the client uses the self-signed certificate.
-            if (config.https.ca) {
-                opts.ca = fs.readFileSync(config.https.ca);
+            if (config.https.pfx) {
+                opts.pfx = fs.readFileSync(config.https.pfx);
+            } else {
+                opts.key = fs.readFileSync(config.https.key);
+                opts.cert = fs.readFileSync(config.https.certificate);
+                // This is necessary only if the client uses the self-signed certificate.
+                if (config.https.ca) {
+                    opts.ca = fs.readFileSync(config.https.ca);
+                }
             }
 
             if (opts.requestCert) {

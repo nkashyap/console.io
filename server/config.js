@@ -48,7 +48,8 @@ var config = {
 
     /** https configurations **/
     https: {
-        enable: true,
+        enable: false,
+        //pfx: './certificates/bbdev1.pfx',
         key: './certificates/server.key',
         certificate: './certificates/server.crt',
         ca: './certificates/ca.crt'
