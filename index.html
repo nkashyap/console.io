@@ -1,43 +1,51 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=640" />
+
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen"/>
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)"/>
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
+    </script>
     <title>Console.io by nkashyap</title>
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="javascripts/respond.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <!--[if lt IE 8]>
-    <link rel="stylesheet" href="stylesheets/ie.css">
-    <![endif]-->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
   </head>
+
   <body>
-      <div id="header">
-        <nav>
-          <li class="fork"><a href="https://github.com/nkashyap/console.io">View On GitHub</a></li>
-          <li class="downloads"><a href="https://github.com/nkashyap/console.io/zipball/master">ZIP</a></li>
-          <li class="downloads"><a href="https://github.com/nkashyap/console.io/tarball/master">TAR</a></li>
-          <li class="title">DOWNLOADS</li>
-        </nav>
-      </div><!-- end header -->
+    <a id="forkme_banner" href="https://github.com/nkashyap/console.io">View on GitHub</a>
+    <div class="shell">
 
-    <div class="wrapper">
+      <header>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>Console.io</h1>
+            <h2>JavaScript Remote Web Console</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+      </header>
 
-      <section>
-        <div id="title">
-          <h1>Console.io</h1>
-          <p>JavaScript Remote Web Console</p>
-          <hr>
-          <span class="credits left">Project maintained by <a href="https://github.com/nkashyap">nkashyap</a></span>
-          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
-        </div>
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/nkashyap/console.io/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/nkashyap/console.io/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
 
+
+      <span class="banner-fix"></span>
+
+
+      <section id="main_content">
         <h1>
 <a name="consoleio" class="anchor" href="#consoleio"><span class="octicon octicon-link"></span></a>Console.IO</h1>
 
@@ -81,7 +89,7 @@ node ./server/main.js
 
 <p>include inject.js scripts with config parameters</p>
 
-<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js?url=http://nodeserver:port&amp;secure=false&amp;web=true&amp;..."</span><span class="nt">&gt;&lt;/script&gt;</span>
+<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js?url=http://nodeserver:port&amp;web=true&amp;..."</span><span class="nt">&gt;&lt;/script&gt;</span>
 </pre></div>
 
 <p>OR create a create ConfigIO global object with config options</p>
@@ -95,9 +103,6 @@ node ./server/main.js
 <div class="highlight"><pre>window.ConfigIO = {
     //URL to connect back
     url: 'http://nodeserver:port/',
-
-    // SSL is not supported yet
-    secure: false,
 
     // set it to true to enable WebIO (web console)  (optional)
     web: true,
@@ -238,10 +243,31 @@ If you have install using npm -g then you will find it in C:\Users[USERNAME]\App
     production: {
         ...
         { 'port-number': 8082 },
-        { 'secret-key': 'console.io' },
+        { 'session-key': 'console.io' },
         ...
     }
 }
+</pre></div>
+
+<h3>
+<a name="ssl-support" class="anchor" href="#ssl-support"><span class="octicon octicon-link"></span></a>SSL Support</h3>
+
+<p>Change following in server side config file to enable server to run over SSL and use "https" instead of "http" to inject files on client.
+To generate your own SSL Certificate please check this <a href="http://forum.synology.com/wiki/index.php/How_to_generate_custom_SSL_certificates">How to generate custom SSL certificates</a>.</p>
+
+<div class="highlight"><pre>var config = {
+    .....
+    https: {
+        enable: true, // change true/false to enable and disable SSL
+        key: './certificates/server.key',
+        certificate: './certificates/server.crt',
+        ca: './certificates/ca.crt'
+    },
+    .....
+}
+</pre></div>
+
+<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js?url=https://nodeserver:port&amp;web=true&amp;..."</span><span class="nt">&gt;&lt;/script&gt;</span>
 </pre></div>
 
 <h3>
@@ -261,7 +287,6 @@ And also change following value in config file before starting the Console.IO se
 
 <ul>
 <li>Update Readme with full feature list</li>
-<li>Add SSL support</li>
 <li>Add JSDoc &amp; Unit Tests</li>
 </ul><h3>
 <a name="copyright-and-license" class="anchor" href="#copyright-and-license"><span class="octicon octicon-link"></span></a>Copyright and license</h3>
@@ -279,11 +304,25 @@ And also change following value in config file before starting the Console.IO se
 <li><a href="https://code.google.com/p/google-code-prettify/">prettify</a></li>
 <li>
 <a href="http://dhtmlx.com/">dhtmlx</a> [GPL LICENSE]</li>
+<li><a href="http://www.openssl.org/">OpenSSL</a></li>
+<li><a href="http://html2canvas.hertzen.com/">Html2Canvas</a></li>
 </ul>
       </section>
 
+      <footer>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/nkashyap">nkashyap</a> can be found on <a href="https://github.com/nkashyap/console.io">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
+      </footer>
+
     </div>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
     
   </body>
 </html>
