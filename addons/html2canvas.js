@@ -2213,6 +2213,20 @@ _html2canvas.Preload = function( options ) {
 
   // TODO modify proxy to serve images with CORS enabled, where available
   function proxyGetImage(url, img, imageObj){
+      //TODO Doc: Changed by Console.IO
+      var imgUrl = options.proxy;
+      if (imgUrl.indexOf("?") > -1) {
+          imgUrl += "&";
+      } else {
+          imgUrl += "?";
+      }
+      img.crossOrigin = 'anonymous';
+      imgUrl += 'url=' + encodeURIComponent(url);
+      setImageLoadHandlers(img, imageObj);
+      img.src = imgUrl;
+      return false;
+      //Changed by Console.IO
+
     var callback_name,
     scriptUrl = options.proxy,
     script;

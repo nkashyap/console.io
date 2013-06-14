@@ -90,14 +90,18 @@ function main() {
         app.use('/proxy', function (req, res) {
             var request = http.request(req.param('url'), function (response) {
                 var headers = response.headers;
-                res.header('Access-Control-Allow-Origin', '*');
-                res.header('Access-Control-Allow-Headers', 'X-Requested-With');
+
                 Object.getOwnPropertyNames(headers).forEach(function (header) {
-                    res.header(header, headers[header]);
+                    if(header !== 'cache-control'){
+                        res.header(header, headers[header]);
+                    }
                 });
 
+                res.header('Access-Control-Allow-Origin', '*');
+                res.header('Access-Control-Allow-Headers', 'X-Requested-With');
+
                 response.on('data', function (chunk) {
-                    res.send(chunk);
+                    res.write(chunk);
                 });
 
                 response.on('end', function () {
@@ -107,7 +111,8 @@ function main() {
 
             request.on('error', function (e) {
                 console.log('An error occured: ' + e.message);
-                res.send(503, 'An error occured: ' + e.message);
+                res.write('An error occured: ' + e.message);
+                res.writeHead(503);
                 res.end();
             });
             request.end();
