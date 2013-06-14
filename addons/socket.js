@@ -334,6 +334,8 @@ window.SocketIO = (function () {
 
                 window.html2canvas(document.body, {
                     logging: true,
+                    useCORS: true,
+                    proxy: Socket.config.url + '/proxy',
                     onrendered: function (canvas) {
                         Socket.emit('screenShot', { screen: canvas.toDataURL() });
                         if (webLog) {

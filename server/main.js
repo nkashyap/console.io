@@ -20,6 +20,7 @@ function main() {
         config = require('./config'),
         configure = require('./configure'),
         fs = require('fs'),
+        http = require('http'),
         cluster = require('cluster'),
         redis = require('redis');
 
@@ -63,6 +64,13 @@ function main() {
             }));
         }
 
+        // Setup your corss domain
+        app.all('/', function (req, res, next) {
+            res.header("Access-Control-Allow-Origin", "*");
+            res.header("Access-Control-Allow-Headers", "X-Requested-With");
+            next();
+        });
+
         // Setup your sessions, just like normal.
         app.use(express.cookieParser());
         app.use(express.session({ secret: app.get('session-key') }));
@@ -77,6 +85,32 @@ function main() {
         //userdata app routes
         app.use('/userdata/export', function (req, res) {
             res.download("./" + req.originalUrl);
+        });
+
+        app.use('/proxy', function (req, res) {
+            var request = http.request(req.param('url'), function (response) {
+                var headers = response.headers;
+                res.header('Access-Control-Allow-Origin', '*');
+                res.header('Access-Control-Allow-Headers', 'X-Requested-With');
+                Object.getOwnPropertyNames(headers).forEach(function (header) {
+                    res.header(header, headers[header]);
+                });
+
+                response.on('data', function (chunk) {
+                    res.send(chunk);
+                });
+
+                response.on('end', function () {
+                    res.end();
+                });
+            });
+
+            request.on('error', function (e) {
+                console.log('An error occured: ' + e.message);
+                res.send(503, 'An error occured: ' + e.message);
+                res.end();
+            });
+            request.end();
         });
 
         // initialize connection manager
