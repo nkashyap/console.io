@@ -46,7 +46,7 @@ ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
     });
 
     this.dhxWins = new dhtmlXWindows();
-    this.dhxWins.enableAutoViewport(false);
+    this.dhxWins.enableAutoViewport(true);
     this.dhxWins.attachViewportTo(document.body);
     this.dhxWins.setSkin(ConsoleIO.Constraint.THEMES.get('win'));
     this.dhxWins.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('win'));
@@ -66,12 +66,12 @@ ConsoleIO.View.Device.Preview.prototype.preview = function preview(data) {
     if (this.dhxWins) {
         this.previewFrame.src = "data:text/html," + escape(data.content);
 
-        var win = this.dhxWins.createWindow("preview", 20, 30, 800, 600);
+        var win = this.dhxWins.createWindow("preview", 0, 0, 900, 700);
         win.setText("Preview");
         win.button('park').hide();
         win.keepInViewport(true);
-        win.centerOnScreen();
         win.setModal(true);
+        win.centerOnScreen();
         win.attachObject(this.previewFrame);
     }
 };
@@ -80,12 +80,12 @@ ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
     if (this.dhxWins) {
         this.previewFrame.src = data.screen;
 
-        var win = this.dhxWins.createWindow("screen", 20, 30, 800, 600);
+        var win = this.dhxWins.createWindow("screen", 0, 0, 900, 700);
         win.setText("Capture");
         win.button('park').hide();
         win.keepInViewport(true);
-        win.centerOnScreen();
         win.setModal(true);
+        win.centerOnScreen();
         win.attachObject(this.previewFrame);
     }
 };
