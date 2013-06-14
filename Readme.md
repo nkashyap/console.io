@@ -215,3 +215,4 @@ redis: {
  * [prettify] (https://code.google.com/p/google-code-prettify/)
  * [dhtmlx] (http://dhtmlx.com/) [GPL LICENSE]
  * [OpenSSL] (http://www.openssl.org/)
+ * [Html2Canvas] (http://html2canvas.hertzen.com/)

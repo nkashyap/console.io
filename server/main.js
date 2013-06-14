@@ -21,6 +21,7 @@ function main() {
         configure = require('./configure'),
         fs = require('fs'),
         http = require('http'),
+        https = require('https'),
         cluster = require('cluster'),
         redis = require('redis');
 
@@ -88,11 +89,14 @@ function main() {
         });
 
         app.use('/proxy', function (req, res) {
-            var request = http.request(req.param('url'), function (response) {
+            var request,
+                webHttp = req.param('url').indexOf("https:") > -1 ? https : http;
+
+            request = webHttp.request(req.param('url'), function (response) {
                 var headers = response.headers;
 
                 Object.getOwnPropertyNames(headers).forEach(function (header) {
-                    if(header !== 'cache-control'){
+                    if (header !== 'cache-control') {
                         res.header(header, headers[header]);
                     }
                 });

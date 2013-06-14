@@ -81,7 +81,7 @@ ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
         this.previewFrame.src = data.screen;
 
         var win = this.dhxWins.createWindow("screen", 20, 30, 800, 600);
-        win.setText("ScreenShot");
+        win.setText("Capture");
         win.button('park').hide();
         win.keepInViewport(true);
         win.centerOnScreen();

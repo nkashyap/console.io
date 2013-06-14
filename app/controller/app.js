@@ -18,7 +18,7 @@ ConsoleIO.App = function AppController() {
     this.view = new ConsoleIO.View.App(this, {
         target: document.body,
         type: "3U",
-        status: "Welcome to Console.IO"
+        status: "<a style='float:left;' target='_blank' href='http://nkashyap.github.io/console.io/'>Welcome to Console.IO</a><span style='float:right;'>Author: Nisheeth Kashyap, Email: nisheeth.k.kashyap@gmail.com</span>"
     });
 
     this.browser = new ConsoleIO.App.Browser(this, {
