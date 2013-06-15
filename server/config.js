@@ -10,6 +10,11 @@
  * @property {object}  express.development.set  - express development env setters
  * @property {object}  express.production       - express production env configuration object
  * @property {object}  express.production.set   - express production env setters
+ * @property {object}  https                    - express http/https configuration object
+ * @property {object}  https.enable             - express
+ * @property {object}  https.key                - express
+ * @property {object}  https.certificate        - express
+ * @property {object}  https.ca                 - express
  * @property {object}  io                       - io configuration object
  * @property {object}  io.development           - io development env configuration object
  * @property {Array}   io.development.enable    - io development enable configuration
@@ -85,7 +90,7 @@ var config = {
 
     /** redis configurations **/
     redis: {
-        enable: false,
+        enable: true,
         process: 6
     }
 };

@@ -2236,8 +2236,8 @@
             } else {
                 imgUrl += "?";
             }
-            img.crossOrigin = 'anonymous';
             imgUrl += 'url=' + encodeURIComponent(url);
+            img.crossOrigin = 'anonymous';
             setImageLoadHandlers(img, imageObj);
             img.src = imgUrl;
             return false;
@@ -2370,7 +2370,6 @@
                     // CORS succeeded
                     window.clearTimeout(imageObj.timer);
                 }
-
                 images.numLoaded++;
                 imageObj.succeeded = true;
                 img.onerror = img.onload = null;
@@ -2422,7 +2421,6 @@
                         img.src = src;
                     } else if (supportCORS && !options.allowTaint && options.useCORS) {
                         // attempt to load with CORS
-
                         img.crossOrigin = "anonymous";
                         imageObj = images[src] = {
                             img: img
@@ -2727,7 +2725,7 @@
         };
     };
 
-    window.html2canvas.log = h2clog; // for renderers
+    window.html2canvas.log = h2clog; // for renderer
     window.html2canvas.Renderer = {
         Canvas: undefined // We are assuming this will be used
     };
@@ -2832,7 +2830,6 @@
                     if (storageContext.clip) {
                         ctx.save();
                         ctx.beginPath();
-                        // console.log(storageContext);
                         ctx.rect(storageContext.clip.left, storageContext.clip.top, storageContext.clip.width, storageContext.clip.height);
                         ctx.clip();
                     }

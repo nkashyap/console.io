@@ -325,7 +325,7 @@ window.ConsoleIO = (function () {
                 type = this.getType(e),
                 className = Utils.getObjectType(e);
 
-            if (['[object Error]', '[object ErrorEvent]'].indexOf(className) === -1) {
+            if (['[object Error]', '[object ErrorEvent]', '[object DOMException]'].indexOf(className) === -1) {
                 Wrapper.warn(className + ' error type missing!');
                 return data;
             }
@@ -470,7 +470,7 @@ window.ConsoleIO = (function () {
         },
 
         exception: function exception(e) {
-            logger("error", arguments, null, Stack.get(e));
+            logger("error", arguments);
         },
 
         trace: function trace() {
@@ -493,7 +493,7 @@ window.ConsoleIO = (function () {
         TYPES: [
             '[object Arguments]', '[object Array]',
             '[object String]', '[object Number]', '[object Boolean]',
-            '[object Error]', '[object ErrorEvent]',
+            '[object Error]', '[object ErrorEvent]', '[object DOMException]',
             '[object Function]', '[object Object]'
         ],
 
@@ -512,7 +512,9 @@ window.ConsoleIO = (function () {
                     case '[object String]':
                         value = this.parseString(data);
                         break;
-
+                    case '[object DOMException]':
+                        value = this.parseObject(type, data, level);
+                        break;
                     case '[object Arguments]':
                         data = Utils.toArray(data);
                     case '[object Array]':

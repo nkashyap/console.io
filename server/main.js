@@ -19,10 +19,10 @@ function main() {
     var express = require('express.io'),
         config = require('./config'),
         configure = require('./configure'),
+        proxy = require('./proxy'),
         fs = require('fs'),
-        http = require('http'),
-        https = require('https'),
         cluster = require('cluster'),
+        spawn = require('child_process').spawn,
         redis = require('redis');
 
     // server worker process
@@ -88,38 +88,9 @@ function main() {
             res.download("./" + req.originalUrl);
         });
 
+        //proxy setup
         app.use('/proxy', function (req, res) {
-            var request,
-                webHttp = req.param('url').indexOf("https:") > -1 ? https : http;
-
-            request = webHttp.request(req.param('url'), function (response) {
-                var headers = response.headers;
-
-                Object.getOwnPropertyNames(headers).forEach(function (header) {
-                    if (header !== 'cache-control') {
-                        res.header(header, headers[header]);
-                    }
-                });
-
-                res.header('Access-Control-Allow-Origin', '*');
-                res.header('Access-Control-Allow-Headers', 'X-Requested-With');
-
-                response.on('data', function (chunk) {
-                    res.write(chunk);
-                });
-
-                response.on('end', function () {
-                    res.end();
-                });
-            });
-
-            request.on('error', function (e) {
-                console.log('An error occured: ' + e.message);
-                res.write('An error occured: ' + e.message);
-                res.writeHead(503);
-                res.end();
-            });
-            request.end();
+            proxy.get(req, res);
         });
 
         // initialize connection manager
@@ -179,6 +150,7 @@ function main() {
 
     // Start forking if you are the master.
     if (cluster.isMaster && config.redis.enable) {
+        spawn('redis-server.exe', [], { cwd: process.cwd() + '\\redis\\' });
         while (config.redis.process--) {
             cluster.fork();
         }

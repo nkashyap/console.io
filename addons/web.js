@@ -20,7 +20,7 @@ window.WebIO = (function () {
         this.config = ConsoleIO.extend({
             docked: false,
             position: 'bottom',
-            height: '400px',
+            height: '300px',
             width: '99%'
         }, config);
 

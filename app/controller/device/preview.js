@@ -73,6 +73,10 @@ ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(bt
             case 'screenShot':
                 this.view.toggleButton('screenShot', false);
                 ConsoleIO.Service.Socket.emit('captureScreen', { guid: this.model.guid });
+                var scope = this;
+                setTimeout(function () {
+                    scope.view.toggleButton('screenShot', true);
+                }, 10000);
                 break;
         }
     }

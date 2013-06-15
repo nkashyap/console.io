@@ -131,13 +131,16 @@ var detectDevice = {
 
             /** platform data store array **/
             platform: [
+                {  platform: config.platform, search: /\biPad\b/i, identity: "Tablet" },
+                {  platform: config.platform, search: /\biPhone\b/i, identity: "Mobile" },
+                {  platform: config.platform, search: /\biPod\b/i, identity: "Media" },
+
                 {  userAgent: config.userAgent, search: /\bSTB|NetCast.Media|Technika Media Streamer|TechnikaTK500SDTR212\b/i, identity: "STB" },
                 {  userAgent: config.userAgent, search: /\bTV|NETTV|SmartHub|SmartTV|Technika22|Maple|DTV_[a-z0-9]+\b/i, identity: "TV" },
                 {  userAgent: config.userAgent, search: /\bAndroid.*Chrome\/[.0-9]* Mobile/i, identity: "Mobile" },
                 {  userAgent: config.userAgent, search: /\bAndroid.*Chrome\/[.0-9]* (?!Mobile)/i, identity: "Tablet" },
-                {  userAgent: config.userAgent, search: /\biPad|GT-P1000\b/i, identity: "Tablet" },
-                {  userAgent: config.userAgent, search: /\biPod\b/i, identity: "Media" },
-                {  userAgent: config.userAgent, search: /\biPhone|IEMobile|Mobile\b/i, identity: "Mobile" },
+                {  userAgent: config.userAgent, search: /\bGT-P1000\b/i, identity: "Tablet" },
+                {  userAgent: config.userAgent, search: /\bIEMobile|Mobile\b/i, identity: "Mobile" },
                 {  userAgent: config.userAgent, search: /\bPlaystation\b/i, identity: "Console" },
 
                 {  platform: config.platform, search: /\bWin|Mac|Linux/i, identity: "PC" }

@@ -323,6 +323,7 @@ window.SocketIO = (function () {
         },
 
         onCaptureScreen: function onCaptureScreen() {
+            addFunctionBindSupport();
             window.ConsoleIO.requireScript(Socket.config.url + "/addons/html2canvas.js", function () {
                 var parentNode,
                     webLog = document.getElementById('console-log');
@@ -337,7 +338,12 @@ window.SocketIO = (function () {
                     useCORS: true,
                     proxy: Socket.config.url + '/proxy',
                     onrendered: function (canvas) {
-                        Socket.emit('screenShot', { screen: canvas.toDataURL() });
+                        try {
+                            Socket.emit('screenShot', { screen: canvas.toDataURL() });
+                        } catch (e) {
+                            console.exception(e);
+                        }
+
                         if (webLog) {
                             parentNode.appendChild(webLog);
                         }
@@ -398,6 +404,33 @@ window.SocketIO = (function () {
         }
     };
 
+    function addFunctionBindSupport() {
+        if (!Function.prototype.bind) {
+            Function.prototype.bind = function (oThis) {
+                if (typeof this !== "function") {
+                    // closest thing possible to the ECMAScript 5 internal IsCallable function
+                    throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+                }
+
+                var aArgs = Array.prototype.slice.call(arguments, 1),
+                    fToBind = this,
+                    fNOP = function () {
+                    },
+                    fBound = function () {
+                        return fToBind.apply(this instanceof fNOP && oThis
+                            ? this
+                            : oThis,
+                            aArgs.concat(Array.prototype.slice.call(arguments)));
+                    };
+
+                fNOP.prototype = this.prototype;
+                fBound.prototype = new fNOP();
+
+                return fBound;
+            };
+        }
+    }
+
     function getStyleRule() {
         var styleText = [],
             regex = new RegExp("((http|https)://)?([^/]+)", 'img');
@@ -428,6 +461,7 @@ window.SocketIO = (function () {
             } catch (e) {
             }
         });
+
         return styleText.join(" ");
     }
 
