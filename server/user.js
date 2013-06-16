@@ -27,9 +27,14 @@ User.prototype.isSubscribed = function isSubscribed(guid) {
 
 User.prototype.subscribe = function subscribe(guid) {
     if (!this.isSubscribed(guid)) {
+        var device = this.manager.getDeviceByGuid(guid);
+        if (!device) {
+            console.log('Device not found: ' + guid);
+            return;
+        }
         this.deviceGUIDs.push(guid);
         this.request.io.join(guid);
-        this.emit('subscribed', this.manager.getDeviceByGuid(guid).getInformation());
+        this.emit('subscribed', device.getInformation());
         console.log('subscribe', guid);
     }
 };
@@ -37,9 +42,14 @@ User.prototype.subscribe = function subscribe(guid) {
 User.prototype.unSubscribe = function unSubscribe(guid) {
     var index = this.deviceGUIDs.indexOf(guid);
     if (index > -1) {
+        var device = this.manager.getDeviceByGuid(guid);
+        if (!device) {
+            console.log('Device not found: ' + guid);
+            return;
+        }
         this.deviceGUIDs.splice(index, 1);
         this.request.io.leave(guid);
-        this.emit('unSubscribed', this.manager.getDeviceByGuid(guid).getInformation());
+        this.emit('unSubscribed', device.getInformation());
         console.log('unSubscribe', guid);
     }
 };

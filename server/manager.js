@@ -120,6 +120,7 @@ function Manager() {
     function getDeviceByGuid(guid) {
         var device;
         Object.getOwnPropertyNames(devices).every(function (name) {
+            console.log(name, devices[name].guid, guid)
             if (devices[name].guid == guid) {
                 device = devices[name];
                 return false;
