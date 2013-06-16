@@ -150,7 +150,27 @@ function main() {
 
     // Start forking if you are the master.
     if (cluster.isMaster && config.redis.enable) {
-        spawn('redis-server.exe', [], { cwd: process.cwd() + '\\redis\\' });
+
+        var redisServer = spawn('redis-server.exe', [], { cwd: process.cwd() + '\\redis\\' });
+
+        redisServer.stdout.on('data', function (data) {
+            console.log('stdout', (new Buffer(data)).toString());
+        });
+
+        redisServer.stderr.on('data', function (data) {
+            console.log('stderr', (new Buffer(data)).toString());
+        });
+
+        redisServer.on('close', function (code) {
+            if (code !== 0) {
+                console.log('Redis Server process exited with code ' + code);
+            }
+        });
+
+        if (!config.redis.process) {
+            config.redis.process = require('os').cpus().length;
+        }
+
         while (config.redis.process--) {
             cluster.fork();
         }

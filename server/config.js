@@ -91,7 +91,7 @@ var config = {
     /** redis configurations **/
     redis: {
         enable: true,
-        process: 6
+        process: 0
     }
 };
 
