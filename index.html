@@ -273,8 +273,9 @@ To generate your own SSL Certificate please check this <a href="http://forum.syn
 <h3>
 <a name="scaling-server" class="anchor" href="#scaling-server"><span class="octicon octicon-link"></span></a>Scaling server</h3>
 
-<p>Console.IO use socket.io and in order to scale socket.io you need to run redis server (/redis/redis-server.exe).
-And also change following value in config file before starting the Console.IO server</p>
+<p>Console.IO use socket.io and in order to scale socket.io you need to run redis server.
+Change following value in config file before starting the Console.IO server and
+on window platform (/redis/redis-server.exe) is started by server itself but on other platforms you have to start redis server manually.</p>
 
 <div class="highlight"><pre>redis: {
         enable: true, // <span class="err">&lt;</span>- true to enable socket.io scaling
