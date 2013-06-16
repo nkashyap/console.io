@@ -22,6 +22,7 @@ function main() {
         proxy = require('./proxy'),
         fs = require('fs'),
         cluster = require('cluster'),
+        os = require('os'),
         spawn = require('child_process').spawn,
         redis = require('redis');
 
@@ -150,25 +151,26 @@ function main() {
 
     // Start forking if you are the master.
     if (cluster.isMaster && config.redis.enable) {
+        if (os.platform() === 'win32') {
+            var redisServer = spawn('redis-server.exe', [], { cwd: process.cwd() + '\\redis\\' });
 
-        var redisServer = spawn('redis-server.exe', [], { cwd: process.cwd() + '\\redis\\' });
+            redisServer.stdout.on('data', function (data) {
+                console.log('stdout', (new Buffer(data)).toString());
+            });
 
-        redisServer.stdout.on('data', function (data) {
-            console.log('stdout', (new Buffer(data)).toString());
-        });
+            redisServer.stderr.on('data', function (data) {
+                console.log('stderr', (new Buffer(data)).toString());
+            });
 
-        redisServer.stderr.on('data', function (data) {
-            console.log('stderr', (new Buffer(data)).toString());
-        });
-
-        redisServer.on('close', function (code) {
-            if (code !== 0) {
-                console.log('Redis Server process exited with code ' + code);
-            }
-        });
+            redisServer.on('close', function (code) {
+                if (code !== 0) {
+                    console.log('Redis Server process exited with code ' + code);
+                }
+            });
+        }
 
         if (!config.redis.process) {
-            config.redis.process = require('os').cpus().length;
+            config.redis.process = os.cpus().length;
         }
 
         while (config.redis.process--) {

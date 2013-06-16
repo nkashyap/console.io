@@ -190,8 +190,9 @@ var config = {
 
 
 ### Scaling server
-Console.IO use socket.io and in order to scale socket.io you need to run redis server (/redis/redis-server.exe).
-And also change following value in config file before starting the Console.IO server
+Console.IO use socket.io and in order to scale socket.io you need to run redis server.
+Change following value in config file before starting the Console.IO server and
+on window platform (/redis/redis-server.exe) is started by server itself but on other platforms you have to start redis server manually.
 
 ```html
 redis: {
