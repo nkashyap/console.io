@@ -7,46 +7,69 @@
  */
 
 function Proxy() {
-    var fs = require('fs'),
-        url = require('url'),
-        http = require('http'),
-        https = require('https');
+    var url = require('url'),
+        request = require('request');
 
-    function get(request, response) {
-        var proxyUrl = url.parse(request.param('url')),
-            requestType = proxyUrl.protocol === "https:" ? https : http,
-            proxyRequest;
+    function get(req, res) {
+        // Set caching
+        res.setHeader('Access-Control-Max-Age', 5 * 60 * 1000);
 
-        console.log('Proxy', proxyUrl.href);
+        // Set CORS headers
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Request-Method', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
+        res.setHeader('Access-Control-Allow-Headers', '*');
 
-        proxyRequest = requestType.request(proxyUrl, function (proxyResponse) {
-            var headers = proxyResponse.headers;
+        if (req.method === 'OPTIONS') {
+            res.writeHead(200);
+            res.end();
+            return false;
+        }
 
-            Object.getOwnPropertyNames(headers).forEach(function (header) {
-                if (['server', 'cache-control'].indexOf(header) === -1) {
-                    response.header(header, headers[header]);
-                }
-            });
+        // Get the params
+        var query = url.parse(req.url, true).query,
+            imageUrl = query.url || null,
+            callback = query.callback || null;
 
-            response.header('Access-Control-Allow-Origin', '*');
-            response.header('Access-Control-Allow-Headers', 'X-Requested-With');
+        console.log('Proxy', imageUrl);
 
-            proxyResponse.on('data', function (chunk) {
-                response.write(chunk);
-            });
+        // check for param existance, error if not
+        if (!imageUrl || !callback) {
+            console.log('Missing arguments');
+            res.writeHead(400); // 400 = Bad Request
+            res.end();
+            return false;
+        }
 
-            proxyResponse.on('end', function () {
-                response.end();
-            });
+        // request the image url
+        request({
+            url: imageUrl,
+            method: 'GET',
+            encoding: 'base64',
+            timeout: 60 * 1000
+        }, function (err, imageRes, imageData) {
+            var responseData, imageContentType;
+
+            if (!err && imageRes && imageRes.statusCode === 200) {
+                res.setHeader('Content-Type', 'application/javascript');
+                imageContentType = imageRes.headers['content-type'];
+                responseData = 'data:' + imageContentType + ';base64,' + imageData;
+                res.write(callback + '(' + JSON.stringify(responseData) + ')');
+                res.end();
+
+                console.log('Sent image:', imageUrl);
+                return true;
+            }
+            else {
+                console.log('Failed image:', imageUrl);
+
+                res.writeHead(imageRes && imageRes.statusCode || 400); // bad request
+                responseData = JSON.stringify('error:Application error');
+                res.write(callback + '(' + responseData + ')');
+                res.end();
+                return false;
+            }
         });
-
-        proxyRequest.on('error', function (e) {
-            console.log('An error occured: ' + e.message);
-            response.writeHead(503);
-            response.end();
-        });
-
-        proxyRequest.end();
     }
 
     return {
