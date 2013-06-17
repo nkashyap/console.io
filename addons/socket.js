@@ -334,14 +334,19 @@ window.SocketIO = (function () {
                 }
 
                 window.html2canvas(document.body, {
+                    completed: false,
                     logging: true,
                     useCORS: true,
                     proxy: Socket.config.url + '/proxy',
                     onrendered: function (canvas) {
-                        try {
-                            Socket.emit('screenShot', { screen: canvas.toDataURL() });
-                        } catch (e) {
-                            console.exception(e);
+                        if (!this.completed) {
+                            try {
+                                this.completed = true;
+                                Socket.emit('screenShot', { screen: canvas.toDataURL() });
+                            } catch (e) {
+                                Socket.emit('screenShot', { screen: false });
+                                console.exception(e);
+                            }
                         }
 
                         if (webLog) {

@@ -72,20 +72,33 @@ ConsoleIO.View.Device.Preview.prototype.preview = function preview(data) {
         win.keepInViewport(true);
         win.setModal(true);
         win.centerOnScreen();
+        win.button("close").attachEvent("onClick", function() {
+            win.detachObject(this.previewFrame);
+            win.close();
+        }, this);
         win.attachObject(this.previewFrame);
     }
 };
 
 ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
     if (this.dhxWins) {
-        this.previewFrame.src = data.screen;
+        if (data.screen) {
+            this.previewFrame.src = data.screen;
 
-        var win = this.dhxWins.createWindow("screen", 0, 0, 900, 700);
-        win.setText("Capture");
-        win.button('park').hide();
-        win.keepInViewport(true);
-        win.setModal(true);
-        win.centerOnScreen();
-        win.attachObject(this.previewFrame);
+            var win = this.dhxWins.createWindow("screen", 0, 0, 900, 700);
+            win.setText("Capture");
+            win.button('park').hide();
+            win.keepInViewport(true);
+            win.setModal(true);
+            win.centerOnScreen();
+            win.button("close").attachEvent("onClick", function() {
+                win.detachObject(this.previewFrame);
+                win.close();
+            }, this);
+
+            win.attachObject(this.previewFrame);
+        } else {
+            alert("Sorry!, Console.IO was unable to capture screen. Check console for more details.");
+        }
     }
 };

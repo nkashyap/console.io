@@ -13,9 +13,9 @@
         computedCSS,
         html2canvas;
 
-    function h2clog(a) {
+    function h2clog() {
         if (_html2canvas.logging && window.console && window.console.log) {
-            window.console.log(a);
+            window.console.log.apply(window.console.log, arguments);
         }
     }
 
@@ -2702,8 +2702,6 @@
             if (typeof options.onrendered === "function") {
                 options.onrendered(canvas);
             }
-
-
         };
 
         // for pages without images, we still want this to be async, i.e. return methods before executing
