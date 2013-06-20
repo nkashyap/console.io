@@ -13,9 +13,7 @@
  *
  * @author Nisheeth Kashyap <nisheeth.k.kashyap@gmail.com>
  */
-
 function main() {
-
     var express = require('express.io'),
         config = require('./config'),
         configure = require('./configure'),
@@ -26,9 +24,12 @@ function main() {
         spawn = require('child_process').spawn,
         redis = require('redis');
 
+
     // server worker process
     function Workers() {
-        var app, opts = {}, manager = require('./manager');
+        var app,
+            base = '/',
+            opts = {}, manager = require('./manager');
 
         if (config.https.enable) {
             if (config.https.pfx) {
@@ -51,6 +52,16 @@ function main() {
             app = express().http().io();
         }
 
+        // If this node.js application is hosted in IIS, assume it is hosted
+        if (process.env.IISNODE_VERSION) {
+            base = '/console.io/';
+            config.io.development.set.push({ 'transports': ['htmlfile', 'xhr-polling', 'jsonp-polling']});
+            config.io.production.set.push({ 'transports': ['htmlfile', 'xhr-polling', 'jsonp-polling']});
+        }
+
+        config.io.development.set.push({ 'resource': base + 'socket.io' });
+        config.io.production.set.push({ 'resource': base + 'socket.io' });
+
         // configuration
         configure(app, 'development', config.express);
         configure(app, 'production', config.express);
@@ -66,31 +77,36 @@ function main() {
             }));
         }
 
-        // Setup your corss domain
-        app.all('/', function (req, res, next) {
+        // Setup your cross domain
+        app.all('*', function (req, res, next) {
             res.header("Access-Control-Allow-Origin", "*");
             res.header("Access-Control-Allow-Headers", "X-Requested-With");
             next();
         });
 
         // Setup your sessions, just like normal.
-        app.use(express.cookieParser());
-        app.use(express.session({ secret: app.get('session-key') }));
+        app.use(base, express.cookieParser());
+        app.use(base, express.session({ secret: app.get('session-key') }));
+
+        // add request logger
+        //app.use(base, express.logger());
 
         //admin app routes
-        app.use('/', express.static('app'));
-        app.use('/lib', express.static('lib'));
+        app.use(base, express.static('app'));
+
+        //console lib routes
+        app.use(base + 'lib', express.static('lib'));
 
         //console app routes
-        app.use('/addons', express.static('addons'));
+        app.use(base + 'addons', express.static('addons'));
 
         //userdata app routes
-        app.use('/userdata/export', function (req, res) {
-            res.download("./" + req.originalUrl);
+        app.use(base + 'userdata/export', function download(req, res) {
+            res.download("./" + req.originalUrl.replace(base, ''));
         });
 
         //proxy setup
-        app.use('/proxy', function (req, res) {
+        app.use(base + 'proxy', function proxyHandler(req, res) {
             proxy.get(req, res);
         });
 
@@ -98,7 +114,7 @@ function main() {
         manager.setUp(app);
 
         // listen to port
-        app.listen(app.get('port-number'));
+        app.listen(process.env.PORT || app.get('port-number'));
 
         //set GUID cookie handler
         (function setUpCookieHandler(express, app) {
@@ -146,7 +162,7 @@ function main() {
         }(express, app));
 
         //display remote ui url information
-        console.log(app.get('title') + ' is run at ' + (config.https.enable ? 'https' : 'http') + '://localhost:' + app.get('port-number'));
+        console.log(app.get('title') + ' is run at ' + (config.https.enable ? 'https' : 'http') + '://localhost:' + (process.env.PORT || app.get('port-number')));
     }
 
     // Start forking if you are the master.

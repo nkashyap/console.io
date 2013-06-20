@@ -18,7 +18,7 @@ ConsoleIO.View.Device.Panel = function PanelView(ctrl, model) {
 ConsoleIO.View.Device.Panel.prototype.render = function render(target) {
     this.target = target;
     this.tabs = this.target.attachTabbar();
-    this.tabs.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('tab'));
+    this.tabs.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tab'));
     this.tabs.attachEvent("onTabClick", function (tabId) {
         this.onTabClick(tabId);
     }, this.ctrl);

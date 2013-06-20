@@ -31,7 +31,7 @@ ConsoleIO.View.Browser.prototype.render = function render(target) {
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
 
     this.tree = this.target.attachTree();
-    this.tree.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('tree'));
+    this.tree.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tree'));
     this.tree.setIconPath(ConsoleIO.Settings.iconPath);
     this.tree.enableHighlighting(true);
     this.tree.enableTreeImages(true);

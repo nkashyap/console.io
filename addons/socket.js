@@ -24,7 +24,10 @@ window.SocketIO = (function () {
 
         init: function init(config) {
             this.config = config;
-            this.io = window.io.connect(config.url, { secure: (typeof config.secure === 'boolean' ? config.secure : config.secure == 'true') });
+            this.io = window.io.connect(config.url, {
+                secure: (typeof config.secure === 'boolean' ? config.secure : config.secure == 'true'),
+                resource: config.base + 'socket.io'
+            });
 
             // set console.io event
             ConsoleIO.on('console', function (data) {
@@ -94,7 +97,7 @@ window.SocketIO = (function () {
             this.setInterval = window.setInterval(function () {
                 if (!Socket.io.socket.connected || (Socket.io.socket.connected && !Socket.subscribed)) {
                     console.log('forceReconnect reconnecting', Socket.name);
-                    Socket.io.socket.disconnect();
+                    Socket.io.socket.disconnectSync();
                     Socket.io.socket.reconnect();
                     window.clearInterval(Socket.setInterval);
                     Socket.setInterval = null;
@@ -273,8 +276,8 @@ window.SocketIO = (function () {
         onPlugin: function onPlugin(data) {
             if (data.WebIO) {
                 if (!window.WebIO && data.WebIO.enabled) {
-                    ConsoleIO.requireStyle(Socket.config.url + "/resources/console.css");
-                    ConsoleIO.requireScript(Socket.config.url + "/addons/web.js", function () {
+                    ConsoleIO.requireStyle(InjectIO.getUrl(Socket.config) + "resources/console.css");
+                    ConsoleIO.requireScript(InjectIO.getUrl(Socket.config) + "addons/web.js", function () {
                         var config = ConsoleIO.extend({}, Socket.config);
                         window.WebIO.init(ConsoleIO.extend(config, data.WebIO));
                     });
@@ -324,7 +327,7 @@ window.SocketIO = (function () {
 
         onCaptureScreen: function onCaptureScreen() {
             addFunctionBindSupport();
-            window.ConsoleIO.requireScript(Socket.config.url + "/addons/html2canvas.js", function () {
+            window.ConsoleIO.requireScript(InjectIO.getUrl(Socket.config) + "addons/html2canvas.js", function () {
                 var parentNode,
                     webLog = document.getElementById('console-log');
 
@@ -337,7 +340,7 @@ window.SocketIO = (function () {
                     completed: false,
                     logging: true,
                     useCORS: true,
-                    proxy: Socket.config.url + '/proxy',
+                    proxy: InjectIO.getUrl(Socket.config) + 'proxy',
                     onrendered: function (canvas) {
                         if (!this.completed) {
                             try {

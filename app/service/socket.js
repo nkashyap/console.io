@@ -15,7 +15,10 @@ ConsoleIO.Service.Socket = {
     connectionMode: null,
 
     connect: function init() {
-        this.io = io.connect(window.location.origin, { secure: window.location.origin.indexOf("https") > -1 });
+        this.io = io.connect(window.location.origin, {
+            secure: window.location.origin.indexOf("https") > -1,
+            resource: (window.location.pathname.split('/').slice(0, -1).join('/') + '/socket.io').substring(1)
+        });
 
         // set events
         this.io.on('connect', this.onConnect);

@@ -46,7 +46,7 @@ ConsoleIO.View.Editor.prototype.listScripts = function listScripts(data) {
     });
 
     ConsoleIO.forEach(data, function (file, index) {
-        scope.toolbar.addListOption('open', 'script-' + file, index, 'button', file, ConsoleIO.Constraint.ICONS.JAVASCRIPT);
+        scope.toolbar.addListOption('open', 'script-' + file, index, 'button', file, ConsoleIO.Constant.ICONS.JAVASCRIPT);
     }, this);
 };
 
@@ -55,7 +55,7 @@ ConsoleIO.View.Editor.prototype.addScript = function addScript(data) {
         index = this.toolbar.getAllListOptions('open').length;
 
     this.toolbar.removeListOption('open', id);
-    this.toolbar.addListOption('open', id, index, 'button', data.name, ConsoleIO.Constraint.ICONS.JAVASCRIPT);
+    this.toolbar.addListOption('open', id, index, 'button', data.name, ConsoleIO.Constant.ICONS.JAVASCRIPT);
 };
 
 ConsoleIO.View.Editor.prototype.createElements = function createElements() {

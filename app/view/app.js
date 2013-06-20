@@ -15,7 +15,7 @@ ConsoleIO.View.App = function AppView(ctrl, model) {
 };
 
 ConsoleIO.View.App.prototype.render = function render() {
-    this.layout = new dhtmlXLayoutObject(this.model.target, this.model.type, ConsoleIO.Constraint.THEMES.get('layout'));
+    this.layout = new dhtmlXLayoutObject(this.model.target, this.model.type, ConsoleIO.Constant.THEMES.get('layout'));
 
     this.layout.cont.obj._offsetTop = 5; // top margin
     this.layout.cont.obj._offsetLeft = 5; // left margin
@@ -24,10 +24,6 @@ ConsoleIO.View.App.prototype.render = function render() {
 
     this.layout.setSizes();
     this.layout.setEffect("resize", true);
-
-    //var appMenu = this.layout.attachMenu();
-    //var appToolbar = this.layout.attachToolbar();
-
     this.layout.attachStatusBar().setText(this.model.status);
 };
 

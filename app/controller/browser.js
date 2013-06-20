@@ -40,7 +40,7 @@ ConsoleIO.App.Browser.prototype.online = function online(data) {
     if (this.isSubscribed(data.guid)) {
         this.subscribed(data);
     } else {
-        this.view.setIcon(data.guid, ConsoleIO.Constraint.ICONS.ONLINE);
+        this.view.setIcon(data.guid, ConsoleIO.Constant.ICONS.ONLINE);
     }
 };
 
@@ -48,7 +48,7 @@ ConsoleIO.App.Browser.prototype.offline = function offline(data) {
     if (this.store.offline.indexOf(data.guid) === -1) {
         this.store.offline.push(data.guid);
     }
-    this.view.setIcon(data.guid, ConsoleIO.Constraint.ICONS.OFFLINE);
+    this.view.setIcon(data.guid, ConsoleIO.Constant.ICONS.OFFLINE);
 };
 
 ConsoleIO.App.Browser.prototype.isSubscribed = function isSubscribed(guid) {
@@ -59,7 +59,7 @@ ConsoleIO.App.Browser.prototype.subscribed = function subscribed(data) {
     if (!this.isSubscribed(data.guid)) {
         this.store.subscribed.push(data.guid);
     }
-    this.view.setIcon(data.guid, ConsoleIO.Constraint.ICONS.SUBSCRIBE);
+    this.view.setIcon(data.guid, ConsoleIO.Constant.ICONS.SUBSCRIBE);
 };
 
 ConsoleIO.App.Browser.prototype.unSubscribed = function unSubscribed(data) {
@@ -81,22 +81,22 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
 
     if (this.store.platform.indexOf(data.platform) === -1) {
         this.store.platform.push(data.platform);
-        this.view.add(data.platform, data.platform, 0, ConsoleIO.Constraint.ICONS[data.platform.toUpperCase()] || ConsoleIO.Constraint.ICONS.UNKNOWN);
+        this.view.add(data.platform, data.platform, 0, ConsoleIO.Constant.ICONS[data.platform.toUpperCase()] || ConsoleIO.Constant.ICONS.UNKNOWN);
     }
 
     if (this.store.manufacture.indexOf(manufacture) === -1) {
         this.store.manufacture.push(manufacture);
-        this.view.add(manufacture, data.manufacture, data.platform, ConsoleIO.Constraint.ICONS[data.manufacture.toUpperCase()] || ConsoleIO.Constraint.ICONS.UNKNOWN);
+        this.view.add(manufacture, data.manufacture, data.platform, ConsoleIO.Constant.ICONS[data.manufacture.toUpperCase()] || ConsoleIO.Constant.ICONS.UNKNOWN);
     }
 
     if (this.store.browser.indexOf(browser) === -1) {
         this.store.browser.push(browser);
-        this.view.add(browser, data.browser, manufacture, ConsoleIO.Constraint.ICONS[data.browser.toUpperCase()] || ConsoleIO.Constraint.ICONS.UNKNOWN);
+        this.view.add(browser, data.browser, manufacture, ConsoleIO.Constant.ICONS[data.browser.toUpperCase()] || ConsoleIO.Constant.ICONS.UNKNOWN);
     }
 
     if (this.store.version.indexOf(version) === -1) {
         this.store.version.push(version);
-        this.view.add(version, data.version, browser, ConsoleIO.Constraint.ICONS.VERSION);
+        this.view.add(version, data.version, browser, ConsoleIO.Constant.ICONS.VERSION);
     }
 
     this.view.addOrUpdate(data.guid, data.name.indexOf('|') > -1 ? data.browser : data.name, version);

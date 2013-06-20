@@ -53,7 +53,7 @@ window.InjectIO = (function () {
         // get test info
         for (; !!(script = scripts[i++]);) {
             //TODO script.getAttribute possibility can be removed
-            src = (script.src ? script.src : script.getAttribute('src')).toLowerCase();
+            src = (script.src ? script.src : (script.getAttribute('src') || '')).toLowerCase();
 
             if (src.indexOf('inject.js') === -1) {
                 continue;
@@ -76,6 +76,10 @@ window.InjectIO = (function () {
                 var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im'),
                     url = queryIndex > -1 ? src.substring(0, queryIndex) : src;
                 params.url = (params.secure ? 'https://' : 'http://') + url.match(re)[1].toString();
+            }
+
+            if (!params.base) {
+                params.base = src.indexOf('/console.io/') > -1 ? 'console.io/' : '';
             }
 
             break;
@@ -340,6 +344,10 @@ window.InjectIO = (function () {
         }
     }
 
+    function getUrl(config){
+        return config.url + (config.base ? '/' + config.base : '/');
+    }
+
     // Load required Scripts
     ready(function init() {
         if (domReady) {
@@ -351,15 +359,22 @@ window.InjectIO = (function () {
             config = typeof window.ConfigIO !== 'undefined' ? window.ConfigIO : getServerParams();
 
         // fix the ordering for Opera
-        scripts.push(config.url + "/socket.io/socket.io.js");
+        if(!window.io){
+            scripts.push(getUrl(config) + "socket.io/socket.io.js");
+        }
 
         // fix the samsung to load all script up front
-        scripts.push(config.url + "/addons/console.io.js");
-        scripts.push(config.url + "/addons/socket.js");
+        if(!window.ConsoleIO){
+            scripts.push(getUrl(config) + "addons/console.io.js");
+        }
 
-        if (config.web) {
-            scripts.push(config.url + "/addons/web.js");
-            requireStyle(config.url + "/resources/console.css");
+        if(!window.SocketIO){
+            scripts.push(getUrl(config) + "addons/socket.js");
+        }
+
+        if (config.web && !window.WebIO) {
+            scripts.push(getUrl(config) + "addons/web.js");
+            requireStyle(getUrl(config) + "resources/console.css");
         }
 
         //Request console.io.js file to get connect.sid cookie from the server
@@ -376,6 +391,7 @@ window.InjectIO = (function () {
     window.onerror = onErrorFn;
 
     return {
+        getUrl: getUrl,
         debug: debug,
         require: require,
         ready: ready

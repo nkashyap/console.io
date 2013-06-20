@@ -52,13 +52,13 @@ ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
             if (isJSFile || isCSSFile) {
                 if (this.store.files.indexOf(id) === -1) {
                     this.store.files.push(id);
-                    this.view.add(id, name, parentId, ConsoleIO.Constraint.ICONS[isJSFile ? 'JAVASCRIPT' : isCSSFile ? 'STYLESHEET' : 'FILE']);
+                    this.view.add(id, name, parentId, ConsoleIO.Constant.ICONS[isJSFile ? 'JAVASCRIPT' : isCSSFile ? 'STYLESHEET' : 'FILE']);
                 }
             } else {
                 if (this.store.folder.indexOf(id) === -1) {
                     this.store.folder.push(id);
 
-                    this.view.add(id, name, parentId, ConsoleIO.Constraint.ICONS[isHttpFile ? 'WEB' : 'FOLDEROPEN']);
+                    this.view.add(id, name, parentId, ConsoleIO.Constant.ICONS[isHttpFile ? 'WEB' : 'FOLDEROPEN']);
                 }
             }
         }, this);

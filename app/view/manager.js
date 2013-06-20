@@ -19,7 +19,7 @@ ConsoleIO.View.Manager = function ManagerView(ctrl, model) {
 ConsoleIO.View.Manager.prototype.render = function render(target) {
     this.target = target;
     this.tabs = this.target.attachTabbar();
-    this.tabs.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('tab'));
+    this.tabs.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tab'));
     this.tabs.enableTabCloseButton(true);
 
     this.tabs.attachEvent('onTabClose', function (id) {

@@ -48,8 +48,8 @@ ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
     this.dhxWins = new dhtmlXWindows();
     this.dhxWins.enableAutoViewport(true);
     this.dhxWins.attachViewportTo(document.body);
-    this.dhxWins.setSkin(ConsoleIO.Constraint.THEMES.get('win'));
-    this.dhxWins.setImagePath(ConsoleIO.Constraint.IMAGE_URL.get('win'));
+    this.dhxWins.setSkin(ConsoleIO.Constant.THEMES.get('win'));
+    this.dhxWins.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('win'));
 };
 
 ConsoleIO.View.Device.Preview.prototype.toggleButton = function toggleButton(id, state) {
