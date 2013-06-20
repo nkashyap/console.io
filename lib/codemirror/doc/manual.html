@@ -39,10 +39,10 @@
     component, no accompanying buttons, auto-completion, or other IDE
     functionality. It does provide a rich API on top of which such
     functionality can be straightforwardly implemented. See
-    the <a href="#addons">add-ons</a> included in the distribution,
-    and
-    the <a href="https://github.com/jagthedrummer/codemirror-ui">CodeMirror
-    UI</a> project, for reusable implementations of extra features.</p>
+    the <a href="#addons">addons</a> included in the distribution,
+    and the <a href="https://github.com/marijnh/CodeMirror/wiki/CodeMirror-addons">list
+    of externally hosted addons</a>, for reusable
+    implementations of extra features.</p>
 
     <p>CodeMirror works with language-specific modes. Modes are
     JavaScript programs that help color (and optionally indent) text
@@ -71,7 +71,8 @@
     <p>The editor will be appended to the document body, will start
     empty, and will use the mode that we loaded. To have more control
     over the new editor, a configuration object can be passed
-    to <code>CodeMirror</code> as a second argument:</p>
+    to <a href="#CodeMirror"><code>CodeMirror</code></a> as a second
+    argument:</p>
 
     <pre data-lang="javascript">var myCodeMirror = CodeMirror(document.body, {
   value: "function myScript(){return 100;}\n",
@@ -108,13 +109,13 @@
 
     <h2 id="config">Configuration</h2>
 
-    <p>Both the <code>CodeMirror</code> function and
-    its <code>fromTextArea</code> method take as second (optional)
-    argument an object containing configuration options. Any option
-    not supplied like this will be taken
-    from <code>CodeMirror.defaults</code>, an object containing the
-    default options. You can update this object to change the defaults
-    on your page.</p>
+    <p>Both the <a href="#CodeMirror"><code>CodeMirror</code></a>
+    function and its <code>fromTextArea</code> method take as second
+    (optional) argument an object containing configuration options.
+    Any option not supplied like this will be taken
+    from <a href="#defaults"><code>CodeMirror.defaults</code></a>, an
+    object containing the default options. You can update this object
+    to change the defaults on your page.</p>
 
     <p>Options are not checked in any way, so setting bogus option
     values is bound to lead to odd errors.</p>
@@ -231,6 +232,13 @@
       horizontally (false) or whether it stays fixed during horizontal
       scrolling (true, the default).</dd>
 
+      <dt id="option_coverGutterNextToScrollbar"><code><strong>coverGutterNextToScrollbar</strong>: boolean</code></dt>
+      <dd>When <a href="#option_fixedGutter"><code>fixedGutter</code></a>
+      is on, and there is a horizontal scrollbar, by default the
+      gutter will be visible to the left of this scrollbar. If this
+      option is set to true, it will be covered by an element with
+      class <code>CodeMirror-gutter-filler</code>.</dd>
+
       <dt id="option_readOnly"><code><strong>readOnly</strong>: boolean|string</code></dt>
       <dd>This disables editing of the editor content by the user. If
       the special value <code>"nocursor"</code> is given (instead of
@@ -274,17 +282,21 @@
       <dd>Controls whether drag-and-drop is enabled. On by default.</dd>
 
       <dt id="option_onDragEvent"><code><strong>onDragEvent</strong>: function(instance: CodeMirror, event: Event) → boolean</code></dt>
-      <dd>When given, this will be called when the editor is handling
+      <dd><em>Deprecated! See <a href="#event_dom">these</a> event
+      handlers for the current recommended approach.</em><br>When given,
+      this will be called when the editor is handling
       a <code>dragenter</code>, <code>dragover</code>,
-      or <code>drop</code> event. It will be passed the editor instance
-      and the event object as arguments. The callback can choose to
-      handle the event itself, in which case it should
+      or <code>drop</code> event. It will be passed the editor
+      instance and the event object as arguments. The callback can
+      choose to handle the event itself, in which case it should
       return <code>true</code> to indicate that CodeMirror should not
       do anything further.</dd>
 
       <dt id="option_onKeyEvent"><code><strong>onKeyEvent</strong>: function(instance: CodeMirror, event: Event) → boolean</code></dt>
-      <dd>This provides a rather low-level hook into CodeMirror's key
-      handling. If provided, this function will be called on
+      <dd><em>Deprecated! See <a href="#event_dom">these</a> event
+      handlers for the current recommended approach.</em><br>This
+      provides a rather low-level hook into CodeMirror's key handling.
+      If provided, this function will be called on
       every <code>keydown</code>, <code>keyup</code>,
       and <code>keypress</code> event that CodeMirror captures. It
       will be passed two arguments, the editor instance and the key
@@ -304,6 +316,11 @@
       <dt id="option_cursorBlinkRate"><code><strong>cursorBlinkRate</strong>: number</code></dt>
       <dd>Half-period in milliseconds used for cursor blinking. The default blink
       rate is 530ms.</dd>
+
+      <dt id="option_cursorScrollMargin"><code><strong>cursorScrollMargin</strong>: number</code></dt>
+      <dd>How much extra space to always keep above and below the
+      cursor when approaching the top or bottom of the visible view in
+      a scrollable document. Default is 0.</dd>
 
       <dt id="option_cursorHeight"><code><strong>cursorHeight</strong>: number</code></dt>
       <dd>Determines the height of the cursor. Default is 1, meaning
@@ -393,21 +410,37 @@
       properties, as with
       the <a href="#event_change"><code>"change"</code></a> event, but
       never a <code>next</code> property, since this is fired for each
-      individual change, and not batched per operation. It also
-      has <code>update(from, to, text)</code>
-      and <code>cancel()</code> methods, which may be used to modify
-      or cancel the change. All three arguments to <code>update</code>
-      are optional, and can be left off to leave the existing value
-      for that field intact. <strong>Note:</strong> you may not do
-      anything from a <code>"beforeChange"</code> handler that would
-      cause changes to the document or its visualization. Doing so
-      will, since this handler is called directly from the bowels of
-      the CodeMirror implementation, probably cause the editor to
-      become corrupted.</dd>
+      individual change, and not batched per operation. It also has
+      a <code>cancel()</code> method, which can be called to cancel
+      the change, and, <strong>if</strong> the change isn't coming
+      from an undo or redo event, an <code>update(from, to,
+      text)</code> method, which may be used to modify the change.
+      Undo or redo changes can't be modified, because they hold some
+      metainformation for restoring old marked ranges that is only
+      valid for that specific change. All three arguments
+      to <code>update</code> are optional, and can be left off to
+      leave the existing value for that field
+      intact. <strong>Note:</strong> you may not do anything from
+      a <code>"beforeChange"</code> handler that would cause changes
+      to the document or its visualization. Doing so will, since this
+      handler is called directly from the bowels of the CodeMirror
+      implementation, probably cause the editor to become
+      corrupted.</dd>
 
       <dt id="event_cursorActivity"><code><strong>"cursorActivity"</strong> (instance: CodeMirror)</code></dt>
       <dd>Will be fired when the cursor or selection moves, or any
       change is made to the editor content.</dd>
+
+      <dt id="event_keyHandled"><code><strong>"keyHandled"</strong> (instance: CodeMirror, name: string, event: Event)</code></dt>
+      <dd>Fired after a key is handled through a
+      keymap. <code>name</code> is the name of the handled key (for
+      example <code>"Ctrl-X"</code> or <code>"'q'"</code>),
+      and <code>event</code> is the DOM <code>keydown</code>
+      or <code>keypress</code> event.</dd>
+
+      <dt id="event_inputRead"><code><strong>"inputRead"</strong> (instance: CodeMirror, changeObj: object)</code></dt>
+      <dd>Fired whenever new input is read from the hidden textarea
+      (typed or pasted by the user).</dd>
 
       <dt id="event_beforeSelectionChange"><code><strong>"beforeSelectionChange"</strong> (instance: CodeMirror, selection: {head, anchor})</code></dt>
       <dd>This event is fired before the selection is moved. Its
@@ -447,12 +480,21 @@
       <dt id="event_update"><code><strong>"update"</strong> (instance: CodeMirror)</code></dt>
       <dd>Will be fired whenever CodeMirror updates its DOM display.</dd>
 
-      <dt id="event_renderLine"><code><strong>"renderLine"</strong> (instance: CodeMirror, line: integer, element: Element)</code></dt>
+      <dt id="event_renderLine"><code><strong>"renderLine"</strong> (instance: CodeMirror, line: LineHandle, element: Element)</code></dt>
       <dd>Fired whenever a line is (re-)rendered to the DOM. Fired
       right after the DOM element is built, <em>before</em> it is
       added to the document. The handler may mess with the style of
       the resulting element, or add event handlers, but
       should <em>not</em> try to change the state of the editor.</dd>
+
+      <dt id="event_dom"><code><strong>"mousedown"</strong>,
+      <strong>"dblclick"</strong>, <strong>"keydown"</strong>, <strong>"keypress"</strong>,
+      <strong>"keyup"</strong>, <strong>"dragstart"</strong>, <strong>"dragenter"</strong>,
+      <strong>"dragover"</strong>, <strong>"drop"</strong>
+      (instance: CodeMirror, event: Event)</code></dt>
+      <dd>Fired when CodeMirror is handling a DOM event of this type.
+      You can <code>preventDefault</code> the event to signal that
+      CodeMirror should do no further handling.</dd>
     </dl>
 
     <p>It is also possible to <a href="#on">register</a> events on
@@ -611,8 +653,11 @@
     <p>When a keymap contains a <code>nofallthrough</code> property
     set to <code>true</code>, keys matched against that map will be
     ignored if they don't match any of the bindings in the map (no
-    further child maps will be tried, and the default effect of
-    inserting a character will not occur).</p>
+    further child maps will be tried). When
+    the <code>disableInput</code> property is set
+    to <code>true</code>, the default effect of inserting a character
+    will be suppressed when the keymap is active as the top-level
+    map.</p>
 
     <h2 id="styling">Customized Styling</h2>
 
@@ -679,7 +724,7 @@
       with this class.</dd>
 
       <dt id="class_CodeMirror_matchingbracket"><code><strong>CodeMirror-matchingbracket</strong></code>,
-        <code>CodeMirror-nonmatchingbracket</code></dt>
+        <code><strong>CodeMirror-nonmatchingbracket</strong></code></dt>
       <dd>These are used to style matched (or unmatched) brackets.</dd>
     </dl>
 
@@ -715,17 +760,38 @@
     prefixed with <code>cm.</code> are <em>only</em> available
     on <code>CodeMirror</code> instances.</p>
 
+    <h3 id="api_constructor">Constructor</h3>
+
+    <p id="CodeMirror">Constructing an editor instance is done with
+    the <code><strong>CodeMirror</strong>(place: Element|fn(Element),
+    ?option: object)</code> constructor. If the <code>place</code>
+    argument is a DOM element, the editor will be appended to it. If
+    it is a function, it will be called, and is expected to place the
+    editor into the document. <code>options</code> may be an element
+    mapping <a href="#config">option names</a> to values. The options
+    that it doesn't explicitly specify (or all options, if it is not
+    passed) will be taken
+    from <a href="#defaults"><code>CodeMirror.defaults</code></a>.</p>
+
+    <p>Note that the options object passed to the constructor will be
+    mutated when the instance's options
+    are <a href="#setOption">changed</a>, so you shouldn't share such
+    objects between instances.</p>
+
+    <p>See <a href="#fromTextArea"><code>CodeMirror.fromTextArea</code></a>
+    for another way to construct an editor instance.</p>
+
     <h3 id="api_content">Content manipulation methods</h3>
 
     <dl>
-      <dt id="getValue"><code><strong>doc.getValue</strong>(?seperator: string) → string</code></dt>
+      <dt id="getValue"><code><strong>doc.getValue</strong>(?separator: string) → string</code></dt>
       <dd>Get the current editor content. You can pass it an optional
       argument to specify the string to be used to separate lines
       (defaults to <code>"\n"</code>).</dd>
       <dt id="setValue"><code><strong>doc.setValue</strong>(content: string)</code></dt>
       <dd>Set the editor content.</dd>
 
-      <dt id="getRange"><code><strong>doc.getRange</strong>(from: {line, ch}, to: {line, ch}, ?seperator: string) → string</code></dt>
+      <dt id="getRange"><code><strong>doc.getRange</strong>(from: {line, ch}, to: {line, ch}, ?separator: string) → string</code></dt>
       <dd>Get the text between the given points in the editor, which
       should be <code>{line, ch}</code> objects. An optional third
       argument can be given to indicate the line separator string to
@@ -754,7 +820,7 @@
       <dt id="lastLine"><code><strong>doc.lastLine</strong>() → integer</code></dt>
       <dd>Get the last line of the editor. This will
       usually be <code>doc.lineCount() - 1</code>,
-      but for <a href="#linkedDoc_from">linked sub-views</a>, 
+      but for <a href="#linkedDoc_from">linked sub-views</a>,
       it might return other values.</dd>
 
       <dt id="getLineHandle"><code><strong>doc.getLineHandle</strong>(num: integer) → LineHandle</code></dt>
@@ -779,11 +845,21 @@
       <dd>Set the editor content as 'clean', a flag that it will
       retain until it is edited, and which will be set again when such
       an edit is undone again. Useful to track whether the content
-      needs to be saved.</dd>
-      <dt id="isClean"><code><strong>doc.isClean</strong>() → boolean</code></dt>
-      <dd>Returns whether the document is currently clean (not
+      needs to be saved. This function is deprecated in favor
+      of <a href="#changeGeneration"><code>changeGeneration</code></a>,
+      which allows multiple subsystems to track different notions of
+      cleanness without interfering.</dd>
+      <dt id="changeGeneration"><code><strong>doc.changeGeneration</strong>() → integer</code></dt>
+      <dd>Returns a number that can later be passed
+      to <a href="#isClean"><code>isClean</code></a> to test whether
+      any edits were made (and not undone) in the meantime.</dd>
+      <dt id="isClean"><code><strong>doc.isClean</strong>(?generation: integer) → boolean</code></dt>
+      <dd>Returns whether the document is currently clean — not
       modified since initialization or the last call
-      to <a href="#markClean"><code>markClean</code></a>).</dd>
+      to <a href="#markClean"><code>markClean</code></a> if no
+      argument is passed, or since the matching call
+      to <a href="#changeGeneration"><code>changeGeneration</code></a>
+      if a generation value is given.</dd>
     </dl>
 
     <h3 id="api_selection">Cursor and selection methods</h3>
@@ -905,10 +981,10 @@
       override the styling of the base mode entirely, instead of the
       two being applied together.</dd>
       <dt id="removeOverlay"><code><strong>cm.removeOverlay</strong>(mode: string|object)</code></dt>
-      <dd>Pass this the exact argument passed for
-      the <code>mode</code> parameter
-      to <a href="#addOverlay"><code>addOverlay</code></a> to remove
-      an overlay again.</dd>
+      <dd>Pass this the exact value passed for the <code>mode</code>
+      parameter to <a href="#addOverlay"><code>addOverlay</code></a>,
+      or a string that corresponds to the <code>name</code> propery of
+      that value, to remove an overlay again.</dd>
 
       <dt id="on"><code><strong>cm.on</strong>(type: string, func: (...args))</code></dt>
       <dd>Register an event handler for the given event type (a
@@ -1051,6 +1127,12 @@
         <dd>Use a given node to display this range. Implies both
         collapsed and atomic. The given DOM node <em>must</em> be an
         inline element (as opposed to a block element).</dd>
+        <dt><code><strong>handleMouseEvents</strong>: boolean</code></dt>
+        <dd>When <code>replacedWith</code> is given, this determines
+        whether the editor will capture mouse and drag events
+        occurring in this widget. Default is false—the events will be
+        left alone for the default browser handler, or specific
+        handlers on the widget, to capture.</dd>
         <dt id="mark_readOnly"><code><strong>readOnly</strong>: boolean</code></dt>
         <dd>A read-only span can, as long as it is not cleared, not be
         modified except by
@@ -1078,17 +1160,16 @@
       The method will return an object that represents the marker
       (with constuctor <code>CodeMirror.TextMarker</code>), which
       exposes three methods:
-      <code>clear()</code>, to remove the mark,
-      <code>find()</code>, which returns a <code>{from, to}</code>
-      object (both holding document positions), indicating the current
-      position of the marked range, or <code>undefined</code> if the
-      marker is no longer in the document, and
-      finally <code>getOptions(copyWidget)</code>, which returns an
-      object representing the options for the marker.
-      If <code>copyWidget</code> is given true, it will clone the
-      value of
-      the <a href="#mark_replacedWith"><code>replacedWith</code></a>
-      option, if any.</dd>
+      <code><strong>clear</strong>()</code>, to remove the mark,
+      <code><strong>find</strong>()</code>, which returns
+      a <code>{from, to}</code> object (both holding document
+      positions), indicating the current position of the marked range,
+      or <code>undefined</code> if the marker is no longer in the
+      document, and finally <code><strong>changed</strong>()</code>,
+      which you can call if you've done something that might change
+      the size of the marker (for example changing the content of
+      a <a href="#mark_replacedWith"><code>replacedWith</code></a>
+      node), and want to cheaply update the display.</dd>
 
       <dt id="setBookmark"><code><strong>doc.setBookmark</strong>(pos: {line, ch}, ?options: object) → TextMarker</code></dt>
       <dd>Inserts a bookmark, a handle that follows the text around it
@@ -1117,7 +1198,7 @@
     </dl>
 
     <h3 id="api_decoration">Widget, gutter, and decoration methods</h3>
-    
+
     <dl>
       <dt id="setGutterMarker"><code><strong>cm.setGutterMarker</strong>(line: integer|LineHandle, gutterID: string, value: Element) → LineHandle</code></dt>
       <dd>Sets the gutter marker for the given gutter (identified by
@@ -1127,7 +1208,7 @@
       clear the marker, or a DOM element, to set it. The DOM element
       will be shown in the specified gutter next to the specified
       line.</dd>
-      
+
       <dt id="clearGutter"><code><strong>cm.clearGutter</strong>(gutterID: string)</code></dt>
       <dd>Remove all gutter markers in
       the <a href="#option_gutters">gutter</a> with the given ID.</dd>
@@ -1193,6 +1274,11 @@
           <dt><code><strong>showIfHidden</strong>: boolean</code></dt>
           <dd>When true, will cause the widget to be rendered even if
           the line it is associated with is hidden.</dd>
+          <dt><code><strong>handleMouseEvents</strong>: boolean</code></dt>
+          <dd>Determines whether the editor will capture mouse and
+          drag events occurring in this widget. Default is false—the
+          events will be left alone for the default browser handler,
+          or specific handlers on the widget, to capture.</dd>
         </dl>
       Note that the widget node will become a descendant of nodes with
       CodeMirror-specific CSS classes, and those classes might in some
@@ -1250,7 +1336,7 @@
       end (<code>false</code>) of the selection, or, if a <code>{line,
       ch}</code> object is given, it specifies the precise position at
       which you want to measure.</dd>
-      <dt id="charCoords"><code><strong>cm.charCoords</strong>(pos: {line, ch}, mode: string) → {left, right, top, bottom}</code></dt>
+      <dt id="charCoords"><code><strong>cm.charCoords</strong>(pos: {line, ch}, ?mode: string) → {left, right, top, bottom}</code></dt>
       <dd>Returns the position and dimensions of an arbitrary
       character. <code>pos</code> should be a <code>{line, ch}</code>
       object. This differs from <code>cursorCoords</code> in that
@@ -1264,6 +1350,18 @@
       the coordinates are interpreted. It may
       be <code>"window"</code>, <code>"page"</code> (the default),
       or <code>"local"</code>.</dd>
+      <dt id="lineAtHeight"><code><strong>cm.lineAtHeight</strong>(height: number, ?mode: string) → number</code></dt>
+      <dd>Computes the line at the given pixel
+      height. <code>mode</code> can be one of the same strings
+      that <a href="#coordsChar"><code>coordsChar</code></a>
+      accepts.</dd>
+      <dt id="heightAtLine"><code><strong>cm.heightAtLine</strong>(line: number, ?mode: string) → number</code></dt>
+      <dd>Computes the height of the top of a line, in the coordinate
+      system specified by <code>mode</code>
+      (see <a href="#coordsChar"><code>coordsChar</code></a>), which
+      defaults to <code>"page"</code>. When a line below the bottom of
+      the document is specified, the returned value is the bottom of
+      the last line in the document.</dd>
       <dt id="defaultTextHeight"><code><strong>cm.defaultTextHeight</strong>() → number</code></dt>
       <dd>Returns the line height of the default font for the editor.</dd>
       <dt id="defaultCharWidth"><code><strong>cm.defaultCharWidth</strong>() → number</code></dt>
@@ -1302,7 +1400,7 @@
       the mode specification, rather than the resolved, instantiated
       <a href="#defineMode">mode object</a>.</dd>
 
-      <dt id="getTokenAt"><code><strong>cm.getTokenAt</strong>(pos: {line, ch}) → object</code></dt>
+      <dt id="getTokenAt"><code><strong>cm.getTokenAt</strong>(pos: {line, ch}, ?precise: boolean) → object</code></dt>
       <dd>Retrieves information about the token the current mode found
       before the given position (a <code>{line, ch}</code> object). The
       returned object has the following properties:
@@ -1314,22 +1412,32 @@
         to the token, such as <code>"keyword"</code>
         or <code>"comment"</code> (may also be null).</dd>
         <dt><code><strong>state</strong></code></dt><dd>The mode's state at the end of this token.</dd>
-      </dl></dd>
+      </dl>
+      If <code>precise</code> is true, the token will be guaranteed to be accurate based on recent edits. If false or
+      not specified, the token will use cached state information, which will be faster but might not be accurate if
+      edits were recently made and highlighting has not yet completed.
+      </dd>
 
-      <dt id="getStateAfter"><code><strong>cm.getStateAfter</strong>(?line: integer) → object</code></dt>
+      <dt id="getTokenTypeAt"><code><strong>cm.getTokenTypeAt</strong>(pos: {line, ch}) → string</code></dt>
+      <dd>This is a (much) cheaper version
+      of <a href="#getTokenAt"><code>getTokenAt</code></a> useful for
+      when you just need the type of the token at a given position,
+      and no other information. Will return <code>null</code> for
+      unstyled tokens, and a string, potentially containing multiple
+      space-separated style names, otherwise.</dd>
+
+      <dt id="getStateAfter"><code><strong>cm.getStateAfter</strong>(?line: integer, ?precise: boolean) → object</code></dt>
       <dd>Returns the mode's parser state, if any, at the end of the
       given line number. If no line number is given, the state at the
       end of the document is returned. This can be useful for storing
       parsing errors in the state, or getting other kinds of
-      contextual information for a line.</dd>
+      contextual information for a line. <code>precise</code> is defined
+      as in <code>getTokenAt()</code>.</dd>
     </dl>
 
     <h3 id="api_misc">Miscellaneous methods</h3>
 
     <dl>
-      <dt id="constructor"><code><strong>CodeMirror</strong>(elt: Element|function(elt: Element), ?config: object)</code></dt>
-      <dd>The constructor. See <a href="#usage">Basic Usage</a>.</dd>
-
       <dt id="operation"><code><strong>cm.operation</strong>(func: () → any) → any</code></dt>
       <dd>CodeMirror internally buffers changes and only updates its
       DOM structure after it has finished performing some operation.
@@ -1340,7 +1448,7 @@
       lot faster. The return value from this method will be the return
       value of your function.</dd>
 
-      <dt id="indentLine"><code><strong>cm.indentLine</strong>(line: integer, ?dir: string)</code></dt>
+      <dt id="indentLine"><code><strong>cm.indentLine</strong>(line: integer, ?dir: string|integer)</code></dt>
       <dd>Adjust the indentation of the given line. The second
       argument (which defaults to <code>"smart"</code>) may be one of:
         <dl>
@@ -1354,7 +1462,15 @@
           one <a href="#option_indentUnit">indent unit</a>.</dd>
           <dt><code><strong>"subtract"</strong></code></dt>
           <dd>Reduce the indentation of the line.</dd>
+          <dt><code><strong>&lt;integer></strong></code></dt>
+          <dd>Add (positive number) or reduce (negative number) the
+          indentation by the given amount of spaces.</dd>
         </dl></dd>
+
+      <dt id="toggleOverwrite"><code><strong>cm.toggleOverwrite</strong>(?value: bool)</code></dt>
+      <dd>Switches between overwrite and normal insert mode (when not
+      given an argument), or sets the overwrite mode to a specific
+      state (when given an argument).</dd>
 
       <dt id="posFromIndex"><code><strong>doc.posFromIndex</strong>(index: integer) → {line, ch}</code></dt>
       <dd>Calculates and returns a <code>{line, ch}</code> object for a
@@ -1388,12 +1504,10 @@
     <dl>
       <dt id="version"><code><strong>CodeMirror.version</strong>: string</code></dt>
       <dd>It contains a string that indicates the version of the
-      library. For releases, this simply
-      contains <code>"major.minor"</code> (for
-      example <code>"2.33"</code>. For beta versions, <code>" B"</code>
-      (space, capital B) is added at the end of the string, for
-      development snapshots, <code>" +"</code> (space, plus) is
-      added.</dd>
+      library. This is a triple of
+      integers <code>"major.minor.patch"</code>,
+      where <code>patch</code> is zero for releases, and something
+      else (usually one) for dev snapshots.</dd>
 
       <dt id="fromTextArea"><code><strong>CodeMirror.fromTextArea</strong>(textArea: TextAreaElement, ?config: object)</code></dt>
       <dd>
@@ -1416,6 +1530,12 @@
           <dd>Returns the textarea that the instance was based on.</dd>
         </dl>
       </dd>
+
+      <dt id="defaults"><code><strong>CodeMirror.defaults</strong>: object</code></dt>
+      <dd>An object containing default values for
+      all <a href="#config">options</a>. You can assign to its
+      properties to modify defaults (though this won't affect editors
+      that have already been created).</dd>
 
       <dt id="defineExtension"><code><strong>CodeMirror.defineExtension</strong>(name: string, value: any)</code></dt>
       <dd>If you want to define extra methods in terms of the
@@ -1444,6 +1564,18 @@
       its only argument, and from then on, that function will be called
       (with the instance as argument) whenever a new CodeMirror instance
       is initialized.</dd>
+
+      <dt id="Pos"><code><strong>CodeMirror.Pos</strong>(line: integer, ?ch: integer)</code></dt>
+      <dd>A constructor for the <code>{line, ch}</code> objects that
+      are used to represent positions in editor documents.</dd>
+
+      <dt id="changeEnd"><code><strong>CodeMirror.changeEnd</strong>(change: object) → {line, ch}</code></dt>
+      <dd>Utility function that computes an end position from a change
+      (an object with <code>from</code>, <code>to</code>,
+      and <code>text</code> properties, as passed to
+      various <a href="#event_change">event handlers</a>). The
+      returned position will be the end of the changed
+      range, <em>after</em> the change is applied.</dd>
     </dl>
 
     <h2 id="addons">Add-ons</h2>
@@ -1460,6 +1592,7 @@
       prompt (should include an <code>input</code> tag), and a
       callback function that is called when text has been entered.
       Depends on <code>addon/dialog/dialog.css</code>.</dd>
+
       <dt id="addon_searchcursor"><a href="../addon/search/searchcursor.js"><code>search/searchcursor.js</code></a></dt>
       <dd>Adds the <code>getSearchCursor(query, start, caseFold) →
       cursor</code> method to CodeMirror instances, which can be used
@@ -1498,6 +1631,7 @@
       on <code>searchcursor.js</code>, and will make use
       of <a href="#addon_dialog"><code>openDialog</code></a> when
       available to make prompting for search queries less ugly.</dd>
+
       <dt id="addon_matchbrackets"><a href="../addon/edit/matchbrackets.js"><code>edit/matchbrackets.js</code></a></dt>
       <dd>Defines an option <code>matchBrackets</code> which, when set
       to true, causes matching brackets to be highlighted whenever the
@@ -1506,30 +1640,104 @@
       once, and a method <code>findMatchingBracket</code> that can be
       used to run the bracket-finding algorithm that this uses
       internally.</dd>
+
       <dt id="addon_closebrackets"><a href="../addon/edit/closebrackets.js"><code>edit/closebrackets.js</code></a></dt>
       <dd>Defines an option <code>autoCloseBrackets</code> that will
       auto-close brackets and quotes when typed. By default, it'll
-      auto-close <code>()[]{}''""</code>, but you can pass it a
-      string similar to that (containing pairs of matching characters)
-      to customize it. <a href="../demo/closebrackets.html">Demo
-      here</a>.</dd>
+      auto-close <code>()[]{}''""</code>, but you can pass it a string
+      similar to that (containing pairs of matching characters), or an
+      object with <code>pairs</code> and
+      optionally <code>explode</code> properties to customize
+      it. <code>explode</code> should be a similar string that gives
+      the pairs of characters that, when enter is pressed between
+      them, should have the second character also moved to its own
+      line. <a href="../demo/closebrackets.html">Demo here</a>.</dd>
+
+      <dt id="addon_trailingspace"><a href="../addon/edit/trailingspace.js"><code>edit/trailingspace.js</code></a></dt>
+      <dd>Adds an option <code>showTrailingSpace</code> which, when
+      enabled, adds the CSS class <code>cm-trailingspace</code> to
+      stretches of whitespace at the end of lines.
+      The <a href="../demo/trailingspace.html">demo</a> has a nice
+      squiggly underline style for this class.</dd>
+
+      <dt id="addon_comment"><a href="../addon/comment/comment.js"><code>comment/comment.js</code></a></dt>
+      <dd>Addon for commenting and uncommenting code. Adds three
+      methods to CodeMirror instances:
+      <dl>
+        <dt id="lineComment"><code><strong>lineComment</strong>(from: {line, ch}, to: {line, ch}, ?options: object)</code></dt>
+        <dd>Set the lines in the given range to be line comments. Will
+        fall back to <code>blockComment</code> when no line comment
+        style is defined for the mode.</dd>
+        <dt id="blockComment"><code><strong>blockComment</strong>(from: {line, ch}, to: {line, ch}, ?options: object)</code></dt>
+        <dd>Wrap the code in the given range in a block comment. Will
+        fall back to <code>lineComment</code> when no block comment
+        style is defined for the mode.</dd>
+        <dt id="uncomment"><code><strong>uncomment</strong>(from: {line, ch}, to: {line, ch}, ?options: object) → boolean</code></dt>
+        <dd>Try to uncomment the given range.
+          Returns <code>true</code> if a comment range was found and
+          removed, <code>false</code> otherwise.</dd>
+      </dl>
+      The <code>options</code> object accepted by these methods may
+      have the following properties:
+      <dl>
+        <dt><code>blockCommentStart, blockCommentEnd, blockCommentLead, lineComment: string</code></dt>
+        <dd>Override the <a href="#mode_comment">comment string
+        properties</a> of the mode with custom comment strings.</dd>
+        <dt><code><strong>padding</strong>: string</code></dt>
+        <dd>A string that will be inserted after opening and before
+        closing comment markers. Defaults to a single space.</dd>
+        <dt><code><strong>commentBlankLines</strong>: boolean</code></dt>
+        <dd>Whether, when adding line comments, to also comment lines
+        that contain only whitespace.</dd>
+        <dt><code><strong>indent</strong>: boolean</code></dt>
+        <dd>When adding line comments and this is turned on, it will
+        align the comment block to the current indentation of the
+        first line of the block.</dd>
+        <dt><code><strong>fullLines</strong>: boolean</code></dt>
+        <dd>When block commenting, this controls whether the whole
+        lines are indented, or only the precise range that is given.
+        Defaults to <code>true</code>.</dd>
+      </dl>
+      The addon also defines
+      a <code>toggleComment</code> <a href="#commands">command</a>,
+      which will try to uncomment the current selection, and if that
+      fails, line-comments it.</dd>
+
       <dt id="addon_foldcode"><a href="../addon/fold/foldcode.js"><code>fold/foldcode.js</code></a></dt>
-      <dd>Helps with code folding.
-      See <a href="../demo/folding.html">the demo</a> for an example.
-      Call <code>CodeMirror.newFoldFunction</code> with a range-finder
-      helper function to create a function that will, when applied to
-      a CodeMirror instance and a line number, attempt to fold or
-      unfold the block starting at the given line. A range-finder is a
-      language-specific function that also takes an instance and a
-      line number, and returns an range to be folded, or null if no
-      block is started on that line. There are files in
-      the <a href="../addon/fold/"><code>addon/fold/</code></a>
-      directory providing <code>CodeMirror.braceRangeFinder</code>,
-      which finds blocks in brace languages (JavaScript, C, Java,
-      etc), <code>CodeMirror.indentRangeFinder</code>, for languages
-      where indentation determines block structure (Python, Haskell),
-      and <code>CodeMirror.tagRangeFinder</code>, for XML-style
-      languages.</dd>
+      <dd>Helps with code folding. Add a <code>foldCode</code> method
+      to editor instances, which will try to do a code fold starting
+      at the given line, or unfold the fold that is already present.
+      The method takes as first argument the position that should be
+      folded (may be a line number or
+      a <a href="#Pos"><code>Pos</code></a>), and as second argument
+      either a range-finder function, or an options object, supporting
+      the following properties:
+      <dl>
+        <dt><code><strong>rangeFinder</strong>: fn(CodeMirror, Pos)</code></dt>
+        <dd>The function that is used to find foldable ranges. There
+        are files in the <a href="../addon/fold/"><code>addon/fold/</code></a>
+        directory providing <code>CodeMirror.braceRangeFinder</code>,
+        which finds blocks in brace languages (JavaScript, C, Java,
+        etc), <code>CodeMirror.indentRangeFinder</code>, for languages
+        where indentation determines block structure (Python,
+        Haskell), and <code>CodeMirror.tagRangeFinder</code>, for
+        XML-style languages.</dd>
+        <dt><code><strong>widget</strong>: string|Element</code></dt>
+        <dd>The widget to show for folded ranges. Can be either a
+        string, in which case it'll become a span with
+        class <code>CodeMirror-foldmarker</code>, or a DOM node.</dd>
+        <dt><code><strong>scanUp</strong>: boolean</code></dt>
+        <dd>When true (default is false), the addon will try to find
+        foldable ranges on the lines above the current one if there
+        isn't an eligible one on the given line.</dd>
+        <dt><code><strong>minFoldSize</strong>: integer</code></dt>
+        <dd>The minimum amount of lines that a fold should span to be
+        accepted. Defaults to 0, which also allows single-line
+        folds.</dd>
+      </dl>
+      See <a href="../demo/folding.html">the demo</a> for an
+      example.</dd>
+
       <dt id="addon_runmode"><a href="../addon/runmode/runmode.js"><code>runmode/runmode.js</code></a></dt>
       <dd>Can be used to run a CodeMirror mode over text without
       actually opening an editor instance.
@@ -1539,6 +1747,7 @@
       (without including all of CodeMirror) and
       for <a href="../addon/runmode/runmode.node.js">running under
       node.js</a>.</dd>
+
       <dt id="addon_overlay"><a href="../addon/mode/overlay.js"><code>mode/overlay.js</code></a></dt>
       <dd>Mode combinator that can be used to extend a mode with an
       'overlay' — a secondary mode is run over the stream, along with
@@ -1547,12 +1756,13 @@
       Defines <code>CodeMirror.overlayMode</code>, which is used to
       create such a mode. See <a href="../demo/mustache.html">this
       demo</a> for a detailed example.</dd>
+
       <dt id="addon_multiplex"><a href="../addon/mode/multiplex.js"><code>mode/multiplex.js</code></a></dt>
       <dd>Mode combinator that can be used to easily 'multiplex'
       between several modes.
       Defines <code>CodeMirror.multiplexingMode</code> which, when
       given as first argument a mode object, and as other arguments
-      any number of <code>{open, close, mode [, delimStyle]}</code>
+      any number of <code>{open, close, mode [, delimStyle, innerStyle]}</code>
       objects, will return a mode object that starts parsing using the
       mode passed as first argument, but will switch to another mode
       as soon as it encounters a string that occurs in one of
@@ -1561,31 +1771,147 @@
       the <code>close</code> string is encountered.
       Pass <code>"\n"</code> for <code>open</code> or <code>close</code>
       if you want to switch on a blank line.
-      When <code>delimStyle</code> is specified, it will be the token
-      style returned for the delimiter tokens. The outer mode will not
-      see the content between the delimiters.
+      <ul><li>When <code>delimStyle</code> is specified, it will be the token
+      style returned for the delimiter tokens.</li>
+      <li>When <code>innerStyle</code> is specified, it will be the token
+      style added for each inner mode token.</li></ul>
+      The outer mode will not see the content between the delimiters.
       See <a href="../demo/multiplex.html">this demo</a> for an
       example.</dd>
+
       <dt id="addon_show-hint"><a href="../addon/hint/show-hint.js"><code>hint/show-hint.js</code></a></dt>
       <dd>Provides a framework for showing autocompletion hints.
       Defines <code>CodeMirror.showHint</code>, which takes a
-      CodeMirror instance and a hinting function, and pops up a widget
-      that allows the user to select a completion. Hinting functions
-      are function that take an editor instance, and return
+      CodeMirror instance, a hinting function, and optionally an
+      options object, and pops up a widget that allows the user to
+      select a completion. Hinting functions are function that take an
+      editor instance and an optional options object, and return
       a <code>{list, from, to}</code> object, where <code>list</code>
-      is an array of strings (the completions), and <code>from</code>
-      and <code>to</code> give the start and end of the token that is
-      being completed. Depends
-      on <code>addon/hint/show-hint.css</code>. See the other files in
-      the <a href="../addon/hint/"><code>addon/hint</code></a> for
-      hint sources for various languages. Check
+      is an array of strings or objects (the completions),
+      and <code>from</code> and <code>to</code> give the start and end
+      of the token that is being completed. When completions aren't
+      simple strings, they should be objects with the folowing
+      properties:
+      <dl>
+        <dt><code><strong>text</strong>: string</code></dt>
+        <dd>The completion text. This is the only required
+        property.</dd>
+        <dt><code><strong>displayText</strong>: string</code></dt>
+        <dd>The text that should be displayed in the menu.</dd>
+        <dt><code><strong>className</strong>: string</code></dt>
+        <dd>A CSS class name to apply to the completion's line in the
+        menu.</dd>
+        <dt><code><strong>render</strong>: fn(Element, self, data)</code></dt>
+        <dd>A method used to create the DOM structure for showing the
+        completion by appending it to its first argument.</dd>
+        <dt><code><strong>hint</strong>: fn(CodeMirror, self, data)</code></dt>
+        <dd>A method used to actually apply the completion, instead of
+        the default behavior.</dd>
+      </dl>
+      The plugin understands the following options (the options object
+      will also be passed along to the hinting function, which may
+      understand additional options):
+      <dl>
+        <dt><code><strong>async</strong>: boolean</code></dt>
+        <dd>When set to true, the hinting function's signature should
+        be <code>(cm, callback, ?options)</code>, and the completion
+        interface will only be popped up when the hinting function
+        calls the callback, passing it the object holding the
+        completions.</dd>
+        <dt><code><strong>completeSingle</strong>: boolean</code></dt>
+        <dd>Determines whether, when only a single completion is
+        available, it is completed without showing the dialog.
+        Defaults to true.</dd>
+        <dt><code><strong>alignWithWord</strong>: boolean</code></dt>
+        <dd>Whether the pop-up should be horizontally aligned with the
+        start of the word (true, default), or with the cursor (false).</dd>
+        <dt><code><strong>closeOnUnfocus</strong>: boolean</code></dt>
+        <dd>When enabled (which is the default), the pop-up will close
+        when the editor is unfocused.</dd>
+        <dt><code><strong>customKeys</strong>: keymap</code></dt>
+        <dd>Allows you to provide a custom keymap of keys to be active
+        when the pop-up is active. The handlers will be called with an
+        extra argument, a handle to the completion menu, which
+        has <code>moveFocus(n)</code>, <code>setFocus(n)</code>, <code>pick()</code>,
+        and <code>close()</code> methods (see the source for details),
+        that can be used to change the focused element, pick the
+        current element or close the menu.</dd>
+        <dt><code><strong>extraKeys</strong>: keymap</code></dt>
+        <dd>Like <code>customKeys</code> above, but the bindings will
+        be added to the set of default bindings, instead of replacing
+        them.</dd>
+      </dl>
+      The following events will be fired on the completions object
+      during completion:
+      <dl>
+        <dt><code><strong>"shown"</strong> ()</code></dt>
+        <dd>Fired when the pop-up is shown.</dd>
+        <dt><code><strong>"select"</strong> (completion, Element)</code></dt>
+        <dd>Fired when a completion is selected. Passed the completion
+        value (string or object) and the DOM node that represents it
+        in the menu.</dd>
+        <dt><code><strong>"close"</strong> ()</code></dt>
+        <dd>Fired when the completion is finished.</dd>
+      </dl>
+      This addon depends styles
+      from <code>addon/hint/show-hint.css</code>. Check
       out <a href="../demo/complete.html">the demo</a> for an
       example.</dd>
+
+      <dt id="addon_javascript-hint"><a href="../addon/hint/javascript-hint.js"><code>hint/javascript-hint.js</code></a></dt>
+      <dd>Defines a simple hinting function for JavaScript
+      (<code>CodeMirror.javascriptHint</code>) and CoffeeScript
+      (<code>CodeMirror.coffeescriptHint</code>) code. This will
+      simply use the JavaScript environment that the editor runs in as
+      a source of information about objects and their properties.</dd>
+
+      <dt id="addon_xml-hint"><a href="../addon/hint/xml-hint.js"><code>hint/xml-hint.js</code></a></dt>
+      <dd>Defines <code>CodeMirror.xmlHint</code>, which produces
+      hints for XML tagnames, attribute names, and attribute values,
+      guided by a <code>schemaInfo</code> option (a property of the
+      second argument passed to the hinting function, or the third
+      argument passed to <code>CodeMirror.showHint</code>).<br>The
+      schema info should be an object mapping tag names to information
+      about these tags, with optionally a <code>"!top"</code> property
+      containing a list of the names of valid top-level tags. The
+      values of the properties should be objects with optional
+      properties <code>children</code> (an array of valid child
+      element names, omit to simply allow all tags to appear)
+      and <code>attrs</code> (an object mapping attribute names
+      to <code>null</code> for free-form attributes, and an array of
+      valid values for restricted
+      attributes). <a href="../demo/xmlcomplete.html">Demo
+      here.</a></dd>
+
+      <dt id="addon_html-hint"><a href="../addon/hint/html-hint.js"><code>hint/html-hint.js</code></a></dt>
+      <dd>Provides schema info to
+      the <a href="#addon_xml-hint">xml-hint</a> addon for HTML
+      documents. Defines a schema
+      object <code>CodeMirror.htmlSchema</code> that you can pass to
+      as a <code>schemaInfo</code> option, and
+      a <code>CodeMirror.htmlHint</code> hinting function that
+      automatically calls <code>CodeMirror.xmlHint</code> with this
+      schema data. See
+      the <a href="../demo/html5complete.html">demo</a>.</dd>
+
+      <dt id="addon_python-hint"><a href="../addon/hint/python-hint.js"><code>hint/python-hint.js</code></a></dt>
+      <dd>A very simple hinting function for Python code.
+      Defines <code>CodeMirror.pythonHint</code>.</dd>
+
       <dt id="addon_match-highlighter"><a href="../addon/search/match-highlighter.js"><code>match-highlighter.js</code></a></dt>
       <dd>Adds a <code>highlightSelectionMatches</code> option that
       can be enabled to highlight all instances of a currently
-      selected word.
+      selected word. Can be set either to true or to an object
+      containing the following options: <code>minChars</code>, for the
+      minimum amount of selected characters that triggers a highlight
+      (default 2), <code>style</code>, for the style to be used to
+      highlight the matches (default <code>"matchhighlight"</code>,
+      which will correspond to CSS class <code>cm-matchhighlight</code>),
+      and <code>showToken</code> which, when enabled, causes the
+      current token to be highlighted when nothing is selected
+      (defaults to off).
       Demo <a href="../demo/matchhighlighter.html">here</a>.</dd>
+
       <dt id="addon_lint"><a href="../addon/lint/lint.js"><code>lint/lint.js</code></a></dt>
       <dd>Defines an interface component for showing linting warnings,
       with pluggable warning sources
@@ -1596,20 +1922,24 @@
       example <code>CodeMirror.javascriptValidator</code>). Depends
       on <code>addon/lint/lint.css</code>. A demo can be
       found <a href="../demo/lint.html">here</a>.</dd>
+
       <dt id="addon_mark-selection"><a href="../addon/selection/mark-selection.js"><code>selection/mark-selection.js</code></a></dt>
       <dd>Causes the selected text to be marked with the CSS class
       <code>CodeMirror-selectedtext</code> when the <code>styleSelectedText</code> option
       is enabled. Useful to change the colour of the selection (in addition to the background),
       like in <a href="../demo/markselection.html">this demo</a>.</dd>
+
       <dt id="addon_active-line"><a href="../addon/selection/active-line.js"><code>selection/active-line.js</code></a></dt>
       <dd>Defines a <code>styleActiveLine</code> option that, when enabled,
-      gives the wrapper of the active line the class <code>CodeMirror-activeline</code>, 
+      gives the wrapper of the active line the class <code>CodeMirror-activeline</code>,
       and adds a background with the class <code>CodeMirror-activeline-background</code>.
       is enabled. See the <a href="../demo/activeline.html">demo</a>.</dd>
+
       <dt id="addon_closetag"><a href="../addon/edit/closetag.js"><code>edit/closetag.js</code></a></dt>
       <dd>Provides utility functions for adding automatic tag closing
       to XML modes. See
       the <a href="../demo/closetag.html">demo</a>.</dd>
+
       <dt id="addon_loadmode"><a href="../addon/mode/loadmode.js"><code>mode/loadmode.js</code></a></dt>
       <dd>Defines a <code>CodeMirror.requireMode(modename,
       callback)</code> function that will try to load a given mode and
@@ -1622,18 +1952,34 @@
       which will ensure the given mode is loaded and cause the given
       editor instance to refresh its mode when the loading
       succeeded. See the <a href="../demo/loadmode.html">demo</a>.</dd>
+
       <dt id="addon_continuecomment"><a href="../addon/edit/continuecomment.js"><code>edit/continuecomment.js</code></a></dt>
       <dd>Adds an <code>continueComments</code> option, which can be
       set to true to have the editor prefix new lines inside C-like
       block comments with an asterisk when Enter is pressed. It can
       also be set to a string in order to bind this functionality to a
       specific key..</dd>
+
       <dt id="addon_placeholder"><a href="../addon/display/placeholder.js"><code>display/placeholder.js</code></a></dt>
       <dd>Adds a <code>placeholder</code> option that can be used to
       make text appear in the editor when it is empty and not focused.
       Also gives the editor a <code>CodeMirror-empty</code> CSS class
       whenever it doesn't contain any text.
       See <a href="../demo/placeholder.html">the demo</a>.</dd>
+
+      <dt id="addon_merge"><a href="../addon/merge/merge.js"><code>merge/merge.js</code></a></dt>
+      <dd>Implements an interface for merging changes, using either a
+      2-way or a 3-way view. The <code>CodeMirror.MergeView</code>
+      constructor takes arguments similar to
+      the <a href="#CodeMirror"><code>CodeMirror</code></a>
+      constructor, first a node to append the interface to, and then
+      an options object. Two extra optional options are
+      recognized, <code>origLeft</code> and <code>origRight</code>,
+      which may be strings that provide original versions of the
+      document, which will be shown to the left and right of the
+      editor in non-editable CodeMirror instances. The merge interface
+      will highlight changes between the editable document and the
+      original(s) (<a href="../demo/merge.html">demo</a>).</dd>
     </dl>
 
     <h2 id="modeapi">Writing CodeMirror Modes</h2>
@@ -1792,6 +2138,15 @@
     return <code>CodeMirror.Pass</code> to indicate that it
     could not come up with a precise indentation.</p>
 
+    <p id="mode_comment">To work well with
+    the <a href="#addon_comment">commenting addon</a>, a mode may
+    define <code>lineComment</code> (string that starts a line
+    comment), <code>blockCommentStart</code>, <code>blockCommentEnd</code>
+    (strings that start and end block comments),
+    and <code>blockCommentLead</code> (a string to put at the start of
+    continued lines in a block comment). All of these are
+    optional.</p>
+
     <p id="electricChars">Finally, a mode may define
     an <code>electricChars</code> property, which should hold a string
     containing all the characters that should trigger the behaviour
@@ -1870,6 +2225,7 @@
       <li><a href="#styling">Customized Styling</a></li>
       <li><a href="#api">Programming API</a>
         <ul>
+          <li><a href="#constructor">Constructor</a></li>
           <li><a href="#api_content">Content manipulation</a></li>
           <li><a href="#api_selection">Selection</a></li>
           <li><a href="#api_configuration">Configuration</a></li>
