@@ -1,1 +1,1 @@
-npm install express.io redis
+npm install express.io redis request

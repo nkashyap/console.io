@@ -10,6 +10,7 @@ ConsoleIO.namespace("ConsoleIO.App.Editor");
 ConsoleIO.namespace("ConsoleIO.App.Editor.CopyDocument");
 
 ConsoleIO.App.Editor = function EditorController(parent, model) {
+    var scope = this;
     this.parent = parent;
     this.model = model;
     this.model.codeMirror = ConsoleIO.extend({
@@ -33,7 +34,10 @@ ConsoleIO.App.Editor = function EditorController(parent, model) {
         extraKeys: {
             "Ctrl-Space": "autocomplete",
             "Ctrl-Enter": "submit",
-            "Ctrl-Q": "toggleComment"
+            "Ctrl-Q": "toggleComment",
+            "Shift-Ctrl-Q": function (cm) {
+                scope.foldCode(cm.getCursor());
+            }
         }
     }, this.model.codeMirror);
     this.fileName = null;
@@ -52,9 +56,16 @@ ConsoleIO.App.Editor.prototype.render = function render(target) {
     this.view.render(target);
 
     var scope = this;
+    this.editor.on("gutterClick", function (cm, where) {
+        scope.foldCode(where);
+    });
     this.editor.on("change", function () {
         scope.updateButtonState();
     });
+};
+
+ConsoleIO.App.Editor.prototype.foldCode = function foldCode(where) {
+    this.editor.foldCode(where, this.model.codeMirror.mode === 'javascript' ? CodeMirror.braceRangeFinder : CodeMirror.tagRangeFinder);
 };
 
 ConsoleIO.App.Editor.prototype.listScripts = function listScripts(data) {
