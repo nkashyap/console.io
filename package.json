@@ -1,6 +1,6 @@
 {
     "name": "xconsole.io",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "description": "Javascript Remote Web Console",
     "author": {
         "name": "Nisheeth Kashyap",
@@ -10,6 +10,8 @@
         "console",
         "console.io",
         "debugger",
+        "web console",
+        "remote console",
         "javascript"
     ],
     "dependencies": {

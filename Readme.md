@@ -73,7 +73,7 @@ OR you can include all files individually
 <script type="text/javascript" src="<Local Folder OR Node Server>/inject.js?url=http://nodeserver:port"></script>
 ```
 
-Visit http://nodeserver:port/ for ConsoleIO interface
+Visit http://nodeserver:port/ for ConsoleIO interface (Tested on Chrome Browsers)
 
 ![Screen shot](https://raw.github.com/nkashyap/console.io/master/console.io.png)
 
@@ -91,6 +91,7 @@ Shortcuts:
 * Ctrl+Enter: execute command
 * Ctrl+Space: autocomplate
 * Ctrl-Q: toggle comments
+* Shift-Ctrl-Q: fold/unfold code
 
 Note: All multilines code should be wrapped within self executable function. E.G
 ```html
@@ -204,6 +205,7 @@ redis: {
 ### TODO
  * Update Readme with full feature list
  * Add JSDoc & Unit Tests
+ * Add IISNode configuration steps
 
 ### Copyright and license
  MIT LICENSE 
