@@ -1,7 +1,8 @@
 {
     "name": "xconsole.io",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "description": "Javascript Remote Web Console",
+    "homepage": "http://nkashyap.github.io/console.io/",
     "author": {
         "name": "Nisheeth Kashyap",
         "email": "nisheeth.k.kashyap@gmail.com"
@@ -31,5 +32,6 @@
         "type": "git",
         "url": "git://github.com/nkashyap/console.io.git"
     },
+    "license" : "MIT",
     "readmeFilename": "README.md"
 }
