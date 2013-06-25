@@ -37,10 +37,12 @@ function Manager() {
 
     function emit(name, data) {
         application.io.sockets.emit(name, data);
+        //console.log('application.emit', name);
     }
 
     function broadcast(room, name, data) {
         application.io.room(room).broadcast(name, data);
+        //console.log('application.broadcast', room, name);
     }
 
     function defineRouteHandler(list, name) {
@@ -49,6 +51,8 @@ function Manager() {
             if (reference && reference[name]) {
                 reference[name](request.data);
             }
+
+            //console.log('defineRouteHandler', reference.guid, name);
         };
     }
 
@@ -58,6 +62,7 @@ function Manager() {
             if (device && device[property]) {
                 device[property](name, request.data);
             }
+            //console.log('defineDeviceCommandRouteHandler', device ? device.guid : 'undefined', name, property);
         };
     }
 
@@ -67,6 +72,8 @@ function Manager() {
             if (device) {
                 device.emit(command, property === true ? request.data : property ? request.data[property] : null);
             }
+
+            //console.log('defineUserCommandRouteHandler', device.guid, command);
         };
     }
 
@@ -80,12 +87,16 @@ function Manager() {
                 }));
             });
         }
+
+        //console.log('notifyRegisteredDevicesToUser', userReg.guid);
     }
 
     function changeDeviceName(request) {
         var device = getDeviceByGuid(request.data.guid);
         device.setName(request.data);
         emit('device:registered', device.getInformation());
+
+        //console.log('changeDeviceName', device.guid, device.name);
     }
 
     function registerDevice(request) {
@@ -97,6 +108,8 @@ function Manager() {
         }
 
         deviceReg.online(request);
+
+        //console.log('registerDevice', deviceReg.guid);
     }
 
     function registerUser(request) {
@@ -107,6 +120,8 @@ function Manager() {
         }
 
         userReg.online(request);
+        //console.log('registerUser', userReg.guid);
+
         notifyRegisteredDevicesToUser(request);
     }
 
@@ -115,11 +130,14 @@ function Manager() {
         if (client) {
             client.offline();
         }
+
+        //console.log('disconnect', client ? client.guid : 'undefined');
     }
 
     function getDeviceByGuid(guid) {
         var device;
         Object.getOwnPropertyNames(devices).every(function (name) {
+            //console.log('getDeviceByGuid', devices[name].guid, guid);
             if (devices[name].guid == guid) {
                 device = devices[name];
                 return false;

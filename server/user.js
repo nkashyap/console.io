@@ -141,10 +141,12 @@ User.prototype.saveScript = function saveScript(data) {
 
 User.prototype.emit = function emit(name, data) {
     this.request.io.emit('user:' + name, data);
+    //console.log('user.emit', this.guid, name);
 };
 
 User.prototype.broadcast = function broadcast(name, data) {
     this.request.io.room(this.guid).broadcast('user:' + name, data);
+    //console.log('user.broadcast', this.guid, name);
 };
 
 module.exports = User;

@@ -332,6 +332,7 @@ Device.prototype.plugin = function plugin(data) {
  */
 Device.prototype.emit = function emit(name, data) {
     this.request.io.emit('device:' + name, data);
+    //console.log('device.emit', this.guid, name);
 };
 
 /**
@@ -345,6 +346,7 @@ Device.prototype.emit = function emit(name, data) {
  */
 Device.prototype.broadcast = function broadcast(name, data) {
     this.request.io.room(this.guid).broadcast('device:' + name, data);
+    //console.log('device.broadcast', this.guid, name);
 };
 
 

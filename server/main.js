@@ -25,6 +25,56 @@ function main() {
         redis = require('redis');
 
 
+    function createClient() {
+        var client = redis.createClient.apply(redis, arguments);
+
+//        client.on("connect", function () {
+//            console.log("Connect ", arguments);
+//        });
+//
+//        client.on("ready", function () {
+//            console.log("Ready ", arguments);
+//        });
+//
+//        client.on("end", function () {
+//            console.log("End ", arguments);
+//        });
+//
+//        client.on("drain", function () {
+//            console.log("Drain ", arguments);
+//        });
+//
+//        client.on("idle", function () {
+//            console.log("Idle ", arguments);
+//        });
+
+        client.on("error", function () {
+            console.log("Error ", arguments);
+        });
+
+        return client;
+    }
+
+    function startRedisServer() {
+        if (os.platform() === 'win32') {
+            var redisServer = spawn('redis-server.exe', ['redis.conf'], { cwd: process.cwd() + '\\redis\\' });
+
+            redisServer.stdout.on('data', function (data) {
+                console.log('stdout', (new Buffer(data)).toString());
+            });
+
+            redisServer.stderr.on('data', function (data) {
+                console.log('stderr', (new Buffer(data)).toString());
+            });
+
+            redisServer.on('close', function (code) {
+                if (code !== 0) {
+                    console.log('Redis Server process exited with code ' + code);
+                }
+            });
+        }
+    }
+
     // server worker process
     function Workers() {
         var app,
@@ -69,11 +119,11 @@ function main() {
         configure(app.io, 'production', config.io);
 
         // Setup the redis store for scalable io.
-        if (config.redis.enable) {
+        if (config.redis.enable && !process.env.IISNODE_VERSION) {
             app.io.set('store', new express.io.RedisStore({
-                redisPub: redis.createClient(),
-                redisSub: redis.createClient(),
-                redisClient: redis.createClient()
+                redisPub: createClient(),
+                redisSub: createClient(),
+                redisClient: createClient()
             }));
         }
 
@@ -165,25 +215,12 @@ function main() {
         console.log(app.get('title') + ' is run at ' + (config.https.enable ? 'https' : 'http') + '://localhost:' + (process.env.PORT || app.get('port-number')));
     }
 
+    if (config.redis.enable && config.redis.autoStart && !process.env.IISNODE_VERSION) {
+        startRedisServer();
+    }
+
     // Start forking if you are the master.
-    if (cluster.isMaster && config.redis.enable) {
-        if (os.platform() === 'win32') {
-            var redisServer = spawn('redis-server.exe', [], { cwd: process.cwd() + '\\redis\\' });
-
-            redisServer.stdout.on('data', function (data) {
-                console.log('stdout', (new Buffer(data)).toString());
-            });
-
-            redisServer.stderr.on('data', function (data) {
-                console.log('stderr', (new Buffer(data)).toString());
-            });
-
-            redisServer.on('close', function (code) {
-                if (code !== 0) {
-                    console.log('Redis Server process exited with code ' + code);
-                }
-            });
-        }
+    if (cluster.isMaster && config.redis.enable && !process.env.IISNODE_VERSION) {
 
         if (!config.redis.process) {
             config.redis.process = os.cpus().length;

@@ -91,6 +91,7 @@ var config = {
     /** redis configurations **/
     redis: {
         enable: false,
+        autoStart: false,
         process: 0
     }
 };
