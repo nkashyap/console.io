@@ -215,12 +215,11 @@ function main() {
         console.log(app.get('title') + ' is run at ' + (config.https.enable ? 'https' : 'http') + '://localhost:' + (process.env.PORT || app.get('port-number')));
     }
 
-    if (config.redis.enable && config.redis.autoStart && !process.env.IISNODE_VERSION) {
-        startRedisServer();
-    }
-
     // Start forking if you are the master.
     if (cluster.isMaster && config.redis.enable && !process.env.IISNODE_VERSION) {
+        if (config.redis.autoStart) {
+            startRedisServer();
+        }
 
         if (!config.redis.process) {
             config.redis.process = os.cpus().length;
