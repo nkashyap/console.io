@@ -205,7 +205,8 @@ window.InjectIO = (function () {
             attr = tag === 'script' ? 'src' : 'href';
             elements = document.getElementsByTagName(tag);
             ConsoleIO.forEach(ConsoleIO.toArray(elements), function (element) {
-                if (element.getAttribute(attr).indexOf(url) > -1) {
+                var path = element.getAttribute(attr) || '';
+                if (path.indexOf(url) > -1) {
                     element.parentNode.removeChild(element);
                 }
             });
