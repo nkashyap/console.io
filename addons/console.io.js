@@ -584,9 +584,9 @@ window.ConsoleIO = (function () {
             }, target);
 
             if (target.length > 0) {
-                return '[' + target.join(', ') + ']';
+                return '[ ' + target.join(', ') + ' ]';
             } else {
-                return '[' + data.toString() + ']';
+                return '[ ' + data.toString() + ' ]';
             }
         },
 
@@ -606,7 +606,7 @@ window.ConsoleIO = (function () {
             }, target);
 
             if (target.length > 0) {
-                return (name || type) + ': {\n' + target.join(',\n') + '\n' + tabAfter + '}\n';
+                return (name || type) + ': {\n' + target.join(',\n') + '\n' + tabAfter + '}';
             } else {
                 return data.toString() + '\n';
             }

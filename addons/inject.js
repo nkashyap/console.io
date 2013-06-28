@@ -387,6 +387,18 @@ window.InjectIO = (function () {
         } else {
             setUp(config);
         }
+
+        // Setup RequireJS global error handler
+        if(typeof window.requirejs !== 'undefined'){
+            window.requirejs.onError = function(error){
+                console.error(error, error.requireModules, error.originalError);
+            };
+        }
+
+        if(window.onerror !== onErrorFn){
+            onErrorHandler = window.onerror
+            window.onerror = onErrorFn;
+        }
     });
 
     window.onerror = onErrorFn;

@@ -202,6 +202,25 @@ redis: {
     }
 ```
 
+### Example to setup AngularJS global $http error handler
+angular.module('app', ['ngResource',])
+	.config(function ($httpProvider)
+	{
+		$httpProvider.responseInterceptors.push(function globalErrorHandling($q) {
+			return function(promise) {
+				return promise.then(function(successResponse) {
+					console.info(successResponse);
+					return successResponse;
+
+				}, function(errorResponse) {
+					console.exception(errorResponse);
+					return $q.reject(errorResponse);
+				});
+			};
+		});
+	});
+});
+
 ### TODO
  * Update Readme with full feature list
  * Add JSDoc & Unit Tests
