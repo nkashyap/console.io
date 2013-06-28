@@ -203,6 +203,7 @@ redis: {
 ```
 
 ### Example to setup AngularJS global $http error handler
+```html
 angular.module('app', ['ngResource',])
 	.config(function ($httpProvider)
 	{
@@ -220,6 +221,7 @@ angular.module('app', ['ngResource',])
 		});
 	});
 });
+```
 
 ### TODO
  * Update Readme with full feature list
