@@ -71,6 +71,7 @@ OR you can include all files individually
 <script type="text/javascript" src="<Local Folder OR Node Server>/socket.js"></script>
 <script type="text/javascript" src="<Local Folder OR Node Server>/web.js"></script>
 <script type="text/javascript" src="<Local Folder OR Node Server>/inject.js?url=http://nodeserver:port"></script>
+<link type="text/css" media="all" href="<Local Folder OR Node Server>/resources/console.css" />
 ```
 
 Visit http://nodeserver:port/ for ConsoleIO interface (Tested on Chrome Browsers)
