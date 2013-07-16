@@ -260,6 +260,7 @@ Device.prototype.command = function command(name, data) {
      * @type {object}
      */
     this.broadcast(name + ':' + this.guid, data);
+    console.log(name + ':' + this.guid, data.type || data);
 };
 
 /**

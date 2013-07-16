@@ -24,12 +24,12 @@ window.InjectIO = (function () {
         },
         // Create Function: Pass name of cookie, value, and days to expire
         create: function (name, value, days) {
+            var expires = "";
             if (days) {
                 var date = new Date();
                 date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                var expires = "; expires=" + date.toGMTString();
+                expires = "; expires=" + date.toGMTString();
             }
-            else var expires = "";
             document.cookie = name + "=" + value + expires + "; path=/";
             this[name] = value;
         },
@@ -349,6 +349,22 @@ window.InjectIO = (function () {
         return config.url + (config.base ? '/' + config.base : '/');
     }
 
+    window.onerror = onErrorFn;
+
+    /**
+     * Maple browser fix
+     * Maple has interface for both addEventListener and attachEvent
+     * but attachEvent is not fully implemented so it never raise any events
+     *
+     * set it to undefined to force other libraries to use addEventListener instead
+     */
+    if (navigator.userAgent.search(/Maple/i) > -1 &&
+        typeof HTMLElement.prototype.addEventListener === 'function' &&
+        typeof HTMLElement.prototype.attachEvent === 'function') {
+
+        HTMLElement.prototype.attachEvent = undefined;
+    }
+
     // Load required Scripts
     ready(function init() {
         if (domReady) {
@@ -400,8 +416,6 @@ window.InjectIO = (function () {
             window.onerror = onErrorFn;
         }
     });
-
-    window.onerror = onErrorFn;
 
     return {
         getUrl: getUrl,
