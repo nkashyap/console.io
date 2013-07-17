@@ -22,31 +22,32 @@ function main() {
         cluster = require('cluster'),
         os = require('os'),
         spawn = require('child_process').spawn,
-        redis = require('redis');
+        redis = require('redis'),
+        RedisStore = require('connect-redis')(express);
 
 
     function createClient() {
         var client = redis.createClient.apply(redis, arguments);
 
-//        client.on("connect", function () {
-//            console.log("Connect ", arguments);
-//        });
-//
-//        client.on("ready", function () {
-//            console.log("Ready ", arguments);
-//        });
-//
-//        client.on("end", function () {
-//            console.log("End ", arguments);
-//        });
-//
-//        client.on("drain", function () {
-//            console.log("Drain ", arguments);
-//        });
-//
-//        client.on("idle", function () {
-//            console.log("Idle ", arguments);
-//        });
+        client.on("connect", function () {
+            console.log("Connect ", arguments);
+        });
+
+        client.on("ready", function () {
+            console.log("Ready ", arguments);
+        });
+
+        client.on("end", function () {
+            console.log("End ", arguments);
+        });
+
+        client.on("drain", function () {
+            console.log("Drain ", arguments);
+        });
+
+        client.on("idle", function () {
+            console.log("Idle ", arguments);
+        });
 
         client.on("error", function () {
             console.log("Error ", arguments);
@@ -72,10 +73,11 @@ function main() {
                     console.log('Redis Server process exited with code ' + code);
                 }
             });
+        } else {
+            throw "Please start redis server manually.";
         }
     }
 
-    // server worker process
     function Workers() {
         var app,
             base = '/',
@@ -118,13 +120,27 @@ function main() {
         configure(app.io, 'development', config.io);
         configure(app.io, 'production', config.io);
 
+
+        // Setup your sessions, just like normal.
+        app.use(base, express.cookieParser());
+
         // Setup the redis store for scalable io.
         if (config.redis.enable && !process.env.IISNODE_VERSION) {
+            app.use(base, express.session({
+                store: new RedisStore({
+                    client: createClient()
+                }),
+                secret: app.get('session-key')
+            }));
+
             app.io.set('store', new express.io.RedisStore({
                 redisPub: createClient(),
                 redisSub: createClient(),
                 redisClient: createClient()
             }));
+
+        } else {
+            app.use(base, express.session({ secret: app.get('session-key') }));
         }
 
         // Setup your cross domain
@@ -133,10 +149,6 @@ function main() {
             res.header("Access-Control-Allow-Headers", "X-Requested-With");
             next();
         });
-
-        // Setup your sessions, just like normal.
-        app.use(base, express.cookieParser());
-        app.use(base, express.session({ secret: app.get('session-key') }));
 
         // add request logger
         //app.use(base, express.logger());
@@ -215,22 +227,26 @@ function main() {
         console.log(app.get('title') + ' is run at ' + (config.https.enable ? 'https' : 'http') + '://localhost:' + (process.env.PORT || app.get('port-number')));
     }
 
-    // Start forking if you are the master.
-    if (cluster.isMaster && config.redis.enable && !process.env.IISNODE_VERSION) {
-        if (config.redis.autoStart) {
-            startRedisServer();
-        }
+    function init() {
+        // Start forking if you are the master.
+        if (cluster.isMaster && config.redis.enable && !process.env.IISNODE_VERSION) {
+            if (config.redis.autoStart) {
+                startRedisServer();
+            }
 
-        if (!config.redis.process) {
-            config.redis.process = os.cpus().length;
-        }
+            if (!config.redis.process) {
+                config.redis.process = os.cpus().length;
+            }
 
-        while (config.redis.process--) {
-            cluster.fork();
+            while (config.redis.process--) {
+                cluster.fork();
+            }
+        } else {
+            Workers();
         }
-    } else {
-        Workers();
     }
+
+    init();
 }
 
 // execute and export it as NodeJS module

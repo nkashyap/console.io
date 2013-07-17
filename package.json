@@ -18,7 +18,8 @@
     "dependencies": {
         "express.io": "latest",
         "request": "latest",
-        "redis": ">=0.8.3"
+        "redis": ">=0.8.3",
+        "connect-redis": "latest"
     },
     "main": "./server/main.js",
     "bin": {
