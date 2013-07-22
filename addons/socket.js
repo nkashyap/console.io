@@ -71,7 +71,11 @@ window.SocketIO = (function () {
 
             // set console.io event
             ConsoleIO.on('console', function (data) {
-                Socket.emit('console', data);
+                Socket.emit('console', {
+                    type: data.type,
+                    message: escape(data.message),
+                    stack: data.stack
+                });
             });
 
             // set events

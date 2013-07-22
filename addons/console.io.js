@@ -574,7 +574,7 @@ window.ConsoleIO = (function () {
         },
 
         parseString: function parseString(data) {
-            return '"' + data.replace(/\n/g, '\\n').replace(/"/g, '\\"').replace(/</g, '').replace(/>/g, '') + '"';
+            return '"' + data.replace(/\n/g, '\\n').replace(/"/g, '\\"').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '"';
         },
 
         parseArray: function parseArray(data, level) {
