@@ -354,7 +354,7 @@ window.InjectIO = (function () {
     /**
      * Maple browser fix
      * Maple has interface for both addEventListener and attachEvent
-     * but attachEvent is not fully implemented so it never raise any events
+     * but attachEvent is not fully implemented so it never raise any event
      *
      * set it to undefined to force other libraries to use addEventListener instead
      */

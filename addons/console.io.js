@@ -446,7 +446,7 @@ window.ConsoleIO = (function () {
         },
 
         groupEnd: function groupEnd() {
-            logger("groupEnd", arguments);
+            logger("groupEnd");
         },
 
         markTimeline: function markTimeline() {
@@ -574,7 +574,7 @@ window.ConsoleIO = (function () {
         },
 
         parseString: function parseString(data) {
-            return '"' + data.replace(/"/g, '\\"').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '"';
+            return '"' + data.replace(/"/g, '\'').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '"';
         },
 
         parseArray: function parseArray(data, level) {
