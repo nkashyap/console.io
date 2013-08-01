@@ -66,11 +66,11 @@ window.ConfigIO = {
 OR you can include all files individually
 
 ```html
-<script type="text/javascript" src="<Local Folder OR Node Server/socket.io>/socket.io.js"></script>
-<script type="text/javascript" src="<Local Folder OR Node Server>/console.io.js"></script>
-<script type="text/javascript" src="<Local Folder OR Node Server>/socket.js"></script>
-<script type="text/javascript" src="<Local Folder OR Node Server>/web.js"></script>
-<script type="text/javascript" src="<Local Folder OR Node Server>/inject.js?url=http://nodeserver:port"></script>
+<script type="text/javascript" src="<Local Folder OR Node Server/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="<Local Folder OR Node Server>/addons/console.io.js"></script>
+<script type="text/javascript" src="<Local Folder OR Node Server>/addons/socket.js"></script>
+<script type="text/javascript" src="<Local Folder OR Node Server>/addons/web.js"></script>
+<script type="text/javascript" src="<Local Folder OR Node Server>/addons/inject.js?url=http://nodeserver:port"></script>
 <link type="text/css" media="all" href="<Local Folder OR Node Server>/resources/console.css" />
 ```
 

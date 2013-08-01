@@ -1,4 +1,4 @@
-(function () {
+(function LGDeviceInfo() {
     var device = document.getElementById('device');
 
     if (!device) {
