@@ -3,21 +3,66 @@
   //window.alert = console.debug;
   
   function networkSuccess(networks) {
-    var i = 0, length = networks.length;
     
-    for (; i < length; i++) {
-      var network = networks[i];      
-      
-      console.info(network, { 
-        active: network.isActive()       
-      });
+    var networkInterface = [];
+    ConsoleIO.forEach(networks, function(network){
+      var interface = {
+        kind: getNetworkType(network.interfaceType),
+        status: 'disconnected',
+        mac : network.mac,
+        ip : network.ip,
+        ipMode : network.ipMode,
+        dns : network.dns,
+        dnsMode : network.dnsMode,
+        gateway : network.gateway, 
+        netmask : network.subnetMask
+      }
       
       if(network.isActive()){
+        interface.status = 'connected';
         network.watchConnectionStatus(function (connectionStatus) {
-        	console.info(connectionStatus);
-    	}, errorCallback);
+          console.warn(getNetworkType(network.interfaceType), connectionStatus);
+        }, errorCallback);
       }
-    }
+      
+      networkInterface.push(interface);
+    });
+    
+    var params = getDeviceParams(),
+    log = {
+      hardware: {
+        manufacturer: 'Samsung',
+        family: getProductType(),
+        model: deviceapis.tv.info.getModel(),
+        processorArchitecture: navigator.platform,
+        firmware: deviceapis.tv.info.getFirmware(),
+        totalMemory: params.totalMemory,
+        availableMemory: '??',
+        usedMemory: '??',
+        serialNumber: deviceapis.tv.info.getDeviceID()
+      },
+      operatingSystem: {
+        platform: deviceapis.platform,
+        version: deviceapis.tv.info.getVersion()
+      },
+      networkInterfaces: networkInterface,
+
+      //some more info
+      additional:{
+        apiVersion: deviceapis.ver,
+        country: deviceapis.tv.info.getCountry(),
+        language: deviceapis.tv.info.getLanguage(),
+        esnWidevine: deviceapis.tv.info.getESN('WIDEVINE'),
+        timezone: deviceapis.tv.info.getTimeZone(),
+        tickTime: deviceapis.tv.info.getTick(),
+      	epochTime: deviceapis.tv.info.getEpochTime(),
+      	epochToTime: deviceapis.tv.info.convertEpochToTime(172800000),
+      	timeToEpoch: deviceapis.tv.info.convertTimeToEpoch(new Date()),
+      	params: getDeviceParams()
+      },
+    };
+    
+    console.info(log);
   }
   
   function errorCallback() {
@@ -54,59 +99,32 @@
     return product;
   }
   
+  function getNetworkType(interfaceType){
+    var type;
+    switch (typeof interfaceType !== 'undefined' ? interfaceType : deviceapis._plugin("Network", "GetActiveType")) {
+      case 0: 
+        type = 'wifi';
+        break;
+      case 1: 
+        type = 'lan';
+        break;
+      case -1: 
+        type = 'no active connection';
+        break;
+    }
+    
+    return type;
+  }
+  
   function init(){
-    
-    console.info({
-      product:{
-        type:getProductType(),
-        model: deviceapis.tv.info.getModel(),
-        firmware: deviceapis.tv.info.getFirmware(),
-        version: deviceapis.tv.info.getVersion()
-      },
-      api: {
-        platform: deviceapis.platform,
-        version: deviceapis.ver
-      },
-      device:{
-        id: deviceapis.tv.info.getDeviceID(),
-        platform: navigator.platform,
-        country: deviceapis.tv.info.getCountry(),
-        language: deviceapis.tv.info.getLanguage(),
-        esn:{
-          WIDEVINE: deviceapis.tv.info.getESN('WIDEVINE')
-        }
-      },
-      time:{
-        timezone: deviceapis.tv.info.getTimeZone(),
-        tickTime: deviceapis.tv.info.getTick(),
-      	epochTime: deviceapis.tv.info.getEpochTime(),
-      	epochToTime: deviceapis.tv.info.convertEpochToTime(172800000),
-      	timeToEpoch: deviceapis.tv.info.convertTimeToEpoch(new Date())
-      },
-      params: getDeviceParams()
-    });
-    
     try {
       deviceapis.network.getAvailableNetworks(networkSuccess, errorCallback);
     } catch (error) {
       errorCallback('catch', error);
     }
-    
-    //health();
   }
   
-  function health(){
-    try {
-      deviceapis.healthcaredevice.getHealthcareDevices(function(){
-        console.info(arguments);
-      }, errorCallback);
-    } catch (error) {
-      console.error(error);
-      errorCallback('catch', error);
-    }
-  }      
-
-  
+ 
   InjectIO.require(
     ["$MANAGER_WIDGET\\Common\\webapi\\1.0\\deviceapis.js", 
      "$MANAGER_WIDGET\\Common\\API\\Plugin.js", 

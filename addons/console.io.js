@@ -19,7 +19,7 @@ window.ConsoleIO = (function () {
         withoutScope = ['dir', 'dirxml'],
 		objectTypes = [	'[object Arguments]', '[object Array]',
 						'[object String]', '[object Number]', '[object Boolean]',
-						'[object Function]', '[object Object]', '[object Geoposition]', '[object Coordinates]'],
+						'[object Function]', '[object Object]', '[object Geoposition]', '[object Coordinates]', '[object CRuntimeObject]'],
 		errorTypes = [	'[object Error]', '[object ErrorEvent]', '[object DOMException]', 
 						'[object PositionError]'],
         events = {},
