@@ -54,11 +54,20 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
     ConsoleIO.forEachProperty(data, function (value, property) {
         this.view.addLabel(property);
         ConsoleIO.forEachProperty(value, function (config, name) {
-            if (name === 'More') {
-                config = config.join(", ");
-                if (!config) {
-                    return;
-                }
+            switch (name.toLowerCase()) {
+                case 'more':
+                    config = config.join(", ");
+                    if (!config) {
+                        return;
+                    }
+                    break;
+                case 'search':
+                case 'href':
+                    config = ConsoleIO.queryParams(config);
+                    break;
+                case 'cookie':
+                    config = ConsoleIO.cookieToJSON(config);
+                    break;
             }
 
             this.view.add(name, typeof config === 'string' ? config.replace(/"/igm, "") : config, property);

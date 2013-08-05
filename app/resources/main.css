@@ -94,3 +94,8 @@ html, body {
     padding: 5px;
     width: 80%;
 }
+
+.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .value .valueList,
+.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .value .valueText {
+    word-break: break-all;
+}

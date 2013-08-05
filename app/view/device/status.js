@@ -53,22 +53,14 @@ ConsoleIO.View.Device.Status.prototype.clear = function clear() {
 ConsoleIO.View.Device.Status.prototype.addLabel = function addLabel(name) {
     var id = this.id + '-' + name,
         labelDiv = ConsoleIO.Service.DHTMLXHelper.createElement({
-            attr: {
-                'class': 'label'
-            },
-            prop: {
-                id: id
-            },
+            attr: { 'class': 'label' },
+            prop: { id: id },
             target: this.container
         });
 
     ConsoleIO.Service.DHTMLXHelper.createElement({
-        attr: {
-            'class': 'title'
-        },
-        prop: {
-            innerHTML: name
-        },
+        attr: { 'class': 'title' },
+        prop: { innerHTML: name },
         target: labelDiv
     });
 
@@ -77,31 +69,36 @@ ConsoleIO.View.Device.Status.prototype.addLabel = function addLabel(name) {
 
 ConsoleIO.View.Device.Status.prototype.add = function add(name, value, label) {
     var property = ConsoleIO.Service.DHTMLXHelper.createElement({
-        attr: {
-            'class': 'property'
-        },
+        attr: { 'class': 'property' },
         target: this.labels[this.id + '-' + label]
     });
 
     ConsoleIO.Service.DHTMLXHelper.createElement({
-        attr: {
-            'class': 'name'
-        },
-        prop: {
-            innerHTML: name
-        },
+        attr: { 'class': 'name' },
+        prop: { innerHTML: name },
         target: property
     });
 
-    ConsoleIO.Service.DHTMLXHelper.createElement({
-        attr: {
-            'class': 'value'
-        },
-        prop: {
-            innerHTML: value
-        },
+    var valueDom = ConsoleIO.Service.DHTMLXHelper.createElement({
+        attr: { 'class': 'value' },
         target: property
     });
+
+    if (typeof value === 'string') {
+        ConsoleIO.Service.DHTMLXHelper.createElement({
+            attr: { 'class': 'valueText' },
+            prop: { innerHTML: value },
+            target: valueDom
+        });
+    } else {
+        ConsoleIO.forEachProperty(value, function (val, name) {
+            ConsoleIO.Service.DHTMLXHelper.createElement({
+                attr: { 'class': 'valueList' },
+                prop: { innerHTML: name + ': ' + val },
+                target: valueDom
+            });
+        }, this);
+    }
 };
 
 ConsoleIO.View.Device.Status.prototype.getValue = function getValue(id) {

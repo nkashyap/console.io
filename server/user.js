@@ -45,14 +45,17 @@ User.prototype.isSubscribed = function isSubscribed(guid) {
 };
 
 User.prototype.subscribe = function subscribe(guid) {
+    var device = this.manager.getDeviceByGuid(guid);
     if (!this.isSubscribed(guid)) {
-        var device = this.manager.getDeviceByGuid(guid);
         if (!device) {
             console.log('Device not found: ' + guid);
             return;
         }
         this.deviceGUIDs.push(guid);
         this.request.io.join(guid);
+    }
+
+    if (device) {
         this.emit('subscribed', device.getInformation());
         console.log('subscribe', guid);
     }
