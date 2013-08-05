@@ -51,6 +51,7 @@ ConsoleIO.App.Device.Status.prototype.activate = function activate(state) {
 };
 
 ConsoleIO.App.Device.Status.prototype.add = function add(data) {
+    this.view.clear();
     ConsoleIO.forEachProperty(data, function (value, property) {
         this.view.addLabel(property);
         ConsoleIO.forEachProperty(value, function (config, name) {
@@ -76,7 +77,6 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
 };
 
 ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
-    this.view.clear();
     ConsoleIO.Service.Socket.emit('deviceStatus', { guid: this.model.guid });
 };
 

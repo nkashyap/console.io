@@ -205,7 +205,13 @@ function main() {
                     expiryDate = new Date();
 
                 expiryDate.setDate(expiryDate.getDate() + 365);
-                guidCookie = "guid=" + escape(((new Date().getTime()) + "-" + Math.random()).replace(".", "")) + "; expires=" + expiryDate.toUTCString() + "; path=/";
+                guidCookie = "guid=" + escape(((new Date().getTime()) + "-" + Math.random()).replace(".", "")) + "; expires=" + expiryDate.toUTCString() + ";";
+
+                if (config.domain) {
+                    guidCookie += "domain=" + config.domain + "; path=/";
+                } else {
+                    guidCookie += "path=/";
+                }
 
                 if (document.setHeader) {
                     document.setHeader("Set-Cookie", [guidCookie]);
