@@ -109,12 +109,15 @@ node ./server/main.js
 
 <p>OR you can include all files individually</p>
 
-<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server/socket.io&gt;/socket.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/console.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/socket.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/web.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/inject.js?url=http://nodeserver:port"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server/socket.io/socket.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/addons/console.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/addons/socket.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/addons/web.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/addons/inject.js?url=http://nodeserver:port"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;link</span> <span class="na">type=</span><span class="s">"text/css"</span> <span class="na">media=</span><span class="s">"all"</span> <span class="na">href=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/resources/console.css"</span> <span class="nt">/&gt;</span>
 </pre></div>
+
+<p>You can also capture iframe console logs. To do that just include inject.js script file in child document.</p>
 
 <p>Visit http://nodeserver:port/ for ConsoleIO interface (Tested on Chrome Browsers)</p>
 
@@ -274,6 +277,28 @@ on window platform (/redis/redis-server.exe) is started by server itself but on 
         enable: true, // <span class="err">&lt;</span>- true to enable socket.io scaling
         process: 6 // number of process to run
     }
+</pre></div>
+
+<h3>
+<a name="example-to-setup-angularjs-global-http-error-handler" class="anchor" href="#example-to-setup-angularjs-global-http-error-handler"><span class="octicon octicon-link"></span></a>Example to setup AngularJS global $http error handler</h3>
+
+<div class="highlight"><pre>angular.module('app', ['ngResource',])
+    .config(function ($httpProvider)
+    {
+        $httpProvider.responseInterceptors.push(function globalErrorHandling($q) {
+            return function(promise) {
+                return promise.then(function(successResponse) {
+                    console.info(successResponse);
+                    return successResponse;
+
+                }, function(errorResponse) {
+                    console.exception(errorResponse);
+                    return $q.reject(errorResponse);
+                });
+            };
+        });
+    });
+});
 </pre></div>
 
 <h3>
