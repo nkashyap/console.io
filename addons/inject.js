@@ -130,7 +130,7 @@ window.InjectIO = (function () {
     function requireScript(url, callback) {
 
         if (isLoaded(url)) {
-            setTimeout(function(){
+            setTimeout(function () {
                 callback(url);
             }, 100);
             return false;
@@ -289,6 +289,11 @@ window.InjectIO = (function () {
                     type: 'error',
                     message: error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo
                 });
+            } else if (typeof window.ChildMessageIO !== 'undefined') {
+                window.ChildMessageIO.emit('console', {
+                    type: 'error',
+                    message: error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo
+                });
             } else {
                 debug([error, filePath, lineNo].join("; "));
             }
@@ -333,6 +338,14 @@ window.InjectIO = (function () {
                 window.SocketIO.init(config);
             }
 
+            if (window.ChildMessageIO) {
+                window.ChildMessageIO.init(config);
+            }
+
+            if (window.ParentMessageIO) {
+                window.ParentMessageIO.init(config);
+            }
+
             if (window.WebIO) {
                 window.WebIO.init(config);
             }
@@ -345,8 +358,12 @@ window.InjectIO = (function () {
         }
     }
 
-    function getUrl(config){
+    function getUrl(config) {
         return config.url + (config.base ? '/' + config.base : '/');
+    }
+
+    function isChildWindow() {
+        return window.location !== window.parent.location;
     }
 
     window.onerror = onErrorFn;
@@ -376,17 +393,26 @@ window.InjectIO = (function () {
             config = typeof window.ConfigIO !== 'undefined' ? window.ConfigIO : getServerParams();
 
         // fix the ordering for Opera
-        if(!window.io){
+        if (!window.io && !isChildWindow()) {
             scripts.push(getUrl(config) + "socket.io/socket.io.js");
         }
 
         // fix the samsung to load all script up front
-        if(!window.ConsoleIO){
+        if (!window.ConsoleIO) {
             scripts.push(getUrl(config) + "addons/console.io.js");
         }
 
-        if(!window.SocketIO){
-            scripts.push(getUrl(config) + "addons/socket.js");
+        if (isChildWindow()) {
+            if (!window.ChildMessageIO && window.postMessage) {
+                scripts.push(getUrl(config) + "addons/childMessage.js");
+            }
+        } else {
+            if (!window.SocketIO) {
+                scripts.push(getUrl(config) + "addons/socket.js");
+            }
+            if (!window.ParentMessageIO && window.postMessage) {
+                scripts.push(getUrl(config) + "addons/parentMessage.js");
+            }
         }
 
         if (config.web && !window.WebIO) {
@@ -405,13 +431,13 @@ window.InjectIO = (function () {
         }
 
         // Setup RequireJS global error handler
-        if(typeof window.requirejs !== 'undefined'){
-            window.requirejs.onError = function(error){
+        if (typeof window.requirejs !== 'undefined') {
+            window.requirejs.onError = function (error) {
                 console.error(error, error.requireModules, error.originalError);
             };
         }
 
-        if(window.onerror !== onErrorFn){
+        if (window.onerror !== onErrorFn) {
             onErrorHandler = window.onerror
             window.onerror = onErrorFn;
         }

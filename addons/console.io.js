@@ -17,11 +17,16 @@ window.ConsoleIO = (function () {
         counters = {},
         timeCounters = {},
         withoutScope = ['dir', 'dirxml'],
-		objectTypes = [	'[object Arguments]', '[object Array]',
-						'[object String]', '[object Number]', '[object Boolean]',
-						'[object Function]', '[object Object]', '[object Geoposition]', '[object Coordinates]', '[object CRuntimeObject]'],
-		errorTypes = [	'[object Error]', '[object ErrorEvent]', '[object DOMException]', 
-						'[object PositionError]'],
+        objectTypes = [
+            '[object Arguments]', '[object Array]',
+            '[object String]', '[object Number]', '[object Boolean]',
+            '[object Function]', '[object Object]', '[object Geoposition]', '[object Coordinates]',
+            '[object CRuntimeObject]'
+        ],
+        errorTypes = [
+            '[object Error]', '[object ErrorEvent]', '[object DOMException]',
+            '[object PositionError]'
+        ],
         events = {},
         nativeEnabled = true;
 
@@ -519,10 +524,10 @@ window.ConsoleIO = (function () {
                         break;
 
                     case '[object Object]':
-					case '[object Geoposition]':
-					case '[object Coordinates]':
-					case '[object DOMException]':
-					case '[object PositionError]':
+                    case '[object Geoposition]':
+                    case '[object Coordinates]':
+                    case '[object DOMException]':
+                    case '[object PositionError]':
                         value = this.parseObject(type, data, level);
                         break;
 

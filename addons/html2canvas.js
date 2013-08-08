@@ -13,9 +13,9 @@
         computedCSS,
         html2canvas;
 
-    function h2clog() {
+    function h2clog(a) {
         if (_html2canvas.logging && window.console && window.console.log) {
-            window.console.log.apply(window.console.log, arguments);
+            window.console.log(a);
         }
     }
 
@@ -811,7 +811,10 @@
                             grad.addColorStop(gradient.colorStops[i].stop, gradient.colorStops[i].color);
                         }
                         catch (e) {
-                            h2clog(['failed to add color stop: ', e, '; tried to add: ', gradient.colorStops[i], '; stop: ', i, '; in: ', src]);
+                            h2clog([
+                                'failed to add color stop: ', e, '; tried to add: ', gradient.colorStops[i], '; stop: ',
+                                i, '; in: ', src
+                            ]);
                         }
                     }
 
@@ -1475,10 +1478,14 @@
                     return [bezierCurve(start, ab, abbc, dest), bezierCurve(dest, bccd, cd, end)];
                 },
                 curveTo: function (borderArgs) {
-                    borderArgs.push(["bezierCurve", startControl.x, startControl.y, endControl.x, endControl.y, end.x, end.y]);
+                    borderArgs.push([
+                        "bezierCurve", startControl.x, startControl.y, endControl.x, endControl.y, end.x, end.y
+                    ]);
                 },
                 curveToReversed: function (borderArgs) {
-                    borderArgs.push(["bezierCurve", endControl.x, endControl.y, startControl.x, startControl.y, start.x, start.y]);
+                    borderArgs.push([
+                        "bezierCurve", endControl.x, endControl.y, startControl.x, startControl.y, start.x, start.y
+                    ]);
                 }
             };
         }
@@ -1504,7 +1511,7 @@
                 borderArgs.push(["line", outer1[1].start.x, outer1[1].start.y]);
                 outer1[1].curveTo(borderArgs);
             } else {
-                borderArgs.push([ "line", borderData.c1[0], borderData.c1[1]]);
+                borderArgs.push(["line", borderData.c1[0], borderData.c1[1]]);
             }
 
             if (radius2[0] > 0 || radius2[1] > 0) {
@@ -1513,15 +1520,15 @@
                 borderArgs.push(["line", inner2[0].end.x, inner2[0].end.y]);
                 inner2[0].curveToReversed(borderArgs);
             } else {
-                borderArgs.push([ "line", borderData.c2[0], borderData.c2[1]]);
-                borderArgs.push([ "line", borderData.c3[0], borderData.c3[1]]);
+                borderArgs.push(["line", borderData.c2[0], borderData.c2[1]]);
+                borderArgs.push(["line", borderData.c3[0], borderData.c3[1]]);
             }
 
             if (radius1[0] > 0 || radius1[1] > 0) {
                 borderArgs.push(["line", inner1[1].end.x, inner1[1].end.y]);
                 inner1[1].curveToReversed(borderArgs);
             } else {
-                borderArgs.push([ "line", borderData.c4[0], borderData.c4[1]]);
+                borderArgs.push(["line", borderData.c4[0], borderData.c4[1]]);
             }
 
             return borderArgs;
@@ -1742,7 +1749,10 @@
         function renderFormValue(el, bounds, stack) {
 
             var valueWrap = doc.createElement('valuewrap'),
-                cssPropertyArray = ['lineHeight', 'textAlign', 'fontFamily', 'color', 'fontSize', 'paddingLeft', 'paddingTop', 'width', 'height', 'border', 'borderLeftWidth', 'borderTopWidth'],
+                cssPropertyArray = [
+                    'lineHeight', 'textAlign', 'fontFamily', 'color', 'fontSize', 'paddingLeft', 'paddingTop', 'width',
+                    'height', 'border', 'borderLeftWidth', 'borderTopWidth'
+                ],
                 textValue,
                 textNode;
 
@@ -2272,6 +2282,7 @@
             script.setAttribute("src", scriptUrl);
             imageObj.script = script;
             window.document.body.appendChild(script);
+
         }
 
         function loadPseudoElement(element, type) {
@@ -2357,6 +2368,7 @@
                     // CORS succeeded
                     window.clearTimeout(imageObj.timer);
                 }
+
                 images.numLoaded++;
                 imageObj.succeeded = true;
                 img.onerror = img.onload = null;
@@ -2408,6 +2420,7 @@
                         img.src = src;
                     } else if (supportCORS && !options.allowTaint && options.useCORS) {
                         // attempt to load with CORS
+
                         img.crossOrigin = "anonymous";
                         imageObj = images[src] = {
                             img: img
@@ -2689,6 +2702,8 @@
             if (typeof options.onrendered === "function") {
                 options.onrendered(canvas);
             }
+
+
         };
 
         // for pages without images, we still want this to be async, i.e. return methods before executing
@@ -2710,7 +2725,7 @@
         };
     };
 
-    window.html2canvas.log = h2clog; // for renderer
+    window.html2canvas.log = h2clog; // for renderers
     window.html2canvas.Renderer = {
         Canvas: undefined // We are assuming this will be used
     };
@@ -2815,6 +2830,7 @@
                     if (storageContext.clip) {
                         ctx.save();
                         ctx.beginPath();
+                        // console.log(storageContext);
                         ctx.rect(storageContext.clip.left, storageContext.clip.top, storageContext.clip.width, storageContext.clip.height);
                         ctx.clip();
                     }
