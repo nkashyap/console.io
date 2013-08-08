@@ -289,11 +289,8 @@ window.InjectIO = (function () {
                     type: 'error',
                     message: error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo
                 });
-            } else if (typeof window.ChildMessageIO !== 'undefined') {
-                window.ChildMessageIO.emit('console', {
-                    type: 'error',
-                    message: error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo
-                });
+            } else if (isChildWindow()) {
+                console.exception(error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo);
             } else {
                 debug([error, filePath, lineNo].join("; "));
             }
@@ -338,16 +335,19 @@ window.InjectIO = (function () {
                 window.SocketIO.init(config);
             }
 
-            if (window.ChildMessageIO) {
-                window.ChildMessageIO.init(config);
-            }
-
-            if (window.ParentMessageIO) {
-                window.ParentMessageIO.init(config);
-            }
-
             if (window.WebIO) {
                 window.WebIO.init(config);
+            }
+
+            if (isChildWindow() && window.parent.postMessage) {
+                ConsoleIO.on('console', function (data) {
+                    window.parent.postMessage({
+                        event: 'console',
+                        type: data.type,
+                        message: escape(data.message),
+                        stack: data.stack
+                    }, "*");
+                });
             }
 
         } else {
@@ -392,32 +392,23 @@ window.InjectIO = (function () {
         var scripts = [],
             config = typeof window.ConfigIO !== 'undefined' ? window.ConfigIO : getServerParams();
 
-        // fix the ordering for Opera
-        if (!window.io && !isChildWindow()) {
-            scripts.push(getUrl(config) + "socket.io/socket.io.js");
-        }
-
-        // fix the samsung to load all script up front
         if (!window.ConsoleIO) {
             scripts.push(getUrl(config) + "addons/console.io.js");
         }
 
-        if (isChildWindow()) {
-            if (!window.ChildMessageIO && window.postMessage) {
-                scripts.push(getUrl(config) + "addons/childMessage.js");
+        if (!isChildWindow()) {
+            if (!window.io) {
+                scripts.push(getUrl(config) + "socket.io/socket.io.js");
             }
-        } else {
+
             if (!window.SocketIO) {
                 scripts.push(getUrl(config) + "addons/socket.js");
             }
-            if (!window.ParentMessageIO && window.postMessage) {
-                scripts.push(getUrl(config) + "addons/parentMessage.js");
-            }
-        }
 
-        if (config.web && !window.WebIO) {
-            scripts.push(getUrl(config) + "addons/web.js");
-            requireStyle(getUrl(config) + "resources/console.css");
+            if (config.web && !window.WebIO) {
+                scripts.push(getUrl(config) + "addons/web.js");
+                requireStyle(getUrl(config) + "resources/console.css");
+            }
         }
 
         //Request console.io.js file to get connect.sid cookie from the server

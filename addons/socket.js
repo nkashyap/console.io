@@ -78,6 +78,15 @@ window.SocketIO = (function () {
                 });
             });
 
+            window.addEventListener("message", function onMessage(event) {
+                var data = event.data;
+                Socket.emit(data.event, {
+                    type: data.type,
+                    message: data.message,
+                    stack: data.stack
+                });
+            }, false);
+
             // set events
             this.io.on('connect', this.onConnect);
             this.io.on('connecting', this.onConnecting);

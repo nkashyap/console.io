@@ -74,6 +74,8 @@ OR you can include all files individually
 <link type="text/css" media="all" href="<Local Folder OR Node Server>/resources/console.css" />
 ```
 
+You can also capture iframe console logs. To do that just include inject.js script file in child document.
+
 Visit http://nodeserver:port/ for ConsoleIO interface (Tested on Chrome Browsers)
 
 ![Screen shot](https://raw.github.com/nkashyap/console.io/master/console.io.png)
