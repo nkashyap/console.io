@@ -51,14 +51,24 @@ ConsoleIO.App.Device.Status.prototype.activate = function activate(state) {
 };
 
 ConsoleIO.App.Device.Status.prototype.add = function add(data) {
+    this.view.clear();
     ConsoleIO.forEachProperty(data, function (value, property) {
         this.view.addLabel(property);
         ConsoleIO.forEachProperty(value, function (config, name) {
-            if (name === 'More') {
-                config = config.join(", ");
-                if (!config) {
-                    return;
-                }
+            switch (name.toLowerCase()) {
+                case 'more':
+                    config = config.join(", ");
+                    if (!config) {
+                        return;
+                    }
+                    break;
+                case 'search':
+                case 'href':
+                    config = ConsoleIO.queryParams(config);
+                    break;
+                case 'cookie':
+                    config = ConsoleIO.cookieToJSON(config);
+                    break;
             }
 
             this.view.add(name, typeof config === 'string' ? config.replace(/"/igm, "") : config, property);
@@ -67,7 +77,6 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
 };
 
 ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
-    this.view.clear();
     ConsoleIO.Service.Socket.emit('deviceStatus', { guid: this.model.guid });
 };
 

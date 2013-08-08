@@ -17,6 +17,16 @@ window.ConsoleIO = (function () {
         counters = {},
         timeCounters = {},
         withoutScope = ['dir', 'dirxml'],
+        objectTypes = [
+            '[object Arguments]', '[object Array]',
+            '[object String]', '[object Number]', '[object Boolean]',
+            '[object Function]', '[object Object]', '[object Geoposition]', '[object Coordinates]',
+            '[object CRuntimeObject]'
+        ],
+        errorTypes = [
+            '[object Error]', '[object ErrorEvent]', '[object DOMException]',
+            '[object PositionError]'
+        ],
         events = {},
         nativeEnabled = true;
 
@@ -325,7 +335,7 @@ window.ConsoleIO = (function () {
                 type = this.getType(e),
                 className = Utils.getObjectType(e);
 
-            if (['[object Error]', '[object ErrorEvent]', '[object DOMException]'].indexOf(className) === -1) {
+            if (errorTypes.indexOf(className) === -1) {
                 Wrapper.warn(className + ' error type missing!');
                 return data;
             }
@@ -446,7 +456,7 @@ window.ConsoleIO = (function () {
         },
 
         groupEnd: function groupEnd() {
-            logger("groupEnd", arguments);
+            logger("groupEnd");
         },
 
         markTimeline: function markTimeline() {
@@ -490,12 +500,7 @@ window.ConsoleIO = (function () {
 
 
     Stringify = {
-        TYPES: [
-            '[object Arguments]', '[object Array]',
-            '[object String]', '[object Number]', '[object Boolean]',
-            '[object Error]', '[object ErrorEvent]', '[object DOMException]',
-            '[object Function]', '[object Object]'
-        ],
+        TYPES: objectTypes.concat(errorTypes),
 
         parse: function parse(data, level, simple) {
             var value = '',
@@ -512,9 +517,6 @@ window.ConsoleIO = (function () {
                     case '[object String]':
                         value = this.parseString(data);
                         break;
-                    case '[object DOMException]':
-                        value = this.parseObject(type, data, level);
-                        break;
                     case '[object Arguments]':
                         data = Utils.toArray(data);
                     case '[object Array]':
@@ -522,6 +524,10 @@ window.ConsoleIO = (function () {
                         break;
 
                     case '[object Object]':
+                    case '[object Geoposition]':
+                    case '[object Coordinates]':
+                    case '[object DOMException]':
+                    case '[object PositionError]':
                         value = this.parseObject(type, data, level);
                         break;
 
@@ -574,7 +580,7 @@ window.ConsoleIO = (function () {
         },
 
         parseString: function parseString(data) {
-            return '"' + data.replace(/\n/g, '\\n').replace(/"/g, '\\"').replace(/</g, '').replace(/>/g, '') + '"';
+            return '"' + data.replace(/"/g, '\'').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '"';
         },
 
         parseArray: function parseArray(data, level) {

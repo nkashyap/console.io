@@ -9,6 +9,12 @@ code {
     padding: 2px 80px 5px;
 }
 
+.console span {
+    word-wrap:break-word;
+    word-break: break-all;
+    white-space:pre-wrap;
+}
+
 .console::before {
     color: rgba(111, 114, 117, 0.5);
     position: absolute;

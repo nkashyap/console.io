@@ -33,6 +33,8 @@
 
 var config = {
 
+    domain: null, //'.bbdev1.com',
+
     /** express configurations **/
     express: {
         development: {

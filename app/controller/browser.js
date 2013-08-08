@@ -102,7 +102,7 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
     this.view.addOrUpdate(data.guid, data.name.indexOf('|') > -1 ? data.browser : data.name, version);
 
     //set correct icon
-    if (data.subscribed) {
+    if (data.subscribed && data.online) {
         this.subscribed(data);
     } else if (data.online) {
         this.online(data);

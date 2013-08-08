@@ -7,10 +7,15 @@
  */
 var fs = require('fs');
 
-function User(application, request, manager) {
+function User(application, request, manager, restored) {
     this.application = application;
     this.request = request;
     this.manager = manager;
+
+    if (restored) {
+        return;
+    }
+
     this.guid = this.request.cookies.guid;
     this.deviceGUIDs = [];
     this.isOnline = false;
@@ -21,19 +26,36 @@ function User(application, request, manager) {
     });
 }
 
+User.restore = function restore(application, request, manager, userConfig) {
+    var parseUser = new User(application, request, manager, true);
+    manager.extend(parseUser, userConfig);
+    return parseUser;
+};
+
+User.save = function save(user) {
+    return {
+        guid: user.guid,
+        deviceGUIDs: user.deviceGUIDs,
+        isOnline: user.isOnline
+    };
+};
+
 User.prototype.isSubscribed = function isSubscribed(guid) {
     return this.deviceGUIDs.indexOf(guid) > -1;
 };
 
 User.prototype.subscribe = function subscribe(guid) {
+    var device = this.manager.getDeviceByGuid(guid);
     if (!this.isSubscribed(guid)) {
-        var device = this.manager.getDeviceByGuid(guid);
         if (!device) {
             console.log('Device not found: ' + guid);
             return;
         }
         this.deviceGUIDs.push(guid);
         this.request.io.join(guid);
+    }
+
+    if (device) {
         this.emit('subscribed', device.getInformation());
         console.log('subscribe', guid);
     }
@@ -82,14 +104,19 @@ User.prototype.offline = function offline() {
 User.prototype.exportHTML = function exportHTML(data) {
     var scope = this,
         cssFile = './app/resources/console.css',
-        htmlFile = ["userdata/export/", data.name.replace(/[|]/ig, '-'), '-', data.guid, '-', (new Date()).getTime(), '.html'].join("");
+        htmlFile = [
+            "userdata/export/", data.name.replace(/[|]/ig, '-'), '-', data.guid, '-', (new Date()).getTime(), '.html'
+        ].join("");
 
     fs.readFile(cssFile, null, function (err, cssData) {
         if (err) {
             scope.emit('error', { message: 'Reading CSS file: ' + cssFile });
 
         } else {
-            var content = ['<html><head><title>', data.name, '</title><style>', cssData, '</style></head><body>', data.content, '</body></html>'].join("");
+            var content = [
+                '<html><head><title>', data.name, '</title><style>', cssData, '</style></head><body>', data.content,
+                '</body></html>'
+            ].join("");
 
             fs.writeFile("./" + htmlFile, content, function (err) {
                 if (err) {

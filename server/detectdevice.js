@@ -188,10 +188,12 @@ var detectDevice = {
 
             /** version data store array **/
             version: [
-                {  userAgent: config.userAgent, search: /2010\b/i, identity: "2010" },
-                {  userAgent: config.userAgent, search: /2011|TL868|NETTV\/3.1\b/i, identity: "2011" },
-                {  userAgent: config.userAgent, search: /2012|RL953|NETTV\/3.0|NETTV\/3.2|NETTV\/4.0\b/i, identity: "2012" },
+                {  userAgent: config.userAgent, search: /2015\b/i, identity: "2015" },
+                {  userAgent: config.userAgent, search: /2014\b/i, identity: "2014" },
                 {  userAgent: config.userAgent, search: /2013\b/i, identity: "2013" },
+                {  userAgent: config.userAgent, search: /2012|RL953|NETTV\/3.0|NETTV\/3.2|NETTV\/4.0\b/i, identity: "2012" },
+                {  userAgent: config.userAgent, search: /2011|TL868|NETTV\/3.1\b/i, identity: "2011" },
+                {  userAgent: config.userAgent, search: /2010\b/i, identity: "2010" },
 
                 {  userAgent: config.userAgent, versionSearch: /\bTesco-Technika22-|Tesco-TechnikaTK500SDTR/i },
                 {  userAgent: config.userAgent, versionSearch: /\bEspial Browser\/\b/i },
