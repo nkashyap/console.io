@@ -131,7 +131,7 @@ function Manager() {
             client.offline();
         }
 
-        //console.log('disconnect', client ? client.guid : 'undefined');
+        console.log('disconnect', client ? client.guid : 'undefined');
     }
 
     function getDeviceByGuid(guid) {

@@ -24,12 +24,12 @@ window.InjectIO = (function () {
         },
         // Create Function: Pass name of cookie, value, and days to expire
         create: function (name, value, days) {
+            var expires = "";
             if (days) {
                 var date = new Date();
                 date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                var expires = "; expires=" + date.toGMTString();
+                expires = "; expires=" + date.toGMTString();
             }
-            else var expires = "";
             document.cookie = name + "=" + value + expires + "; path=/";
             this[name] = value;
         },
@@ -130,7 +130,7 @@ window.InjectIO = (function () {
     function requireScript(url, callback) {
 
         if (isLoaded(url)) {
-            setTimeout(function(){
+            setTimeout(function () {
                 callback(url);
             }, 100);
             return false;
@@ -289,6 +289,8 @@ window.InjectIO = (function () {
                     type: 'error',
                     message: error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo
                 });
+            } else if (isChildWindow()) {
+                console.exception(error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo);
             } else {
                 debug([error, filePath, lineNo].join("; "));
             }
@@ -337,6 +339,17 @@ window.InjectIO = (function () {
                 window.WebIO.init(config);
             }
 
+            if (isChildWindow() && window.parent.postMessage) {
+                ConsoleIO.on('console', function (data) {
+                    window.parent.postMessage({
+                        event: 'console',
+                        type: data.type,
+                        message: escape(data.message),
+                        stack: data.stack
+                    }, "*");
+                });
+            }
+
         } else {
             debug("Console.IO dependencies are missing!" +
                 " If you are using inject.js to load dependencies" +
@@ -345,8 +358,28 @@ window.InjectIO = (function () {
         }
     }
 
-    function getUrl(config){
+    function getUrl(config) {
         return config.url + (config.base ? '/' + config.base : '/');
+    }
+
+    function isChildWindow() {
+        return window.location !== window.parent.location;
+    }
+
+    window.onerror = onErrorFn;
+
+    /**
+     * Maple browser fix
+     * Maple has interface for both addEventListener and attachEvent
+     * but attachEvent is not fully implemented so it never raise any event
+     *
+     * set it to undefined to force other libraries to use addEventListener instead
+     */
+    if (navigator.userAgent.search(/Maple/i) > -1 &&
+        typeof HTMLElement.prototype.addEventListener === 'function' &&
+        typeof HTMLElement.prototype.attachEvent === 'function') {
+
+        HTMLElement.prototype.attachEvent = undefined;
     }
 
     // Load required Scripts
@@ -359,23 +392,23 @@ window.InjectIO = (function () {
         var scripts = [],
             config = typeof window.ConfigIO !== 'undefined' ? window.ConfigIO : getServerParams();
 
-        // fix the ordering for Opera
-        if(!window.io){
-            scripts.push(getUrl(config) + "socket.io/socket.io.js");
-        }
-
-        // fix the samsung to load all script up front
-        if(!window.ConsoleIO){
+        if (!window.ConsoleIO) {
             scripts.push(getUrl(config) + "addons/console.io.js");
         }
 
-        if(!window.SocketIO){
-            scripts.push(getUrl(config) + "addons/socket.js");
-        }
+        if (!isChildWindow()) {
+            if (!window.io) {
+                scripts.push(getUrl(config) + "socket.io/socket.io.js");
+            }
 
-        if (config.web && !window.WebIO) {
-            scripts.push(getUrl(config) + "addons/web.js");
-            requireStyle(getUrl(config) + "resources/console.css");
+            if (!window.SocketIO) {
+                scripts.push(getUrl(config) + "addons/socket.js");
+            }
+
+            if (config.web && !window.WebIO) {
+                scripts.push(getUrl(config) + "addons/web.js");
+                requireStyle(getUrl(config) + "resources/console.css");
+            }
         }
 
         //Request console.io.js file to get connect.sid cookie from the server
@@ -389,19 +422,17 @@ window.InjectIO = (function () {
         }
 
         // Setup RequireJS global error handler
-        if(typeof window.requirejs !== 'undefined'){
-            window.requirejs.onError = function(error){
+        if (typeof window.requirejs !== 'undefined') {
+            window.requirejs.onError = function (error) {
                 console.error(error, error.requireModules, error.originalError);
             };
         }
 
-        if(window.onerror !== onErrorFn){
+        if (window.onerror !== onErrorFn) {
             onErrorHandler = window.onerror
             window.onerror = onErrorFn;
         }
     });
-
-    window.onerror = onErrorFn;
 
     return {
         getUrl: getUrl,

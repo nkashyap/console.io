@@ -46,6 +46,9 @@ ConsoleIO.View.Device.Console.prototype.render = function render(target) {
 };
 
 ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData(data) {
+
+    data.message = unescape(data.message);
+
     var tag = 'code',
         css = data.type,
         stackMessage,

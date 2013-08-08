@@ -86,6 +86,37 @@ if (typeof window.ConsoleIO === "undefined") {
             }
         }()),
 
+        queryParams: function queryParams(url) {
+            var options = {};
+            if (url && url.length > 0) {
+                url = url.replace(/"/igm, "");
+
+                if (url.indexOf('?') > -1) {
+                    url = url.split('?');
+                    options['URL'] = url[0];
+                    url = url[1];
+                }
+
+                this.forEach(url.split('&'), function (param) {
+                    param = param.split('=');
+                    this[param[0]] = param[1];
+                }, options);
+            }
+
+            return options;
+        },
+
+        cookieToJSON: function cookieToJSON(cookies) {
+            var options = {};
+
+            this.forEach(cookies.split('; '), function (cookie) {
+                cookie = cookie.split('=');
+                this[cookie[0]] = cookie[1];
+            }, options);
+
+            return options;
+        },
+
         forEachProperty: function forEachProperty(obj, callback, scope) {
             var prop;
             for (prop in obj) {

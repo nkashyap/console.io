@@ -24,27 +24,68 @@ window.SocketIO = (function () {
 
         init: function init(config) {
             this.config = config;
+
+            /** Fix for old Opera and Maple browsers
+             * to process JSONP requests in a queue
+             */
+            (function overrideJsonPolling(io) {
+                var original = io.Transport["jsonp-polling"].prototype.post;
+
+                io.Transport["jsonp-polling"].prototype.requestQueue = [];
+                io.Transport["jsonp-polling"].prototype.isProcessingQueue = false;
+                io.Transport["jsonp-polling"].prototype.hasOutstandingRequests = false;
+                io.Transport["jsonp-polling"].prototype.postRequest = function postRequest() {
+                    var scope = this;
+                    this.isProcessingQueue = true;
+                    setTimeout(function () {
+                        original.call(scope, scope.requestQueue.shift());
+                    }, 10);
+                };
+                io.Transport["jsonp-polling"].prototype.completePostRequest = function completePostRequest() {
+                    var scope = this;
+                    setTimeout(function () {
+                        scope.socket.setBuffer(false);
+                        scope.hasOutstandingRequests = scope.requestQueue.length > 0;
+                        scope.isProcessingQueue = false;
+                        scope.processPendingRequests();
+                    }, 250);
+                };
+                io.Transport["jsonp-polling"].prototype.processPendingRequests = function processPendingRequests() {
+                    if (this.hasOutstandingRequests && !this.isProcessingQueue) {
+                        this.postRequest();
+                        this.completePostRequest();
+                    }
+                };
+                io.Transport["jsonp-polling"].prototype.post = function (data) {
+                    this.requestQueue.push(data);
+                    this.hasOutstandingRequests = true;
+                    this.processPendingRequests();
+                };
+
+            }(window.io));
+
             this.io = window.io.connect(config.url, {
                 secure: (typeof config.secure === 'boolean' ? config.secure : config.secure == 'true'),
-                resource: config.base + 'socket.io'
+                resource: (config.base || '') + 'socket.io'
             });
 
             // set console.io event
             ConsoleIO.on('console', function (data) {
-                Socket.emit('console', data);
+                Socket.emit('console', {
+                    type: data.type,
+                    message: escape(data.message),
+                    stack: data.stack
+                });
             });
 
-            // Fix for old Opera and Maple browsers
-            (function overrideJsonPolling(io) {
-                var original = io.Transport["jsonp-polling"].prototype.post;
-                io.Transport["jsonp-polling"].prototype.post = function (data) {
-                    var scope = this;
-                    original.call(this, data);
-                    setTimeout(function () {
-                        scope.socket.setBuffer(false);
-                    }, 250);
-                };
-            }(window.io));
+            window.addEventListener("message", function onMessage(event) {
+                var data = event.data;
+                Socket.emit(data.event, {
+                    type: data.type,
+                    message: data.message,
+                    stack: data.stack
+                });
+            }, false);
 
             // set events
             this.io.on('connect', this.onConnect);

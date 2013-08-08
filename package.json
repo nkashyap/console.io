@@ -1,6 +1,6 @@
 {
     "name": "xconsole.io",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "description": "Javascript Remote Web Console",
     "homepage": "http://nkashyap.github.io/console.io/",
     "author": {
@@ -18,7 +18,8 @@
     "dependencies": {
         "express.io": "latest",
         "request": "latest",
-        "redis": ">=0.8.3"
+        "redis": ">=0.8.3",
+        "connect-redis": "latest"
     },
     "main": "./server/main.js",
     "bin": {
