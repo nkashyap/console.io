@@ -96,16 +96,18 @@ Note:
 
 ### Console.IO Web only
 
-You can now use web console only without any need to node server.
+Console.IO now also support web only mode. It allow user to access console logs on the device without need of node server.
 
-to auto inject files include following script in you page
+Include following script in the web page to auto inject files
+
 ```html
     <script type="text/javascript" src="inject.js?web=true&socket=false"></script>
 ```
 
-You can also manually include files in web page
+Files can also be manually included in the web page, steps are given below.
 
 define ConfigIO object to set web only mode
+
 ```html
 window.ConfigIO = {
     socket: false,
@@ -114,7 +116,7 @@ window.ConfigIO = {
 };
 ```
 
-and include following scripts in web page
+and include following scripts in the web page
 
 ```html
     <script type="text/javascript" src="inject.js"></script>
