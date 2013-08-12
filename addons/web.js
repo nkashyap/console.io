@@ -34,10 +34,10 @@ window.WebIO = (function () {
         this.view = new View(this);
 
         // set events
-        if (SocketIO) {
-            SocketIO.on('device:pluginConfig', this.syncConfig, this);
-            SocketIO.on('device:pluginControl', this.syncControl, this);
-            SocketIO.emit('plugin', { name: 'WebIO', enabled: true });
+        if (window.SocketIO) {
+            window.SocketIO.on('device:pluginConfig', this.syncConfig, this);
+            window.SocketIO.on('device:pluginControl', this.syncControl, this);
+            window.SocketIO.emit('plugin', { name: 'WebIO', enabled: true });
         }
     }
 
@@ -46,7 +46,9 @@ window.WebIO = (function () {
     };
 
     Controller.prototype.destroy = function destroy() {
-        SocketIO.emit('plugin', { name: 'WebIO', enabled: false });
+        if (window.SocketIO) {
+            window.SocketIO.emit('plugin', { name: 'WebIO', enabled: false });
+        }
         this.view.destroy();
     };
 
@@ -171,7 +173,8 @@ window.WebIO = (function () {
         this.container = this.createElement({
             attr: {
                 id: 'console-log',
-                'style': styles.join(';')
+                'style': styles.join(';'),
+                tabindex: 1
             },
             target: this.target,
             position: this.ctrl.config.position
@@ -338,7 +341,6 @@ window.WebIO = (function () {
         log = new Controller(config);
         log.render(document.body);
 
-        //Hook into ConsoleIO API
         ConsoleIO.on('console', logConsole);
     }
 

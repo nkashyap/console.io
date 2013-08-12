@@ -52,6 +52,9 @@ window.ConfigIO = {
     //URL to connect back
 	url: 'http://nodeserver:port/',
 
+    // default is true if not defined, No connection will be made to server if set to false
+    socket: true,
+
 	// set it to true to enable WebIO (web console)  (optional)
 	web: true,
 

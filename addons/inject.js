@@ -330,12 +330,11 @@ window.InjectIO = (function () {
                 ready: ready
             });
 
-            //Hook into ConsoleIO API
-            if (window.SocketIO) {
+            if (window.SocketIO && config.socket) {
                 window.SocketIO.init(config);
             }
 
-            if (window.WebIO) {
+            if (window.WebIO && config.web) {
                 window.WebIO.init(config);
             }
 
@@ -360,6 +359,15 @@ window.InjectIO = (function () {
 
     function getUrl(config) {
         return config.url + (config.base ? '/' + config.base : '/');
+    }
+
+    function getConfig(){
+        var config = window.ConfigIO || getServerParams();
+
+        config.socket = config.socket == true || typeof config.socket === 'undefined';
+        config.web = config.web === true || config.web == 'true';
+
+        return config;
     }
 
     function isChildWindow() {
@@ -389,23 +397,25 @@ window.InjectIO = (function () {
         }
         domReady = true;
 
-        var scripts = [],
-            config = typeof window.ConfigIO !== 'undefined' ? window.ConfigIO : getServerParams();
+        var config = getConfig(),
+            scripts = [];
 
         if (!window.ConsoleIO) {
             scripts.push(getUrl(config) + "addons/console.io.js");
         }
 
         if (!isChildWindow()) {
-            if (!window.io) {
-                scripts.push(getUrl(config) + "socket.io/socket.io.js");
+            if(config.socket){
+                if (!window.io) {
+                    scripts.push(getUrl(config) + "socket.io/socket.io.js");
+                }
+
+                if (!window.SocketIO) {
+                    scripts.push(getUrl(config) + "addons/socket.js");
+                }
             }
 
-            if (!window.SocketIO) {
-                scripts.push(getUrl(config) + "addons/socket.js");
-            }
-
-            if (config.web && !window.WebIO) {
+            if (!window.WebIO && config.web) {
                 scripts.push(getUrl(config) + "addons/web.js");
                 requireStyle(getUrl(config) + "resources/console.css");
             }
