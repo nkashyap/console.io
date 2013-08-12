@@ -17,7 +17,7 @@ window.WebIO = (function () {
             queue: []
         };
 
-        this.config = ConsoleIO.extend({
+        this.config = window.ConsoleIO.extend({
             docked: false,
             position: 'bottom',
             height: '300px',
@@ -33,7 +33,6 @@ window.WebIO = (function () {
 
         this.view = new View(this);
 
-        // set events
         if (window.SocketIO) {
             window.SocketIO.on('device:pluginConfig', this.syncConfig, this);
             window.SocketIO.on('device:pluginControl', this.syncControl, this);
@@ -56,8 +55,13 @@ window.WebIO = (function () {
         if (data.clear) {
             this.view.clear();
         } else {
-            this.control.paused = data.paused;
-            this.control.filters = data.filters;
+            if (data.paused) {
+                this.control.paused = data.paused;
+            }
+
+            if (data.filters) {
+                this.control.filters = data.filters;
+            }
 
             if (data.pageSize !== this.control.pageSize) {
                 this.control.pageSize = data.pageSize;
@@ -74,7 +78,7 @@ window.WebIO = (function () {
     };
 
     Controller.prototype.syncConfig = function syncConfig(data) {
-        this.config = ConsoleIO.extend(this.config, data);
+        this.config = window.ConsoleIO.extend(this.config, data);
         this.view.reload();
     };
 
@@ -188,13 +192,13 @@ window.WebIO = (function () {
         }
 
         var element = this.elements[config.tag].cloneNode(false);
-        ConsoleIO.forEachProperty(config.attr, function (value, property) {
+        window.ConsoleIO.forEachProperty(config.attr, function (value, property) {
             if (value) {
                 element.setAttribute(property, value);
             }
         });
 
-        ConsoleIO.forEachProperty(config.prop, function (value, property) {
+        window.ConsoleIO.forEachProperty(config.prop, function (value, property) {
             if (value) {
                 element[property] = value;
             }
@@ -293,7 +297,7 @@ window.WebIO = (function () {
                 store = store.slice(0, this.ctrl.control.pageSize);
             }
 
-            ConsoleIO.forEach(store, function (item) {
+            window.ConsoleIO.forEach(store, function (item) {
                 if (!this.ctrl.isFiltered(item) || !this.ctrl.isSearchFiltered(item)) {
                     return false;
                 }
@@ -341,11 +345,27 @@ window.WebIO = (function () {
         log = new Controller(config);
         log.render(document.body);
 
-        ConsoleIO.on('console', logConsole);
+        var webConfig = {};
+
+        if (config.filters) {
+            webConfig.filters = typeof config.filters === 'string' ? config.filters.split(',') : config.filters;
+        }
+
+        if (config.pageSize) {
+            webConfig.pageSize = config.pageSize;
+        }
+
+        if (config.search) {
+            webConfig.search = config.search;
+        }
+
+        log.syncControl(webConfig);
+
+        window.ConsoleIO.on('console', logConsole);
     }
 
     function destroy() {
-        ConsoleIO.off('console', logConsole);
+        window.ConsoleIO.off('console', logConsole);
         log.destroy();
     }
 
