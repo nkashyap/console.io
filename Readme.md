@@ -59,6 +59,11 @@ window.ConfigIO = {
 	web: true,
 
     // WebIO config (optional)
+	filters: ['log','error'],
+	search: 'test',
+	pageSize: 100,
+
+    // WebIO UI config (optional)
 	docked: false,
     position: 'bottom',
     height: '300px',
@@ -88,6 +93,35 @@ Note:
 * ![Offline icons](https://raw.github.com/nkashyap/console.io/master/app/resources/icons/offline.png) Device is registered but offline.
 * ![Subscribe icons](https://raw.github.com/nkashyap/console.io/master/app/resources/icons/subscribe.gif) Device is subscribed (double click on Online icon to subscribe).
 * ![WebIO icons](https://raw.github.com/nkashyap/console.io/master/app/resources/icons/console.gif) WebIO (web console) icon to enable/disable WebIO remotely.
+
+### Console.IO Web only
+
+You can now use web console only without any need to node server.
+
+to auto inject files include following script in you page
+```html
+    <script type="text/javascript" src="inject.js?web=true&socket=false"></script>
+```
+
+You can also manually include files in web page
+
+define ConfigIO object to set web only mode
+```html
+window.ConfigIO = {
+    socket: false,
+	web: true,
+	....
+};
+```
+
+and include following scripts in web page
+
+```html
+    <script type="text/javascript" src="inject.js"></script>
+    <script type="text/javascript" src="console.js"></script>
+    <script type="text/javascript" src="web.js"></script>
+    <link type="text/css" media="all" href="app/resources/console.css" />
+```
 
 ### Console.IO Editor
 
