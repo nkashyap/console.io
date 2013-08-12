@@ -96,7 +96,7 @@ Note:
 
 ### Console.IO Web only
 
-Console.IO now also support web only mode. It allow user to access console logs on the device without need of node server.
+Console.IO now also support web only mode. It allow user to access console logs on the device without any need of node server.
 
 Include following script in the web page to auto inject files
 
@@ -104,7 +104,7 @@ Include following script in the web page to auto inject files
     <script type="text/javascript" src="inject.js?web=true&socket=false"></script>
 ```
 
-Files can also be manually included in the web page, steps are given below.
+Files can be included manually in the web page as well, steps are given below.
 
 define ConfigIO object to set web only mode
 
