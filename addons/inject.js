@@ -401,7 +401,7 @@ window.InjectIO = (function () {
             scripts = [];
 
         if (!window.ConsoleIO) {
-            scripts.push(getUrl(config) + "addons/console.io.js");
+            scripts.push(getUrl(config) + "addons/console.js");
         }
 
         if (!isChildWindow()) {
