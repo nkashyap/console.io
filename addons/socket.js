@@ -78,14 +78,20 @@ window.SocketIO = (function () {
                 });
             });
 
-            window.addEventListener("message", function onMessage(event) {
+            function onMessage(event) {
                 var data = event.data;
                 Socket.emit(data.event, {
                     type: data.type,
                     message: data.message,
                     stack: data.stack
                 });
-            }, false);
+            }
+
+            if (window.addEventListener) {
+                window.addEventListener("message", onMessage, false);
+            } else if (window.attachEvent) {
+                window.attachEvent('onmessage', onMessage);
+            }
 
             // set events
             this.io.on('connect', this.onConnect);

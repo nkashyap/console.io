@@ -338,7 +338,7 @@ window.InjectIO = (function () {
                 window.WebIO.init(config);
             }
 
-            if (isChildWindow()) {
+            if (!window.SocketIO && isChildWindow()) {
 				if(window.parent.postMessage){
 					ConsoleIO.on('console', function (data) {
 						window.parent.postMessage({
