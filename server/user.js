@@ -48,7 +48,7 @@ User.prototype.subscribe = function subscribe(guid) {
     var device = this.manager.getDeviceByGuid(guid);
     if (!this.isSubscribed(guid)) {
         if (!device) {
-            console.log('Device not found: ' + guid);
+            console.log('Device not found: ', guid);
             return;
         }
         this.deviceGUIDs.push(guid);
@@ -66,7 +66,7 @@ User.prototype.unSubscribe = function unSubscribe(guid) {
     if (index > -1) {
         var device = this.manager.getDeviceByGuid(guid);
         if (!device) {
-            console.log('Device not found: ' + guid);
+            console.log('Device not found: ', guid);
             return;
         }
         this.deviceGUIDs.splice(index, 1);

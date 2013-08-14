@@ -289,32 +289,29 @@ window.WebIO = (function () {
     };
 
     View.prototype.addBatch = function addBatch(store) {
-        var length = store.length;
-        if (length > 0) {
-            var fragment = document.createDocumentFragment();
+        if (store.length > 0) {
+            var count = 0,
+                fragment = document.createDocumentFragment();
 
-            if (this.ctrl.control.pageSize < length) {
-                store = store.slice(0, this.ctrl.control.pageSize);
-            }
+            window.ConsoleIO.every([].concat(store).reverse(), function (item) {
+                if (this.ctrl.isFiltered(item) && this.ctrl.isSearchFiltered(item)) {
+                    var element = this.getElementData(item);
+                    this.createElement({
+                        tag: element.tag,
+                        attr: {
+                            'class': element.className
+                        },
+                        prop: {
+                            innerHTML: element.message
+                        },
+                        target: fragment,
+                        position: 'bottom'
+                    });
 
-            window.ConsoleIO.forEach(store, function (item) {
-                if (!this.ctrl.isFiltered(item) || !this.ctrl.isSearchFiltered(item)) {
-                    return false;
+                    count++;
                 }
 
-                var element = this.getElementData(item);
-                this.createElement({
-                    tag: element.tag,
-                    attr: {
-                        'class': element.className
-                    },
-                    prop: {
-                        innerHTML: element.message
-                    },
-                    target: fragment,
-                    position: 'top'
-                });
-
+                return this.ctrl.control.pageSize > count;
             }, this);
 
             this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);

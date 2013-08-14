@@ -117,32 +117,29 @@ ConsoleIO.View.Device.Console.prototype.add = function add(data) {
 };
 
 ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
-    var length = store.length;
-    if (length > 0) {
-        var fragment = document.createDocumentFragment();
+    if (store.length > 0) {
+        var count = 0,
+            fragment = document.createDocumentFragment();
 
-        if (ConsoleIO.Settings.pageSize.active < length) {
-            store = store.slice(0, ConsoleIO.Settings.pageSize.active);
-        }
+        ConsoleIO.every([].concat(store).reverse(), function (item) {
+            if (this.ctrl.isFiltered(item) && this.ctrl.isSearchFiltered(item)) {
+                var element = this.getElementData(item);
+                ConsoleIO.Service.DHTMLXHelper.createElement({
+                    tag: element.tag,
+                    attr: {
+                        'class': element.className
+                    },
+                    prop: {
+                        innerHTML: element.message
+                    },
+                    target: fragment,
+                    insert: 'bottom'
+                });
 
-        ConsoleIO.forEach(store, function (item) {
-            if (!this.ctrl.isFiltered(item) || !this.ctrl.isSearchFiltered(item)) {
-                return false;
+                count++;
             }
 
-            var element = this.getElementData(item);
-            ConsoleIO.Service.DHTMLXHelper.createElement({
-                tag: element.tag,
-                attr: {
-                    'class': element.className
-                },
-                prop: {
-                    innerHTML: element.message
-                },
-                target: fragment,
-                insert: 'top'
-            });
-
+            return ConsoleIO.Settings.pageSize.active > count;
         }, this);
 
         this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);

@@ -338,17 +338,27 @@ window.InjectIO = (function () {
                 window.WebIO.init(config);
             }
 
-            if (isChildWindow() && window.parent.postMessage) {
-                ConsoleIO.on('console', function (data) {
-                    window.parent.postMessage({
-                        event: 'console',
-                        type: data.type,
-                        message: escape(data.message),
-                        stack: data.stack
-                    }, "*");
-                });
+            if (isChildWindow()) {
+				if(window.parent.postMessage){
+					ConsoleIO.on('console', function (data) {
+						window.parent.postMessage({
+							event: 'console',
+							type: data.type,
+							message: escape(data.message),
+							stack: data.stack
+						}, "*");
+					});
+				}else{
+					console.log('window.parent.postMessage not supported');
+				}
             }
 
+            /**
+             * override samsung maple logging
+             */
+            if (navigator.userAgent.search(/Maple/i) > -1) {
+                window.alert = window.console.info;
+            }
         } else {
             debug("Console.IO dependencies are missing!" +
                 " If you are using inject.js to load dependencies" +
