@@ -11,34 +11,87 @@ window.InjectIO = (function () {
     "use strict";
 
     var domReady = false,
-        onErrorHandler = window.onerror;
+        onErrorHandler = window.onerror,
+        Storage;
 
-    /* COOKIES OBJECT */
-    var Cookies = {
-        // Initialize by splitting the array of Cookies
-        init: function () {
-            ConsoleIO.forEach(document.cookie.split('; '), function (cookie) {
-                var cookiePair = cookie.split('=');
-                this[cookiePair[0]] = cookiePair[1];
-            }, this);
-        },
-        // Create Function: Pass name of cookie, value, and days to expire
-        create: function (name, value, days) {
+    /* Storage OBJECT */
+    Storage = (function () {
+        var memory = {};
+
+        function add(name, value, days, skipLocalStorage) {
             var expires = "";
             if (days) {
                 var date = new Date();
                 date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
                 expires = "; expires=" + date.toGMTString();
             }
+
             document.cookie = name + "=" + value + expires + "; path=/";
-            this[name] = value;
-        },
-        // Erase cookie by name
-        erase: function (name) {
-            this.create(name, '', -1);
-            this[name] = undefined;
+            memory[name] = value;
+
+            if (!skipLocalStorage && window.localStorage) {
+                window.localStorage.setItem(name, value);
+            }
         }
-    };
+
+        function remove(name) {
+            add(name, '', -1, true);
+            delete memory[name];
+            if (window.localStorage) {
+                window.localStorage.removeItem(name);
+            }
+        }
+
+        function get(name) {
+            if (window.localStorage) {
+                return window.localStorage.getItem(name) || memory[name];
+            }
+            return memory[name];
+        }
+
+        function setUp() {
+            var i, cookie, key, value,
+                cookies = document.cookie.split('; '),
+                length = cookies.length;
+
+            for (i = 0; i < length; i++) {
+                cookie = cookies[i].split('=');
+
+                key = cookie[0];
+                value = cookie[1];
+
+                memory[key] = value;
+
+                if (window.localStorage) {
+                    if (!window.localStorage.getItem(key)) {
+                        window.localStorage.setItem(key, value);
+                    }
+                }
+            }
+
+            // override cookie with localstorage value
+            if (window.localStorage) {
+                var guid = window.localStorage.getItem('guid'),
+                    deviceName = window.localStorage.getItem('deviceName');
+
+                if (guid) {
+                    add('guid', guid, 365, true);
+                }
+
+                if (deviceName) {
+                    add('deviceName', deviceName, 365, true);
+                }
+            }
+        }
+
+        return {
+            add: add,
+            remove: remove,
+            get: get,
+            setUp: setUp
+        };
+
+    }());
 
     function getServerParams() {
         var i = 0,
@@ -283,18 +336,15 @@ window.InjectIO = (function () {
 
         // Treat return value as window.onerror itself does,
         // Only do our handling if not suppressed.
-        if (result !== true) {
-            if (typeof window.SocketIO !== 'undefined' && window.SocketIO.isConnected()) {
-                window.SocketIO.emit('console', {
-                    type: 'error',
-                    message: error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo
-                });
-            } else if (isChildWindow()) {
-                console.exception(error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo);
-            } else {
-                debug([error, filePath, lineNo].join("; "));
-            }
-            return false;
+        if (typeof window.SocketIO !== 'undefined' && window.SocketIO.isConnected()) {
+            window.SocketIO.emit('console', {
+                type: 'error',
+                message: error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo
+            });
+        } else if (isChildWindow()) {
+            console.exception(error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo);
+        } else {
+            debug([error, filePath, lineNo].join("; "));
         }
 
         return result;
@@ -318,10 +368,10 @@ window.InjectIO = (function () {
 
     function setUp(config) {
         if (typeof window.ConsoleIO !== 'undefined') {
-            Cookies.init();
+            Storage.setUp();
 
             window.ConsoleIO.extend(window.ConsoleIO, {
-                Cookies: Cookies,
+                Storage: Storage,
                 debug: debug,
                 require: require,
                 requireScript: requireScript,
@@ -339,18 +389,18 @@ window.InjectIO = (function () {
             }
 
             if (!window.SocketIO && isChildWindow()) {
-				if(window.parent.postMessage){
-					ConsoleIO.on('console', function (data) {
-						window.parent.postMessage({
-							event: 'console',
-							type: data.type,
-							message: escape(data.message),
-							stack: data.stack
-						}, "*");
-					});
-				}else{
-					console.log('window.parent.postMessage not supported');
-				}
+                if (window.parent.postMessage) {
+                    ConsoleIO.on('console', function (data) {
+                        window.parent.postMessage({
+                            event: 'console',
+                            type: data.type,
+                            message: escape(data.message),
+                            stack: data.stack
+                        }, "*");
+                    });
+                } else {
+                    console.log('window.parent.postMessage not supported');
+                }
             }
 
             /**
@@ -371,7 +421,7 @@ window.InjectIO = (function () {
         return config.url + (config.base ? '/' + config.base : '/');
     }
 
-    function getConfig(){
+    function getConfig() {
         var config = window.ConfigIO || getServerParams();
 
         config.socket = config.socket == true || typeof config.socket === 'undefined';
@@ -415,7 +465,7 @@ window.InjectIO = (function () {
         }
 
         if (!isChildWindow()) {
-            if(config.socket){
+            if (config.socket) {
                 if (!window.io) {
                     scripts.push(getUrl(config) + "socket.io/socket.io.js");
                 }

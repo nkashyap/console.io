@@ -16,7 +16,7 @@ function User(application, request, manager, restored) {
         return;
     }
 
-    this.guid = this.request.cookies.guid;
+    this.guid = application.getGUIDCookie(this.request);
     this.deviceGUIDs = [];
     this.isOnline = false;
 

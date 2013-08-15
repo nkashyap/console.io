@@ -180,16 +180,25 @@ function main() {
 
         //set GUID cookie handler
         (function setUpCookieHandler(express, app) {
-            var originalHandleRequest = express.io.Manager.prototype.handleRequest;
+            var originalHandleRequest = express.io.Manager.prototype.handleRequest,
+                cookieMapping = [];
 
-            function hasGUIDCookie(document) {
-                var value, cookies;
+            function getGUIDFromSID(sid) {
+                var guid;
+                cookieMapping.every(function (item) {
+                    guid = item.guid;
+                    return item.sid != sid;
+                });
 
-                if (document && document.cookie) {
-                    cookies = document.cookie.split(";");
+                return guid;
+            }
 
+            function getCookie(cookies, name) {
+                var value;
+
+                if (cookies) {
                     cookies.every(function (cookie) {
-                        if ((cookie.substr(0, cookie.indexOf("="))).replace(/^\s+|\s+$/g, "") === 'guid') {
+                        if ((cookie.substr(0, cookie.indexOf("="))).replace(/^\s+|\s+$/g, "") === name) {
                             value = unescape(cookie.substr(cookie.indexOf("=") + 1));
                             return false;
                         }
@@ -200,12 +209,13 @@ function main() {
                 return value;
             }
 
-            function setGUIDCookie(document) {
+            function setGUIDCookie(document, requestHeaders) {
                 var guidCookie,
-                    expiryDate = new Date();
+                    expiryDate = new Date(),
+                    guid = escape(((new Date().getTime()) + "-" + Math.random()).replace(".", ""));
 
                 expiryDate.setDate(expiryDate.getDate() + 365);
-                guidCookie = "guid=" + escape(((new Date().getTime()) + "-" + Math.random()).replace(".", "")) + "; expires=" + expiryDate.toUTCString() + ";";
+                guidCookie = "guid=" + guid + "; expires=" + expiryDate.toUTCString() + ";";
 
                 if (config.domain) {
                     guidCookie += "domain=" + config.domain + "; path=/";
@@ -218,14 +228,44 @@ function main() {
                 } else if (document.headers) {
                     document.headers.cookie = guidCookie;
                 }
+
+                if (requestHeaders && requestHeaders.cookie) {
+                    cookieMapping.push({
+                        guid: guid,
+                        sid: getCookie(requestHeaders.cookie.split(";"), 'connect.sid')
+                    });
+                }
+            }
+
+            function getGUIDCookie(requestHeaders) {
+                if (requestHeaders) {
+                    var guid, sid;
+
+                    if (requestHeaders.cookies) {
+                        guid = requestHeaders.cookies.guid;
+                        sid = requestHeaders.cookies['connect.sid'];
+                    } else if (requestHeaders.cookie) {
+                        var cookies = requestHeaders.cookie.split(";");
+                        guid = getCookie(cookies, 'guid');
+                        sid = getCookie(cookies, 'connect.sid');
+                    }
+
+                    if (!guid && sid) {
+                        guid = getGUIDFromSID(sid);
+                    }
+
+                    return guid;
+                }
             }
 
             express.io.Manager.prototype.handleRequest = function handleRequest(request, response) {
-                if (!hasGUIDCookie(request.headers)) {
-                    setGUIDCookie(response);
+                if (!getGUIDCookie(request.headers)) {
+                    setGUIDCookie(response, request.headers);
                 }
                 originalHandleRequest.call(app.io, request, response);
             };
+
+            app.getGUIDCookie = getGUIDCookie;
 
         }(express, app));
 
