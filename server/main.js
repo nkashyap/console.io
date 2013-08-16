@@ -207,19 +207,21 @@ function main() {
                     return true;
                 });
 
-                console.log(sid, indexOf);
+                console.log(sid, indexOf, newGUID, oldGUID);
 
                 if (indexOf > -1) {
                     cookieMapping.splice(indexOf, 1);
                 }
 
-                cookieMapping.every(function (item) {
-                    if (item.guid == newGUID) {
-                        item.sid = sid;
-                        return false;
-                    }
-                    return true;
-                });
+                if (sid) {
+                    cookieMapping.every(function (item) {
+                        if (item.guid == newGUID) {
+                            item.sid = sid;
+                            return false;
+                        }
+                        return true;
+                    });
+                }
             }
 
             function getCookie(cookies, name) {
