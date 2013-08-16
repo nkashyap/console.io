@@ -18,11 +18,12 @@ function User(application, request, manager, restored) {
 
     this.guid = application.getGUIDCookie(this.request);
     this.deviceGUIDs = [];
-    this.isOnline = false;
+    this.isOnline = true;
 
     this.emit('ready', {
         name: this.guid,
-        guid: this.guid
+        guid: this.guid,
+        subscribed: this.isOnline
     });
 }
 
@@ -89,6 +90,11 @@ User.prototype.online = function online(request) {
         }
     }, this);
 
+    this.emit('online', {
+        name: this.guid,
+        guid: this.guid,
+        subscribed: this.isOnline
+    });
     this.listScripts();
 };
 
@@ -99,6 +105,12 @@ User.prototype.offline = function offline() {
     this.deviceGUIDs.forEach(function (guid) {
         this.request.io.leave(guid);
     }, this);
+
+    this.emit('offline', {
+        name: this.guid,
+        guid: this.guid,
+        subscribed: this.isOnline
+    });
 };
 
 User.prototype.exportHTML = function exportHTML(data) {

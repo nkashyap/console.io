@@ -65,14 +65,12 @@ ConsoleIO.App = function AppController() {
         contextId: 'manager'
     });
 
-    ConsoleIO.Service.Socket.on('user:error', function (data) {
-        console.log('user:error', data);
-    }, this);
-
+    ConsoleIO.Service.Socket.on('connect', this.onConnect, this);
+    ConsoleIO.Service.Socket.on('disconnect', this.onDisconnect, this);
+    ConsoleIO.Service.Socket.on('user:error', this.notify, this);
     ConsoleIO.Service.Socket.on('user:listScripts', this.listScripts, this);
     ConsoleIO.Service.Socket.on('user:scriptContent', this.add, this);
     ConsoleIO.Service.Socket.on('user:scriptSaved', this.scriptSaved, this);
-
 };
 
 ConsoleIO.App.prototype.render = function render() {
@@ -97,6 +95,18 @@ ConsoleIO.App.prototype.scriptSaved = function scriptSaved(file) {
 
 ConsoleIO.App.prototype.add = function add(data) {
     this.editor.add(data);
+};
+
+ConsoleIO.App.prototype.onConnect = function onConnect() {
+    this.view.online();
+};
+
+ConsoleIO.App.prototype.onDisconnect = function onDisconnect() {
+    this.view.offline();
+};
+
+ConsoleIO.App.prototype.notify = function notify() {
+    this.view.notify(arguments);
 };
 
 ConsoleIO.App.prototype.getActiveDeviceGuid = function getActiveDeviceGuid() {
