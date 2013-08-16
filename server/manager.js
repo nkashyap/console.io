@@ -99,7 +99,7 @@ function Manager() {
             deviceReg = devices[guid];
 
         if (!deviceReg && request.data.guid !== 'undefined' && request.data.guid !== guid) {
-            console.log('new guid', guid, request);
+            console.log('new guid', guid, request.data.guid);
             deviceReg = devices[request.data.guid];
             application.update(request.data.guid, guid);
         }
