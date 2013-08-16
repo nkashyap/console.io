@@ -95,10 +95,6 @@ ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData
 };
 
 ConsoleIO.View.Device.Console.prototype.add = function add(data) {
-    if (!this.ctrl.isFiltered(data) || !this.ctrl.isSearchFiltered(data)) {
-        return false;
-    }
-
     var element = this.getElementData(data);
 
     ConsoleIO.Service.DHTMLXHelper.createElement({
@@ -118,28 +114,21 @@ ConsoleIO.View.Device.Console.prototype.add = function add(data) {
 
 ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
     if (store.length > 0) {
-        var count = 0,
-            fragment = document.createDocumentFragment();
+        var fragment = document.createDocumentFragment();
 
-        ConsoleIO.every([].concat(store).reverse(), function (item) {
-            if (this.ctrl.isFiltered(item) && this.ctrl.isSearchFiltered(item)) {
-                var element = this.getElementData(item);
-                ConsoleIO.Service.DHTMLXHelper.createElement({
-                    tag: element.tag,
-                    attr: {
-                        'class': element.className
-                    },
-                    prop: {
-                        innerHTML: element.message
-                    },
-                    target: fragment,
-                    insert: 'bottom'
-                });
-
-                count++;
-            }
-
-            return ConsoleIO.Settings.pageSize.active > count;
+        ConsoleIO.forEach(store, function (item) {
+            var element = this.getElementData(item);
+            ConsoleIO.Service.DHTMLXHelper.createElement({
+                tag: element.tag,
+                attr: {
+                    'class': element.className
+                },
+                prop: {
+                    innerHTML: element.message
+                },
+                target: fragment,
+                insert: 'bottom'
+            });
         }, this);
 
         this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);

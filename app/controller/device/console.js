@@ -54,9 +54,30 @@ ConsoleIO.App.Device.Console.prototype.activate = function activate(state) {
     this.addBatch();
 };
 
+ConsoleIO.App.Device.Console.prototype.getData = function getData(store) {
+    var count = 0, dataStore = [];
+    if (store.length > 0) {
+        ConsoleIO.every([].concat(store).reverse(), function (item) {
+            if (this.isFiltered(item) && this.isSearchFiltered(item)) {
+                dataStore.push(item);
+                count++;
+            }
+
+            return ConsoleIO.Settings.pageSize.active > count;
+        }, this);
+    }
+
+    return dataStore;
+};
+
 ConsoleIO.App.Device.Console.prototype.add = function add(data) {
     if (this.active && !this.paused) {
         this.store.added.push(data);
+
+        if (!this.isFiltered(data) || !this.isSearchFiltered(data)) {
+            return false;
+        }
+
         this.view.add(data);
     } else {
         this.store.queue.push(data);
@@ -65,7 +86,7 @@ ConsoleIO.App.Device.Console.prototype.add = function add(data) {
 
 ConsoleIO.App.Device.Console.prototype.addBatch = function addBatch() {
     if (this.active && !this.paused) {
-        this.view.addBatch(this.store.queue);
+        this.view.addBatch(this.getData(this.store.queue));
         this.store.added = this.store.added.concat(this.store.queue);
         this.store.queue = [];
     }
@@ -81,7 +102,7 @@ ConsoleIO.App.Device.Console.prototype.applySearch = function applySearch(value)
         }
     }
     this.view.clear();
-    this.view.addBatch(this.store.added);
+    this.view.addBatch(this.getData(this.store.added));
 };
 
 ConsoleIO.App.Device.Console.prototype.isSearchFiltered = function isSearchFiltered(data) {
@@ -95,7 +116,7 @@ ConsoleIO.App.Device.Console.prototype.isFiltered = function isFiltered(data) {
 ConsoleIO.App.Device.Console.prototype.onPageSizeChanged = function onPageSizeChanged(btnId) {
     ConsoleIO.Settings.pageSize.active = btnId.split("-")[1];
     this.view.clear();
-    this.view.addBatch(this.store.added);
+    this.view.addBatch(this.getData(this.store.added));
 };
 
 ConsoleIO.App.Device.Console.prototype.onFilterChanged = function onFilterChanged(btnId, state) {
@@ -109,7 +130,7 @@ ConsoleIO.App.Device.Console.prototype.onFilterChanged = function onFilterChange
     }
 
     this.view.clear();
-    this.view.addBatch(this.store.added);
+    this.view.addBatch(this.getData(this.store.added));
 };
 
 ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(btnId, state) {
