@@ -55,11 +55,11 @@ window.WebIO = (function () {
         if (data.clear) {
             this.view.clear();
         } else {
-            if (data.paused) {
+            if (typeof data.paused !== 'undefined') {
                 this.control.paused = data.paused;
             }
 
-            if (data.filters) {
+            if (typeof data.filters !== 'undefined') {
                 this.control.filters = data.filters;
             }
 
@@ -72,7 +72,7 @@ window.WebIO = (function () {
             }
 
             this.view.clear();
-            this.view.addBatch(this.store.added);
+            this.view.addBatch(this.getData(this.store.added));
             this.addBatch();
         }
     };
@@ -80,6 +80,22 @@ window.WebIO = (function () {
     Controller.prototype.syncConfig = function syncConfig(data) {
         this.config = window.ConsoleIO.extend(this.config, data);
         this.view.reload();
+    };
+
+    Controller.prototype.getData = function getData(store) {
+        var count = 0, dataStore = [];
+        if (store.length > 0) {
+            window.ConsoleIO.every([].concat(store).reverse(), function (item) {
+                if (this.isFiltered(item) && this.isSearchFiltered(item)) {
+                    dataStore.push(item);
+                    count++;
+                }
+
+                return this.control.pageSize > count;
+            }, this);
+        }
+
+        return dataStore;
     };
 
     Controller.prototype.add = function add(data) {
@@ -93,7 +109,7 @@ window.WebIO = (function () {
 
     Controller.prototype.addBatch = function addBatch() {
         if (!this.control.paused) {
-            this.view.addBatch(this.store.queue);
+            this.view.addBatch(this.getData(this.store.queue));
             this.store.added = this.store.added.concat(this.store.queue);
             this.store.queue = [];
         }
@@ -290,28 +306,21 @@ window.WebIO = (function () {
 
     View.prototype.addBatch = function addBatch(store) {
         if (store.length > 0) {
-            var count = 0,
-                fragment = document.createDocumentFragment();
+            var fragment = document.createDocumentFragment();
 
-            window.ConsoleIO.every([].concat(store).reverse(), function (item) {
-                if (this.ctrl.isFiltered(item) && this.ctrl.isSearchFiltered(item)) {
-                    var element = this.getElementData(item);
-                    this.createElement({
-                        tag: element.tag,
-                        attr: {
-                            'class': element.className
-                        },
-                        prop: {
-                            innerHTML: element.message
-                        },
-                        target: fragment,
-                        position: 'bottom'
-                    });
-
-                    count++;
-                }
-
-                return this.ctrl.control.pageSize > count;
+            window.ConsoleIO.forEach(store, function (item) {
+                var element = this.getElementData(item);
+                this.createElement({
+                    tag: element.tag,
+                    attr: {
+                        'class': element.className
+                    },
+                    prop: {
+                        innerHTML: element.message
+                    },
+                    target: fragment,
+                    position: 'bottom'
+                });
             }, this);
 
             this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);
@@ -344,15 +353,14 @@ window.WebIO = (function () {
 
         var webConfig = {};
 
-        if (config.filters) {
+        if (typeof config.filters !== 'undefined') {
             webConfig.filters = typeof config.filters === 'string' ? config.filters.split(',') : config.filters;
         }
-
-        if (config.pageSize) {
+        if (typeof config.pageSize !== 'undefined') {
             webConfig.pageSize = config.pageSize;
         }
 
-        if (config.search) {
+        if (typeof config.search !== 'undefined') {
             webConfig.search = config.search;
         }
 
