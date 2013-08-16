@@ -98,6 +98,12 @@ function Manager() {
         var guid = application.getGUIDCookie(request),
             deviceReg = devices[guid];
 
+        if (!deviceReg && request.data.guid !== guid) {
+            console.log('new guid', guid);
+            deviceReg = devices[request.data.guid];
+            application.update(request.data.guid, guid);
+        }
+
         if (!deviceReg) {
             deviceReg = new Device(application, request, manage);
             devices[guid] = deviceReg;

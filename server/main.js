@@ -193,6 +193,35 @@ function main() {
                 return guid;
             }
 
+            function update(newGUID, oldGUID) {
+
+                var sid, indexOf = -1;
+
+                cookieMapping.every(function (item, index) {
+                    if (item.guid == oldGUID) {
+                        indexOf = index;
+                        sid = item.sid;
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                console.log(sid, indexOf);
+
+                if (indexOf > -1) {
+                    cookieMapping.splice(indexOf, 1);
+                }
+
+                cookieMapping.every(function (item) {
+                    if (item.guid == newGUID) {
+                        item.sid = sid;
+                        return false;
+                    }
+                    return true;
+                });
+            }
+
             function getCookie(cookies, name) {
                 var value;
 
@@ -266,6 +295,7 @@ function main() {
             };
 
             app.getGUIDCookie = getGUIDCookie;
+            app.update = update;
 
         }(express, app));
 

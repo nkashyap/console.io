@@ -172,6 +172,8 @@ window.SocketIO = (function () {
 
             var navigator = window.navigator;
             Socket.emit('setUp', {
+                guid: ConsoleIO.Storage.get('guid'),
+                deviceName: ConsoleIO.Storage.get('deviceName'),
                 userAgent: navigator.userAgent,
                 appVersion: navigator.appVersion,
                 vendor: navigator.vendor,
@@ -229,7 +231,9 @@ window.SocketIO = (function () {
         },
 
         onOnline: function onOnline(data) {
-            if (!Socket.guid) {
+            if (!Socket.guid || data.guid !== Socket.guid) {
+                ConsoleIO.Storage.add("deviceName", data.name, 365);
+                ConsoleIO.Storage.add("guid", data.guid, 365);
                 Socket.name = data.name;
                 Socket.guid = data.guid;
                 showName(data.name + '|' + data.guid);
