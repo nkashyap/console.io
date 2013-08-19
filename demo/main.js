@@ -48,7 +48,7 @@ function init() {
             currentIndex = 0;
         }
 
-        if (SocketIO) {
+        if (window.SocketIO) {
             var info = [
                 "Name: " + SocketIO.name,
                 "guid: " + SocketIO.guid,

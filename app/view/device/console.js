@@ -95,10 +95,6 @@ ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData
 };
 
 ConsoleIO.View.Device.Console.prototype.add = function add(data) {
-    if (!this.ctrl.isFiltered(data) || !this.ctrl.isSearchFiltered(data)) {
-        return false;
-    }
-
     var element = this.getElementData(data);
 
     ConsoleIO.Service.DHTMLXHelper.createElement({
@@ -117,19 +113,10 @@ ConsoleIO.View.Device.Console.prototype.add = function add(data) {
 };
 
 ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
-    var length = store.length;
-    if (length > 0) {
+    if (store.length > 0) {
         var fragment = document.createDocumentFragment();
 
-        if (ConsoleIO.Settings.pageSize.active < length) {
-            store = store.slice(0, ConsoleIO.Settings.pageSize.active);
-        }
-
         ConsoleIO.forEach(store, function (item) {
-            if (!this.ctrl.isFiltered(item) || !this.ctrl.isSearchFiltered(item)) {
-                return false;
-            }
-
             var element = this.getElementData(item);
             ConsoleIO.Service.DHTMLXHelper.createElement({
                 tag: element.tag,
@@ -140,9 +127,8 @@ ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
                     innerHTML: element.message
                 },
                 target: fragment,
-                insert: 'top'
+                insert: 'bottom'
             });
-
         }, this);
 
         this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);

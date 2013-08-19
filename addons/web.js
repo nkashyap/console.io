@@ -17,7 +17,7 @@ window.WebIO = (function () {
             queue: []
         };
 
-        this.config = ConsoleIO.extend({
+        this.config = window.ConsoleIO.extend({
             docked: false,
             position: 'bottom',
             height: '300px',
@@ -33,11 +33,10 @@ window.WebIO = (function () {
 
         this.view = new View(this);
 
-        // set events
-        if (SocketIO) {
-            SocketIO.on('device:pluginConfig', this.syncConfig, this);
-            SocketIO.on('device:pluginControl', this.syncControl, this);
-            SocketIO.emit('plugin', { name: 'WebIO', enabled: true });
+        if (window.SocketIO) {
+            window.SocketIO.on('device:pluginConfig', this.syncConfig, this);
+            window.SocketIO.on('device:pluginControl', this.syncControl, this);
+            window.SocketIO.emit('plugin', { name: 'WebIO', enabled: true });
         }
     }
 
@@ -46,7 +45,9 @@ window.WebIO = (function () {
     };
 
     Controller.prototype.destroy = function destroy() {
-        SocketIO.emit('plugin', { name: 'WebIO', enabled: false });
+        if (window.SocketIO) {
+            window.SocketIO.emit('plugin', { name: 'WebIO', enabled: false });
+        }
         this.view.destroy();
     };
 
@@ -54,8 +55,13 @@ window.WebIO = (function () {
         if (data.clear) {
             this.view.clear();
         } else {
-            this.control.paused = data.paused;
-            this.control.filters = data.filters;
+            if (typeof data.paused !== 'undefined') {
+                this.control.paused = data.paused;
+            }
+
+            if (typeof data.filters !== 'undefined') {
+                this.control.filters = data.filters;
+            }
 
             if (data.pageSize !== this.control.pageSize) {
                 this.control.pageSize = data.pageSize;
@@ -66,14 +72,30 @@ window.WebIO = (function () {
             }
 
             this.view.clear();
-            this.view.addBatch(this.store.added);
+            this.view.addBatch(this.getData(this.store.added));
             this.addBatch();
         }
     };
 
     Controller.prototype.syncConfig = function syncConfig(data) {
-        this.config = ConsoleIO.extend(this.config, data);
+        this.config = window.ConsoleIO.extend(this.config, data);
         this.view.reload();
+    };
+
+    Controller.prototype.getData = function getData(store) {
+        var count = 0, dataStore = [];
+        if (store.length > 0) {
+            window.ConsoleIO.every([].concat(store).reverse(), function (item) {
+                if (this.isFiltered(item) && this.isSearchFiltered(item)) {
+                    dataStore.push(item);
+                    count++;
+                }
+
+                return this.control.pageSize > count;
+            }, this);
+        }
+
+        return dataStore;
     };
 
     Controller.prototype.add = function add(data) {
@@ -87,7 +109,7 @@ window.WebIO = (function () {
 
     Controller.prototype.addBatch = function addBatch() {
         if (!this.control.paused) {
-            this.view.addBatch(this.store.queue);
+            this.view.addBatch(this.getData(this.store.queue));
             this.store.added = this.store.added.concat(this.store.queue);
             this.store.queue = [];
         }
@@ -171,7 +193,8 @@ window.WebIO = (function () {
         this.container = this.createElement({
             attr: {
                 id: 'console-log',
-                'style': styles.join(';')
+                'style': styles.join(';'),
+                tabindex: 1
             },
             target: this.target,
             position: this.ctrl.config.position
@@ -185,13 +208,13 @@ window.WebIO = (function () {
         }
 
         var element = this.elements[config.tag].cloneNode(false);
-        ConsoleIO.forEachProperty(config.attr, function (value, property) {
+        window.ConsoleIO.forEachProperty(config.attr, function (value, property) {
             if (value) {
                 element.setAttribute(property, value);
             }
         });
 
-        ConsoleIO.forEachProperty(config.prop, function (value, property) {
+        window.ConsoleIO.forEachProperty(config.prop, function (value, property) {
             if (value) {
                 element[property] = value;
             }
@@ -282,19 +305,10 @@ window.WebIO = (function () {
     };
 
     View.prototype.addBatch = function addBatch(store) {
-        var length = store.length;
-        if (length > 0) {
+        if (store.length > 0) {
             var fragment = document.createDocumentFragment();
 
-            if (this.ctrl.control.pageSize < length) {
-                store = store.slice(0, this.ctrl.control.pageSize);
-            }
-
-            ConsoleIO.forEach(store, function (item) {
-                if (!this.ctrl.isFiltered(item) || !this.ctrl.isSearchFiltered(item)) {
-                    return false;
-                }
-
+            window.ConsoleIO.forEach(store, function (item) {
                 var element = this.getElementData(item);
                 this.createElement({
                     tag: element.tag,
@@ -305,9 +319,8 @@ window.WebIO = (function () {
                         innerHTML: element.message
                     },
                     target: fragment,
-                    position: 'top'
+                    position: 'bottom'
                 });
-
             }, this);
 
             this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);
@@ -338,12 +351,26 @@ window.WebIO = (function () {
         log = new Controller(config);
         log.render(document.body);
 
-        //Hook into ConsoleIO API
-        ConsoleIO.on('console', logConsole);
+        var webConfig = {};
+
+        if (typeof config.filters !== 'undefined') {
+            webConfig.filters = typeof config.filters === 'string' ? config.filters.split(',') : config.filters;
+        }
+        if (typeof config.pageSize !== 'undefined') {
+            webConfig.pageSize = config.pageSize;
+        }
+
+        if (typeof config.search !== 'undefined') {
+            webConfig.search = config.search;
+        }
+
+        log.syncControl(webConfig);
+
+        window.ConsoleIO.on('console', logConsole);
     }
 
     function destroy() {
-        ConsoleIO.off('console', logConsole);
+        window.ConsoleIO.off('console', logConsole);
         log.destroy();
     }
 

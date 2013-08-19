@@ -52,7 +52,7 @@ function Device(application, request, manager, restored) {
      * @member {string} guid
      * @public
      */
-    this.guid = this.request.cookies.guid;
+    this.guid = application.getGUIDCookie(this.request);
 
     /**
      * When user explicitly set device name, it is stored as a cookie on client device
@@ -281,7 +281,7 @@ Device.prototype.command = function command(name, data) {
      * @type {object}
      */
     this.broadcast(name + ':' + this.guid, data);
-    console.log(name + ':' + this.guid, data.type || data);
+    console.log(name + ':' + this.guid, data.type);
 };
 
 /**

@@ -49,6 +49,27 @@ window.ConsoleIO = (function () {
             return Array.prototype.slice.call(data);
         },
 
+        every: (function () {
+            if (Array.prototype.every) {
+                return function (array, callback, scope) {
+                    return (array || []).every(callback, scope);
+                };
+            } else {
+                return function (array, callback, scope) {
+                    array = array || [];
+                    var i = 0, length = array.length;
+                    if (length) {
+                        do {
+                            if (!callback.call(scope || array, array[i], i, array)) {
+                                return false;
+                            }
+                        } while (++i < length);
+                    }
+                    return true;
+                };
+            }
+        }()),
+
         forEach: (function () {
             if (Array.prototype.forEach) {
                 return function (array, callback, scope) {

@@ -16,13 +16,14 @@ function User(application, request, manager, restored) {
         return;
     }
 
-    this.guid = this.request.cookies.guid;
+    this.guid = application.getGUIDCookie(this.request);
     this.deviceGUIDs = [];
-    this.isOnline = false;
+    this.isOnline = true;
 
     this.emit('ready', {
         name: this.guid,
-        guid: this.guid
+        guid: this.guid,
+        subscribed: this.isOnline
     });
 }
 
@@ -48,7 +49,7 @@ User.prototype.subscribe = function subscribe(guid) {
     var device = this.manager.getDeviceByGuid(guid);
     if (!this.isSubscribed(guid)) {
         if (!device) {
-            console.log('Device not found: ' + guid);
+            console.log('Device not found: ', guid);
             return;
         }
         this.deviceGUIDs.push(guid);
@@ -66,7 +67,7 @@ User.prototype.unSubscribe = function unSubscribe(guid) {
     if (index > -1) {
         var device = this.manager.getDeviceByGuid(guid);
         if (!device) {
-            console.log('Device not found: ' + guid);
+            console.log('Device not found: ', guid);
             return;
         }
         this.deviceGUIDs.splice(index, 1);
@@ -89,6 +90,11 @@ User.prototype.online = function online(request) {
         }
     }, this);
 
+    this.emit('online', {
+        name: this.guid,
+        guid: this.guid,
+        subscribed: this.isOnline
+    });
     this.listScripts();
 };
 
@@ -99,6 +105,12 @@ User.prototype.offline = function offline() {
     this.deviceGUIDs.forEach(function (guid) {
         this.request.io.leave(guid);
     }, this);
+
+    this.emit('offline', {
+        name: this.guid,
+        guid: this.guid,
+        subscribed: this.isOnline
+    });
 };
 
 User.prototype.exportHTML = function exportHTML(data) {

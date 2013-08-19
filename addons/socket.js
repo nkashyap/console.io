@@ -78,14 +78,20 @@ window.SocketIO = (function () {
                 });
             });
 
-            window.addEventListener("message", function onMessage(event) {
+            function onMessage(event) {
                 var data = event.data;
                 Socket.emit(data.event, {
                     type: data.type,
                     message: data.message,
                     stack: data.stack
                 });
-            }, false);
+            }
+
+            if (window.addEventListener) {
+                window.addEventListener("message", onMessage, false);
+            } else if (window.attachEvent) {
+                window.attachEvent('onmessage', onMessage);
+            }
 
             // set events
             this.io.on('connect', this.onConnect);
@@ -166,6 +172,8 @@ window.SocketIO = (function () {
 
             var navigator = window.navigator;
             Socket.emit('setUp', {
+                guid: ConsoleIO.Storage.get('guid'),
+                deviceName: ConsoleIO.Storage.get('deviceName'),
                 userAgent: navigator.userAgent,
                 appVersion: navigator.appVersion,
                 vendor: navigator.vendor,
@@ -214,7 +222,8 @@ window.SocketIO = (function () {
             Socket.name = data.name;
             Socket.guid = data.guid;
 
-            ConsoleIO.Cookies.create("deviceName", data.name, 365);
+            ConsoleIO.Storage.add("deviceName", data.name, 365);
+            ConsoleIO.Storage.add("guid", data.guid, 365);
             showName(data.name + '|' + data.guid);
             console.log('Ready', Socket.name);
 
@@ -222,7 +231,9 @@ window.SocketIO = (function () {
         },
 
         onOnline: function onOnline(data) {
-            if (!Socket.guid) {
+            if (!Socket.guid || data.guid !== Socket.guid) {
+                ConsoleIO.Storage.add("deviceName", data.name, 365);
+                ConsoleIO.Storage.add("guid", data.guid, 365);
                 Socket.name = data.name;
                 Socket.guid = data.guid;
                 showName(data.name + '|' + data.guid);
@@ -252,11 +263,11 @@ window.SocketIO = (function () {
 
         onName: function onName(data) {
             if (!data.name) {
-                ConsoleIO.Cookies.erase('deviceName');
+                ConsoleIO.Storage.remove('deviceName');
             }
 
             Socket.name = data.name;
-            ConsoleIO.Cookies.create('deviceName', Socket.name, 365);
+            ConsoleIO.Storage.add('deviceName', Socket.name, 365);
             document.getElementById("device-style").parentNode.removeChild(document.getElementById("device-style"));
             showName(data.name + '|' + data.guid);
         },

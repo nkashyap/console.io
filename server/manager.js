@@ -37,32 +37,31 @@ function Manager() {
 
     function emit(name, data) {
         application.io.sockets.emit(name, data);
-        //console.log('application.emit', name);
     }
 
     function broadcast(room, name, data) {
         application.io.room(room).broadcast(name, data);
-        //console.log('application.broadcast', room, name);
     }
 
     function defineRouteHandler(list, name) {
         return function (request) {
-            var reference = list[request.cookies.guid];
+            var guid = application.getGUIDCookie(request),
+                reference = list[guid];
+
             if (reference && reference[name]) {
                 reference[name](request.data);
             }
-
-            //console.log('defineRouteHandler', reference.guid, name);
         };
     }
 
     function defineDeviceCommandRouteHandler(property, name) {
         return function (request) {
-            var device = devices[request.cookies.guid];
+            var guid = application.getGUIDCookie(request),
+                device = devices[guid];
+
             if (device && device[property]) {
                 device[property](name, request.data);
             }
-            //console.log('defineDeviceCommandRouteHandler', device ? device.guid : 'undefined', name, property);
         };
     }
 
@@ -72,13 +71,13 @@ function Manager() {
             if (device) {
                 device.emit(command, property === true ? request.data : property ? request.data[property] : null);
             }
-
-            //console.log('defineUserCommandRouteHandler', device.guid, command);
         };
     }
 
     function notifyRegisteredDevicesToUser(request) {
-        var userReg = users[request.cookies.guid];
+        var guid = application.getGUIDCookie(request),
+            userReg = users[guid];
+
         if (userReg) {
             forEach(devices, function (device) {
                 var deviceConfig = device.getInformation();
@@ -87,46 +86,51 @@ function Manager() {
                 }));
             });
         }
-
-        //console.log('notifyRegisteredDevicesToUser', userReg.guid);
     }
 
     function changeDeviceName(request) {
         var device = getDeviceByGuid(request.data.guid);
         device.setName(request.data);
         emit('device:registered', device.getInformation());
-
-        //console.log('changeDeviceName', device.guid, device.name);
     }
 
     function registerDevice(request) {
-        var deviceReg = devices[request.cookies.guid];
+        var guid = application.getGUIDCookie(request),
+            deviceReg = devices[guid];
+
+        if (!deviceReg && request.data.guid !== 'undefined' && request.data.guid !== guid) {
+            console.log('new guid', guid, request.data.guid);
+            deviceReg = devices[request.data.guid];
+            application.update(request.data.guid, guid);
+        }
+
         if (!deviceReg) {
             deviceReg = new Device(application, request, manage);
-            devices[request.cookies.guid] = deviceReg;
+            devices[guid] = deviceReg;
             emit('device:registered', deviceReg.getInformation());
         }
 
         deviceReg.online(request);
-
-        //console.log('registerDevice', deviceReg.guid);
     }
 
     function registerUser(request) {
-        var userReg = users[request.cookies.guid];
+        var guid = application.getGUIDCookie(request),
+            userReg = users[guid];
+
         if (!userReg) {
             userReg = new User(application, request, manage);
-            users[request.cookies.guid] = userReg;
+            users[guid] = userReg;
         }
 
         userReg.online(request);
-        //console.log('registerUser', userReg.guid);
 
         notifyRegisteredDevicesToUser(request);
     }
 
     function disconnect(request) {
-        var client = devices[request.cookies.guid] || users[request.cookies.guid];
+        var guid = application.getGUIDCookie(request),
+            client = devices[guid] || users[guid];
+
         if (client) {
             client.offline();
         }
@@ -137,7 +141,6 @@ function Manager() {
     function getDeviceByGuid(guid) {
         var device;
         Object.getOwnPropertyNames(devices).every(function (name) {
-            //console.log('getDeviceByGuid', devices[name].guid, guid);
             if (devices[name].guid == guid) {
                 device = devices[name];
                 return false;
@@ -147,6 +150,8 @@ function Manager() {
 
         return device;
     }
+
+
 
 
     /** extend manage object with methods for child objects **/

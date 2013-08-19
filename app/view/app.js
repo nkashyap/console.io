@@ -12,6 +12,7 @@ ConsoleIO.View.App = function AppView(ctrl, model) {
     this.ctrl = ctrl;
     this.model = model;
     this.layout = null;
+    this.statusBar = null;
 };
 
 ConsoleIO.View.App.prototype.render = function render() {
@@ -24,12 +25,34 @@ ConsoleIO.View.App.prototype.render = function render() {
 
     this.layout.setSizes();
     this.layout.setEffect("resize", true);
-    this.layout.attachStatusBar().setText(this.model.status);
+
+    this.statusBar = this.layout.attachStatusBar();
+
+    this.offline();
 };
 
 ConsoleIO.View.App.prototype.getContextById = function getContextById(contextId) {
     return this.layout ? this.layout.cells(contextId) : null;
 };
+
+ConsoleIO.View.App.prototype.online = function online() {
+    var icon = '<img src="' + ConsoleIO.Settings.iconPath + 'online.png" class="status">';
+    this.statusBar.setText(icon + this.model.status);
+};
+
+ConsoleIO.View.App.prototype.offline = function offline() {
+    var icon = '<img src="' + ConsoleIO.Settings.iconPath + 'offline.png" class="status">';
+    this.statusBar.setText(icon + this.model.status);
+};
+
+ConsoleIO.View.App.prototype.notify = function notify(data) {
+    console.log(data);
+};
+
+ConsoleIO.View.App.prototype.getContextById = function getContextById(contextId) {
+    return this.layout ? this.layout.cells(contextId) : null;
+};
+
 
 ConsoleIO.View.App.prototype.setTitle = function setTitle(contextId, title) {
     if (this.layout) {
