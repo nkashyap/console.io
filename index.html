@@ -96,10 +96,18 @@ node ./server/main.js
     //URL to connect back
     url: 'http://nodeserver:port/',
 
+    // default is true if not defined, No connection will be made to server if set to false
+    socket: true,
+
     // set it to true to enable WebIO (web console)  (optional)
     web: true,
 
     // WebIO config (optional)
+    filters: ['log','error'],
+    search: 'test',
+    pageSize: 100,
+
+    // WebIO UI config (optional)
     docked: false,
     position: 'bottom',
     height: '300px',
@@ -135,6 +143,35 @@ node ./server/main.js
 <li>
 <img src="https://raw.github.com/nkashyap/console.io/master/app/resources/icons/console.gif" alt="WebIO icons"> WebIO (web console) icon to enable/disable WebIO remotely.</li>
 </ul><h3>
+<a name="consoleio-web-only" class="anchor" href="#consoleio-web-only"><span class="octicon octicon-link"></span></a>Console.IO Web only</h3>
+
+<p>Console.IO now also support web only mode. It allow user to access console logs on the device without any need of node server.</p>
+
+<p>Include following script in the web page to auto inject files</p>
+
+<div class="highlight"><pre>    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js?web=true&amp;socket=false"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</pre></div>
+
+<p>Files can be included manually in the web page as well, steps are given below.</p>
+
+<p>define ConfigIO object to set web only mode</p>
+
+<div class="highlight"><pre>window.ConfigIO = {
+    socket: false,
+    web: true,
+    ....
+};
+</pre></div>
+
+<p>and include following scripts in the web page</p>
+
+<div class="highlight"><pre>    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"console.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"web.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+    <span class="nt">&lt;link</span> <span class="na">type=</span><span class="s">"text/css"</span> <span class="na">media=</span><span class="s">"all"</span> <span class="na">href=</span><span class="s">"app/resources/console.css"</span> <span class="nt">/&gt;</span>
+</pre></div>
+
+<h3>
 <a name="consoleio-editor" class="anchor" href="#consoleio-editor"><span class="octicon octicon-link"></span></a>Console.IO Editor</h3>
 
 <p>You can execute commands on remote client from Console.IO. You can execute single &amp; multilines javascript code.</p>
