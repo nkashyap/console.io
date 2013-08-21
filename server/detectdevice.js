@@ -19,11 +19,12 @@ var detectDevice = {
      * @return {object} object with browser name, version, manufacture and platform
      */
     get: function get(config) {
+
         var store = this.getStore(config),
-            browser = this.getIdentity(store.browser),
-            version = this.getIdentity(store.version) || this.getVersion(store.version),
-            platform = this.getIdentity(store.platform),
-            manufacture = this.getIdentity(store.manufacture);
+            browser = this.getIdentity(store.browser) || 'Unknown',
+            version = this.getIdentity(store.version) || this.getVersion(store.version) || 'Unknown',
+            platform = this.getIdentity(store.platform) || 'Unknown',
+            manufacture = this.getIdentity(store.manufacture) || 'Unknown';
 
         return {
             browser: browser,
@@ -136,7 +137,7 @@ var detectDevice = {
                 {  platform: config.platform, search: /\biPod\b/i, identity: "Media" },
 
                 {  userAgent: config.userAgent, search: /\bSTB|NetCast.Media|Technika Media Streamer|TechnikaTK500SDTR212\b/i, identity: "STB" },
-                {  userAgent: config.userAgent, search: /\bTV|NETTV|SmartHub|SmartTV|Technika22|Maple|DTV_[a-z0-9]+\b/i, identity: "TV" },
+                {  userAgent: config.userAgent, search: /\bTV|Viera|QtEmbedded|NETTV|SmartHub|SmartTV|Technika22|Maple|DTV_[a-z0-9]+\b/i, identity: "TV" },
                 {  userAgent: config.userAgent, search: /\bAndroid.*Chrome\/[.0-9]* Mobile/i, identity: "Mobile" },
                 {  userAgent: config.userAgent, search: /\bAndroid.*Chrome\/[.0-9]* (?!Mobile)/i, identity: "Tablet" },
                 {  userAgent: config.userAgent, search: /\bGT-P1000\b/i, identity: "Tablet" },
@@ -151,13 +152,14 @@ var detectDevice = {
                 {  userAgent: config.userAgent, search: /\bLGE\b/i, identity: "LG" },
                 {  userAgent: config.userAgent, search: /\bPhilips\b/i, identity: "Philips" },
                 {  userAgent: config.userAgent, search: /\bSmartHub|Samsung|Maple\b/i, identity: "Samsung" },
-                {  userAgent: config.userAgent, search: /\bToshiba\b/i, identity: "Toshiba" },
+                {  userAgent: config.userAgent, search: /\bToshiba|QtEmbedded\b/i, identity: "Toshiba" },
                 {  userAgent: config.userAgent, search: /\bTesco\b/i, identity: "Tesco" },
                 {  userAgent: config.userAgent, search: /\bPlaystation\b/i, identity: "Sony" },
                 {  userAgent: config.userAgent, search: /\bMSIE\b/i, identity: "Microsoft" },
                 {  userAgent: config.userAgent, search: /\bFirefox\b/i, identity: "Mozilla" },
                 {  userAgent: config.userAgent, search: /\bAndroid\b/i, identity: "Android" },
 
+                {  vendor: config.vendor, search: /\bPanasonic\b/i, identity: "Panasonic" },
                 {  vendor: config.vendor, search: /\bGoogle\b/i, identity: "Google" },
                 {  vendor: config.vendor, search: /\bApple\b/i, identity: "Apple" },
 
@@ -175,9 +177,12 @@ var detectDevice = {
                 {  userAgent: config.userAgent, search: /\bOreganMediaBrowser\b/i, identity: "Oregan Media" },
                 {  userAgent: config.userAgent, search: /\bGINGERBREAD\b/i, identity: "Gingerbread" },
                 {  userAgent: config.userAgent, search: /\bGalaxy|Nexus\b/i, identity: "Galaxy Nexus" },
+                {  userAgent: config.userAgent, search: /\bViera\b/i, identity: "Viera" },
 
                 {  userAgent: config.userAgent, search: /\bPlaystation\b/i, identity: "Playstation" },
                 {  userAgent: config.userAgent, search: /\bChrome\b/i, identity: "Chrome" },
+                {  userAgent: config.userAgent, search: /\bPhantomJS\b/i, identity: "PhantomJS" },
+                {  userAgent: config.userAgent, search: /\bQtEmbedded\b/i, identity: "QtEmbedded" },
                 {  userAgent: config.userAgent, search: /\bMSIE\b/i, identity: "IE" },
                 {  userAgent: config.userAgent, search: /\bFirefox\b/i, identity: "Firefox" },
                 {  vendor: config.vendor, search: /\bApple\b/i, identity: "Safari" },
@@ -197,6 +202,9 @@ var detectDevice = {
 
                 {  userAgent: config.userAgent, versionSearch: /\bTesco-Technika22-|Tesco-TechnikaTK500SDTR/i },
                 {  userAgent: config.userAgent, versionSearch: /\bEspial Browser\/\b/i },
+                {  userAgent: config.userAgent, versionSearch: /\bQt\/\b/i },
+                {  userAgent: config.userAgent, versionSearch: /\bViera\/\b/i },
+                {  userAgent: config.userAgent, versionSearch: /\bPhantomJS\/\b/i },
                 {  userAgent: config.userAgent, versionSearch: /\bChrome\/\b/i },
                 {  userAgent: config.userAgent, versionSearch: /\bVersion\/\b/i },
                 {  userAgent: config.userAgent, versionSearch: /\bPlaystation\b/i },

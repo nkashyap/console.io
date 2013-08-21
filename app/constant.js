@@ -67,6 +67,7 @@ ConsoleIO.Constant.ICONS = {
     TOSHIBA: 'toshiba.png',
     TESCO: 'tesco.jpg',
     SONY: 'sony.jpg',
+    PANASONIC: 'panasonic.gif',
     MICROSOFT: 'microsoft.png',
     MOZILLA: 'mozilla.png',
     GOOGLE: 'google.png',
@@ -87,6 +88,7 @@ ConsoleIO.Constant.ICONS = {
     TOSHIBATP: 'toshibatp.png',
     ESPIAL: 'espial.png',
     MSTAR: 'mstar.png',
+    VIERA: 'viera.png',
     //"OREGAN MEDIA": '',
     PLAYSTATION: 'playstation.png',
 
