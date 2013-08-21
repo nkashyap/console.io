@@ -6,12 +6,13 @@ It uses express.io (express & socket.io) to provide user real time experience.
 It works pretty much on all modern browsers, mobile devices, Smart TVs, etc
 
 Tested on: 
-* Toshiba TV (2011, 2012)
+* Toshiba TV (2011, 2012, 2013)
 * LG NetCast TV (2011, 2012, 2013)
 * Philips NetTV (2011, 2012)
 * Samsung TV (2010, 2011, 2012, 2013)
+* Panasonic TV (2013)
 * Technika Avtrex STB
-* Firefox, Safari, Opera, Chrome, Maple and IE
+* Firefox, Safari, Opera, Chrome, Maple, PhantomJS and IE
 * iPhone, iPod, iPad, Android browser, windows 8 phone etc
 
 
