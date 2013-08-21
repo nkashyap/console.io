@@ -16,6 +16,7 @@ ConsoleIO.View.Device.Preview = function PreviewView(ctrl, model) {
     this.tab = null;
     this.dhxWins = null;
     this.previewFrame = null;
+    this.image = null;
     this.id = [this.model.name, this.model.guid].join("-");
 };
 
@@ -42,6 +43,11 @@ ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
             height: '100%',
             width: '100%'
         },
+        target: document.body
+    });
+
+    this.image = ConsoleIO.Service.DHTMLXHelper.createElement({
+        tag: 'img',
         target: document.body
     });
 
@@ -72,7 +78,7 @@ ConsoleIO.View.Device.Preview.prototype.preview = function preview(data) {
         win.keepInViewport(true);
         win.setModal(true);
         win.centerOnScreen();
-        win.button("close").attachEvent("onClick", function() {
+        win.button("close").attachEvent("onClick", function () {
             win.detachObject(this.previewFrame);
             win.close();
         }, this);
@@ -83,7 +89,7 @@ ConsoleIO.View.Device.Preview.prototype.preview = function preview(data) {
 ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
     if (this.dhxWins) {
         if (data.screen) {
-            this.previewFrame.src = data.screen;
+            this.image.src = data.screen;
 
             var win = this.dhxWins.createWindow("screen", 0, 0, 900, 700);
             win.setText("Capture");
@@ -91,12 +97,12 @@ ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
             win.keepInViewport(true);
             win.setModal(true);
             win.centerOnScreen();
-            win.button("close").attachEvent("onClick", function() {
-                win.detachObject(this.previewFrame);
+            win.button("close").attachEvent("onClick", function () {
+                win.detachObject(this.image);
                 win.close();
             }, this);
 
-            win.attachObject(this.previewFrame);
+            win.attachObject(this.image);
         } else {
             alert("Sorry!, Console.IO was unable to capture screen. Check console for more details.");
         }
