@@ -135,6 +135,11 @@ Shortcuts:
 * Ctrl+Space: autocomplate
 * Ctrl-Q: toggle comments
 * Shift-Ctrl-Q: fold/unfold code
+* Ctrl-F / Cmd-F: Start searching
+* Ctrl-G / Cmd-G: Find next
+* Shift-Ctrl-G / Shift-Cmd-G: Find previous
+* Shift-Ctrl-F / Cmd-Option-F: Replace
+* Shift-Ctrl-R / Shift-Cmd-Option-F: Replace all
 
 Note: All multilines code should be wrapped within self executable function. E.G
 ```html
