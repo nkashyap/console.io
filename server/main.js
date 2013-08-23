@@ -8,8 +8,6 @@
  * @requires module:config
  * @requires module:configure
  * @requires module:manager
- * @requires module:cluster
- * @requires module:redis
  *
  * @author Nisheeth Kashyap <nisheeth.k.kashyap@gmail.com>
  */
@@ -19,69 +17,13 @@ function main() {
         configure = require('./configure'),
         proxy = require('./proxy'),
         fs = require('fs'),
-        cluster = require('cluster'),
-        os = require('os'),
-        spawn = require('child_process').spawn,
-        redis = require('redis'),
-        RedisStore = require('connect-redis')(express);
+        manager = require('./manager');
 
-
-    function createClient() {
-        var client = redis.createClient.apply(redis, arguments);
-
-        client.on("connect", function () {
-            console.log("Connect ", arguments);
-        });
-
-        client.on("ready", function () {
-            console.log("Ready ", arguments);
-        });
-
-        client.on("end", function () {
-            console.log("End ", arguments);
-        });
-
-        client.on("drain", function () {
-            console.log("Drain ", arguments);
-        });
-
-        client.on("idle", function () {
-            console.log("Idle ", arguments);
-        });
-
-        client.on("error", function () {
-            console.log("Error ", arguments);
-        });
-
-        return client;
-    }
-
-    function startRedisServer() {
-        if (os.platform() === 'win32') {
-            var redisServer = spawn('redis-server.exe', ['redis.conf'], { cwd: process.cwd() + '\\redis\\' });
-
-            redisServer.stdout.on('data', function (data) {
-                console.log('stdout', (new Buffer(data)).toString());
-            });
-
-            redisServer.stderr.on('data', function (data) {
-                console.log('stderr', (new Buffer(data)).toString());
-            });
-
-            redisServer.on('close', function (code) {
-                if (code !== 0) {
-                    console.log('Redis Server process exited with code ' + code);
-                }
-            });
-        } else {
-            throw "Please start redis server manually.";
-        }
-    }
 
     function Workers() {
         var app,
             base = '/',
-            opts = {}, manager = require('./manager');
+            opts = {};
 
         if (config.https.enable) {
             if (config.https.pfx) {
@@ -123,25 +65,7 @@ function main() {
 
         // Setup your sessions, just like normal.
         app.use(base, express.cookieParser());
-
-        // Setup the redis store for scalable io.
-        if (config.redis.enable && !process.env.IISNODE_VERSION) {
-            app.use(base, express.session({
-                store: new RedisStore({
-                    client: createClient()
-                }),
-                secret: app.get('session-key')
-            }));
-
-            app.io.set('store', new express.io.RedisStore({
-                redisPub: createClient(),
-                redisSub: createClient(),
-                redisClient: createClient()
-            }));
-
-        } else {
-            app.use(base, express.session({ secret: app.get('session-key') }));
-        }
+        app.use(base, express.session({ secret: app.get('session-key') }));
 
         // Setup your cross domain
         app.all('*', function (req, res, next) {
@@ -305,26 +229,7 @@ function main() {
         console.log(app.get('title') + ' is run at ' + (config.https.enable ? 'https' : 'http') + '://localhost:' + (process.env.PORT || app.get('port-number')));
     }
 
-    function init() {
-        // Start forking if you are the master.
-        if (cluster.isMaster && config.redis.enable && !process.env.IISNODE_VERSION) {
-            if (config.redis.autoStart) {
-                startRedisServer();
-            }
-
-            if (!config.redis.process) {
-                config.redis.process = os.cpus().length;
-            }
-
-            while (config.redis.process--) {
-                cluster.fork();
-            }
-        } else {
-            Workers();
-        }
-    }
-
-    init();
+    Workers();
 }
 
 // execute and export it as NodeJS module

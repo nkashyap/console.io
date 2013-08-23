@@ -24,9 +24,6 @@
  * @property {Array}   io.production.enable     - io production enable configuration
  * @property {Array}   io.production.disable    - io production disable configuration
  * @property {object}  io.production.set        - io production env setters
- * @property {object}  redis                    - redis configuration object
- * @property {boolean} redis.enable             - true to scale console.io server
- * @property {number} redis.process             - number of process to run
  *
  * @author Nisheeth Kashyap <nisheeth.k.kashyap@gmail.com>
  */
@@ -88,13 +85,6 @@ var config = {
                 { 'log level': 1 }
             ]
         }
-    },
-
-    /** redis configurations **/
-    redis: {
-        enable: false,
-        autoStart: false,
-        process: 0
     }
 };
 

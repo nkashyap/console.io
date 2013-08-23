@@ -28,7 +28,7 @@ consoleio
 #### Install and start or execute install.bat and start.bat (window user only)
 
 ```bash
-npm install express.io redis
+npm install express.io request
 node ./server/main.js
 ```
 
@@ -237,19 +237,6 @@ var config = {
 <script type="text/javascript" src="inject.js?url=https://nodeserver:port&web=true&..."></script>
 ```
 
-
-### Scaling server
-Console.IO use socket.io and in order to scale socket.io you need to run redis server.
-Change following value in config file before starting the Console.IO server and
-on window platform (/redis/redis-server.exe) is started by server itself but on other platforms you have to start redis server manually.
-
-```html
-redis: {
-        enable: true, // <- true to enable socket.io scaling
-        process: 6 // number of process to run
-    }
-```
-
 ### Example to setup AngularJS global $http error handler
 ```html
 angular.module('app', ['ngResource',])
@@ -275,6 +262,7 @@ angular.module('app', ['ngResource',])
  * Update Readme with full feature list
  * Add JSDoc & Unit Tests
  * Add IISNode configuration steps
+ * Support scaling
 
 ### Copyright and license
  MIT LICENSE 
