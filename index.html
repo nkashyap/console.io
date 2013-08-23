@@ -73,7 +73,7 @@ consoleio
 <h4>
 <a name="install-and-start-or-execute-installbat-and-startbat-window-user-only" class="anchor" href="#install-and-start-or-execute-installbat-and-startbat-window-user-only"><span class="octicon octicon-link"></span></a>Install and start or execute install.bat and start.bat (window user only)</h4>
 
-<div class="highlight"><pre>npm install express.io redis
+<div class="highlight"><pre>npm install express.io request
 node ./server/main.js
 </pre></div>
 
@@ -184,6 +184,11 @@ node ./server/main.js
 <li>Ctrl+Space: autocomplate</li>
 <li>Ctrl-Q: toggle comments</li>
 <li>Shift-Ctrl-Q: fold/unfold code</li>
+<li>Ctrl-F / Cmd-F: Start searching</li>
+<li>Ctrl-G / Cmd-G: Find next</li>
+<li>Shift-Ctrl-G / Shift-Cmd-G: Find previous</li>
+<li>Shift-Ctrl-F / Cmd-Option-F: Replace</li>
+<li>Shift-Ctrl-R / Shift-Cmd-Option-F: Replace all</li>
 </ul><p>Note: All multilines code should be wrapped within self executable function. E.G</p>
 
 <div class="highlight"><pre>(function doSomeThing(){
@@ -305,19 +310,6 @@ To generate your own SSL Certificate please check this <a href="http://forum.syn
 </pre></div>
 
 <h3>
-<a name="scaling-server" class="anchor" href="#scaling-server"><span class="octicon octicon-link"></span></a>Scaling server</h3>
-
-<p>Console.IO use socket.io and in order to scale socket.io you need to run redis server.
-Change following value in config file before starting the Console.IO server and
-on window platform (/redis/redis-server.exe) is started by server itself but on other platforms you have to start redis server manually.</p>
-
-<div class="highlight"><pre>redis: {
-        enable: true, // <span class="err">&lt;</span>- true to enable socket.io scaling
-        process: 6 // number of process to run
-    }
-</pre></div>
-
-<h3>
 <a name="example-to-setup-angularjs-global-http-error-handler" class="anchor" href="#example-to-setup-angularjs-global-http-error-handler"><span class="octicon octicon-link"></span></a>Example to setup AngularJS global $http error handler</h3>
 
 <div class="highlight"><pre>angular.module('app', ['ngResource',])
@@ -346,6 +338,7 @@ on window platform (/redis/redis-server.exe) is started by server itself but on 
 <li>Update Readme with full feature list</li>
 <li>Add JSDoc &amp; Unit Tests</li>
 <li>Add IISNode configuration steps</li>
+<li>Support scaling</li>
 </ul><h3>
 <a name="copyright-and-license" class="anchor" href="#copyright-and-license"><span class="octicon octicon-link"></span></a>Copyright and license</h3>
 
