@@ -23,6 +23,11 @@ window.ConsoleIO = (function () {
             '[object Function]', '[object Object]', '[object Geoposition]', '[object Coordinates]',
             '[object CRuntimeObject]'
         ],
+        eventTypes = [
+            '[object Event]', '[object KeyboardEvent]', '[object MouseEvent]', '[object TouchEvent]',
+            '[object WheelEvent]', '[object UIEvent]', '[object CustomEvent]', '[object NotifyAudioAvailableEvent]',
+            '[object CompositionEvent]', '[object CloseEvent]', '[object MessageEvent]', '[object MessageEvent]'
+        ],
         errorTypes = [
             '[object Error]', '[object ErrorEvent]', '[object DOMException]',
             '[object PositionError]'
@@ -521,7 +526,7 @@ window.ConsoleIO = (function () {
 
 
     Stringify = {
-        TYPES: objectTypes.concat(errorTypes),
+        TYPES: objectTypes.concat(errorTypes).concat(eventTypes),
 
         parse: function parse(data, level, simple) {
             var value = '',
@@ -538,18 +543,11 @@ window.ConsoleIO = (function () {
                     case '[object String]':
                         value = this.parseString(data);
                         break;
+
                     case '[object Arguments]':
                         data = Utils.toArray(data);
                     case '[object Array]':
                         value = this.parseArray(data, level);
-                        break;
-
-                    case '[object Object]':
-                    case '[object Geoposition]':
-                    case '[object Coordinates]':
-                    case '[object DOMException]':
-                    case '[object PositionError]':
-                        value = this.parseObject(type, data, level);
                         break;
 
                     case '[object Number]':
@@ -562,6 +560,10 @@ window.ConsoleIO = (function () {
 
                     case '[object Function]':
                         value = '"' + Utils.getFunctionName(data) + '"';
+                        break;
+
+                    default:
+                        value = this.parseObject(type, data, level);
                         break;
                 }
             } else if (data === null) {

@@ -37,11 +37,33 @@ html, body {
     line-height: .3;
     cursor: pointer;
 }
+.editor .CodeMirror-foldgutter {
+    width: .7em;
+}
+
+.editor .CodeMirror-foldgutter-open,
+.editor .CodeMirror-foldgutter-folded {
+    color: #555;
+    cursor: pointer;
+}
+
+.editor .CodeMirror-foldgutter-open:after {
+    content: "\25BE";
+}
+
+.editor .CodeMirror-foldgutter-folded:after {
+    content: "\25B8";
+}
 
 .editor .CodeMirror-focused .cm-matchhighlight {
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVQI12NgYGBgkKzc8x9CMDAwAAAmhwSbidEoSQAAAABJRU5ErkJggg==);
     background-position: bottom;
     background-repeat: repeat-x;
+}
+
+.editor dt {
+    font-family: monospace;
+    color: #666;
 }
 
 .editor .CodeMirror-empty.CodeMirror-focused {

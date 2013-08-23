@@ -17,8 +17,7 @@ ConsoleIO.App.Editor = function EditorController(parent, model) {
         mode: {
             name: "htmlmixed",
             scriptTypes: [
-                {matches: /\/x-handlebars-template|\/x-mustache/i,
-                    mode: null},
+                {matches: /\/x-handlebars-template|\/x-mustache/i, mode: null},
                 {matches: /(text|application)\/(x-)?vb(a|script)/i, mode: "vbscript"}
             ]
         },
@@ -38,7 +37,9 @@ ConsoleIO.App.Editor = function EditorController(parent, model) {
             "Shift-Ctrl-Q": function (cm) {
                 scope.foldCode(cm.getCursor());
             }
-        }
+        },
+        foldGutter: true,
+        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
     }, this.model.codeMirror);
     this.fileName = null;
     this.view = new ConsoleIO.View.Editor(this, {
@@ -56,9 +57,6 @@ ConsoleIO.App.Editor.prototype.render = function render(target) {
     this.view.render(target);
 
     var scope = this;
-    this.editor.on("gutterClick", function (cm, where) {
-        scope.foldCode(where);
-    });
     this.editor.on("change", function () {
         scope.updateButtonState();
     });
