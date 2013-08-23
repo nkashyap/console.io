@@ -7,14 +7,10 @@
  */
 var fs = require('fs');
 
-function User(application, request, manager, restored) {
+function User(application, request, manager) {
     this.application = application;
     this.request = request;
     this.manager = manager;
-
-    if (restored) {
-        return;
-    }
 
     this.guid = application.getGUIDCookie(this.request);
     this.deviceGUIDs = [];
@@ -26,20 +22,6 @@ function User(application, request, manager, restored) {
         subscribed: this.isOnline
     });
 }
-
-User.restore = function restore(application, request, manager, userConfig) {
-    var parseUser = new User(application, request, manager, true);
-    manager.extend(parseUser, userConfig);
-    return parseUser;
-};
-
-User.save = function save(user) {
-    return {
-        guid: user.guid,
-        deviceGUIDs: user.deviceGUIDs,
-        isOnline: user.isOnline
-    };
-};
 
 User.prototype.isSubscribed = function isSubscribed(guid) {
     return this.deviceGUIDs.indexOf(guid) > -1;

@@ -23,7 +23,7 @@ var detectDevice = require('./detectdevice');
  * @param {object} request express.io request object
  * @param {object} manager connection Manager object
  */
-function Device(application, request, manager, restored) {
+function Device(application, request, manager) {
 
     /** express.io app **/
     this.application = application;
@@ -34,9 +34,6 @@ function Device(application, request, manager, restored) {
     /** connection manager **/
     this.manager = manager;
 
-    if (restored) {
-        return;
-    }
 
     /**
      * Parse information provided by client to
@@ -109,23 +106,6 @@ function Device(application, request, manager, restored) {
         console.log("Unknown Browser", this.device, request.data);
     }
 }
-
-Device.restore = function restore(application, request, manager, deviceConfig) {
-    var parseDevice = new Device(application, request, manager, true);
-    manager.extend(parseDevice, deviceConfig);
-    return parseDevice;
-};
-
-Device.save = function save(device) {
-    return {
-        device: device.device,
-        guid: device.guid,
-        name: device.name,
-        isOnline: device.isOnline,
-        plugins: device.plugins,
-        timeStamp: device.timeStamp
-    };
-};
 
 /**
  * Get device information
