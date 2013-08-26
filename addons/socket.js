@@ -24,6 +24,8 @@ window.SocketIO = (function () {
 
         init: function init(config) {
             this.config = config;
+            this.guid = ConsoleIO.Storage.get('guid');
+            this.name = ConsoleIO.Storage.get('deviceName');
 
             /** Fix for old Opera and Maple browsers
              * to process JSONP requests in a queue
@@ -172,8 +174,8 @@ window.SocketIO = (function () {
 
             var navigator = window.navigator;
             Socket.emit('setUp', {
-                guid: ConsoleIO.Storage.get('guid'),
-                deviceName: ConsoleIO.Storage.get('deviceName'),
+                guid: Socket.guid,
+                deviceName: Socket.name,
                 userAgent: navigator.userAgent,
                 appVersion: navigator.appVersion,
                 vendor: navigator.vendor,
@@ -219,25 +221,13 @@ window.SocketIO = (function () {
         },
 
         onReady: function onReady(data) {
-            Socket.name = data.name;
-            Socket.guid = data.guid;
-
-            ConsoleIO.Storage.add("deviceName", data.name, 365);
-            ConsoleIO.Storage.add("guid", data.guid, 365);
-            showName(data.name + '|' + data.guid);
+            setData(data);
             console.log('Ready', Socket.name);
-
             Socket.forceReconnect();
         },
 
         onOnline: function onOnline(data) {
-            if (!Socket.guid || data.guid !== Socket.guid) {
-                ConsoleIO.Storage.add("deviceName", data.name, 365);
-                ConsoleIO.Storage.add("guid", data.guid, 365);
-                Socket.name = data.name;
-                Socket.guid = data.guid;
-                showName(data.name + '|' + data.guid);
-            }
+            setData(data);
 
             if (data.guid === Socket.guid) {
                 Socket.subscribed = true;
@@ -249,11 +239,7 @@ window.SocketIO = (function () {
         },
 
         onOffline: function onOffline(data) {
-            if (!Socket.guid) {
-                Socket.name = data.name;
-                Socket.guid = data.guid;
-                showName(data.name + '|' + data.guid);
-            }
+            setData(data);
 
             if (data.guid === Socket.guid) {
                 console.log('Offline', Socket.name);
@@ -269,7 +255,7 @@ window.SocketIO = (function () {
             Socket.name = data.name;
             ConsoleIO.Storage.add('deviceName', Socket.name, 365);
             document.getElementById("device-style").parentNode.removeChild(document.getElementById("device-style"));
-            showName(data.name + '|' + data.guid);
+            displayName(Socket.name + '|' + Socket.guid);
         },
 
         onStatus: function onStatus() {
@@ -464,6 +450,21 @@ window.SocketIO = (function () {
         }
     };
 
+    function setData(data) {
+        if (!Socket.guid) {
+            Socket.guid = data.guid;
+            ConsoleIO.Storage.add("guid", data.guid, 365);
+        }
+
+        if (!Socket.name) {
+            Socket.name = data.name;
+            ConsoleIO.Storage.add("deviceName", data.name, 365);
+        }
+
+        displayName(Socket.name + '|' + Socket.guid);
+    }
+
+
     function addFunctionBindSupport() {
         if (!Function.prototype.bind) {
             Function.prototype.bind = function (oThis) {
@@ -603,7 +604,7 @@ window.SocketIO = (function () {
         return xhr;
     }
 
-    function showName(content) {
+    function displayName(content) {
         var className = "console-content",
             styleId = "device-style";
 
