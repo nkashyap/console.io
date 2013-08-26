@@ -19,6 +19,10 @@ window.InjectIO = (function () {
         var memory = {};
 
         function add(name, value, days, skipLocalStorage) {
+            if (!value || value === 'undefined') {
+                return;
+            }
+
             var expires = "";
             if (days) {
                 var date = new Date();
@@ -74,11 +78,11 @@ window.InjectIO = (function () {
                 var guid = window.localStorage.getItem('guid'),
                     deviceName = window.localStorage.getItem('deviceName');
 
-                if (guid) {
+                if (guid && !memory.guid) {
                     add('guid', guid, 365, true);
                 }
 
-                if (deviceName) {
+                if (deviceName && !memory.deviceName) {
                     add('deviceName', deviceName, 365, true);
                 }
             }
