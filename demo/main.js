@@ -64,4 +64,5 @@ function init() {
     }, 2000);
 }
 
-window.InjectIO.ready(init);
+//window.InjectIO.ready(init);
+window.ConsoleIO.util.ready(init);
