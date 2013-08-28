@@ -2057,8 +2057,11 @@ var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
     }
 
 
-    function configure(io) {
+    function configure(io, config) {
         exports.io = io || global.io;
+        if(config){
+            exports.util.extend(exports.config, config);
+        }
         exports.transport.setUp();
         exports.client.setUp();
     }
@@ -2072,7 +2075,7 @@ var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
             //Socket.io use connection cookie
             if (!exports.util.isIFrameChild()) {
                 if (exports.util.foundRequireJS()) {
-                    global.require(["socket.io"], configure);
+                    global.require(["socket.io","console.io.config"], configure);
                 } else {
                     exports.util.require(exports.util.getUrl(exports.config) + exports.config.socketio, configure);
                 }

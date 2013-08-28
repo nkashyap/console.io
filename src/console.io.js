@@ -15,7 +15,7 @@
         url: '',
         base: '/',
         html2canvas: "addons/html2canvas.js",
-        socketio: "socket.io/socket.io.js",
+        "socket.io": "socket.io/socket.io.js",
         forceReconnection: true,
         forceReconnectInterval: 5000,
         nativeConsole: true,
@@ -135,7 +135,7 @@
                 if (exports.util.foundRequireJS()) {
                     global.require(["socket.io"], configure);
                 } else {
-                    exports.util.require(exports.util.getUrl(exports.config) + exports.config.socketio, configure);
+                    exports.util.require(exports.util.getUrl(exports.config) + exports.config["socket.io"], configure);
                 }
             }
         }

@@ -5,18 +5,12 @@
  * Time: 16:51
  * To change this template use File | Settings | File Templates.
  */
-var domReady = false;
 
 function init() {
     "use strict";
 
-    if (domReady) {
-        return;
-    }
-
-    domReady = true;
-
     var currentIndex = 0,
+        connectionMode = document.getElementById('ConnectionMode'),
         Commands = [
             "console.log('log test');",
             "console.info('info test');",
@@ -39,8 +33,6 @@ function init() {
         ],
         length = Commands.length;
 
-    var connectionMode = document.getElementById('ConnectionMode');
-
     setInterval(function () {
         if (currentIndex < length) {
             eval(Commands[currentIndex++]);
@@ -48,15 +40,13 @@ function init() {
             currentIndex = 0;
         }
 
-        if (window.SocketIO) {
+        if (window.ConsoleIO) {
             var info = [
-                "Name: " + SocketIO.name,
-                "guid: " + SocketIO.guid,
-                "mode: " + SocketIO.connectionMode,
-                "connected: " + SocketIO.io.socket.connected,
-                "subscribed: " + SocketIO.subscribed,
-                "pending: " + SocketIO.pending.length,
-                "forceReconnection: " + SocketIO.setInterval
+                "Name: " + window.ConsoleIO.name,
+                "guid: " + window.ConsoleIO.guid,
+                "mode: " + window.ConsoleIO.transport.connectionMode,
+                "connected: " + window.ConsoleIO.transport.isConnected(),
+                "subscribed: " + window.ConsoleIO.transport.subscribed
             ].join(", ");
 
             connectionMode.innerHTML = info;
@@ -64,5 +54,9 @@ function init() {
     }, 2000);
 }
 
-//window.InjectIO.ready(init);
-window.ConsoleIO.util.ready(init);
+if (typeof define === "function" && define.amd) {
+    define(['console.io'], init);
+} else {
+    window.ConsoleIO.util.ready(init);
+}
+
