@@ -84,7 +84,9 @@ function main() {
         app.use(base + 'lib', express.static('lib'));
 
         //console app routes
-        app.use(base + 'addons', express.static('addons'));
+        app.use(base + 'console.io.js', function download(req, res) {
+            res.sendfile('./dist' + req.originalUrl);
+        });
 
         //userdata app routes
         app.use(base + 'userdata/export', function download(req, res) {
