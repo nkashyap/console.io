@@ -1,9 +1,9 @@
 /**
- * Created with IntelliJ IDEA.
+ * util
+ *
  * User: nisheeth
  * Date: 19/05/13
  * Time: 14:24
- * To change this template use File | Settings | File Templates.
  */
 
 (function (exports, global) {
@@ -23,7 +23,7 @@
         for (; !!(script = scripts[i++]);) {
             //TODO script.getAttribute possibility can be removed
             src = (script.src ? script.src : (script.getAttribute('src') || '')).toLowerCase();
-            if (src.indexOf('inject.js') === -1) {
+            if (src.indexOf('console.io.js') === -1) {
                 continue;
             }
 

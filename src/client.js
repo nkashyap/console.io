@@ -1,9 +1,9 @@
 /**
- * Client
+ * Client browser
+ *
  * User: nisheeth
  * Date: 27/08/13
  * Time: 12:17
- *
  */
 
 (function (exports, global) {
@@ -293,6 +293,16 @@
     }
 
     function onPlugin(data) {
+        if (data.WebIO) {
+            if (data.WebIO.enabled) {
+                exports.util.requireCSS(exports.util.getUrl(exports.config) + "resources/console.css");
+
+                var config = exports.util.extend({}, exports.config);
+                exports.web.setUp(exports.util.extend(config, data.WebIO));
+            } else if (!data.WebIO.enabled) {
+                exports.web.disabled();
+            }
+        }
 //        if (data.WebIO) {
 //            if (!global.WebIO && data.WebIO.enabled) {
 //                var url = exports.util.getUrl(exports.config);

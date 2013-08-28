@@ -1,9 +1,9 @@
 /**
- * Created with JetBrains WebStorm.
+ * Console wrapper
+ *
  * User: nisheeth
  * Date: 27/08/13
  * Time: 11:16
- * To change this template use File | Settings | File Templates.
  */
 
 (function (exports, global) {

@@ -11,52 +11,73 @@ module.exports = function (grunt) {
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+
         concat: {
-            dist: {
-                // the files to concatenate
+            options: {
+                separator: '\n\n',
+                banner: '/*! <%= pkg.project %> - v<%= pkg.version %> - ' +
+                    '   <%= grunt.template.today("yyyy-mm-dd") %> */\n\n' +
+                    'var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);\n\n' +
+                    '(function(){\n\n',
+                footer: '\n\nif (typeof define === "function" && define.amd) {\n' +
+                    '\tdefine([], function () { return ConsoleIO; });\n' +
+                    '}\n\n' +
+                    '}());'
+            },
+            console: {
                 src: [
                     'src/util.js',
                     'src/storage.js',
                     'src/events.js',
                     'src/stringify.js',
+                    'src/formatter.js',
                     'src/stacktrace.js',
                     'src/transport.js',
                     'src/console.js',
                     'src/client.js',
-                    'src/console.io.js'],
-                // the location of the resulting JS file
-                dest: 'dist/<%= pkg.name %>.js'
+                    'src/console.io.js',
+                    'src/web.js'
+                ],
+
+                dest: 'dist/<%= pkg.project %>.js'
             }
         },
+
         uglify: {
             options: {
                 // the banner is inserted at the top of the output
-                banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n'
+                banner: '/*! <%= pkg.project %> <%= grunt.template.today("dd-mm-yyyy") %> */\n'
             },
-            dist: {
+            console: {
                 files: {
-                    'dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
+                    'dist/<%= pkg.project %>.min.js': ['<%= concat.console.dest %>']
                 }
             }
         },
+
         jshint: {
-            // define the files to lint
-            files: ['gruntfile.js', 'src/**/*.js', 'app/**/*.js', 'server/**/*.js'],
-            // configure JSHint (documented at http://www.jshint.com/docs/)
+            files: ['src/**/*.js', 'app/**/*.js'],
             options: {
-                // more options here if you want to override JSHint defaults
+                browser: true,
                 globals: {
+                    ConsoleIO: true,
                     console: true,
+                    document: true,
                     module: true
                 }
             }
+        },
+
+        watch: {
+            files: ['<%= jshint.files %>'],
+            tasks: ['jshint']
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     //grunt.loadNpmTasks('grunt-contrib-qunit');
-    //grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-concat');
 
     // Default task(s).

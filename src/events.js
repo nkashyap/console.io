@@ -1,9 +1,9 @@
 /**
- * Created with JetBrains WebStorm.
+ * EventEmitter
+ *
  * User: nisheeth
  * Date: 27/08/13
  * Time: 10:13
- * To change this template use File | Settings | File Templates.
  */
 
 (function (exports, global) {

@@ -1,9 +1,9 @@
 /**
- * Created with IntelliJ IDEA.
+ * Storage
+ *
  * User: nisheeth
  * Date: 26/08/13
  * Time: 09:39
- * To change this template use File | Settings | File Templates.
  */
 
 (function (exports, global) {

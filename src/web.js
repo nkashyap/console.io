@@ -1,16 +1,16 @@
 /**
- * Created with JetBrains WebStorm.
+ * Web
+ *
  * User: nisheeth
  * Date: 27/08/13
  * Time: 14:57
- * To change this template use File | Settings | File Templates.
  */
 
 (function (exports, global) {
 
     var web = exports.web = {};
 
-    function Controller() {
+    function Controller(config) {
         this.store = {
             added: [],
             queue: []
@@ -337,11 +337,37 @@
         }
     };
 
+    function log(data) {
+        web.logger.add(data);
+    }
+
     web.Controller = Controller;
     web.View = View;
+    web.setUp = function setUp(config){
+        web.logger = new Controller(config);
+        web.logger.render(document.body);
 
-    web.setUp = function setUp(){
+        var webConfig = {};
+        if (typeof config.filters !== 'undefined') {
+            webConfig.filters = typeof config.filters === 'string' ? config.filters.split(',') : config.filters;
+        }
 
+        if (typeof config.pageSize !== 'undefined') {
+            webConfig.pageSize = config.pageSize;
+        }
+
+        if (typeof config.search !== 'undefined') {
+            webConfig.search = config.search;
+        }
+
+        web.logger.syncControl(webConfig);
+
+        exports.console.on('console', log);
+    };
+
+    web.disabled = function disabled(){
+        exports.console.removeListener('console', log);
+        web.logger.destroy();
     };
 
 }('undefined' !== typeof ConsoleIO ? ConsoleIO : module.exports, this));

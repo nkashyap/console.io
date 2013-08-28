@@ -1,9 +1,9 @@
 /**
- * Created with IntelliJ IDEA.
+ * Console.IO main init file
+ *
  * User: nisheeth
  * Date: 26/08/13
  * Time: 09:51
- * To change this template use File | Settings | File Templates.
  */
 
 (function (exports, global) {
@@ -12,6 +12,8 @@
     exports.guid = '';
     exports.name = '';
     exports.config = {
+        url: '',
+        base: '/',
         html2canvas: "addons/html2canvas.js",
         socketio: "socket.io/socket.io.js",
         forceReconnection: true,
