@@ -81,7 +81,6 @@
         exports.console.warn('Socket Error');
     }
 
-
     transport.connectionMode = '';
     transport.subscribed = false;
 
@@ -194,8 +193,12 @@
 
                 exports.console.log('forceReconnect reconnecting', exports.name);
 
-                transport.io.socket.disconnectSync();
-                transport.io.socket.reconnect();
+                try {
+                    transport.io.socket.disconnectSync();
+                    transport.io.socket.reconnect();
+                } catch (e) {
+                    exports.console.error(e);
+                }
 
                 global.clearInterval(interval);
                 interval = null;

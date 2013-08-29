@@ -213,7 +213,7 @@
         function callbackFn() {
             domReady = true;
 
-            util.forEach(pendingCallback, function(fn){
+            util.forEach(pendingCallback, function (fn) {
                 fn();
             });
             pendingCallback = [];
@@ -281,9 +281,39 @@
         }
     };
 
+    util.addCSSRule = function addCSSRule(sheet, selector, rules, index) {
+        if (sheet.insertRule) {
+            sheet.insertRule(selector + "{" + rules + "}", index);
+        }
+        else {
+            sheet.addRule(selector, rules, index);
+        }
+    };
+
+    util.deleteCSSRule = function deleteCSSRule(sheet, selector) {
+        var rules = sheet.cssRules || sheet.rules;
+
+        util.forEach(util.toArray(rules), function (rule, index) {
+            if (rule.selectorText && rule.selectorText === selector) {
+                if (sheet.deleteRule) {
+                    sheet.deleteRule(index);
+                } else {
+                    sheet.removeRule(index);
+                }
+            }
+        });
+    };
+
     util.getUrl = function getUrl(name) {
-        var config = exports.getConfig();
-        return config.url + (config.base ? '/' + config.base : '/') + config[name];
+        var config = exports.getConfig(),
+            url = config.url,
+            last = url.length - 1;
+
+        if (url.charAt(last) === '/') {
+            url = url.substr(0, last);
+        }
+
+        return (url + (config.base ? '/' + config.base : '/') + config[name]);
     };
 
     util.isIFrameChild = function isIFrameChild() {

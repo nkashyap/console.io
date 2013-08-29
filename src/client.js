@@ -13,35 +13,20 @@
 
     var client = exports.client = {};
 
-    function displayName(content) {
-        var className = "console-content",
-            styleId = "device-style";
+    function showInfo(content, online) {
+        var className = "consoleio",
+            bgColor = online ? 'rgba(92, 255, 0, 0.5)' : 'rgba(192, 192, 192, 0.5)',
+            css = "content: 'Console.IO:" + content + "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
+                "font-size: 12px; font-weight: bold; color: rgb(111, 114, 117); " +
+                "background-color: " + bgColor + "; border: 1px solid rgb(111, 114, 117); " +
+                "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
 
-        if (!document.getElementById(styleId)) {
-            var css = "." + className + "::after { content: 'Console.IO:" + content +
-                    "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
-                    "font-size: 12px; font-weight: bold; color: rgb(111, 114, 117); " +
-                    "background-color: rgba(192, 192, 192, 0.5); border: 1px solid rgb(111, 114, 117); " +
-                    "font-family: Monaco,Menlo,Consolas,'Courier New',monospace; };",
-                head = document.getElementsByTagName('head')[0],
-                style = document.createElement('style');
-
-            style.type = 'text/css';
-            style.id = styleId;
-
-            if (style.styleSheet) {
-                style.styleSheet.cssText = css;
-            } else {
-                style.appendChild(document.createTextNode(css));
-            }
-
-            head.appendChild(style);
-        }
-
-        (document.body.firstElementChild || document.body.firstChild).setAttribute("class", className);
+        exports.util.deleteCSSRule(exports.style, "." + className + "::after");
+        exports.util.addCSSRule(exports.style, "." + className + "::after", css);
+        document.body.setAttribute("class", className);
     }
 
-    function setData(data) {
+    function storeData(data, online) {
         if (!exports.guid) {
             exports.guid = data.guid;
 
@@ -53,7 +38,7 @@
             exports.storage.addItem("deviceName", data.name, 365);
         }
 
-        displayName(exports.name + '|' + exports.guid);
+        showInfo([exports.name, exports.guid, online ? 'online' : 'offline'].join('|'), online);
     }
 
     function addFunctionBindSupport() {
@@ -195,16 +180,59 @@
         return xhr;
     }
 
+    function configWebConsole(data) {
+        if (data) {
+            exports.web.setConfig(data);
+
+            var info = [exports.name, exports.guid, 'online'];
+
+            if (data.paused) {
+                info.push('paused');
+            }
+
+            if (data.filters && data.filters.length > 0) {
+                info.push('filters:' + data.filters.join(","));
+            }
+
+            if (data.pageSize) {
+                info.push('pagesize:' + data.pageSize);
+            }
+
+            if (data.search) {
+                info.push('search:' + data.search);
+            }
+
+            showInfo(info.join('|'), true);
+        }
+    }
+
+    function setUpWebConsole(data) {
+        if (data.enabled) {
+            exports.web.enabled();
+        } else {
+            exports.web.disabled();
+        }
+
+        if (data.config) {
+            configWebConsole(data.config);
+        }
+    }
+
+    function onDisconnect() {
+        showInfo([exports.name, exports.guid, 'offline'].join('|'));
+    }
 
     function onReady(data) {
-        setData(data);
+        storeData(data);
+        setUpWebConsole(data.web);
 
         exports.console.log('Ready', exports.name);
         exports.transport.forceReconnect();
     }
 
     function onOnline(data) {
-        setData(data);
+        storeData(data, true);
+        setUpWebConsole(data.web);
 
         if (data.guid === exports.guid) {
             exports.transport.subscribed = true;
@@ -217,7 +245,7 @@
     }
 
     function onOffline(data) {
-        setData(data);
+        storeData(data);
 
         if (data.guid === exports.guid) {
             exports.console.log('Offline', exports.name);
@@ -233,9 +261,7 @@
         exports.name = data.name;
         exports.storage.addItem('deviceName', exports.name, 365);
 
-        document.getElementById("device-style").parentNode.removeChild(document.getElementById("device-style"));
-
-        displayName(exports.name + '|' + exports.guid);
+        showInfo([exports.name, exports.guid, 'online'].join('|'), true);
     }
 
     function onStatus() {
@@ -295,22 +321,9 @@
         }(location.href)), 500);
     }
 
-//    function onPlugin(data) {
-//        if (data.web) {
-//            if (data.web.enabled) {
-//                exports.util.requireCSS(exports.util.getUrl(exports.config) + "resources/console.css");
-//
-//                var config = exports.util.extend({}, exports.config);
-//                exports.web.setUp(exports.util.extend(config, data.web));
-//            } else if (!data.WebIO.enabled) {
-//                exports.web.disabled();
-//            }
-//        }
-//    }
-
     function onHTMLContent() {
         var parentNode,
-            webLog = document.getElementById('console-log');
+            webLog = document.getElementById(exports.getConfig().consoleId);
 
         if (webLog) {
             parentNode = webLog.parentNode;
@@ -326,7 +339,7 @@
 
     function onPreview() {
         var parentNode, preview,
-            webLog = document.getElementById('console-log');
+            webLog = document.getElementById(exports.getConfig().consoleId);
 
         if (webLog) {
             parentNode = webLog.parentNode;
@@ -349,7 +362,7 @@
 
         exports.util.requireScript(exports.util.getUrl('html2canvas'), function () {
             var parentNode,
-                webLog = document.getElementById('console-log');
+                webLog = document.getElementById(exports.getConfig().consoleId);
 
             if (webLog) {
                 parentNode = webLog.parentNode;
@@ -430,6 +443,7 @@
 
 
     client.setUp = function setUp() {
+        exports.transport.on('disconnect', onDisconnect);
         exports.transport.on('device:ready', onReady);
         exports.transport.on('device:online', onOnline);
         exports.transport.on('device:offline', onOffline);
@@ -441,8 +455,10 @@
         exports.transport.on('device:captureScreen', onCaptureScreen);
         exports.transport.on('device:status', onStatus);
         exports.transport.on('device:reload', onReload);
-        //exports.transport.on('device:plugin', onPlugin);
         exports.transport.on('device:name', onName);
+
+        exports.transport.on('device:web:control', configWebConsole);
+        exports.transport.on('device:web:config', setUpWebConsole);
     };
 
 }('undefined' !== typeof ConsoleIO ? ConsoleIO : module.exports, this));

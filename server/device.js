@@ -67,6 +67,11 @@ function Device(application, request, manager) {
      */
     this.isOnline = false;
 
+    this.web = {
+        enabled: false,
+        config: {}
+    };
+
     /**
      * Plugins references
      * @member {object} plugins
@@ -97,7 +102,7 @@ function Device(application, request, manager) {
      * @property {string} name - device name
      * @property {string} guid - device GUID
      */
-    this.emit('ready', { name: this.name, guid: this.guid });
+    this.emit('ready', this.getInformation());
 
     /**
      * Server log
@@ -119,7 +124,7 @@ Device.prototype.getInformation = function getInformation() {
         name: this.name,
         guid: this.guid,
         online: this.isOnline,
-        //plugins: this.plugins,
+        web: this.web,
         browser: this.device.browser,
         platform: this.device.platform,
         manufacture: this.device.manufacture,
@@ -297,32 +302,16 @@ Device.prototype.status = function status(data) {
     this.broadcast('status:' + this.guid, data);
 };
 
-/**
- * broadcast device webIO event
- *
- * @public
- * @method plugin
- * @param {object} data response parameter object
- */
-//Device.prototype.plugin = function plugin(data) {
-//
-//    /** add plugins **/
-//    if (!this.plugins[data.name]) {
-//        this.plugins[data.name] = { };
-//    }
-//
-//    /** set plugin state **/
-//    this.plugins[data.name].enabled = data.enabled;
-//
-//    /**
-//     * device:name event is broadcast in the room
-//     * and is received by all clients subscribed to the room
-//     *
-//     * @event Device#device:web
-//     * @type {object}
-//     */
-//    this.broadcast('plugin:' + this.guid, data);
-//};
+Device.prototype.webStatus = function webStatus(data) {
+    this.web.enabled = data.enabled;
+    this.broadcast('web:status:' + this.guid, data);
+};
+
+Device.prototype.control = function control(data) {
+    this.web.config = data;
+    this.emit('web:control', data);
+};
+
 
 /**
  * emits events

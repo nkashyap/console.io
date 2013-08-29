@@ -74,6 +74,15 @@ function Manager() {
         };
     }
 
+    function defineDeviceMethodRouteHandler(property) {
+        return function (request) {
+            var device = getDeviceByGuid(request.data.guid);
+            if (device && device[property]) {
+                device[property](request.data);
+            }
+        };
+    }
+
     function notifyRegisteredDevicesToUser(request) {
         var guid = application.getGUIDCookie(request),
             userReg = users[guid];
@@ -150,8 +159,6 @@ function Manager() {
 
         return device;
     }
-
-
 
 
     /** extend manage object with methods for child objects **/
@@ -241,13 +248,13 @@ function Manager() {
              * Device status event routes handler.
              * gives device status information
              */
-            status: defineRouteHandler(devices, 'status')
+            status: defineRouteHandler(devices, 'status'),
 
             /**
-             * Device plugin event routes handler.
-             * add plugins
+             * Device web console event routes handler.
+             * add web console
              */
-            //plugin: defineRouteHandler(devices, 'plugin')
+            webStatus: defineRouteHandler(devices, 'webStatus')
         });
 
         /**
@@ -270,19 +277,14 @@ function Manager() {
             deviceName: changeDeviceName,
 
             /**
-             * User command to add/remove plugin from client device
+             * User command to add/remove web console from client device
              */
-            //plugin: defineUserCommandRouteHandler('plugin', true),
+            webConfig: defineUserCommandRouteHandler('web:config', true),
 
             /**
-             * User command to control WebIO console on client device
+             * User command to control Web console on client device
              */
-            //pluginControl: defineUserCommandRouteHandler('pluginControl', true),
-
-            /**
-             * User command to configure WebIO console on client device
-             */
-            //pluginConfig: defineUserCommandRouteHandler('pluginConfig', true),
+            webControl: defineDeviceMethodRouteHandler('control'),
 
             /**
              * User command to reload client device

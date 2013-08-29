@@ -19,16 +19,19 @@
         secure: false,
         html2canvas: "addons/html2canvas.js",
         "socket.io": "socket.io/socket.io.js",
+        webStyle: "resources/console.css",
         proxy: 'proxy',
         forceReconnection: true,
         forceReconnectInterval: 5000,
         nativeConsole: true,
         web: false,
-        webOnly: false
-//        docked: false,
-//        position: 'bottom',
-//        height: '300px',
-//        width: '99%'
+        webOnly: false,
+
+        consoleId: 'consoleioweb',
+        docked: false,
+        position: 'bottom',
+        height: '300px',
+        width: '99%'
     };
 
     function debug(msg) {
@@ -54,6 +57,10 @@
         config.web = config.web === true || (config.web || '').toLowerCase() === 'true';
         config.secure = config.secure === true || (config.secure || '').toLowerCase() === 'true';
 
+        if (typeof config.filters !== 'undefined') {
+            config.filters = typeof config.filters === 'string' ? config.filters.split(',') : config.filters;
+        }
+
         return config;
     }
 
@@ -61,6 +68,10 @@
         exports.io = io || global.io;
         exports.transport.setUp();
         exports.client.setUp();
+
+        if (defaultConfig.web) {
+            exports.web.setUp();
+        }
     }
 
     exports.configure = function configure(cfg) {
@@ -85,6 +96,21 @@
         return defaultConfig;
     };
 
+    exports.style = (function style() {
+        // Create the <style> tag
+        var style = document.createElement("style");
+
+        style.type = 'text/css';
+        style.id = 'console.io.style';
+
+        // WebKit hack :(
+        style.appendChild(document.createTextNode(""));
+
+        // Add the <style> element to the page
+        document.head.appendChild(style);
+
+        return style.sheet;
+    }());
 
     // Cover uncaught exceptions
     // Returning true will surpress the default browser handler,

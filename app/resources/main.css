@@ -7,7 +7,7 @@ html, body {
 }
 
 .status {
-    float:left;
+    float: left;
     height: 16px;
     width: 16px;
     margin: 2px 10px 2px 1px;
@@ -37,6 +37,7 @@ html, body {
     line-height: .3;
     cursor: pointer;
 }
+
 .editor .CodeMirror-foldgutter {
     width: .7em;
 }

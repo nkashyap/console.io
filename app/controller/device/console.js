@@ -20,6 +20,25 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
         added: [],
         queue: []
     };
+
+    var config = this.model.web.config;
+
+    if (typeof config.pageSize !== 'undefined') {
+        ConsoleIO.Settings.pageSize.active = config.pageSize;
+    }
+
+    if (typeof config.paused !== 'undefined') {
+        this.paused = this.model.web.config.paused;
+    }
+
+    if (typeof config.filters !== 'undefined') {
+        this.filters = this.model.web.config.filters;
+    }
+
+    if (typeof config.search !== 'undefined') {
+        this.searchRegex = this.model.web.config.search;
+    }
+
     this.view = new ConsoleIO.View.Device.Console(this, {
         name: "Console",
         guid: this.model.guid,
@@ -48,6 +67,16 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
 
 ConsoleIO.App.Device.Console.prototype.render = function render(target) {
     this.view.render(target);
+    this.view.setItemState('playPause', this.paused);
+    this.view.setValue('searchText', this.searchRegex);
+
+    if (this.searchRegex) {
+        this.applySearch(this.searchRegex);
+    }
+
+    ConsoleIO.forEach(this.filters, function (filter) {
+        this.view.setItemState('filter-' + filter, true);
+    }, this);
 };
 
 ConsoleIO.App.Device.Console.prototype.activate = function activate(state) {
@@ -170,14 +199,12 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
 };
 
 ConsoleIO.App.Device.Console.prototype.notify = function notify(clearAll) {
-//    if (this.model.plugins.Web.enabled) {
-//        ConsoleIO.Service.Socket.emit('pluginControl', {
-//            guid: this.model.guid,
-//            pageSize: ConsoleIO.Settings.pageSize.active,
-//            filters: this.filters,
-//            search: this.view.getValue('searchText'),
-//            paused: this.paused,
-//            clear: !!clearAll
-//        });
-//    }
+    ConsoleIO.Service.Socket.emit('webControl', {
+        guid: this.model.guid,
+        pageSize: ConsoleIO.Settings.pageSize.active,
+        filters: this.filters,
+        search: this.view.getValue('searchText'),
+        paused: this.paused,
+        clear: !!clearAll
+    });
 };
