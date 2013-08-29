@@ -55,7 +55,10 @@ function init() {
 }
 
 if (typeof define === "function" && define.amd) {
-    define(['console.io'], init);
+    define(['console.io', 'console.io.config'], function (consoleio, config) {
+        consoleio.configure(config);
+        init();
+    });
 } else {
     window.ConsoleIO.util.ready(init);
 }

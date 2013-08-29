@@ -347,9 +347,7 @@
     function onCaptureScreen() {
         addFunctionBindSupport();
 
-        var url = exports.util.getUrl(exports.config);
-
-        exports.util.requireScript(url + exports.config.html2canvas, function () {
+        exports.util.requireScript(exports.util.getUrl('html2canvas'), function () {
             var parentNode,
                 webLog = document.getElementById('console-log');
 
@@ -362,7 +360,7 @@
                 completed: false,
                 logging: true,
                 useCORS: true,
-                proxy: url + 'proxy',
+                proxy: exports.util.getUrl('proxy'),
                 onrendered: function (canvas) {
                     if (!this.completed) {
                         try {

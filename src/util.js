@@ -281,18 +281,9 @@
         }
     };
 
-    util.getUrl = function getUrl(config) {
-        return config.url + (config.base ? '/' + config.base : '/');
-    };
-
-    util.getConfig = function getConfig() {
-        var config = global.ConfigIO || util.queryParams();
-
-        config.socket = config.socket === true || typeof config.socket === 'undefined' || (config.socket || '').toLowerCase() === 'true';
-        config.web = config.web === true || (config.web || '').toLowerCase() === 'true';
-        config.secure = config.secure === true || (config.secure || '').toLowerCase() === 'true';
-
-        return config;
+    util.getUrl = function getUrl(name) {
+        var config = exports.getConfig();
+        return config.url + (config.base ? '/' + config.base : '/') + config[name];
     };
 
     util.isIFrameChild = function isIFrameChild() {

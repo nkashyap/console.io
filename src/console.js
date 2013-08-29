@@ -19,7 +19,7 @@
 
 
     function send(type, args, value, callStack) {
-        if (nativeConsole && exports.config.nativeConsole) {
+        if (nativeConsole && exports.getConfig().nativeConsole) {
             if (nativeConsole[type]) {
                 if (withoutScope.indexOf(type) > -1) {
                     nativeConsole[type](args);

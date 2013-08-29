@@ -25,7 +25,8 @@ module.exports = function (grunt) {
                     ' * Author: <%= pkg.author.name %>\n' +
                     ' * Email: <%= pkg.author.email %>\n' +
                     ' * Date: <%= grunt.template.today("yyyy-mm-dd") %>\n*/\n\n' +
-                    'var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);\n\n' +
+                    'var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);\n' +
+                    'ConsoleIO.version = "<%= pkg.version %>";\n\n' +
                     '(function(){\n\n',
                 footer: '\n\nif (typeof define === "function" && define.amd) {\n' +
                     '\tdefine([], function () { return ConsoleIO; });\n' +
@@ -43,7 +44,7 @@ module.exports = function (grunt) {
                     'src/transport.js',
                     'src/console.js',
                     'src/client.js',
-                    'src/console.io.js',
+                    'src/config.js',
                     'src/web.js'
                 ],
 

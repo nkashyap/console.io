@@ -11,26 +11,27 @@
 
 (function (exports, global) {
 
-    exports.version = '0.0.15';
     exports.guid = '';
     exports.name = '';
-    exports.config = {
+    var defaultConfig = {
         url: '',
-        base: '/',
+        base: '',
+        secure: false,
         html2canvas: "addons/html2canvas.js",
         "socket.io": "socket.io/socket.io.js",
+        proxy: 'proxy',
         forceReconnection: true,
         forceReconnectInterval: 5000,
         nativeConsole: true,
-        webOnly: false,
-
-        docked: false,
-        position: 'bottom',
-        height: '300px',
-        width: '99%'
+        web: false,
+        webOnly: false
+//        docked: false,
+//        position: 'bottom',
+//        height: '300px',
+//        width: '99%'
     };
 
-    exports.debug = function debug(msg) {
+    function debug(msg) {
         var log = document.getElementById('log'), li;
 
         if (!log && document.body) {
@@ -44,7 +45,46 @@
             li.innerHTML = msg;
             log.insertBefore(li, log.firstElementChild || log.firstChild);
         }
+    }
+
+    function getSettings() {
+        var config = exports.config || exports.util.queryParams();
+
+        config.webOnly = config.webOnly === true || (config.webOnly || '').toLowerCase() === 'true';
+        config.web = config.web === true || (config.web || '').toLowerCase() === 'true';
+        config.secure = config.secure === true || (config.secure || '').toLowerCase() === 'true';
+
+        return config;
+    }
+
+    function setUp(io) {
+        exports.io = io || global.io;
+        exports.transport.setUp();
+        exports.client.setUp();
+    }
+
+    exports.configure = function configure(cfg) {
+        exports.util.extend(defaultConfig, cfg);
+
+        if (!defaultConfig.webOnly) {
+            //Request console.io.js file to get connect.sid cookie from the server
+            //Socket.io use connection cookie
+            if (!exports.util.isIFrameChild()) {
+                if (exports.util.foundRequireJS()) {
+                    global.require(["socket.io"], setUp);
+                } else {
+                    exports.util.require(exports.util.getUrl("socket.io"), setUp);
+                }
+            }
+        } else {
+            exports.web.setUp();
+        }
     };
+
+    exports.getConfig = function getConfig() {
+        return defaultConfig;
+    };
+
 
     // Cover uncaught exceptions
     // Returning true will surpress the default browser handler,
@@ -66,7 +106,7 @@
         } else if (exports.util.isIFrameChild()) {
             exports.console.exception(error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo);
         } else {
-            exports.debug([error, filePath, lineNo].join("; "));
+            debug([error, filePath, lineNo].join("; "));
         }
 
         return result;
@@ -99,6 +139,7 @@
         }
     }
 
+
     /** IE console fix */
     if (Function.prototype.bind && global.console && typeof global.console.log === "object") {
         exports.util.forEach(["log", "info", "warn", "error", "assert", "dir", "clear", "profile", "profileEnd"],
@@ -120,28 +161,11 @@
         });
     }
 
-
-    function configure(io) {
-        exports.io = io || global.io;
-        exports.transport.setUp();
-        exports.client.setUp();
+    //Initialize console.io is RequireJS is not found
+    if (!exports.util.foundRequireJS()) {
+        exports.util.ready(function () {
+            exports.configure(getSettings());
+        });
     }
-
-
-    exports.util.ready(function () {
-        exports.util.extend(exports.config, exports.util.getConfig());
-
-        if (!exports.config.webOnly) {
-            //Request console.io.js file to get connect.sid cookie from the server
-            //Socket.io use connection cookie
-            if (!exports.util.isIFrameChild()) {
-                if (exports.util.foundRequireJS()) {
-                    global.require(["socket.io"], configure);
-                } else {
-                    exports.util.require(exports.util.getUrl(exports.config) + exports.config["socket.io"], configure);
-                }
-            }
-        }
-    });
 
 }('undefined' !== typeof ConsoleIO ? ConsoleIO : module.exports, this));

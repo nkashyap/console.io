@@ -13,7 +13,8 @@
 
     var transport = exports.transport = {},
         interval = null,
-        pending = [];
+        pending = [],
+        config;
 
 
     function onMessage(event) {
@@ -38,7 +39,7 @@
             vendor: navigator.vendor,
             platform: navigator.platform,
             opera: !!global.opera,
-            params: exports.config
+            params: exports.getConfig()
         });
 
         transport.forceReconnect();
@@ -127,9 +128,10 @@
 
         }(global.io));
 
-        transport.io = exports.io.connect(exports.config.url, {
-            secure: exports.config.secure,
-            resource: (exports.config.base || '') + 'socket.io'
+        config = exports.getConfig();
+        transport.io = exports.io.connect(config.url, {
+            secure: config.secure,
+            resource: (config.base || '') + 'socket.io'
         });
 
         // set console.io event
@@ -181,7 +183,7 @@
     };
 
     transport.forceReconnect = function forceReconnect() {
-        if (!exports.config.forceReconnection || interval) {
+        if (!config.forceReconnection || interval) {
             return false;
         }
 
@@ -199,7 +201,7 @@
                 interval = null;
             }
 
-        }, exports.config.forceReconnectInterval);
+        }, config.forceReconnectInterval);
     };
 
     transport.clearPendingQueue = function clearPendingQueue() {
