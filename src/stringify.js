@@ -1,9 +1,12 @@
 /**
- * Stringify
- *
+ * Created with IntelliJ IDEA.
  * User: nisheeth
  * Date: 27/08/13
  * Time: 11:00
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ *
+ * Stringify
  */
 
 (function (exports, global) {

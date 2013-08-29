@@ -1,9 +1,10 @@
 /**
  * Created with IntelliJ IDEA.
  * User: nisheeth
- * Date: 19/05/13
+ * Date: 27/08/13
  * Time: 12:17
- * To change this template use File | Settings | File Templates.
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
  */
 
 ConsoleIO.namespace("ConsoleIO.App.Device");
@@ -25,8 +26,6 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
         width: 200,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh
-            //ConsoleIO.Model.DHTMLX.ToolBarItem.SearchText,
-            //ConsoleIO.Model.DHTMLX.ToolBarItem.Search
         ]
     });
     this.panel = new ConsoleIO.App.Device.Panel(this, this.model);

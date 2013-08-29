@@ -1,9 +1,12 @@
 /**
- * Formatter
- *
+ * Created with IntelliJ IDEA.
  * User: nisheeth
  * Date: 27/08/13
  * Time: 10:30
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ *
+ * Formatter
  */
 
 (function (exports, global) {

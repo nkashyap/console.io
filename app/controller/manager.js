@@ -1,9 +1,10 @@
 /**
  * Created with IntelliJ IDEA.
  * User: nisheeth
- * Date: 18/05/13
- * Time: 20:43
- * To change this template use File | Settings | File Templates.
+ * Date: 27/08/13
+ * Time: 12:17
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
  */
 
 ConsoleIO.namespace("ConsoleIO.App.Manager");

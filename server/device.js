@@ -73,7 +73,7 @@ function Device(application, request, manager) {
      * @private
      * @defaultvalue
      */
-    this.plugins = {};
+    //this.plugins = {};
 
     /**
      * Various timestamps
@@ -119,7 +119,7 @@ Device.prototype.getInformation = function getInformation() {
         name: this.name,
         guid: this.guid,
         online: this.isOnline,
-        plugins: this.plugins,
+        //plugins: this.plugins,
         browser: this.device.browser,
         platform: this.device.platform,
         manufacture: this.device.manufacture,
@@ -304,25 +304,25 @@ Device.prototype.status = function status(data) {
  * @method plugin
  * @param {object} data response parameter object
  */
-Device.prototype.plugin = function plugin(data) {
-
-    /** add plugins **/
-    if (!this.plugins[data.name]) {
-        this.plugins[data.name] = { };
-    }
-
-    /** set plugin state **/
-    this.plugins[data.name].enabled = data.enabled;
-
-    /**
-     * device:name event is broadcast in the room
-     * and is received by all clients subscribed to the room
-     *
-     * @event Device#device:web
-     * @type {object}
-     */
-    this.broadcast('plugin:' + this.guid, data);
-};
+//Device.prototype.plugin = function plugin(data) {
+//
+//    /** add plugins **/
+//    if (!this.plugins[data.name]) {
+//        this.plugins[data.name] = { };
+//    }
+//
+//    /** set plugin state **/
+//    this.plugins[data.name].enabled = data.enabled;
+//
+//    /**
+//     * device:name event is broadcast in the room
+//     * and is received by all clients subscribed to the room
+//     *
+//     * @event Device#device:web
+//     * @type {object}
+//     */
+//    this.broadcast('plugin:' + this.guid, data);
+//};
 
 /**
  * emits events

@@ -1,9 +1,10 @@
 /**
- * Created with JetBrains WebStorm.
+ * Created with IntelliJ IDEA.
  * User: nisheeth
- * Date: 18/06/13
- * Time: 12:38
- * To change this template use File | Settings | File Templates.
+ * Date: 27/08/13
+ * Time: 12:17
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
  */
 
 ConsoleIO.namespace("ConsoleIO.Settings");
@@ -15,12 +16,12 @@ ConsoleIO.Settings = {
     pageSize: {
         active: 50,
         list: [50, 100, 250, 500]
-    },
-    WebIO: {
-        remoteControl: false,
-        docked: false,
-        position: 'bottom',
-        height: '300px',
-        width: '99%'
     }
+//    web: {
+//        remoteControl: false,
+//        docked: false,
+//        position: 'bottom',
+//        height: '300px',
+//        width: '99%'
+//    }
 };

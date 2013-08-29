@@ -241,13 +241,13 @@ function Manager() {
              * Device status event routes handler.
              * gives device status information
              */
-            status: defineRouteHandler(devices, 'status'),
+            status: defineRouteHandler(devices, 'status')
 
             /**
              * Device plugin event routes handler.
              * add plugins
              */
-            plugin: defineRouteHandler(devices, 'plugin')
+            //plugin: defineRouteHandler(devices, 'plugin')
         });
 
         /**
@@ -272,17 +272,17 @@ function Manager() {
             /**
              * User command to add/remove plugin from client device
              */
-            plugin: defineUserCommandRouteHandler('plugin', true),
+            //plugin: defineUserCommandRouteHandler('plugin', true),
 
             /**
              * User command to control WebIO console on client device
              */
-            pluginControl: defineUserCommandRouteHandler('pluginControl', true),
+            //pluginControl: defineUserCommandRouteHandler('pluginControl', true),
 
             /**
              * User command to configure WebIO console on client device
              */
-            pluginConfig: defineUserCommandRouteHandler('pluginConfig', true),
+            //pluginConfig: defineUserCommandRouteHandler('pluginConfig', true),
 
             /**
              * User command to reload client device

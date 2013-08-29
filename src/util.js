@@ -1,9 +1,12 @@
 /**
- * util
- *
+ * Created with IntelliJ IDEA.
  * User: nisheeth
  * Date: 19/05/13
  * Time: 14:24
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ *
+ * util
  */
 
 (function (exports, global) {

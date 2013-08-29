@@ -1,9 +1,12 @@
 /**
- * Storage
- *
+ * Created with IntelliJ IDEA.
  * User: nisheeth
  * Date: 26/08/13
  * Time: 09:39
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ *
+ * Storage
  */
 
 (function (exports, global) {

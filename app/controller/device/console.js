@@ -1,9 +1,10 @@
 /**
  * Created with IntelliJ IDEA.
  * User: nisheeth
- * Date: 19/05/13
- * Time: 13:32
- * To change this template use File | Settings | File Templates.
+ * Date: 27/08/13
+ * Time: 12:17
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
  */
 
 ConsoleIO.namespace("ConsoleIO.App.Device.Console");
@@ -169,14 +170,14 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
 };
 
 ConsoleIO.App.Device.Console.prototype.notify = function notify(clearAll) {
-    if (this.model.plugins.WebIO.enabled) {
-        ConsoleIO.Service.Socket.emit('pluginControl', {
-            guid: this.model.guid,
-            pageSize: ConsoleIO.Settings.pageSize.active,
-            filters: this.filters,
-            search: this.view.getValue('searchText'),
-            paused: this.paused,
-            clear: !!clearAll
-        });
-    }
+//    if (this.model.plugins.Web.enabled) {
+//        ConsoleIO.Service.Socket.emit('pluginControl', {
+//            guid: this.model.guid,
+//            pageSize: ConsoleIO.Settings.pageSize.active,
+//            filters: this.filters,
+//            search: this.view.getValue('searchText'),
+//            paused: this.paused,
+//            clear: !!clearAll
+//        });
+//    }
 };

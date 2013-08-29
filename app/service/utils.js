@@ -1,9 +1,10 @@
 /**
- * Created with JetBrains WebStorm.
+ * Created with IntelliJ IDEA.
  * User: nisheeth
- * Date: 18/06/13
- * Time: 12:29
- * To change this template use File | Settings | File Templates.
+ * Date: 27/08/13
+ * Time: 12:17
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
  */
 
 if (typeof window.ConsoleIO === "undefined") {

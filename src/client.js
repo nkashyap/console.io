@@ -1,9 +1,12 @@
 /**
- * Client browser
- *
+ * Created with IntelliJ IDEA.
  * User: nisheeth
  * Date: 27/08/13
  * Time: 12:17
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ *
+ * Client browser
  */
 
 (function (exports, global) {
@@ -292,35 +295,18 @@
         }(location.href)), 500);
     }
 
-    function onPlugin(data) {
-        if (data.WebIO) {
-            if (data.WebIO.enabled) {
-                exports.util.requireCSS(exports.util.getUrl(exports.config) + "resources/console.css");
-
-                var config = exports.util.extend({}, exports.config);
-                exports.web.setUp(exports.util.extend(config, data.WebIO));
-            } else if (!data.WebIO.enabled) {
-                exports.web.disabled();
-            }
-        }
-//        if (data.WebIO) {
-//            if (!global.WebIO && data.WebIO.enabled) {
-//                var url = exports.util.getUrl(exports.config);
+//    function onPlugin(data) {
+//        if (data.web) {
+//            if (data.web.enabled) {
+//                exports.util.requireCSS(exports.util.getUrl(exports.config) + "resources/console.css");
 //
-//                exports.util.requireCSS(url + "resources/console.css");
-//                exports.util.requireScript(url + "addons/web.js", function () {
-//                    var config = exports.util.extend({}, exports.config);
-//
-//                    global.WebIO.init(exports.util.extend(config, data.WebIO));
-//                });
-//
-//            } else if (global.WebIO && !data.WebIO.enabled) {
-//                global.WebIO = global.WebIO.destroy();
-//                exports.util.removeFile("resources/console.css");
-//                exports.util.removeFile("addons/web.js");
+//                var config = exports.util.extend({}, exports.config);
+//                exports.web.setUp(exports.util.extend(config, data.web));
+//            } else if (!data.WebIO.enabled) {
+//                exports.web.disabled();
 //            }
 //        }
-    }
+//    }
 
     function onHTMLContent() {
         var parentNode,
@@ -457,7 +443,7 @@
         exports.transport.on('device:captureScreen', onCaptureScreen);
         exports.transport.on('device:status', onStatus);
         exports.transport.on('device:reload', onReload);
-        exports.transport.on('device:plugin', onPlugin);
+        //exports.transport.on('device:plugin', onPlugin);
         exports.transport.on('device:name', onName);
     };
 

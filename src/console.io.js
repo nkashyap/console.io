@@ -1,9 +1,12 @@
 /**
- * Console.IO main init file
- *
+ * Created with IntelliJ IDEA.
  * User: nisheeth
  * Date: 26/08/13
  * Time: 09:51
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ *
+ * Console.IO main init file
  */
 
 (function (exports, global) {

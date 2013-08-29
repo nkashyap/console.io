@@ -3,7 +3,10 @@
  * User: nisheeth
  * Date: 27/08/13
  * Time: 19:39
- * To change this template use File | Settings | File Templates.
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ *
+ * Grunt Build file
  */
 
 module.exports = function (grunt) {
@@ -15,8 +18,13 @@ module.exports = function (grunt) {
         concat: {
             options: {
                 separator: '\n\n',
-                banner: '/*! <%= pkg.project %> - v<%= pkg.version %> - ' +
-                    '   <%= grunt.template.today("yyyy-mm-dd") %> */\n\n' +
+                banner: '/**\n * Name: <%= pkg.project %>\n' +
+                    ' * Version: <%= pkg.version %>\n' +
+                    ' * Description: <%= pkg.description %>\n' +
+                    ' * Website: <%= pkg.homepage %>\n' +
+                    ' * Author: <%= pkg.author.name %>\n' +
+                    ' * Email: <%= pkg.author.email %>\n' +
+                    ' * Date: <%= grunt.template.today("yyyy-mm-dd") %>\n*/\n\n' +
                     'var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);\n\n' +
                     '(function(){\n\n',
                 footer: '\n\nif (typeof define === "function" && define.amd) {\n' +
@@ -45,8 +53,13 @@ module.exports = function (grunt) {
 
         uglify: {
             options: {
-                // the banner is inserted at the top of the output
-                banner: '/*! <%= pkg.project %> <%= grunt.template.today("dd-mm-yyyy") %> */\n'
+                banner: '/**\n * Name: <%= pkg.project %>\n' +
+                    ' * Version: <%= pkg.version %>\n' +
+                    ' * Description: <%= pkg.description %>\n' +
+                    ' * Website: <%= pkg.homepage %>\n' +
+                    ' * Author: <%= pkg.author.name %>\n' +
+                    ' * Email: <%= pkg.author.email %>\n' +
+                    ' * Date: <%= grunt.template.today("yyyy-mm-dd") %>\n*/\n\n'
             },
             console: {
                 files: {
