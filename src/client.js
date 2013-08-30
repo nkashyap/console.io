@@ -13,19 +13,6 @@
 
     var client = exports.client = {};
 
-    function showInfo(content, online) {
-        var className = "consoleio",
-            bgColor = online ? 'rgba(92, 255, 0, 0.5)' : 'rgba(192, 192, 192, 0.5)',
-            css = "content: 'Console.IO:" + content + "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
-                "font-size: 12px; font-weight: bold; color: rgb(111, 114, 117); " +
-                "background-color: " + bgColor + "; border: 1px solid rgb(111, 114, 117); " +
-                "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
-
-        exports.util.deleteCSSRule(exports.style, "." + className + "::after");
-        exports.util.addCSSRule(exports.style, "." + className + "::after", css);
-        document.body.setAttribute("class", className);
-    }
-
     function storeData(data, online) {
         if (!exports.guid) {
             exports.guid = data.guid;
@@ -38,34 +25,31 @@
             exports.storage.addItem("deviceName", data.name, 365);
         }
 
-        showInfo([exports.name, exports.guid, online ? 'online' : 'offline'].join('|'), online);
+        exports.util.showInfo([exports.name, exports.guid, online ? 'online' : 'offline'].join('|'), online);
     }
 
-    function addFunctionBindSupport() {
-        if (!Function.prototype.bind) {
-            Function.prototype.bind = function (oThis) {
-                if (typeof this !== "function") {
-                    // closest thing possible to the ECMAScript 5 internal IsCallable function
-                    throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
-                }
-
-                var aArgs = Array.prototype.slice.call(arguments, 1),
-                    fToBind = this,
-                    fNOP = function () {
-                    },
-                    fBound = function () {
-                        return fToBind.apply(this instanceof fNOP && oThis
-                            ? this
-                            : oThis,
-                            aArgs.concat(Array.prototype.slice.call(arguments)));
-                    };
-
-                fNOP.prototype = this.prototype;
-                fBound.prototype = new fNOP();
-
-                return fBound;
-            };
+    function addBindSupport() {
+        if (Function.prototype.bind) {
+            return false;
         }
+
+        Function.prototype.bind = function bind(oThis) {
+            if (typeof this !== "function") {
+                throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+            }
+
+            var aArgs = Array.prototype.slice.call(arguments, 1),
+                fToBind = this,
+                fNOP = function () {
+                },
+                fBound = function () {
+                    return fToBind.apply(this instanceof fNOP && oThis ? this : oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
+                };
+
+            fNOP.prototype = this.prototype;
+            fBound.prototype = new fNOP();
+            return fBound;
+        };
     }
 
     function getStyleRule() {
@@ -110,36 +94,9 @@
             getStyledElement(child, clone.children[index]);
         });
 
-        clone.setAttribute('style', (element.style.display !== 'none') ? getAppliedStyles(element) : 'display:none;');
+        clone.setAttribute('style', (element.style.display !== 'none') ? exports.util.getAppliedStyles(element) : 'display:none;');
 
         return clone;
-    }
-
-    function getAppliedStyles(element) {
-        var win = document.defaultView || global,
-            styleNode = [];
-
-        if (win.getComputedStyle) {
-            /* Modern browsers */
-            var styles = win.getComputedStyle(element, '');
-            exports.util.forEach(exports.util.toArray(styles), function (style) {
-                styleNode.push(style + ':' + styles.getPropertyValue(style));
-            });
-
-        } else if (element.currentStyle) {
-            /* IE */
-            exports.util.forEachProperty(element.currentStyle, function (value, style) {
-                styleNode.push(style + ':' + value);
-            });
-
-        } else {
-            /* Ancient browser..*/
-            exports.util.forEach(exports.util.toArray(element.style), function (style) {
-                styleNode.push(style + ':' + element.style[style]);
-            });
-        }
-
-        return styleNode.join("; ");
     }
 
     function getBrowserInfo(obj) {
@@ -180,29 +137,10 @@
         return xhr;
     }
 
+
     function configWebConsole(data) {
         if (data) {
             exports.web.setConfig(data);
-
-            var info = [exports.name, exports.guid, 'online'];
-
-            if (data.paused) {
-                info.push('paused');
-            }
-
-            if (data.filters && data.filters.length > 0) {
-                info.push('filters:' + data.filters.join(","));
-            }
-
-            if (data.pageSize) {
-                info.push('pagesize:' + data.pageSize);
-            }
-
-            if (data.search) {
-                info.push('search:' + data.search);
-            }
-
-            showInfo(info.join('|'), true);
         }
     }
 
@@ -213,14 +151,9 @@
             exports.web.disabled();
         }
 
-        if (data.config) {
-            configWebConsole(data.config);
-        }
+        configWebConsole(data.config);
     }
 
-    function onDisconnect() {
-        showInfo([exports.name, exports.guid, 'offline'].join('|'));
-    }
 
     function onReady(data) {
         storeData(data);
@@ -253,15 +186,14 @@
         }
     }
 
-    function onName(data) {
+    function onNameChanged(data) {
         if (!data.name) {
             exports.storage.removeItem('deviceName');
         }
 
         exports.name = data.name;
         exports.storage.addItem('deviceName', exports.name, 365);
-
-        showInfo([exports.name, exports.guid, 'online'].join('|'), true);
+        exports.util.showInfo([exports.name, exports.guid, 'online'].join('|'), true);
     }
 
     function onStatus() {
@@ -279,36 +211,65 @@
     }
 
     function onFileSource(data) {
-        var xmlhttp = getXMLHttp();
-        if (xmlhttp) {
-            xmlhttp.open("GET", data.url, true);
-            xmlhttp.onreadystatechange = function () {
-                if (xmlhttp.readyState === 4) {
-                    var content;
-                    if (xmlhttp.status === 200) {
-                        content = xmlhttp.responseText;
-                    } else {
-                        content = xmlhttp.statusText;
+        try {
+            //TODO use proxy for cross-domain files
+            var xmlhttp = getXMLHttp();
+            if (xmlhttp) {
+                xmlhttp.open("GET", data.url, true);
+                xmlhttp.onreadystatechange = function () {
+                    if (xmlhttp.readyState === 4) {
+                        var content;
+                        if (xmlhttp.status === 200) {
+                            content = xmlhttp.responseText;
+                        } else {
+                            content = xmlhttp.statusText;
+                        }
+
+                        exports.transport.emit('source', {
+                            url: data.url,
+                            content: content
+                        });
                     }
+                };
 
-                    exports.transport.emit('source', { url: data.url, content: content });
-                }
-            };
+                xmlhttp.onloadend = function onloadend(e) {
+                    exports.console.info('file:onloadend', e);
+                };
 
-            //xmlhttp.onload  = function (e) { ConsoleIO.native.log('onload',e); };
-            xmlhttp.onerror = function (e) {
-                exports.transport.emit('source', { url: data.url, content: 'XMLHttpRequest Error: Possibally Access-Control-Allow-Origin security issue.' });
-            };
+                xmlhttp.onloadstart = function onloadstart(e) {
+                    exports.console.info('file:onloadstart', e);
+                };
 
-            xmlhttp.send(null);
-        } else {
-            exports.transport.emit('source', { url: data.url, content: 'XMLHttpRequest request not supported by the browser.' });
+                xmlhttp.onprogress = function onprogress(e) {
+                    exports.console.info('file:onprogress', e);
+                };
+
+                xmlhttp.onload = function onload(e) {
+                    exports.console.info('file:onload', e);
+                };
+
+                xmlhttp.onerror = function (e) {
+                    exports.console.exception('file:onerror', e);
+                    exports.transport.emit('source', {
+                        url: data.url,
+                        content: 'XMLHttpRequest Error: Possibally Access-Control-Allow-Origin security issue.'
+                    });
+                };
+
+                xmlhttp.send(null);
+            } else {
+                exports.transport.emit('source', {
+                    url: data.url,
+                    content: 'XMLHttpRequest request not supported by the browser.'
+                });
+            }
+        } catch (e) {
+            exports.console.error(e);
         }
     }
 
     function onReload() {
-
-        exports.console.log('executing reload command');
+        exports.console.log('Reloading...');
 
         global.setTimeout((function (url) {
             return function () {
@@ -318,56 +279,38 @@
                     global.location.assign(url);
                 }
             };
-        }(location.href)), 500);
+        }(location.href)), 100);
     }
 
     function onHTMLContent() {
-        var parentNode,
-            webLog = document.getElementById(exports.getConfig().consoleId);
+        exports.web.hide();
 
-        if (webLog) {
-            parentNode = webLog.parentNode;
-            parentNode.removeChild(webLog);
-        }
+        exports.transport.emit('content', {
+            content: document.documentElement.innerHTML
+        });
 
-        exports.transport.emit('content', { content: document.documentElement.innerHTML });
-
-        if (webLog) {
-            parentNode.appendChild(webLog);
-        }
+        exports.web.show();
     }
 
     function onPreview() {
-        var parentNode, preview,
-            webLog = document.getElementById(exports.getConfig().consoleId);
+        exports.web.hide();
 
-        if (webLog) {
-            parentNode = webLog.parentNode;
-            parentNode.removeChild(webLog);
-        }
+        exports.transport.emit('previewContent', {
+            content: '<html><head><style type="text/css">' +
+                getStyleRule() + '</style></head>' +
+                getStyledElement().outerHTML + '</html>'
+        });
 
-        preview = '<html><head><style type="text/css">' +
-            getStyleRule() + '</style></head>' +
-            getStyledElement().outerHTML + '</html>';
-
-        exports.transport.emit('previewContent', { content: preview });
-
-        if (webLog) {
-            parentNode.appendChild(webLog);
-        }
+        exports.web.show();
     }
 
     function onCaptureScreen() {
-        addFunctionBindSupport();
+
+        addBindSupport();
 
         exports.util.requireScript(exports.util.getUrl('html2canvas'), function () {
-            var parentNode,
-                webLog = document.getElementById(exports.getConfig().consoleId);
 
-            if (webLog) {
-                parentNode = webLog.parentNode;
-                parentNode.removeChild(webLog);
-            }
+            exports.web.hide();
 
             global.html2canvas(document.body, {
                 completed: false,
@@ -378,16 +321,21 @@
                     if (!this.completed) {
                         try {
                             this.completed = true;
-                            exports.transport.emit('screenShot', { screen: canvas.toDataURL() });
+                            exports.transport.emit('screenShot', {
+                                screen: canvas.toDataURL()
+                            });
+
                         } catch (e) {
-                            exports.transport.emit('screenShot', { screen: false });
+
+                            exports.transport.emit('screenShot', {
+                                screen: false
+                            });
+
                             exports.console.exception(e);
                         }
                     }
 
-                    if (webLog) {
-                        parentNode.appendChild(webLog);
-                    }
+                    exports.web.show();
                 }
             });
         });
@@ -396,9 +344,10 @@
     function onFileList() {
         var scripts = [],
             styles = [],
-            origin = (global.location.origin || global.location.href.replace(global.location.pathname, ""));
+            origin = exports.util.getOrigin();
 
-        exports.util.forEach(exports.util.toArray(document.scripts), function (script) {
+        //scripts
+        exports.util.forEach(exports.util.getScripts(), function (script) {
             if (script.src) {
                 scripts.push(script.src.replace(origin, ""));
             }
@@ -411,7 +360,8 @@
             });
         }
 
-        exports.util.forEach(exports.util.toArray(document.getElementsByTagName('link')), function (style) {
+        //styles
+        exports.util.forEach(exports.util.getStyles(), function (style) {
             if (style.href) {
                 styles.push(style.href.replace(origin, ""));
             }
@@ -426,14 +376,14 @@
     }
 
     function onCommand(cmd) {
-        exports.console.log('executing script');
+        exports.console.info('executing...');
 
         var evalFun, result;
         try {
             //Function first argument is Deprecated
             evalFun = new Function([], "return " + cmd);
             result = evalFun();
-            if (result) {
+            if (typeof result !== 'undefined') {
                 exports.console.command(result);
             }
         } catch (e) {
@@ -443,7 +393,6 @@
 
 
     client.setUp = function setUp() {
-        exports.transport.on('disconnect', onDisconnect);
         exports.transport.on('device:ready', onReady);
         exports.transport.on('device:online', onOnline);
         exports.transport.on('device:offline', onOffline);
@@ -455,7 +404,7 @@
         exports.transport.on('device:captureScreen', onCaptureScreen);
         exports.transport.on('device:status', onStatus);
         exports.transport.on('device:reload', onReload);
-        exports.transport.on('device:name', onName);
+        exports.transport.on('device:name', onNameChanged);
 
         exports.transport.on('device:web:control', configWebConsole);
         exports.transport.on('device:web:config', setUpWebConsole);

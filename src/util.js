@@ -15,37 +15,71 @@
         domReady = false,
         pendingCallback = [];
 
-    util.queryParams = function queryParams() {
-        var i = 0,
-            script,
-            src,
-            params = {},
-            scripts = Array.prototype.slice.call(document.scripts || document.getElementsByName('script'));
+    util.getScripts = function getScripts() {
+        return exports.util.toArray(document.scripts || document.getElementsByName('script'));
+    };
 
-        // get test info
-        for (; !!(script = scripts[i++]);) {
-            //TODO script.getAttribute possibility can be removed
-            src = (script.src ? script.src : (script.getAttribute('src') || '')).toLowerCase();
+    util.getStyles = function getStyles() {
+        return exports.util.toArray(document.getElementsByTagName('link'));
+    };
+
+    util.getFirstElement = function getFirstElement(element) {
+        return element ? (element.firstElementChild || element.firstChild) : false;
+    };
+
+    util.getOrigin = function getOrigin() {
+        return global.location.origin || global.location.protocol + '//' + global.location.hostname;
+    };
+
+    util.getHashParams = function getHashParams() {
+        var params = {},
+            hash = global.location.hash || global.location.href.replace(util.getOrigin() + global.location.pathname, '');
+
+        if (hash) {
+            util.forEach(hash.split('#'), function (item) {
+                var param = item.split('=');
+                params[param[0]] = param[1];
+            });
+        }
+
+        return params;
+    };
+
+    util.getQueryParams = function getQueryParams(url) {
+        url = url || global.location.href;
+
+        var params = {},
+            queryIndex = url.indexOf('?');
+
+        if (queryIndex > -1) {
+            util.forEach(url.substring(queryIndex + 1, url.length).split('&'), function (item) {
+                var param = item.split('=');
+                params[param[0]] = param[1];
+            });
+        }
+
+        return params;
+    };
+
+    util.queryParams = function queryParams() {
+        var params = {},
+            scripts = util.getScripts();
+
+        util.every(scripts, function (script) {
+            var src = (script.src || script.getAttribute('src') || '').toLowerCase();
+
             if (src.indexOf('console.io.js') === -1) {
-                continue;
+                return true;
             }
 
             params.secure = src.indexOf('https') > -1;
-            var queryIndex = src.indexOf('?');
-            if (queryIndex > -1) {
-                var j = 0,
-                    param,
-                    queryParams = src.substring(queryIndex + 1, src.length).split('&');
-
-                for (; !!(param = queryParams[j++]);) {
-                    param = param.split('=');
-                    params[param[0]] = param[1];
-                }
-            }
+            util.extend(params, util.getQueryParams(src));
 
             if (!params.url) {
                 var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im'),
+                    queryIndex = src.indexOf('?'),
                     url = queryIndex > -1 ? src.substring(0, queryIndex) : src;
+
                 params.url = (params.secure ? 'https://' : 'http://') + url.match(re)[1].toString();
             }
 
@@ -53,29 +87,10 @@
                 params.base = src.indexOf('/console.io/') > -1 ? 'console.io/' : '';
             }
 
-            break;
-        }
+            return false;
+        });
 
-        // override test config from location
-        if (location) {
-            var origin = location.origin ? location.origin : location.protocol + '//' + location.hostname,
-                hash = location.hash ? location.hash : location.href.replace(origin + location.pathname, '');
-
-            if (hash && hash.length > 0) {
-                var item,
-                    z = 0,
-                    hashItems = hash.split('#'),
-                    length = hashItems.length;
-
-                while (length > z) {
-                    item = hashItems[z++];
-                    if (!!item) {
-                        var queryParam = item.split('=');
-                        params[queryParam[0]] = queryParam[1];
-                    }
-                }
-            }
-        }
+        util.extend(params, util.getHashParams());
 
         return params;
     };
@@ -304,6 +319,34 @@
         });
     };
 
+    util.getAppliedStyles = function getAppliedStyles(element) {
+        var win = document.defaultView || global,
+            styleNode = [];
+
+        if (win.getComputedStyle) {
+            /* Modern browsers */
+            var styles = win.getComputedStyle(element, '');
+
+            util.forEach(util.toArray(styles), function (style) {
+                styleNode.push(style + ':' + styles.getPropertyValue(style));
+            });
+
+        } else if (element.currentStyle) {
+            /* IE */
+            util.forEachProperty(element.currentStyle, function (value, style) {
+                styleNode.push(style + ':' + value);
+            });
+
+        } else {
+            /* Ancient browser..*/
+            util.forEach(util.toArray(element.style), function (style) {
+                styleNode.push(style + ':' + element.style[style]);
+            });
+        }
+
+        return styleNode.join("; ");
+    };
+
     util.getUrl = function getUrl(name) {
         var config = exports.getConfig(),
             url = config.url,
@@ -313,7 +356,20 @@
             url = url.substr(0, last);
         }
 
-        return (url + (config.base ? '/' + config.base : '/') + config[name]);
+        return (url + (config.base.length > 0 ? '/' + config.base : '/') + config[name]);
+    };
+
+    util.showInfo = function showInfo(content, online) {
+        var className = "consoleio",
+            bgColor = online ? 'rgba(92, 255, 0, 0.5)' : 'rgba(192, 192, 192, 0.5)',
+            css = "content: 'Console.IO:" + content + "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
+                "font-size: 12px; font-weight: bold; color: rgb(111, 114, 117); " +
+                "background-color: " + bgColor + "; border: 1px solid rgb(111, 114, 117); " +
+                "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
+
+        util.deleteCSSRule(exports.style, "." + className + "::after");
+        util.addCSSRule(exports.style, "." + className + "::after", css);
+        document.body.setAttribute("class", className);
     };
 
     util.isIFrameChild = function isIFrameChild() {

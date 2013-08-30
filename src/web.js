@@ -35,7 +35,7 @@
 
         this.view = new View(this);
 
-        exports.transport.on('device:web:control', this.setControl, this);
+        //exports.transport.on('device:web:control', this.setControl, this);
     }
 
     Controller.prototype.setUp = function setUp() {
@@ -58,26 +58,25 @@
     };
 
     Controller.prototype.setControl = function setControl(data) {
-        if (data.clear) {
-            this.view.clear();
-        } else {
-            if (typeof data.paused !== 'undefined') {
-                this.control.paused = data.paused;
-            }
+        if (typeof data.paused !== 'undefined') {
+            this.control.paused = data.paused;
+        }
 
-            if (typeof data.filters !== 'undefined') {
-                this.control.filters = data.filters;
-            }
+        if (typeof data.filters !== 'undefined') {
+            this.control.filters = data.filters;
+        }
 
-            if (data.pageSize !== this.control.pageSize) {
-                this.control.pageSize = data.pageSize;
-            }
+        if (data.pageSize !== this.control.pageSize) {
+            this.control.pageSize = data.pageSize;
+        }
 
-            if (data.search !== this.control.search) {
-                this.applySearch(data.search);
-            }
+        if (data.search !== this.control.search) {
+            this.applySearch(data.search);
+        }
 
-            this.view.clear();
+        this.view.clear();
+
+        if (!data.clear) {
             this.view.addBatch(this.getData(this.store.added));
             this.addBatch();
         }
@@ -97,6 +96,14 @@
         }
 
         return dataStore;
+    };
+
+    Controller.prototype.hide = function hide() {
+        return this.view.hide();
+    };
+
+    Controller.prototype.show = function show() {
+        return this.view.show();
     };
 
     Controller.prototype.add = function add(data) {
@@ -159,6 +166,24 @@
             this.clear();
             if (this.container.parentNode) {
                 this.container.parentNode.removeChild(this.container);
+                this.container = null;
+                this.target = null;
+            }
+        }
+    };
+
+    View.prototype.hide = function hide() {
+        if (this.target && this.container) {
+            this.target.removeChild(this.container);
+        }
+    };
+
+    View.prototype.show = function show() {
+        if (this.target && this.container) {
+            if (this.ctrl.config.position && this.ctrl.config.position === 'top') {
+                this.target.insertBefore(this.container, exports.util.getFirstElement(this.target));
+            } else {
+                this.target.appendChild(this.container);
             }
         }
     };
@@ -230,7 +255,7 @@
 
         if (config.target) {
             if (config.position && config.position === 'top') {
-                config.target.insertBefore(element, config.target.firstElementChild || config.target.firstChild);
+                config.target.insertBefore(element, exports.util.getFirstElement(config.target));
             } else {
                 config.target.appendChild(element);
             }
@@ -331,7 +356,7 @@
                 });
             }, this);
 
-            this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);
+            this.container.insertBefore(fragment, exports.util.getFirstElement(this.container));
             this.removeOverflowElement();
         }
     };
@@ -381,9 +406,39 @@
         }
     };
 
-    web.setConfig = function setConfig(cfg) {
+    web.setConfig = function setConfig(data) {
         if (web.console) {
-            web.console.setControl(cfg);
+            web.console.setControl(data);
+        }
+
+        var info = [exports.name, exports.guid, exports.transport.isConnected() ? 'online' : 'offline'];
+
+        if (data.paused) {
+            info.push('paused');
+        }
+
+        if (data.filters && data.filters.length > 0) {
+            info.push('filters:' + data.filters.join(","));
+        }
+
+        info.push('pagesize:' + data.pageSize);
+
+        if (data.search) {
+            info.push('search:' + data.search);
+        }
+
+        exports.util.showInfo(info.join('|'), exports.transport.isConnected());
+    };
+
+    web.show = function show() {
+        if (web.console) {
+            return web.console.show();
+        }
+    };
+
+    web.hide = function hide() {
+        if (web.console) {
+            return web.console.hide();
         }
     };
 

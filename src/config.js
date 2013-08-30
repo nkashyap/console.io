@@ -11,18 +11,21 @@
 
 (function (exports, global) {
 
-    exports.guid = '';
-    exports.name = '';
     var defaultConfig = {
         url: '',
         base: '',
         secure: false,
+
         html2canvas: "addons/html2canvas.js",
+        //"console.io": "console.io.js",
         "socket.io": "socket.io/socket.io.js",
         webStyle: "resources/console.css",
         proxy: 'proxy',
-        forceReconnection: true,
+
+        forceReconnect: true,
         forceReconnectInterval: 5000,
+        forceReconnectMaxTry: 10,
+
         nativeConsole: true,
         web: false,
         webOnly: false,
@@ -40,13 +43,13 @@
         if (!log && document.body) {
             log = document.createElement('ul');
             log.setAttribute('id', 'log');
-            document.body.insertBefore(log, document.body.firstElementChild || document.body.firstChild);
+            document.body.insertBefore(log, exports.util.getFirstElement(document.body));
         }
 
         if (log) {
             li = document.createElement('li');
             li.innerHTML = msg;
-            log.insertBefore(li, log.firstElementChild || log.firstChild);
+            log.insertBefore(li, exports.util.getFirstElement(log));
         }
     }
 
@@ -73,6 +76,10 @@
             exports.web.setUp();
         }
     }
+
+
+    exports.guid = '';
+    exports.name = '';
 
     exports.configure = function configure(cfg) {
         exports.util.extend(defaultConfig, cfg);

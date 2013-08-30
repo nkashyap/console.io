@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-08-29
+ * Date: 2013-08-30
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -30,37 +30,71 @@ ConsoleIO.version = "0.2.0";
         domReady = false,
         pendingCallback = [];
 
-    util.queryParams = function queryParams() {
-        var i = 0,
-            script,
-            src,
-            params = {},
-            scripts = Array.prototype.slice.call(document.scripts || document.getElementsByName('script'));
+    util.getScripts = function getScripts() {
+        return exports.util.toArray(document.scripts || document.getElementsByName('script'));
+    };
 
-        // get test info
-        for (; !!(script = scripts[i++]);) {
-            //TODO script.getAttribute possibility can be removed
-            src = (script.src ? script.src : (script.getAttribute('src') || '')).toLowerCase();
+    util.getStyles = function getStyles() {
+        return exports.util.toArray(document.getElementsByTagName('link'));
+    };
+
+    util.getFirstElement = function getFirstElement(element) {
+        return element ? (element.firstElementChild || element.firstChild) : false;
+    };
+
+    util.getOrigin = function getOrigin() {
+        return global.location.origin || global.location.protocol + '//' + global.location.hostname;
+    };
+
+    util.getHashParams = function getHashParams() {
+        var params = {},
+            hash = global.location.hash || global.location.href.replace(util.getOrigin() + global.location.pathname, '');
+
+        if (hash) {
+            util.forEach(hash.split('#'), function (item) {
+                var param = item.split('=');
+                params[param[0]] = param[1];
+            });
+        }
+
+        return params;
+    };
+
+    util.getQueryParams = function getQueryParams(url) {
+        url = url || global.location.href;
+
+        var params = {},
+            queryIndex = url.indexOf('?');
+
+        if (queryIndex > -1) {
+            util.forEach(url.substring(queryIndex + 1, url.length).split('&'), function (item) {
+                var param = item.split('=');
+                params[param[0]] = param[1];
+            });
+        }
+
+        return params;
+    };
+
+    util.queryParams = function queryParams() {
+        var params = {},
+            scripts = util.getScripts();
+
+        util.every(scripts, function (script) {
+            var src = (script.src || script.getAttribute('src') || '').toLowerCase();
+
             if (src.indexOf('console.io.js') === -1) {
-                continue;
+                return true;
             }
 
             params.secure = src.indexOf('https') > -1;
-            var queryIndex = src.indexOf('?');
-            if (queryIndex > -1) {
-                var j = 0,
-                    param,
-                    queryParams = src.substring(queryIndex + 1, src.length).split('&');
-
-                for (; !!(param = queryParams[j++]);) {
-                    param = param.split('=');
-                    params[param[0]] = param[1];
-                }
-            }
+            util.extend(params, util.getQueryParams(src));
 
             if (!params.url) {
                 var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im'),
+                    queryIndex = src.indexOf('?'),
                     url = queryIndex > -1 ? src.substring(0, queryIndex) : src;
+
                 params.url = (params.secure ? 'https://' : 'http://') + url.match(re)[1].toString();
             }
 
@@ -68,29 +102,10 @@ ConsoleIO.version = "0.2.0";
                 params.base = src.indexOf('/console.io/') > -1 ? 'console.io/' : '';
             }
 
-            break;
-        }
+            return false;
+        });
 
-        // override test config from location
-        if (location) {
-            var origin = location.origin ? location.origin : location.protocol + '//' + location.hostname,
-                hash = location.hash ? location.hash : location.href.replace(origin + location.pathname, '');
-
-            if (hash && hash.length > 0) {
-                var item,
-                    z = 0,
-                    hashItems = hash.split('#'),
-                    length = hashItems.length;
-
-                while (length > z) {
-                    item = hashItems[z++];
-                    if (!!item) {
-                        var queryParam = item.split('=');
-                        params[queryParam[0]] = queryParam[1];
-                    }
-                }
-            }
-        }
+        util.extend(params, util.getHashParams());
 
         return params;
     };
@@ -319,6 +334,34 @@ ConsoleIO.version = "0.2.0";
         });
     };
 
+    util.getAppliedStyles = function getAppliedStyles(element) {
+        var win = document.defaultView || global,
+            styleNode = [];
+
+        if (win.getComputedStyle) {
+            /* Modern browsers */
+            var styles = win.getComputedStyle(element, '');
+
+            util.forEach(util.toArray(styles), function (style) {
+                styleNode.push(style + ':' + styles.getPropertyValue(style));
+            });
+
+        } else if (element.currentStyle) {
+            /* IE */
+            util.forEachProperty(element.currentStyle, function (value, style) {
+                styleNode.push(style + ':' + value);
+            });
+
+        } else {
+            /* Ancient browser..*/
+            util.forEach(util.toArray(element.style), function (style) {
+                styleNode.push(style + ':' + element.style[style]);
+            });
+        }
+
+        return styleNode.join("; ");
+    };
+
     util.getUrl = function getUrl(name) {
         var config = exports.getConfig(),
             url = config.url,
@@ -328,7 +371,20 @@ ConsoleIO.version = "0.2.0";
             url = url.substr(0, last);
         }
 
-        return (url + (config.base ? '/' + config.base : '/') + config[name]);
+        return (url + (config.base.length > 0 ? '/' + config.base : '/') + config[name]);
+    };
+
+    util.showInfo = function showInfo(content, online) {
+        var className = "consoleio",
+            bgColor = online ? 'rgba(92, 255, 0, 0.5)' : 'rgba(192, 192, 192, 0.5)',
+            css = "content: 'Console.IO:" + content + "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
+                "font-size: 12px; font-weight: bold; color: rgb(111, 114, 117); " +
+                "background-color: " + bgColor + "; border: 1px solid rgb(111, 114, 117); " +
+                "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
+
+        util.deleteCSSRule(exports.style, "." + className + "::after");
+        util.addCSSRule(exports.style, "." + className + "::after", css);
+        document.body.setAttribute("class", className);
     };
 
     util.isIFrameChild = function isIFrameChild() {
@@ -710,7 +766,7 @@ ConsoleIO.version = "0.2.0";
     stringify.events = [
         '[object Event]', '[object KeyboardEvent]', '[object MouseEvent]', '[object TouchEvent]',
         '[object WheelEvent]', '[object UIEvent]', '[object CustomEvent]', '[object NotifyAudioAvailableEvent]',
-        '[object CompositionEvent]', '[object CloseEvent]', '[object MessageEvent]', '[object MessageEvent]'
+        '[object CompositionEvent]', '[object CloseEvent]', '[object MessageEvent]', '[object MessageEvent]', '[object XMLHttpRequestProgressEvent]'
     ];
 
     stringify.errors = [
@@ -1127,6 +1183,7 @@ ConsoleIO.version = "0.2.0";
     var transport = exports.transport = {},
         interval = null,
         pending = [],
+        reconnectTryCount = 0,
         config;
 
 
@@ -1155,12 +1212,15 @@ ConsoleIO.version = "0.2.0";
             params: exports.getConfig()
         });
 
+        reconnectTryCount = 0;
+
         transport.forceReconnect();
     }
 
     function onConnecting(mode) {
         transport.connectionMode = mode;
         exports.console.log('Connecting to the Server');
+        exports.util.showInfo([exports.name, exports.guid, 'connecting'].join('|'), false);
     }
 
     function onReconnect(mode, attempts) {
@@ -1171,28 +1231,36 @@ ConsoleIO.version = "0.2.0";
 
         exports.console.log('Reconnected to the Server after ' + attempts + ' attempts.');
 
+        reconnectTryCount = 0;
+
         transport.forceReconnect();
     }
 
     function onReconnecting() {
         exports.console.log('Reconnecting to the Server');
+        exports.util.showInfo([exports.name, exports.guid, 'reconnecting'].join('|'), false);
     }
 
     function onDisconnect() {
         exports.console.log('Disconnected from the Server');
+        exports.util.showInfo([exports.name, exports.guid, 'offline'].join('|'), false);
     }
 
     function onConnectFailed() {
         exports.console.warn('Failed to connect to the Server');
+        exports.util.showInfo([exports.name, exports.guid, 'connection failed'].join('|'), false);
     }
 
     function onReconnectFailed() {
         exports.console.warn('Failed to reconnect to the Server');
+        exports.util.showInfo([exports.name, exports.guid, 'reconnection failed'].join('|'), false);
     }
 
     function onError() {
         exports.console.warn('Socket Error');
+        exports.util.showInfo([exports.name, exports.guid, 'connection error'].join('|'), false);
     }
+
 
     transport.connectionMode = '';
     transport.subscribed = false;
@@ -1243,7 +1311,7 @@ ConsoleIO.version = "0.2.0";
         config = exports.getConfig();
         transport.io = exports.io.connect(config.url, {
             secure: config.secure,
-            resource: (config.base || '') + 'socket.io'
+            resource: config.base + 'socket.io'
         });
 
         // set console.io event
@@ -1261,7 +1329,6 @@ ConsoleIO.version = "0.2.0";
             global.attachEvent('onmessage', onMessage);
         }
 
-        // set events
         transport.io.on('connect', onConnect);
         transport.io.on('connecting', onConnecting);
         transport.io.on('reconnect', onReconnect);
@@ -1295,7 +1362,7 @@ ConsoleIO.version = "0.2.0";
     };
 
     transport.forceReconnect = function forceReconnect() {
-        if (!config.forceReconnection || interval) {
+        if (!config.forceReconnect || interval || config.forceReconnectMaxTry <= reconnectTryCount) {
             return false;
         }
 
@@ -1305,6 +1372,8 @@ ConsoleIO.version = "0.2.0";
             if (!connected || (connected && !transport.subscribed)) {
 
                 exports.console.log('forceReconnect reconnecting', exports.name);
+
+                reconnectTryCount++;
 
                 try {
                     transport.io.socket.disconnectSync();
@@ -1545,19 +1614,6 @@ ConsoleIO.version = "0.2.0";
 
     var client = exports.client = {};
 
-    function showInfo(content, online) {
-        var className = "consoleio",
-            bgColor = online ? 'rgba(92, 255, 0, 0.5)' : 'rgba(192, 192, 192, 0.5)',
-            css = "content: 'Console.IO:" + content + "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
-                "font-size: 12px; font-weight: bold; color: rgb(111, 114, 117); " +
-                "background-color: " + bgColor + "; border: 1px solid rgb(111, 114, 117); " +
-                "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
-
-        exports.util.deleteCSSRule(exports.style, "." + className + "::after");
-        exports.util.addCSSRule(exports.style, "." + className + "::after", css);
-        document.body.setAttribute("class", className);
-    }
-
     function storeData(data, online) {
         if (!exports.guid) {
             exports.guid = data.guid;
@@ -1570,34 +1626,31 @@ ConsoleIO.version = "0.2.0";
             exports.storage.addItem("deviceName", data.name, 365);
         }
 
-        showInfo([exports.name, exports.guid, online ? 'online' : 'offline'].join('|'), online);
+        exports.util.showInfo([exports.name, exports.guid, online ? 'online' : 'offline'].join('|'), online);
     }
 
-    function addFunctionBindSupport() {
-        if (!Function.prototype.bind) {
-            Function.prototype.bind = function (oThis) {
-                if (typeof this !== "function") {
-                    // closest thing possible to the ECMAScript 5 internal IsCallable function
-                    throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
-                }
-
-                var aArgs = Array.prototype.slice.call(arguments, 1),
-                    fToBind = this,
-                    fNOP = function () {
-                    },
-                    fBound = function () {
-                        return fToBind.apply(this instanceof fNOP && oThis
-                            ? this
-                            : oThis,
-                            aArgs.concat(Array.prototype.slice.call(arguments)));
-                    };
-
-                fNOP.prototype = this.prototype;
-                fBound.prototype = new fNOP();
-
-                return fBound;
-            };
+    function addBindSupport() {
+        if (Function.prototype.bind) {
+            return false;
         }
+
+        Function.prototype.bind = function bind(oThis) {
+            if (typeof this !== "function") {
+                throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+            }
+
+            var aArgs = Array.prototype.slice.call(arguments, 1),
+                fToBind = this,
+                fNOP = function () {
+                },
+                fBound = function () {
+                    return fToBind.apply(this instanceof fNOP && oThis ? this : oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
+                };
+
+            fNOP.prototype = this.prototype;
+            fBound.prototype = new fNOP();
+            return fBound;
+        };
     }
 
     function getStyleRule() {
@@ -1642,36 +1695,9 @@ ConsoleIO.version = "0.2.0";
             getStyledElement(child, clone.children[index]);
         });
 
-        clone.setAttribute('style', (element.style.display !== 'none') ? getAppliedStyles(element) : 'display:none;');
+        clone.setAttribute('style', (element.style.display !== 'none') ? exports.util.getAppliedStyles(element) : 'display:none;');
 
         return clone;
-    }
-
-    function getAppliedStyles(element) {
-        var win = document.defaultView || global,
-            styleNode = [];
-
-        if (win.getComputedStyle) {
-            /* Modern browsers */
-            var styles = win.getComputedStyle(element, '');
-            exports.util.forEach(exports.util.toArray(styles), function (style) {
-                styleNode.push(style + ':' + styles.getPropertyValue(style));
-            });
-
-        } else if (element.currentStyle) {
-            /* IE */
-            exports.util.forEachProperty(element.currentStyle, function (value, style) {
-                styleNode.push(style + ':' + value);
-            });
-
-        } else {
-            /* Ancient browser..*/
-            exports.util.forEach(exports.util.toArray(element.style), function (style) {
-                styleNode.push(style + ':' + element.style[style]);
-            });
-        }
-
-        return styleNode.join("; ");
     }
 
     function getBrowserInfo(obj) {
@@ -1712,29 +1738,10 @@ ConsoleIO.version = "0.2.0";
         return xhr;
     }
 
+
     function configWebConsole(data) {
         if (data) {
             exports.web.setConfig(data);
-
-            var info = [exports.name, exports.guid, 'online'];
-
-            if (data.paused) {
-                info.push('paused');
-            }
-
-            if (data.filters && data.filters.length > 0) {
-                info.push('filters:' + data.filters.join(","));
-            }
-
-            if (data.pageSize) {
-                info.push('pagesize:' + data.pageSize);
-            }
-
-            if (data.search) {
-                info.push('search:' + data.search);
-            }
-
-            showInfo(info.join('|'), true);
         }
     }
 
@@ -1745,14 +1752,9 @@ ConsoleIO.version = "0.2.0";
             exports.web.disabled();
         }
 
-        if (data.config) {
-            configWebConsole(data.config);
-        }
+        configWebConsole(data.config);
     }
 
-    function onDisconnect() {
-        showInfo([exports.name, exports.guid, 'offline'].join('|'));
-    }
 
     function onReady(data) {
         storeData(data);
@@ -1785,15 +1787,14 @@ ConsoleIO.version = "0.2.0";
         }
     }
 
-    function onName(data) {
+    function onNameChanged(data) {
         if (!data.name) {
             exports.storage.removeItem('deviceName');
         }
 
         exports.name = data.name;
         exports.storage.addItem('deviceName', exports.name, 365);
-
-        showInfo([exports.name, exports.guid, 'online'].join('|'), true);
+        exports.util.showInfo([exports.name, exports.guid, 'online'].join('|'), true);
     }
 
     function onStatus() {
@@ -1811,36 +1812,65 @@ ConsoleIO.version = "0.2.0";
     }
 
     function onFileSource(data) {
-        var xmlhttp = getXMLHttp();
-        if (xmlhttp) {
-            xmlhttp.open("GET", data.url, true);
-            xmlhttp.onreadystatechange = function () {
-                if (xmlhttp.readyState === 4) {
-                    var content;
-                    if (xmlhttp.status === 200) {
-                        content = xmlhttp.responseText;
-                    } else {
-                        content = xmlhttp.statusText;
+        try {
+            //TODO use proxy for cross-domain files
+            var xmlhttp = getXMLHttp();
+            if (xmlhttp) {
+                xmlhttp.open("GET", data.url, true);
+                xmlhttp.onreadystatechange = function () {
+                    if (xmlhttp.readyState === 4) {
+                        var content;
+                        if (xmlhttp.status === 200) {
+                            content = xmlhttp.responseText;
+                        } else {
+                            content = xmlhttp.statusText;
+                        }
+
+                        exports.transport.emit('source', {
+                            url: data.url,
+                            content: content
+                        });
                     }
+                };
 
-                    exports.transport.emit('source', { url: data.url, content: content });
-                }
-            };
+                xmlhttp.onloadend = function onloadend(e) {
+                    exports.console.info('file:onloadend', e);
+                };
 
-            //xmlhttp.onload  = function (e) { ConsoleIO.native.log('onload',e); };
-            xmlhttp.onerror = function (e) {
-                exports.transport.emit('source', { url: data.url, content: 'XMLHttpRequest Error: Possibally Access-Control-Allow-Origin security issue.' });
-            };
+                xmlhttp.onloadstart = function onloadstart(e) {
+                    exports.console.info('file:onloadstart', e);
+                };
 
-            xmlhttp.send(null);
-        } else {
-            exports.transport.emit('source', { url: data.url, content: 'XMLHttpRequest request not supported by the browser.' });
+                xmlhttp.onprogress = function onprogress(e) {
+                    exports.console.info('file:onprogress', e);
+                };
+
+                xmlhttp.onload = function onload(e) {
+                    exports.console.info('file:onload', e);
+                };
+
+                xmlhttp.onerror = function (e) {
+                    exports.console.exception('file:onerror', e);
+                    exports.transport.emit('source', {
+                        url: data.url,
+                        content: 'XMLHttpRequest Error: Possibally Access-Control-Allow-Origin security issue.'
+                    });
+                };
+
+                xmlhttp.send(null);
+            } else {
+                exports.transport.emit('source', {
+                    url: data.url,
+                    content: 'XMLHttpRequest request not supported by the browser.'
+                });
+            }
+        } catch (e) {
+            exports.console.error(e);
         }
     }
 
     function onReload() {
-
-        exports.console.log('executing reload command');
+        exports.console.log('Reloading...');
 
         global.setTimeout((function (url) {
             return function () {
@@ -1850,56 +1880,38 @@ ConsoleIO.version = "0.2.0";
                     global.location.assign(url);
                 }
             };
-        }(location.href)), 500);
+        }(location.href)), 100);
     }
 
     function onHTMLContent() {
-        var parentNode,
-            webLog = document.getElementById(exports.getConfig().consoleId);
+        exports.web.hide();
 
-        if (webLog) {
-            parentNode = webLog.parentNode;
-            parentNode.removeChild(webLog);
-        }
+        exports.transport.emit('content', {
+            content: document.documentElement.innerHTML
+        });
 
-        exports.transport.emit('content', { content: document.documentElement.innerHTML });
-
-        if (webLog) {
-            parentNode.appendChild(webLog);
-        }
+        exports.web.show();
     }
 
     function onPreview() {
-        var parentNode, preview,
-            webLog = document.getElementById(exports.getConfig().consoleId);
+        exports.web.hide();
 
-        if (webLog) {
-            parentNode = webLog.parentNode;
-            parentNode.removeChild(webLog);
-        }
+        exports.transport.emit('previewContent', {
+            content: '<html><head><style type="text/css">' +
+                getStyleRule() + '</style></head>' +
+                getStyledElement().outerHTML + '</html>'
+        });
 
-        preview = '<html><head><style type="text/css">' +
-            getStyleRule() + '</style></head>' +
-            getStyledElement().outerHTML + '</html>';
-
-        exports.transport.emit('previewContent', { content: preview });
-
-        if (webLog) {
-            parentNode.appendChild(webLog);
-        }
+        exports.web.show();
     }
 
     function onCaptureScreen() {
-        addFunctionBindSupport();
+
+        addBindSupport();
 
         exports.util.requireScript(exports.util.getUrl('html2canvas'), function () {
-            var parentNode,
-                webLog = document.getElementById(exports.getConfig().consoleId);
 
-            if (webLog) {
-                parentNode = webLog.parentNode;
-                parentNode.removeChild(webLog);
-            }
+            exports.web.hide();
 
             global.html2canvas(document.body, {
                 completed: false,
@@ -1910,16 +1922,21 @@ ConsoleIO.version = "0.2.0";
                     if (!this.completed) {
                         try {
                             this.completed = true;
-                            exports.transport.emit('screenShot', { screen: canvas.toDataURL() });
+                            exports.transport.emit('screenShot', {
+                                screen: canvas.toDataURL()
+                            });
+
                         } catch (e) {
-                            exports.transport.emit('screenShot', { screen: false });
+
+                            exports.transport.emit('screenShot', {
+                                screen: false
+                            });
+
                             exports.console.exception(e);
                         }
                     }
 
-                    if (webLog) {
-                        parentNode.appendChild(webLog);
-                    }
+                    exports.web.show();
                 }
             });
         });
@@ -1928,9 +1945,10 @@ ConsoleIO.version = "0.2.0";
     function onFileList() {
         var scripts = [],
             styles = [],
-            origin = (global.location.origin || global.location.href.replace(global.location.pathname, ""));
+            origin = exports.util.getOrigin();
 
-        exports.util.forEach(exports.util.toArray(document.scripts), function (script) {
+        //scripts
+        exports.util.forEach(exports.util.getScripts(), function (script) {
             if (script.src) {
                 scripts.push(script.src.replace(origin, ""));
             }
@@ -1943,7 +1961,8 @@ ConsoleIO.version = "0.2.0";
             });
         }
 
-        exports.util.forEach(exports.util.toArray(document.getElementsByTagName('link')), function (style) {
+        //styles
+        exports.util.forEach(exports.util.getStyles(), function (style) {
             if (style.href) {
                 styles.push(style.href.replace(origin, ""));
             }
@@ -1958,14 +1977,14 @@ ConsoleIO.version = "0.2.0";
     }
 
     function onCommand(cmd) {
-        exports.console.log('executing script');
+        exports.console.info('executing...');
 
         var evalFun, result;
         try {
             //Function first argument is Deprecated
             evalFun = new Function([], "return " + cmd);
             result = evalFun();
-            if (result) {
+            if (typeof result !== 'undefined') {
                 exports.console.command(result);
             }
         } catch (e) {
@@ -1975,7 +1994,6 @@ ConsoleIO.version = "0.2.0";
 
 
     client.setUp = function setUp() {
-        exports.transport.on('disconnect', onDisconnect);
         exports.transport.on('device:ready', onReady);
         exports.transport.on('device:online', onOnline);
         exports.transport.on('device:offline', onOffline);
@@ -1987,7 +2005,7 @@ ConsoleIO.version = "0.2.0";
         exports.transport.on('device:captureScreen', onCaptureScreen);
         exports.transport.on('device:status', onStatus);
         exports.transport.on('device:reload', onReload);
-        exports.transport.on('device:name', onName);
+        exports.transport.on('device:name', onNameChanged);
 
         exports.transport.on('device:web:control', configWebConsole);
         exports.transport.on('device:web:config', setUpWebConsole);
@@ -2010,18 +2028,21 @@ ConsoleIO.version = "0.2.0";
 
 (function (exports, global) {
 
-    exports.guid = '';
-    exports.name = '';
     var defaultConfig = {
         url: '',
         base: '',
         secure: false,
+
         html2canvas: "addons/html2canvas.js",
+        //"console.io": "console.io.js",
         "socket.io": "socket.io/socket.io.js",
         webStyle: "resources/console.css",
         proxy: 'proxy',
-        forceReconnection: true,
+
+        forceReconnect: true,
         forceReconnectInterval: 5000,
+        forceReconnectMaxTry: 10,
+
         nativeConsole: true,
         web: false,
         webOnly: false,
@@ -2039,13 +2060,13 @@ ConsoleIO.version = "0.2.0";
         if (!log && document.body) {
             log = document.createElement('ul');
             log.setAttribute('id', 'log');
-            document.body.insertBefore(log, document.body.firstElementChild || document.body.firstChild);
+            document.body.insertBefore(log, exports.util.getFirstElement(document.body));
         }
 
         if (log) {
             li = document.createElement('li');
             li.innerHTML = msg;
-            log.insertBefore(li, log.firstElementChild || log.firstChild);
+            log.insertBefore(li, exports.util.getFirstElement(log));
         }
     }
 
@@ -2072,6 +2093,10 @@ ConsoleIO.version = "0.2.0";
             exports.web.setUp();
         }
     }
+
+
+    exports.guid = '';
+    exports.name = '';
 
     exports.configure = function configure(cfg) {
         exports.util.extend(defaultConfig, cfg);
@@ -2232,7 +2257,7 @@ ConsoleIO.version = "0.2.0";
 
         this.view = new View(this);
 
-        exports.transport.on('device:web:control', this.setControl, this);
+        //exports.transport.on('device:web:control', this.setControl, this);
     }
 
     Controller.prototype.setUp = function setUp() {
@@ -2255,26 +2280,25 @@ ConsoleIO.version = "0.2.0";
     };
 
     Controller.prototype.setControl = function setControl(data) {
-        if (data.clear) {
-            this.view.clear();
-        } else {
-            if (typeof data.paused !== 'undefined') {
-                this.control.paused = data.paused;
-            }
+        if (typeof data.paused !== 'undefined') {
+            this.control.paused = data.paused;
+        }
 
-            if (typeof data.filters !== 'undefined') {
-                this.control.filters = data.filters;
-            }
+        if (typeof data.filters !== 'undefined') {
+            this.control.filters = data.filters;
+        }
 
-            if (data.pageSize !== this.control.pageSize) {
-                this.control.pageSize = data.pageSize;
-            }
+        if (data.pageSize !== this.control.pageSize) {
+            this.control.pageSize = data.pageSize;
+        }
 
-            if (data.search !== this.control.search) {
-                this.applySearch(data.search);
-            }
+        if (data.search !== this.control.search) {
+            this.applySearch(data.search);
+        }
 
-            this.view.clear();
+        this.view.clear();
+
+        if (!data.clear) {
             this.view.addBatch(this.getData(this.store.added));
             this.addBatch();
         }
@@ -2294,6 +2318,14 @@ ConsoleIO.version = "0.2.0";
         }
 
         return dataStore;
+    };
+
+    Controller.prototype.hide = function hide() {
+        return this.view.hide();
+    };
+
+    Controller.prototype.show = function show() {
+        return this.view.show();
     };
 
     Controller.prototype.add = function add(data) {
@@ -2356,6 +2388,24 @@ ConsoleIO.version = "0.2.0";
             this.clear();
             if (this.container.parentNode) {
                 this.container.parentNode.removeChild(this.container);
+                this.container = null;
+                this.target = null;
+            }
+        }
+    };
+
+    View.prototype.hide = function hide() {
+        if (this.target && this.container) {
+            this.target.removeChild(this.container);
+        }
+    };
+
+    View.prototype.show = function show() {
+        if (this.target && this.container) {
+            if (this.ctrl.config.position && this.ctrl.config.position === 'top') {
+                this.target.insertBefore(this.container, exports.util.getFirstElement(this.target));
+            } else {
+                this.target.appendChild(this.container);
             }
         }
     };
@@ -2427,7 +2477,7 @@ ConsoleIO.version = "0.2.0";
 
         if (config.target) {
             if (config.position && config.position === 'top') {
-                config.target.insertBefore(element, config.target.firstElementChild || config.target.firstChild);
+                config.target.insertBefore(element, exports.util.getFirstElement(config.target));
             } else {
                 config.target.appendChild(element);
             }
@@ -2528,7 +2578,7 @@ ConsoleIO.version = "0.2.0";
                 });
             }, this);
 
-            this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);
+            this.container.insertBefore(fragment, exports.util.getFirstElement(this.container));
             this.removeOverflowElement();
         }
     };
@@ -2578,9 +2628,39 @@ ConsoleIO.version = "0.2.0";
         }
     };
 
-    web.setConfig = function setConfig(cfg) {
+    web.setConfig = function setConfig(data) {
         if (web.console) {
-            web.console.setControl(cfg);
+            web.console.setControl(data);
+        }
+
+        var info = [exports.name, exports.guid, exports.transport.isConnected() ? 'online' : 'offline'];
+
+        if (data.paused) {
+            info.push('paused');
+        }
+
+        if (data.filters && data.filters.length > 0) {
+            info.push('filters:' + data.filters.join(","));
+        }
+
+        info.push('pagesize:' + data.pageSize);
+
+        if (data.search) {
+            info.push('search:' + data.search);
+        }
+
+        exports.util.showInfo(info.join('|'), exports.transport.isConnected());
+    };
+
+    web.show = function show() {
+        if (web.console) {
+            return web.console.show();
+        }
+    };
+
+    web.hide = function hide() {
+        if (web.console) {
+            return web.console.hide();
         }
     };
 

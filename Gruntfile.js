@@ -82,6 +82,36 @@ module.exports = function (grunt) {
             }
         },
 
+        csslint: {
+            lax: {
+                options: {
+                    import: false
+                },
+                src: ['app/**/*.css']
+            }
+        },
+
+        cssmin: {
+            minify: {
+                expand: true,
+                cwd: 'app/resources/',
+                src: ['console.css'],
+                dest: 'dist/',
+                ext: '.min.css'
+            }
+        },
+
+        compile: {
+            name: '<%= pkg.project %>',
+            description: '<%= pkg.description %>',
+            version: '<%= pkg.version %>',
+            url: '<%= pkg.homepage %>',
+            options: {
+                paths: 'src/',
+                outdir: 'dist/'
+            }
+        },
+
         watch: {
             files: ['<%= jshint.files %>'],
             tasks: ['jshint']
@@ -93,7 +123,9 @@ module.exports = function (grunt) {
     //grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-csslint');
+    grunt.loadNpmTasks('grunt-contrib-cssmin');
 
     // Default task(s).
-    grunt.registerTask('default', ['concat', 'uglify']);
+    grunt.registerTask('default', ['concat', 'cssmin', 'uglify']);
 };

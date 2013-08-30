@@ -14,6 +14,7 @@
     var transport = exports.transport = {},
         interval = null,
         pending = [],
+        reconnectTryCount = 0,
         config;
 
 
@@ -42,12 +43,15 @@
             params: exports.getConfig()
         });
 
+        reconnectTryCount = 0;
+
         transport.forceReconnect();
     }
 
     function onConnecting(mode) {
         transport.connectionMode = mode;
         exports.console.log('Connecting to the Server');
+        exports.util.showInfo([exports.name, exports.guid, 'connecting'].join('|'), false);
     }
 
     function onReconnect(mode, attempts) {
@@ -58,28 +62,36 @@
 
         exports.console.log('Reconnected to the Server after ' + attempts + ' attempts.');
 
+        reconnectTryCount = 0;
+
         transport.forceReconnect();
     }
 
     function onReconnecting() {
         exports.console.log('Reconnecting to the Server');
+        exports.util.showInfo([exports.name, exports.guid, 'reconnecting'].join('|'), false);
     }
 
     function onDisconnect() {
         exports.console.log('Disconnected from the Server');
+        exports.util.showInfo([exports.name, exports.guid, 'offline'].join('|'), false);
     }
 
     function onConnectFailed() {
         exports.console.warn('Failed to connect to the Server');
+        exports.util.showInfo([exports.name, exports.guid, 'connection failed'].join('|'), false);
     }
 
     function onReconnectFailed() {
         exports.console.warn('Failed to reconnect to the Server');
+        exports.util.showInfo([exports.name, exports.guid, 'reconnection failed'].join('|'), false);
     }
 
     function onError() {
         exports.console.warn('Socket Error');
+        exports.util.showInfo([exports.name, exports.guid, 'connection error'].join('|'), false);
     }
+
 
     transport.connectionMode = '';
     transport.subscribed = false;
@@ -130,7 +142,7 @@
         config = exports.getConfig();
         transport.io = exports.io.connect(config.url, {
             secure: config.secure,
-            resource: (config.base || '') + 'socket.io'
+            resource: config.base + 'socket.io'
         });
 
         // set console.io event
@@ -148,7 +160,6 @@
             global.attachEvent('onmessage', onMessage);
         }
 
-        // set events
         transport.io.on('connect', onConnect);
         transport.io.on('connecting', onConnecting);
         transport.io.on('reconnect', onReconnect);
@@ -182,7 +193,7 @@
     };
 
     transport.forceReconnect = function forceReconnect() {
-        if (!config.forceReconnection || interval) {
+        if (!config.forceReconnect || interval || config.forceReconnectMaxTry <= reconnectTryCount) {
             return false;
         }
 
@@ -192,6 +203,8 @@
             if (!connected || (connected && !transport.subscribed)) {
 
                 exports.console.log('forceReconnect reconnecting', exports.name);
+
+                reconnectTryCount++;
 
                 try {
                     transport.io.socket.disconnectSync();
