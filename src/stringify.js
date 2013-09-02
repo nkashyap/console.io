@@ -23,7 +23,8 @@
     stringify.events = [
         '[object Event]', '[object KeyboardEvent]', '[object MouseEvent]', '[object TouchEvent]',
         '[object WheelEvent]', '[object UIEvent]', '[object CustomEvent]', '[object NotifyAudioAvailableEvent]',
-        '[object CompositionEvent]', '[object CloseEvent]', '[object MessageEvent]', '[object MessageEvent]', '[object XMLHttpRequestProgressEvent]'
+        '[object CompositionEvent]', '[object CloseEvent]', '[object MessageEvent]', '[object MessageEvent]',
+        '[object XMLHttpRequestProgressEvent]'
     ];
 
     stringify.errors = [

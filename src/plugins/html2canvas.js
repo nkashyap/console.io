@@ -830,7 +830,10 @@
                             grad.addColorStop(gradient.colorStops[i].stop, gradient.colorStops[i].color);
                         }
                         catch (e) {
-                            h2clog(['failed to add color stop: ', e, '; tried to add: ', gradient.colorStops[i], '; stop: ', i, '; in: ', src]);
+                            h2clog([
+                                'failed to add color stop: ', e, '; tried to add: ', gradient.colorStops[i], '; stop: ',
+                                i, '; in: ', src
+                            ]);
                         }
                     }
 
@@ -854,7 +857,10 @@
                             grad.addColorStop(gradient.colorStops[i].stop, gradient.colorStops[i].color);
                         }
                         catch (e) {
-                            h2clog(['failed to add color stop: ', e, '; tried to add: ', gradient.colorStops[i], '; stop: ', i, '; in: ', src]);
+                            h2clog([
+                                'failed to add color stop: ', e, '; tried to add: ', gradient.colorStops[i], '; stop: ',
+                                i, '; in: ', src
+                            ]);
                         }
                     }
 

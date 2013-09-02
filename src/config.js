@@ -15,11 +15,12 @@
         url: '',
         base: '',
         secure: false,
+        minify: true,
 
-        html2canvas: "addons/html2canvas.js",
+        html2canvas: "plugins/html2canvas.js",
         //"console.io": "console.io.js",
         "socket.io": "socket.io/socket.io.js",
-        webStyle: "resources/console.css",
+        webStyle: "console.io.css",
         proxy: 'proxy',
 
         forceReconnect: true,

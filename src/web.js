@@ -421,7 +421,9 @@
             info.push('filters:' + data.filters.join(","));
         }
 
-        info.push('pagesize:' + data.pageSize);
+        if (data.pageSize) {
+            info.push('pagesize:' + data.pageSize);
+        }
 
         if (data.search) {
             info.push('search:' + data.search);

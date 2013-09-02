@@ -29,7 +29,8 @@
         "grunt-contrib-concat": "latest",
         "grunt-contrib-cssmin": "latest",
         "grunt-contrib-yuidoc": "latest",
-        "grunt-contrib-csslint": "latest"
+        "grunt-contrib-csslint": "latest",
+        "grunt-contrib-copy": "latest"
     },
     "main": "./server/main.js",
     "bin": {

@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-08-30
+ * Date: 2013-09-02
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -365,13 +365,21 @@ ConsoleIO.version = "0.2.0";
     util.getUrl = function getUrl(name) {
         var config = exports.getConfig(),
             url = config.url,
-            last = url.length - 1;
+            last = url.length - 1,
+            fileUrl = config[name];
 
         if (url.charAt(last) === '/') {
             url = url.substr(0, last);
         }
 
-        return (url + (config.base.length > 0 ? '/' + config.base : '/') + config[name]);
+        if (config.minify) {
+            fileUrl = fileUrl.replace('.css', '.min.css');
+            fileUrl = fileUrl.replace('.js', '.min.js');
+        }
+
+        url += (config.base.length > 0 ? '/' + config.base : '/') + fileUrl;
+
+        return url;
     };
 
     util.showInfo = function showInfo(content, online) {
@@ -766,7 +774,8 @@ ConsoleIO.version = "0.2.0";
     stringify.events = [
         '[object Event]', '[object KeyboardEvent]', '[object MouseEvent]', '[object TouchEvent]',
         '[object WheelEvent]', '[object UIEvent]', '[object CustomEvent]', '[object NotifyAudioAvailableEvent]',
-        '[object CompositionEvent]', '[object CloseEvent]', '[object MessageEvent]', '[object MessageEvent]', '[object XMLHttpRequestProgressEvent]'
+        '[object CompositionEvent]', '[object CloseEvent]', '[object MessageEvent]', '[object MessageEvent]',
+        '[object XMLHttpRequestProgressEvent]'
     ];
 
     stringify.errors = [
@@ -2032,11 +2041,12 @@ ConsoleIO.version = "0.2.0";
         url: '',
         base: '',
         secure: false,
+        minify: true,
 
-        html2canvas: "addons/html2canvas.js",
+        html2canvas: "plugins/html2canvas.js",
         //"console.io": "console.io.js",
         "socket.io": "socket.io/socket.io.js",
-        webStyle: "resources/console.css",
+        webStyle: "console.io.css",
         proxy: 'proxy',
 
         forceReconnect: true,
@@ -2643,7 +2653,9 @@ ConsoleIO.version = "0.2.0";
             info.push('filters:' + data.filters.join(","));
         }
 
-        info.push('pagesize:' + data.pageSize);
+        if (data.pageSize) {
+            info.push('pagesize:' + data.pageSize);
+        }
 
         if (data.search) {
             info.push('search:' + data.search);

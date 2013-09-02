@@ -350,13 +350,21 @@
     util.getUrl = function getUrl(name) {
         var config = exports.getConfig(),
             url = config.url,
-            last = url.length - 1;
+            last = url.length - 1,
+            fileUrl = config[name];
 
         if (url.charAt(last) === '/') {
             url = url.substr(0, last);
         }
 
-        return (url + (config.base.length > 0 ? '/' + config.base : '/') + config[name]);
+        if (config.minify) {
+            fileUrl = fileUrl.replace('.css', '.min.css');
+            fileUrl = fileUrl.replace('.js', '.min.js');
+        }
+
+        url += (config.base.length > 0 ? '/' + config.base : '/') + fileUrl;
+
+        return url;
     };
 
     util.showInfo = function showInfo(content, online) {

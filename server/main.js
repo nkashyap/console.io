@@ -83,16 +83,19 @@ function main() {
         //console lib routes
         app.use(base + 'lib', express.static('lib'));
 
-        app.use(base + 'addons', express.static('addons'));
+        //app.use(base + 'addons', express.static('addons'));
 
         //console app routes
-        app.use(base + 'console.io.js', function download(req, res) {
-            res.sendfile('./dist' + req.originalUrl);
-        });
+        function client(req, res) {
+            res.sendfile('./dist/console.io-client' + req.originalUrl);
+        }
 
-        app.use(base + 'console.io.min.js', function download(req, res) {
-            res.sendfile('./dist' + req.originalUrl);
-        });
+        app.use(base + 'console.io.js', client);
+        app.use(base + 'console.io.min.js', client);
+        app.use(base + 'console.io.css', client);
+        app.use(base + 'console.io.min.css', client);
+        app.use(base + 'plugins/html2canvas.js', client);
+        app.use(base + 'plugins/html2canvas.min.js', client);
 
         //userdata app routes
         app.use(base + 'userdata/export', function download(req, res) {
