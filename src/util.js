@@ -28,7 +28,7 @@
     };
 
     util.getOrigin = function getOrigin() {
-        return global.location.origin || global.location.protocol + '//' + global.location.hostname;
+        return global.location.origin || global.location.protocol + '//' + (global.location.host || global.location.hostname + ':' + global.location.port);
     };
 
     util.getHashParams = function getHashParams() {
@@ -347,7 +347,7 @@
         return styleNode.join("; ");
     };
 
-    util.getUrl = function getUrl(name) {
+    util.getUrl = function getUrl(name, uncompressed) {
         var config = exports.getConfig(),
             url = config.url,
             last = url.length - 1,
@@ -357,7 +357,7 @@
             url = url.substr(0, last);
         }
 
-        if (config.minify) {
+        if (config.minify && !uncompressed) {
             fileUrl = fileUrl.replace('.css', '.min.css');
             fileUrl = fileUrl.replace('.js', '.min.js');
         }

@@ -92,7 +92,7 @@
                 if (exports.util.foundRequireJS()) {
                     global.require(["socket.io"], setUp);
                 } else {
-                    exports.util.require(exports.util.getUrl("socket.io"), setUp);
+                    exports.util.require(exports.util.getUrl("socket.io", true), setUp);
                 }
             }
         } else {

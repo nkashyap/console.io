@@ -87,7 +87,7 @@ function main() {
 
         //console app routes
         function client(req, res) {
-            res.sendfile('./dist/console.io-client' + req.originalUrl);
+            res.sendfile('./dist/console.io-client' + req.originalUrl.replace(base, '/'));
         }
 
         app.use(base + 'console.io.js', client);
