@@ -2265,6 +2265,7 @@ ConsoleIO.version = "0.2.0";
             search: null
         };
 
+        this.isEnabled = false;
         this.view = new View(this);
 
         //exports.transport.on('device:web:control', this.setControl, this);
@@ -2278,15 +2279,21 @@ ConsoleIO.version = "0.2.0";
     };
 
     Controller.prototype.enabled = function enabled() {
-        this.view.render(document.body);
-        exports.transport.emit('webStatus', { enabled: true });
-        exports.console.on('console', exports.web.logger);
+        if (!this.isEnabled) {
+            this.isEnabled = true;
+            this.view.render(document.body);
+            exports.console.on('console', exports.web.logger);
+            exports.transport.emit('webStatus', { enabled: true });
+        }
     };
 
     Controller.prototype.disabled = function disabled() {
-        exports.transport.emit('webStatus', { enabled: false });
-        exports.console.removeListener('console', exports.web.logger);
-        this.view.destroy();
+        if (this.isEnabled) {
+            this.isEnabled = false;
+            exports.console.removeListener('console', exports.web.logger);
+            exports.transport.emit('webStatus', { enabled: false });
+            this.view.destroy();
+        }
     };
 
     Controller.prototype.setControl = function setControl(data) {

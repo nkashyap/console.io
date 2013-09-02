@@ -73,14 +73,6 @@ function Device(application, request, manager) {
     };
 
     /**
-     * Plugins references
-     * @member {object} plugins
-     * @private
-     * @defaultvalue
-     */
-    //this.plugins = {};
-
-    /**
      * Various timestamps
      * @namespace
      * @property {Date} timeStamp.registered    - device registration time
