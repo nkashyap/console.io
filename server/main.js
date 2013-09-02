@@ -83,8 +83,6 @@ function main() {
         //console lib routes
         app.use(base + 'lib', express.static('lib'));
 
-        //app.use(base + 'addons', express.static('addons'));
-
         //console app routes
         function client(req, res) {
             res.sendfile('./dist/console.io-client' + req.originalUrl.replace(base, '/'));

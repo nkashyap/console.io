@@ -116,7 +116,7 @@ if (typeof define === "function" && define.amd) {
 
     //IIS NODE settings
     if (pathname.indexOf('console.io/') > -1) {
-        url += '/console.io/';
+        url += ':' + location.port + '/console.io/';
     } else {
         url += ':' + window.SERVER_PORT + '/';
     }
