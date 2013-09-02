@@ -384,9 +384,9 @@ ConsoleIO.version = "0.2.0";
 
     util.showInfo = function showInfo(content, online) {
         var className = "consoleio",
-            bgColor = online ? 'rgba(92, 255, 0, 0.5)' : 'rgba(192, 192, 192, 0.5)',
+            bgColor = online ? 'rgba(92, 255, 0, 0.7)' : 'rgba(192, 192, 192, 0.7)',
             css = "content: 'Console.IO:" + content + "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
-                "font-size: 12px; font-weight: bold; color: rgb(111, 114, 117); " +
+                "font-size: 12px; font-weight: bold; color: white; " +
                 "background-color: " + bgColor + "; border: 1px solid rgb(111, 114, 117); " +
                 "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
 
@@ -2421,8 +2421,14 @@ ConsoleIO.version = "0.2.0";
     };
 
     View.prototype.createContainer = function createContainer() {
+        if (this.container) {
+            return false;
+        }
+
         var styles = [
-            'background-color: rgba(219, 255, 232, 0.3)',
+            'background-color: rgba(244, 244, 244, 0.9)',
+            'color: black',
+            'z-index: 5000',
             'overflow: auto',
             'margin: 5px',
             '-o-box-shadow: 0 0 5px 1px #888',

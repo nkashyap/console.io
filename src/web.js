@@ -189,8 +189,14 @@
     };
 
     View.prototype.createContainer = function createContainer() {
+        if (this.container) {
+            return false;
+        }
+
         var styles = [
-            'background-color: rgba(219, 255, 232, 0.3)',
+            'background-color: rgba(244, 244, 244, 0.9)',
+            'color: black',
+            'z-index: 5000',
             'overflow: auto',
             'margin: 5px',
             '-o-box-shadow: 0 0 5px 1px #888',

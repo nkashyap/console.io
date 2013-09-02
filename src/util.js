@@ -369,9 +369,9 @@
 
     util.showInfo = function showInfo(content, online) {
         var className = "consoleio",
-            bgColor = online ? 'rgba(92, 255, 0, 0.5)' : 'rgba(192, 192, 192, 0.5)',
+            bgColor = online ? 'rgba(92, 255, 0, 0.7)' : 'rgba(192, 192, 192, 0.7)',
             css = "content: 'Console.IO:" + content + "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
-                "font-size: 12px; font-weight: bold; color: rgb(111, 114, 117); " +
+                "font-size: 12px; font-weight: bold; color: white; " +
                 "background-color: " + bgColor + "; border: 1px solid rgb(111, 114, 117); " +
                 "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
 
