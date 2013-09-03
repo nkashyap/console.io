@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>User Agent Test Page</title>
-    <script language="JavaScript" >
+    <script language="JavaScript">
         if (!window.module) {
             window.module = {
                 exports: null
@@ -57,9 +57,9 @@
 <body>
 
 </body>
-<script language="JavaScript" >
-    function run(){
-        for(var prop in userAgents){
+<script language="JavaScript">
+    function run() {
+        for (var prop in userAgents) {
             var browser = window.module.exports.get({
                 userAgent: userAgents[prop],
                 platform: userAgents[prop],
