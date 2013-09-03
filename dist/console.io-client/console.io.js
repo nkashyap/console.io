@@ -386,9 +386,9 @@ ConsoleIO.version = "0.2.0";
 
     util.showInfo = function showInfo(content, online) {
         var className = "consoleio",
-            bgColor = online ? 'rgba(92, 255, 0, 0.7)' : 'rgba(192, 192, 192, 0.7)',
+            bgColor = online ? 'rgba(0, 130, 30, 0.8)' : 'rgba(192, 192, 192, 0.7)',
             css = "content: 'Console.IO:" + content + "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
-                "font-size: 12px; font-weight: bold; color: white; " +
+                "font-size: 12px; font-weight: bold; color: lightgrey; " +
                 "background-color: " + bgColor + "; border: 1px solid rgb(111, 114, 117); " +
                 "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
 
