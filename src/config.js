@@ -104,20 +104,18 @@
         return defaultConfig;
     };
 
-    exports.style = (function style() {
-        // Create the <style> tag
-        var style = document.createElement("style");
-
-        style.type = 'text/css';
-        style.id = 'console.io.style';
+    exports.styleSheet = (function styleSheet() {
+        var element = document.createElement("style");
+        element.type = 'text/css';
+        element.id = 'console.io.style';
 
         // WebKit hack :(
-        style.appendChild(document.createTextNode(""));
+        element.appendChild(document.createTextNode(""));
 
         // Add the <style> element to the page
-        document.head.appendChild(style);
+        document.head.appendChild(element);
 
-        return style.sheet;
+        return element.sheet;
     }());
 
     // Cover uncaught exceptions

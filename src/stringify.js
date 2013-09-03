@@ -40,6 +40,7 @@
         level = level || 1;
 
         if (stringify.objects.indexOf(type) > -1 || stringify.events.indexOf(type) > -1 || stringify.errors.indexOf(type) > -1) {
+            /* jshint -W086 */
             switch (type) {
                 case '[object Error]':
                 case '[object ErrorEvent]':
@@ -70,6 +71,7 @@
                     value = stringify.parseObject(type, data, level);
                     break;
             }
+            /* jshint +W086 */
         } else if (data === null) {
             value = '"null"';
 

@@ -16,10 +16,11 @@ code {
 }
 
 .console::before {
+    color: rgb(111, 114, 117);
     color: rgba(111, 114, 117, 0.5);
     position: absolute;
-    top: 0px;
-    right: 5px
+    top: 0;
+    right: 5px;
 }
 
 .type-log::after,
@@ -60,6 +61,7 @@ code {
 .type-log::after {
     content: "log";
     color: rgb(111, 114, 117);
+    background-color: rgb(192, 192, 192);
     background-color: rgba(192, 192, 192, 0.5);
     border: 1px solid rgb(111, 114, 117);
 }
@@ -71,6 +73,7 @@ code {
 .type-info::after {
     content: "info";
     color: rgb(0, 92, 255);
+    background-color: rgb(0, 177, 255);
     background-color: rgba(0, 177, 255, 0.4);
     border: 1px solid rgb(0, 92, 255);
 }
@@ -82,6 +85,7 @@ code {
 .type-error::after {
     content: "error";
     color: rgb(255, 0, 0);
+    background-color: rgb(255, 0, 0);
     background-color: rgba(255, 0, 0, 0.3);
     border: 1px solid rgb(255, 0, 0);
 }
@@ -93,6 +97,7 @@ code {
 .type-assert::after {
     content: "assert";
     color: rgb(3, 92, 3);
+    background-color: rgb(61, 255, 0);
     background-color: rgba(61, 255, 0, 0.22);
     border: 1px solid rgb(3, 92, 3);
 }
@@ -104,6 +109,7 @@ code {
 .type-assert-failed::after {
     content: "assert";
     color: rgb(255, 0, 0);
+    background-color: rgb(255, 0, 0);
     background-color: rgba(255, 0, 0, 0.3);
     border: 1px solid rgb(255, 0, 0);
 }
@@ -115,6 +121,7 @@ code {
 .type-count::after {
     content: "count";
     color: rgb(9, 109, 117);
+    background-color: rgb(98, 192, 184);
     background-color: rgba(98, 192, 184, 0.60);
     border: 1px solid rgb(9, 109, 117);
 }
@@ -126,6 +133,7 @@ code {
 .type-time::after {
     content: "time";
     color: rgb(44, 46, 117);
+    background-color: rgb(120, 125, 192);
     background-color: rgba(120, 125, 192, 0.60);
     border: 1px solid rgb(44, 46, 117);
 }
@@ -137,6 +145,7 @@ code {
 .type-timeEnd::after {
     content: "timeEnd";
     color: rgb(23, 33, 117);
+    background-color: rgb(120, 78, 192);
     background-color: rgba(120, 78, 192, 0.60);
     border: 1px solid rgb(23, 33, 117);
 }
@@ -148,6 +157,7 @@ code {
 .type-debug::after {
     content: "debug";
     color: rgb(117, 86, 8);
+    background-color: rgb(192, 150, 75);
     background-color: rgba(192, 150, 75, 0.60);
     border: 1px solid rgb(117, 86, 8);
 }
@@ -159,6 +169,7 @@ code {
 .type-warn::after {
     content: "warn";
     color: rgb(167, 153, 9);
+    background-color: rgb(201, 195, 22);
     background-color: rgba(201, 195, 22, 0.5);
     border: 1px solid rgb(167, 153, 9);
 }
@@ -170,6 +181,7 @@ code {
 .type-dir::after {
     content: "dir";
     color: rgb(41, 117, 75);
+    background-color: rgb(114, 192, 162);
     background-color: rgba(114, 192, 162, 0.60);
     border: 1px solid rgb(41, 117, 75);
 }
@@ -181,6 +193,7 @@ code {
 .type-dirxml::after {
     content: "dirxml";
     color: rgb(44, 117, 20);
+    background-color: rgb(130, 192, 93);
     background-color: rgba(130, 192, 93, 0.60);
     border: 1px solid rgb(44, 117, 20);
 }
@@ -192,6 +205,7 @@ code {
 .type-group::after {
     content: "group";
     color: rgb(111, 114, 117);
+    background-color: rgb(192, 192, 192);
     background-color: rgba(192, 192, 192, 0.6);
     border: 1px solid rgb(111, 114, 117);
 }
@@ -203,6 +217,7 @@ code {
 .type-groupCollapsed::after {
     content: "groupCollapsed";
     color: rgb(111, 114, 117);
+    background-color: rgb(192, 192, 192);
     background-color: rgba(192, 192, 192, 0.6);
     border: 1px solid rgb(111, 114, 117);
 }
@@ -214,6 +229,7 @@ code {
 .type-groupEnd::after {
     content: "groupEnd";
     color: rgb(111, 114, 117);
+    background-color: rgb(192, 192, 192);
     background-color: rgba(192, 192, 192, 0.6);
     border: 1px solid rgb(111, 114, 117);
 }
@@ -225,6 +241,7 @@ code {
 .type-markTimeline::after {
     content: "markTimeline";
     color: rgb(111, 114, 117);
+    background-color: rgb(192, 192, 192);
     background-color: rgba(192, 192, 192, 0.6);
     border: 1px solid rgb(111, 114, 117);
 }
@@ -236,6 +253,7 @@ code {
 .type-timeStamp::after {
     content: "timeStamp";
     color: rgb(111, 114, 117);
+    background-color: rgb(192, 192, 192);
     background-color: rgba(192, 192, 192, 0.6);
     border: 1px solid rgb(111, 114, 117);
 }
@@ -247,6 +265,7 @@ code {
 .type-profile::after {
     content: "profile";
     color: rgb(111, 114, 117);
+    background-color: rgb(192, 192, 192);
     background-color: rgba(192, 192, 192, 0.6);
     border: 1px solid rgb(111, 114, 117);
 }
@@ -258,6 +277,7 @@ code {
 .type-profileEnd::after {
     content: "profileEnd";
     color: rgb(111, 114, 117);
+    background-color: rgb(192, 192, 192);
     background-color: rgba(192, 192, 192, 0.6);
     border: 1px solid rgb(111, 114, 117);
 }
@@ -269,6 +289,7 @@ code {
 .type-trace::after {
     content: "trace";
     color: rgb(117, 17, 112);
+    background-color: rgb(237, 134, 217);
     background-color: rgba(237, 134, 217, 0.60);
     border: 1px solid rgb(117, 17, 112);
 }
@@ -280,6 +301,7 @@ code {
 .type-clear::after {
     content: "clear";
     color: rgb(53, 117, 110);
+    background-color: rgb(159, 192, 189);
     background-color: rgba(159, 192, 189, 0.60);
     border: 1px solid rgb(53, 117, 110);
 }
@@ -291,6 +313,7 @@ code {
 .type-command::after {
     content: "command";
     color: rgb(143, 172, 123);
+    background-color: rgb(176, 223, 143);
     background-color: rgba(176, 223, 143, 0.60);
     border: 1px solid rgb(143, 172, 123);
 }

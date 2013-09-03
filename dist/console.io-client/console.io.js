@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-02
+ * Date: 2013-09-03
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -31,11 +31,11 @@ ConsoleIO.version = "0.2.0";
         pendingCallback = [];
 
     util.getScripts = function getScripts() {
-        return exports.util.toArray(document.scripts || document.getElementsByName('script'));
+        return util.toArray(document.scripts || document.getElementsByName('script'));
     };
 
     util.getStyles = function getStyles() {
-        return exports.util.toArray(document.getElementsByTagName('link'));
+        return util.toArray(document.getElementsByTagName('link'));
     };
 
     util.getFirstElement = function getFirstElement(element) {
@@ -91,11 +91,13 @@ ConsoleIO.version = "0.2.0";
             util.extend(params, util.getQueryParams(src));
 
             if (!params.url) {
+                /* jshint -W044 */
                 var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im'),
                     queryIndex = src.indexOf('?'),
                     url = queryIndex > -1 ? src.substring(0, queryIndex) : src;
 
                 params.url = (params.secure ? 'https://' : 'http://') + url.match(re)[1].toString();
+                /* jshint +W044 */
             }
 
             if (!params.base) {
@@ -111,21 +113,21 @@ ConsoleIO.version = "0.2.0";
     };
 
     util.checkFile = function checkFile(url) {
-        var tag = url.indexOf('.js') > -1 ? 'script' : url.indexOf('.css') > -1 ? 'link' : null,
-            elements, element, attr, value, i = 0;
+        var isJS = url.indexOf('.js') > -1,
+            isCSS = url.indexOf('.css') > -1,
+            tags = isJS ? util.getScripts() : isCSS ? util.getStyles() : null,
+            attr = isJS ? 'src' : isCSS ? 'href' : null,
+            value = false;
 
-        if (tag) {
-            attr = tag === 'script' ? 'src' : 'href';
-            elements = document.getElementsByTagName(tag);
-            for (; element = elements[i++];) {
-                value = element.getAttribute(attr) || '';
-                if (value.indexOf(url) > -1) {
-                    return true;
-                }
-            }
+        if (tags) {
+            util.every(tags, function (element) {
+                var path = element.getAttribute(attr) || '';
+                value = path.indexOf(url) > -1;
+                return !value;
+            });
         }
 
-        return false;
+        return value;
     };
 
     util.removeFile = function removeFile(url) {
@@ -390,8 +392,8 @@ ConsoleIO.version = "0.2.0";
                 "background-color: " + bgColor + "; border: 1px solid rgb(111, 114, 117); " +
                 "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
 
-        util.deleteCSSRule(exports.style, "." + className + "::after");
-        util.addCSSRule(exports.style, "." + className + "::after", css);
+        util.deleteCSSRule(exports.styleSheet, "." + className + "::after");
+        util.addCSSRule(exports.styleSheet, "." + className + "::after", css);
         document.body.setAttribute("class", className);
     };
 
@@ -733,7 +735,7 @@ ConsoleIO.version = "0.2.0";
 
         var args = Array.prototype.slice.call(arguments, 1);
 
-        if ('function' == typeof handler) {
+        if ('function' === typeof handler) {
             handler.apply(this, args);
         } else if (exports.util.isArray(handler)) {
             var listeners = handler.slice();
@@ -791,6 +793,7 @@ ConsoleIO.version = "0.2.0";
         level = level || 1;
 
         if (stringify.objects.indexOf(type) > -1 || stringify.events.indexOf(type) > -1 || stringify.errors.indexOf(type) > -1) {
+            /* jshint -W086 */
             switch (type) {
                 case '[object Error]':
                 case '[object ErrorEvent]':
@@ -821,6 +824,7 @@ ConsoleIO.version = "0.2.0";
                     value = stringify.parseObject(type, data, level);
                     break;
             }
+            /* jshint +W086 */
         } else if (data === null) {
             value = '"null"';
 
@@ -1119,35 +1123,35 @@ ConsoleIO.version = "0.2.0";
 
     function getFormatter(e) {
         if (e['arguments'] && e.stack) {
-            return exports.formatter['chrome'];
+            return exports.formatter.chrome;
 
         } else if (e.stack && e.sourceURL) {
-            return exports.formatter['safari'];
+            return exports.formatter.safari;
 
         } else if (e.stack && e.number) {
-            return exports.formatter['ie'];
+            return exports.formatter.ie;
 
         } else if (typeof e.message === 'string' && typeof window !== 'undefined' && window.opera) {
             if (!e.stacktrace) {
-                return exports.formatter['opera9'];
+                return exports.formatter.opera9;
             }
 
             if (e.message.indexOf('\n') > -1 && e.message.split('\n').length > e.stacktrace.split('\n').length) {
-                return exports.formatter['opera9'];
+                return exports.formatter.opera9;
             }
 
             if (!e.stack) {
-                return exports.formatter['opera10a'];
+                return exports.formatter.opera10a;
             }
 
             if (e.stacktrace.indexOf("called from line") < 0) {
-                return exports.formatter['opera10b'];
+                return exports.formatter.opera10b;
             }
 
-            return exports.formatter['opera11'];
+            return exports.formatter.opera11;
 
         } else if (e.stack) {
-            return exports.formatter['firefox'];
+            return exports.formatter.firefox;
         }
 
         return 'other';
@@ -1990,6 +1994,7 @@ ConsoleIO.version = "0.2.0";
 
         var evalFun, result;
         try {
+            /*jshint evil:true */
             //Function first argument is Deprecated
             evalFun = new Function([], "return " + cmd);
             result = evalFun();
@@ -2130,20 +2135,18 @@ ConsoleIO.version = "0.2.0";
         return defaultConfig;
     };
 
-    exports.style = (function style() {
-        // Create the <style> tag
-        var style = document.createElement("style");
-
-        style.type = 'text/css';
-        style.id = 'console.io.style';
+    exports.styleSheet = (function styleSheet() {
+        var element = document.createElement("style");
+        element.type = 'text/css';
+        element.id = 'console.io.style';
 
         // WebKit hack :(
-        style.appendChild(document.createTextNode(""));
+        element.appendChild(document.createTextNode(""));
 
         // Add the <style> element to the page
-        document.head.appendChild(style);
+        document.head.appendChild(element);
 
-        return style.sheet;
+        return element.sheet;
     }());
 
     // Cover uncaught exceptions
@@ -2466,8 +2469,8 @@ ConsoleIO.version = "0.2.0";
         }
 
         var config = exports.getConfig();
-        exports.util.deleteCSSRule(exports.style, "#" + config.consoleId);
-        exports.util.addCSSRule(exports.style, "#" + config.consoleId, styles.join(';'));
+        exports.util.deleteCSSRule(exports.styleSheet, "#" + config.consoleId);
+        exports.util.addCSSRule(exports.styleSheet, "#" + config.consoleId, styles.join(';'));
 
         this.container = this.createElement({
             attr: {

@@ -100,27 +100,37 @@ module.exports = function (grunt) {
             }
         },
 
-//        jshint: {
-//            files: ['src/**/*.js', 'app/**/*.js'],
-//            options: {
-//                browser: true,
-//                globals: {
-//                    ConsoleIO: true,
-//                    console: true,
-//                    document: true,
-//                    module: true
-//                }
-//            }
-//        },
+        jshint: {
+            options: {
+                reporter: 'jslint',
+                reporterOutput: 'dist/console.io-client/report/js/junit.xml',
+                browser: true,
+                devel: true,
+                force: true,
+                globals: {
+                    ConsoleIO: true,
+                    module: true
+                }
+            },
+            files: ['src/**/*.js']
+        },
 
-//        csslint: {
-//            lax: {
-//                options: {
-//                    import: false
-//                },
-//                src: ['app/**/*.css']
-//            }
-//        },
+        csslint: {
+            'console-client': {
+                options: {
+                    formatters: [
+                        { id: 'text', dest: 'dist/console.io-client/report/css/text.txt' },
+                        { id: 'compact', dest: 'dist/console.io-client/report/css/compact.txt' },
+                        { id: 'lint-xml', dest: 'dist/console.io-client/report/css/lint.xml' },
+                        { id: 'csslint-xml', dest: 'dist/console.io-client/report/css/csslint.xml' },
+                        { id: 'checkstyle-xml', dest: 'dist/console.io-client/report/css/checkstyle.xml' },
+                        { id: 'junit-xml', dest: 'dist/console.io-client/report/css/junit.xml' }
+                    ],
+                    import: false
+                },
+                src: ['app/resources/console.io.css']
+            }
+        },
 
         cssmin: {
             'console-client': {
@@ -168,5 +178,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
 
     // Default task(s).
-    grunt.registerTask('default', ['concat', 'copy', 'cssmin', 'uglify']);
+    grunt.registerTask('default', ['jshint', 'csslint', 'concat', 'copy', 'cssmin', 'uglify']);
+    //grunt.registerTask('default', ['concat', 'copy', 'cssmin', 'uglify']);
 };

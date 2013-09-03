@@ -16,11 +16,11 @@
         pendingCallback = [];
 
     util.getScripts = function getScripts() {
-        return exports.util.toArray(document.scripts || document.getElementsByName('script'));
+        return util.toArray(document.scripts || document.getElementsByName('script'));
     };
 
     util.getStyles = function getStyles() {
-        return exports.util.toArray(document.getElementsByTagName('link'));
+        return util.toArray(document.getElementsByTagName('link'));
     };
 
     util.getFirstElement = function getFirstElement(element) {
@@ -76,11 +76,13 @@
             util.extend(params, util.getQueryParams(src));
 
             if (!params.url) {
+                /* jshint -W044 */
                 var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im'),
                     queryIndex = src.indexOf('?'),
                     url = queryIndex > -1 ? src.substring(0, queryIndex) : src;
 
                 params.url = (params.secure ? 'https://' : 'http://') + url.match(re)[1].toString();
+                /* jshint +W044 */
             }
 
             if (!params.base) {
@@ -96,21 +98,21 @@
     };
 
     util.checkFile = function checkFile(url) {
-        var tag = url.indexOf('.js') > -1 ? 'script' : url.indexOf('.css') > -1 ? 'link' : null,
-            elements, element, attr, value, i = 0;
+        var isJS = url.indexOf('.js') > -1,
+            isCSS = url.indexOf('.css') > -1,
+            tags = isJS ? util.getScripts() : isCSS ? util.getStyles() : null,
+            attr = isJS ? 'src' : isCSS ? 'href' : null,
+            value = false;
 
-        if (tag) {
-            attr = tag === 'script' ? 'src' : 'href';
-            elements = document.getElementsByTagName(tag);
-            for (; element = elements[i++];) {
-                value = element.getAttribute(attr) || '';
-                if (value.indexOf(url) > -1) {
-                    return true;
-                }
-            }
+        if (tags) {
+            util.every(tags, function (element) {
+                var path = element.getAttribute(attr) || '';
+                value = path.indexOf(url) > -1;
+                return !value;
+            });
         }
 
-        return false;
+        return value;
     };
 
     util.removeFile = function removeFile(url) {
@@ -375,8 +377,8 @@
                 "background-color: " + bgColor + "; border: 1px solid rgb(111, 114, 117); " +
                 "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
 
-        util.deleteCSSRule(exports.style, "." + className + "::after");
-        util.addCSSRule(exports.style, "." + className + "::after", css);
+        util.deleteCSSRule(exports.styleSheet, "." + className + "::after");
+        util.addCSSRule(exports.styleSheet, "." + className + "::after", css);
         document.body.setAttribute("class", className);
     };
 

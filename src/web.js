@@ -234,8 +234,8 @@
         }
 
         var config = exports.getConfig();
-        exports.util.deleteCSSRule(exports.style, "#" + config.consoleId);
-        exports.util.addCSSRule(exports.style, "#" + config.consoleId, styles.join(';'));
+        exports.util.deleteCSSRule(exports.styleSheet, "#" + config.consoleId);
+        exports.util.addCSSRule(exports.styleSheet, "#" + config.consoleId, styles.join(';'));
 
         this.container = this.createElement({
             attr: {

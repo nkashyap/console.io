@@ -380,6 +380,7 @@
 
         var evalFun, result;
         try {
+            /*jshint evil:true */
             //Function first argument is Deprecated
             evalFun = new Function([], "return " + cmd);
             result = evalFun();

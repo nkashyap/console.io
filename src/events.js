@@ -159,7 +159,7 @@
 
         var args = Array.prototype.slice.call(arguments, 1);
 
-        if ('function' == typeof handler) {
+        if ('function' === typeof handler) {
             handler.apply(this, args);
         } else if (exports.util.isArray(handler)) {
             var listeners = handler.slice();

@@ -23,35 +23,35 @@
 
     function getFormatter(e) {
         if (e['arguments'] && e.stack) {
-            return exports.formatter['chrome'];
+            return exports.formatter.chrome;
 
         } else if (e.stack && e.sourceURL) {
-            return exports.formatter['safari'];
+            return exports.formatter.safari;
 
         } else if (e.stack && e.number) {
-            return exports.formatter['ie'];
+            return exports.formatter.ie;
 
         } else if (typeof e.message === 'string' && typeof window !== 'undefined' && window.opera) {
             if (!e.stacktrace) {
-                return exports.formatter['opera9'];
+                return exports.formatter.opera9;
             }
 
             if (e.message.indexOf('\n') > -1 && e.message.split('\n').length > e.stacktrace.split('\n').length) {
-                return exports.formatter['opera9'];
+                return exports.formatter.opera9;
             }
 
             if (!e.stack) {
-                return exports.formatter['opera10a'];
+                return exports.formatter.opera10a;
             }
 
             if (e.stacktrace.indexOf("called from line") < 0) {
-                return exports.formatter['opera10b'];
+                return exports.formatter.opera10b;
             }
 
-            return exports.formatter['opera11'];
+            return exports.formatter.opera11;
 
         } else if (e.stack) {
-            return exports.formatter['firefox'];
+            return exports.formatter.firefox;
         }
 
         return 'other';
