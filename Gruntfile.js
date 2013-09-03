@@ -103,16 +103,26 @@ module.exports = function (grunt) {
         jshint: {
             options: {
                 reporter: 'jslint',
-                reporterOutput: 'dist/console.io-client/report/js/junit.xml',
                 browser: true,
                 devel: true,
-                force: true,
-                globals: {
-                    ConsoleIO: true,
-                    module: true
-                }
+                force: true
             },
-            files: ['src/**/*.js']
+            'console-client': {
+                options: {
+                    reporterOutput: 'dist/console.io-client/report/js/junit.xml',
+                    globals: {
+                        ConsoleIO: true,
+                        module: true
+                    }
+                },
+                src: ['src/**/*.js']
+            },
+            'console-app': {
+                options: {
+                    reporterOutput: 'dist/console.io-app/report/js/junit.xml'
+                },
+                src: ['app/**/*.js']
+            }
         },
 
         csslint: {
@@ -126,9 +136,28 @@ module.exports = function (grunt) {
                         { id: 'checkstyle-xml', dest: 'dist/console.io-client/report/css/checkstyle.xml' },
                         { id: 'junit-xml', dest: 'dist/console.io-client/report/css/junit.xml' }
                     ],
-                    import: false
+                    'import': false
                 },
                 src: ['app/resources/console.io.css']
+            },
+            'console-app': {
+                options: {
+                    formatters: [
+                        { id: 'text', dest: 'dist/console.io-app/report/css/text.txt' },
+                        { id: 'compact', dest: 'dist/console.io-app/report/css/compact.txt' },
+                        { id: 'lint-xml', dest: 'dist/console.io-app/report/css/lint.xml' },
+                        { id: 'csslint-xml', dest: 'dist/console.io-app/report/css/csslint.xml' },
+                        { id: 'checkstyle-xml', dest: 'dist/console.io-app/report/css/checkstyle.xml' },
+                        { id: 'junit-xml', dest: 'dist/console.io-app/report/css/junit.xml' }
+                    ],
+                    //'adjoining-classes': false,
+                    //'outline-none': false,
+                    'regex-selectors': false,
+                    'box-model': false,
+                    'important': false,
+                    'import': false
+                },
+                src: ['app/resources/**/*.css']
             }
         },
 

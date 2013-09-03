@@ -28,6 +28,7 @@
 }
 
 ::-webkit-scrollbar-thumb:vertical {
+    background-color: rgb(0, 0, 0);
     background-color: rgba(0, 0, 0, 0.2);
     height: 50px;
     border-right: 4px solid white;
@@ -35,6 +36,7 @@
 }
 
 ::-webkit-scrollbar-thumb:vertical:hover {
+    background-color: rgb(0, 0, 0);
     background-color: rgba(0, 0, 0, 0.4)
 }
 

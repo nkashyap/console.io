@@ -94,7 +94,7 @@ if (typeof window.ConsoleIO === "undefined") {
 
                 if (url.indexOf('?') > -1) {
                     url = url.split('?');
-                    options['URL'] = url[0];
+                    options.URL = url[0];
                     url = url[1];
                 }
 
