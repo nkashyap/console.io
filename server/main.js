@@ -78,7 +78,10 @@ function main() {
         //app.use(base, express.logger());
 
         //admin app routes
-        app.use(base, express.static('app'));
+        //app.use(base, express.static('app'));
+        app.use(base, function app(req, res) {
+            res.sendfile('./dist/console.io-app' + req.originalUrl.replace(base, '/'));
+        });
 
         //console lib routes
         app.use(base + 'lib', express.static('lib'));

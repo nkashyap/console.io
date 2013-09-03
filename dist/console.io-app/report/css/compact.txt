@@ -1,1 +1,1 @@
-app/resources/console.io.css: Lint Free!app/resources/main.css: Lint Free!app/resources/scrollbar.css: Lint Free!
+src/app/resources/console.io.css: Lint Free!src/app/resources/main.css: Lint Free!src/app/resources/scrollbar.css: Lint Free!

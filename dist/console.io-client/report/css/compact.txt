@@ -1,1 +1,1 @@
-app/resources/console.io.css: Lint Free!
+src/app/resources/console.io.css: Lint Free!

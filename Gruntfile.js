@@ -48,6 +48,28 @@ module.exports = function (grunt) {
                     'src/client/web.js'
                 ],
                 dest: 'dist/console.io-client/<%= pkg.project %>.js'
+            },
+            'console-app': {
+                options: {
+                    separator: '\n\n',
+                    banner: '/**\n * Name: <%= pkg.project %>\n' +
+                        ' * Version: <%= pkg.version %>\n' +
+                        ' * Description: <%= pkg.description %>\n' +
+                        ' * Website: <%= pkg.homepage %>\n' +
+                        ' * Author: <%= pkg.author.name %>\n' +
+                        ' * Email: <%= pkg.author.email %>\n' +
+                        ' * Date: <%= grunt.template.today("yyyy-mm-dd") %>\n*/\n\n'
+                },
+                src: [
+                    'src/app/service/utils.js',
+                    'src/app/service/socket.js',
+                    'src/app/service/dhtmlxHelper.js',
+                    'src/app/model/**/*.js',
+                    'src/app/controller/**/*.js',
+                    'src/app/view/**/*.js',
+                    'src/app/**/*.js'
+                ],
+                dest: 'dist/console.io-app/<%= pkg.project %>.js'
             }
         },
 
@@ -58,7 +80,7 @@ module.exports = function (grunt) {
                         src: ['console.io.css'],
                         dest: 'dist/console.io-client/',
                         expand: true,
-                        cwd: 'app/resources/',
+                        cwd: 'src/app/resources/',
                         flatten: true,
                         filter: 'isFile'
                     }
@@ -71,6 +93,26 @@ module.exports = function (grunt) {
                         dest: 'dist/console.io-client/plugins/',
                         expand: true,
                         cwd: 'src/client/plugins/',
+                        flatten: true,
+                        filter: 'isFile'
+                    }
+                ]
+            },
+            'console-app': {
+                files: [
+                    {
+                        src: ['*.html'],
+                        dest: 'dist/console.io-app/',
+                        expand: true,
+                        cwd: 'src/app/',
+                        flatten: true,
+                        filter: 'isFile'
+                    },
+                    {
+                        src: ['*.*'],
+                        dest: 'dist/console.io-app/resources/icons/',
+                        expand: true,
+                        cwd: 'src/app/resources/icons/',
                         flatten: true,
                         filter: 'isFile'
                     }
@@ -97,6 +139,20 @@ module.exports = function (grunt) {
                 files: {
                     'dist/console.io-client/plugins/html2canvas.min.js': ['src/client/plugins/html2canvas.js']
                 }
+            },
+            'console-app': {
+                options: {
+                    banner: '/**\n * Name: <%= pkg.project %>\n' +
+                        ' * Version: <%= pkg.version %>\n' +
+                        ' * Description: <%= pkg.description %>\n' +
+                        ' * Website: <%= pkg.homepage %>\n' +
+                        ' * Author: <%= pkg.author.name %>\n' +
+                        ' * Email: <%= pkg.author.email %>\n' +
+                        ' * Date: <%= grunt.template.today("yyyy-mm-dd") %>\n*/\n\n'
+                },
+                files: {
+                    'dist/console.io-app/<%= pkg.project %>.min.js': ['<%= concat["console-app"].dest %>']
+                }
             }
         },
 
@@ -121,7 +177,7 @@ module.exports = function (grunt) {
                 options: {
                     reporterOutput: 'dist/console.io-app/report/js/junit.xml'
                 },
-                src: ['app/**/*.js']
+                src: ['src/app/**/*.js']
             }
         },
 
@@ -138,7 +194,7 @@ module.exports = function (grunt) {
                     ],
                     'import': false
                 },
-                src: ['app/resources/console.io.css']
+                src: ['src/app/resources/console.io.css']
             },
             'console-app': {
                 options: {
@@ -157,7 +213,7 @@ module.exports = function (grunt) {
                     'important': false,
                     'import': false
                 },
-                src: ['app/resources/**/*.css']
+                src: ['src/app/resources/**/*.css']
             }
         },
 
@@ -173,10 +229,33 @@ module.exports = function (grunt) {
                         ' * Date: <%= grunt.template.today("yyyy-mm-dd") %>\n*/\n'
                 },
                 expand: true,
-                cwd: 'app/resources/',
+                cwd: 'src/app/resources/',
                 src: ['console.io.css'],
                 dest: 'dist/console.io-client/',
                 ext: '.io.min.css'
+            },
+            'console-app': {
+                options: {
+                    banner: '/**\n * Name: <%= pkg.project %>\n' +
+                        ' * Version: <%= pkg.version %>\n' +
+                        ' * Description: <%= pkg.description %>\n' +
+                        ' * Website: <%= pkg.homepage %>\n' +
+                        ' * Author: <%= pkg.author.name %>\n' +
+                        ' * Email: <%= pkg.author.email %>\n' +
+                        ' * Date: <%= grunt.template.today("yyyy-mm-dd") %>\n*/\n'
+                },
+                files: {
+                    'dist/console.io-app/resources/console.io.min.css': [
+                        'src/app/resources/console.io.css',
+                        'src/app/resources/main.css',
+                        'src/app/resources/scrollbar.css'
+                    ]
+                }
+//                expand: true,
+//                cwd: 'dist/console.io-app/resources/',
+//                src: ['*.css', '!*.min.css'],
+//                dest: 'dist/console.io-app/resources/',
+//                ext: '.io.min.css'
             }
         },
 
