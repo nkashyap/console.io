@@ -1,7 +1,0 @@
-
-
-csslint: No errors in src/app/resources/console.io.css.
-
-csslint: No errors in src/app/resources/main.css.
-
-csslint: No errors in src/app/resources/scrollbar.css.

@@ -77,24 +77,18 @@ function main() {
         // add request logger
         //app.use(base, express.logger());
 
-        //admin app routes
-        //app.use(base, express.static('app'));
-        app.use(base, function app(req, res) {
-            res.sendfile('./dist/console.io-app' + req.originalUrl.replace(base, '/'));
-        });
+        //console app resources routes
+        app.use(base + 'resources', express.static('resources'));
 
-        //console lib routes
-        app.use(base + 'lib', express.static('lib'));
-
-        //console app routes
+        //console client routes
         function client(req, res) {
-            res.sendfile('./dist/console.io-client' + req.originalUrl.replace(base, '/'));
+            res.sendfile('./dist/client' + req.originalUrl.replace(base, '/'));
         }
 
         app.use(base + 'console.io.js', client);
         app.use(base + 'console.io.min.js', client);
-        app.use(base + 'console.io.css', client);
-        app.use(base + 'console.io.min.css', client);
+        app.use(base + 'console.css', client);
+        app.use(base + 'console.min.css', client);
         app.use(base + 'plugins/html2canvas.js', client);
         app.use(base + 'plugins/html2canvas.min.js', client);
 
@@ -106,6 +100,11 @@ function main() {
         //proxy setup
         app.use(base + 'proxy', function proxyHandler(req, res) {
             proxy.get(req, res);
+        });
+
+        //console app routes
+        app.use(base, function app(req, res) {
+            res.sendfile('./dist/app' + req.originalUrl.replace(base, '/'));
         });
 
         // initialize connection manager

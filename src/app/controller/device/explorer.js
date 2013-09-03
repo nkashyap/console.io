@@ -72,6 +72,10 @@ ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
         this.deleteItem(folder);
     }, this.view);
 
+    ConsoleIO.forEach(this.store.files, function (file) {
+        this.deleteItem(file);
+    }, this.view);
+
     this.store = {
         folder: [],
         files: []

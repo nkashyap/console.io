@@ -1,2 +1,1 @@
-grunt default
-pause
+grunt default > debug-log.txt

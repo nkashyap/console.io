@@ -20,7 +20,7 @@
         html2canvas: "plugins/html2canvas.js",
         //"console.io": "console.io.js",
         "socket.io": "socket.io/socket.io.js",
-        webStyle: "console.io.css",
+        webStyle: "console.css",
         proxy: 'proxy',
 
         forceReconnect: true,

@@ -29,16 +29,16 @@ ConsoleIO.Constant.THEMES = {
 
 ConsoleIO.Constant.IMAGE_URL = {
     'web': {
-        tree: "lib/dhtmlx/web/imgs/csh_vista/",
-        tab: "lib/dhtmlx/web/imgs/",
-        win: "lib/dhtmlx/web/imgs/",
-        grid: "lib/dhtmlx/web/imgs/"
+        tree: "resources/lib/dhtmlx/web/imgs/csh_vista/",
+        tab: "resources/lib/dhtmlx/web/imgs/",
+        win: "resources/lib/dhtmlx/web/imgs/",
+        grid: "resources/lib/dhtmlx/web/imgs/"
     },
     'terrace': {
-        tree: "lib/dhtmlx/terrace/imgs/csh_dhx_terrace/",
-        tab: "lib/dhtmlx/terrace/imgs/",
-        win: "lib/dhtmlx/terrace/imgs/",
-        grid: "lib/dhtmlx/terrace/imgs/"
+        tree: "resources/lib/dhtmlx/terrace/imgs/csh_dhx_terrace/",
+        tab: "resources/lib/dhtmlx/terrace/imgs/",
+        win: "resources/lib/dhtmlx/terrace/imgs/",
+        grid: "resources/lib/dhtmlx/terrace/imgs/"
     },
     get: function get(type) {
         return ConsoleIO.Constant.IMAGE_URL[ConsoleIO.Settings.theme][type];

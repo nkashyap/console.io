@@ -1,3 +1,0 @@
-
-
-csslint: No errors in src/app/resources/console.io.css.
