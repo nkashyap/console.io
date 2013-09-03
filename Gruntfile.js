@@ -35,17 +35,17 @@ module.exports = function (grunt) {
                         '}());'
                 },
                 src: [
-                    'src/util.js',
-                    'src/storage.js',
-                    'src/events.js',
-                    'src/stringify.js',
-                    'src/formatter.js',
-                    'src/stacktrace.js',
-                    'src/transport.js',
-                    'src/console.js',
-                    'src/client.js',
-                    'src/config.js',
-                    'src/web.js'
+                    'src/client/util.js',
+                    'src/client/storage.js',
+                    'src/client/events.js',
+                    'src/client/stringify.js',
+                    'src/client/formatter.js',
+                    'src/client/stacktrace.js',
+                    'src/client/transport.js',
+                    'src/client/console.js',
+                    'src/client/client.js',
+                    'src/client/config.js',
+                    'src/client/web.js'
                 ],
                 dest: 'dist/console.io-client/<%= pkg.project %>.js'
             }
@@ -70,7 +70,7 @@ module.exports = function (grunt) {
                         src: ['*.*'],
                         dest: 'dist/console.io-client/plugins/',
                         expand: true,
-                        cwd: 'src/plugins/',
+                        cwd: 'src/client/plugins/',
                         flatten: true,
                         filter: 'isFile'
                     }
@@ -95,7 +95,7 @@ module.exports = function (grunt) {
             },
             'console-plugins': {
                 files: {
-                    'dist/console.io-client/plugins/html2canvas.min.js': ['src/plugins/html2canvas.js']
+                    'dist/console.io-client/plugins/html2canvas.min.js': ['src/client/plugins/html2canvas.js']
                 }
             }
         },
@@ -115,7 +115,7 @@ module.exports = function (grunt) {
                         module: true
                     }
                 },
-                src: ['src/**/*.js']
+                src: ['src/client/**/*.js']
             },
             'console-app': {
                 options: {
