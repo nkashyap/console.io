@@ -386,10 +386,10 @@ ConsoleIO.version = "0.2.0";
 
     util.showInfo = function showInfo(content, online) {
         var className = "consoleio",
-            bgColor = online ? 'rgba(0, 130, 30, 0.8)' : 'rgba(192, 192, 192, 0.7)',
+            bgColor = online ? 'rgba(0, 130, 30, 0.8)' : 'rgba(0, 0, 0, 0.8)',
             css = "content: 'Console.IO:" + content + "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
                 "font-size: 12px; font-weight: bold; color: lightgrey; " +
-                "background-color: " + bgColor + "; border: 1px solid rgb(111, 114, 117); " +
+                "background-color: " + bgColor + "; border: 1px solid rgb(0, 0, 0); " +
                 "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
 
         util.deleteCSSRule(exports.styleSheet, "." + className + "::after");
@@ -2564,7 +2564,7 @@ ConsoleIO.version = "0.2.0";
     };
 
     View.prototype.add = function add(data) {
-        if (!this.ctrl.isFiltered(data) || !this.ctrl.isSearchFiltered(data)) {
+        if (!this.ctrl.isFiltered(data) || !this.ctrl.isSearchFiltered(data) || !this.container) {
             return false;
         }
 
@@ -2586,7 +2586,7 @@ ConsoleIO.version = "0.2.0";
     };
 
     View.prototype.addBatch = function addBatch(store) {
-        if (store.length > 0) {
+        if (store.length > 0 && this.container) {
             var fragment = document.createDocumentFragment();
 
             exports.util.forEach(store, function (item) {

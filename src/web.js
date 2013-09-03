@@ -329,7 +329,7 @@
     };
 
     View.prototype.add = function add(data) {
-        if (!this.ctrl.isFiltered(data) || !this.ctrl.isSearchFiltered(data)) {
+        if (!this.ctrl.isFiltered(data) || !this.ctrl.isSearchFiltered(data) || !this.container) {
             return false;
         }
 
@@ -351,7 +351,7 @@
     };
 
     View.prototype.addBatch = function addBatch(store) {
-        if (store.length > 0) {
+        if (store.length > 0 && this.container) {
             var fragment = document.createDocumentFragment();
 
             exports.util.forEach(store, function (item) {
