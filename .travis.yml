@@ -1,9 +1,11 @@
 language: node_js
 node_js:
-  - "0.11"
-  - "0.10"
-  - "0.8"
+- '0.11'
+- '0.10'
+- '0.8'
 deploy:
-    provider: nodejitsu
-    user: "nisheeth"
-    api_key: "dee2fc6d-87fb-46db-a6fe-480b54b7d646"
+  provider: nodejitsu
+  user: nisheeth
+  api_key:
+    secure: XHL6Hm9sgAj3iHZv7OScdlsanjqJ5K53C+3aSdnpn5CyGvvuZ3gETTJ8H1hq7gdK51ZvN3U8E4y+awAa47maaIRl4DJXZHmd/NvTXnpCSA6CrpURQac13urhibAyqRrrKCv/7kxHDnOuqDJmsaXFvDR+i1u5xyd8c7bpoD1Q5fk=
+  on: dev
