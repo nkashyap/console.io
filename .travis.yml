@@ -3,6 +3,11 @@ node_js:
 - '0.11'
 - '0.10'
 - '0.8'
+deploy:
+  provider: nodejitsu
+  user: nisheeth
+  api_key: 327b0824-f9d1-43ac-a5e4-491ec15aa1ae
+  on: dev
 notifications:
   webhooks:
     urls:
