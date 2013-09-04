@@ -7,7 +7,7 @@ deploy:
   provider: nodejitsu
   user: nisheeth
   api_key:
-    secure: WWiKBqzw3rt6ueBgfoHpLjeoM5Tk+ZY58ZH+XdvpzJnRLV/k6eATnZVYggxDpgdLaxsFnT/TWKe1HLTx9d9N+V01IlMp9s/3DrHEj6+gnkrEf7kVrxdJ+6MNSYjJFWtefjSLva3LurzEyoIyqMWpE8NS3uuDoZk7oXbEZlfg0Ow=
+    secure: RCxDkN0CkfZQXzm8KXkT4UotqTPResN37er8PfM1deBshJGth966ZoFCrWu0HuugVZCppQQEixPD5zVSsvXu+4ViL57kD7+uU1uJUgvs0n+1YxMAw0kpQQ1/XmQ/KbBVuzYsyb2Pb04dIy9UIFxoYO6BD0DEIZ8gtqrlzqCd+TM=
   on: dev
 notifications:
   webhooks:
