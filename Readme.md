@@ -142,7 +142,7 @@ define(['console.io'], function (consoleio) {
 });
 ```
 
-NOTE: Console.IO can also capture iframe logs. To do that just include console.io.js script file in the child document.
+NOTE: It can also capture iframe logs. To do that just include console.io.js script file in the child document.
 
 Visit http://<console.io server>/ for ConsoleIO interface (Tested on Chrome Browsers)
 
@@ -158,7 +158,7 @@ NOTE:
 ### APPLICATION
 #### Editor
 
-Commands/Scripts can be execute on connected client from Console.IO Application.
+Commands/Scripts can be execute on connected client from application.
 
 Shortcuts: 
 * Ctrl+Enter: execute command
@@ -191,7 +191,7 @@ NOTE: All multilines code should be wrapped within self executable function. E.G
 	* Search word or use regex to filter logs
 	* Filter logs by type
 
-#### Console.IO web console
+#### Web console
 * Control it remotely
 	* Pause incoming logs
 	* Clear logs
@@ -203,7 +203,7 @@ NOTE: All multilines code should be wrapped within self executable function. E.G
     * Control logging speed
     * Scroll through logs (Smart Tv/mobile/tablets)
 
-#### Console API methods supported
+### CONSOLE API
  * console.assert(x)
  * console.count(key)
  * console.time(name, reset)
@@ -217,15 +217,16 @@ NOTE: All multilines code should be wrapped within self executable function. E.G
  * console.error(error)
  * console.exception(error)
  * console.trace()
- * TODO
-    * console.group()
-    * console.groupCollapsed()
-    * console.groupEnd()
-    * console.markTimeline()
-    * console.timestamp()
-    * console.profiles
-    * console.profile()
-    * console.profileEnd()
+
+#### TODO
+* console.group()
+* console.groupCollapsed()
+* console.groupEnd()
+* console.markTimeline()
+* console.timestamp()
+* console.profiles
+* console.profile()
+* console.profileEnd()
 
 
 ### SERVER CONFIGURATION

@@ -37,6 +37,9 @@
     "bin": {
         "consoleio": "./bin/consoleio.js"
     },
+    "scripts": {
+        "test": "grunt test --verbose"
+    }
     "engines": {
         "node": "*"
     },
