@@ -2,7 +2,7 @@
     "name": "xconsole.io",
     "version": "0.2.0",
     "project": "console.io",
-    "subdomain": "console",
+    "subdomain": "console.io",
     "description": "Javascript Remote Web Console",
     "homepage": "http://nkashyap.github.io/console.io/",
     "author": {
