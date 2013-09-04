@@ -2,7 +2,7 @@
     "name": "xconsole.io",
     "version": "0.2.0",
     "project": "console.io",
-    "subdomain": "console.io",
+    "subdomain": "console",
     "description": "Javascript Remote Web Console",
     "homepage": "http://nkashyap.github.io/console.io/",
     "author": {
@@ -39,6 +39,7 @@
         "consoleio": "./bin/consoleio.js"
     },
     "scripts": {
+        "start": "node server/main.js",
         "test": "grunt test --verbose"
     },
     "engines": {
