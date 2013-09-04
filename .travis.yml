@@ -6,11 +6,12 @@ node_js:
 deploy:
   provider: nodejitsu
   user: nisheeth
-  api_key: 327b0824-f9d1-43ac-a5e4-491ec15aa1ae
+  api_key:
+    secure: WWiKBqzw3rt6ueBgfoHpLjeoM5Tk+ZY58ZH+XdvpzJnRLV/k6eATnZVYggxDpgdLaxsFnT/TWKe1HLTx9d9N+V01IlMp9s/3DrHEj6+gnkrEf7kVrxdJ+6MNSYjJFWtefjSLva3LurzEyoIyqMWpE8NS3uuDoZk7oXbEZlfg0Ow=
   on: dev
 notifications:
   webhooks:
     urls:
-      - http://webhooks.nodejitsu.com/1/deploy
+    - http://webhooks.nodejitsu.com/1/deploy
     on_success: always
     on_failure: never
