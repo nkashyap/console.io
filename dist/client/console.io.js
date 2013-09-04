@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-03
+ * Date: 2013-09-04
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -2262,11 +2262,15 @@ ConsoleIO.version = "0.2.0";
         }, exports.getConfig());
 
         this.control = {
-            pageSize: 50,
-            filters: [],
+            pageSize: this.config.pageSize || 50,
+            filters: this.config.filters || [],
             paused: false,
             search: null
         };
+
+        if (this.config.search) {
+            this.applySearch(this.config.search);
+        }
 
         this.isEnabled = false;
         this.view = new View(this);

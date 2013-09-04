@@ -1,5 +1,7 @@
 # Console.IO
 
+[![Build Status](https://secure.travis-ci.org/nkashyap/console.io.png)](https://travis-ci.org/nkashyap/console.io)
+
 Console.IO is a NodeJS project. It provides Remote Web Console for websites and web applications.
 It uses express.io (express & socket.io) to provide user real time experience.
 
@@ -16,119 +18,147 @@ Tested on:
 * iPhone, iPod, iPad, Android browser, windows 8 phone etc
 
 
-### Node NPM package
-#### Install and start Console.IO server
+### INSTALLATION
+#### NPM
 
 ```bash
 npm install -g xconsole.io
+```
+
+#### Source (install.bat for windows users)
+
+```bash
+npm install
+```
+
+### START SERVER
+#### NPM
+
+```bash
 consoleio
 ```
 
-### Install from Source
-#### Install and start or execute install.bat and start.bat (window user only)
+#### Source (start.bat for window users)
 
 ```bash
-npm install express.io request
 node ./server/main.js
 ```
 
-### Include scripts in your web page
-
-include inject.js scripts with config parameters
+### USAGE
+#### Include Script directly
 
 ```html
-<script type="text/javascript" src="inject.js?url=http://nodeserver:port&web=true&..."></script>
+<script type="text/javascript" src="http://<console.io server>/console.io.js"></script>
 ```
 
-OR create a create ConfigIO global object with config options
+#### Via RequireJS
 
 ```html
-<script type="text/javascript" src="configIO.js"></script>
-<script type="text/javascript" src="inject.js"></script>
+    //requirejs bootstrap file
+
+    requirejs.config({
+        baseUrl: './',
+        paths: {
+            "socket.io": "<console.io server>/socket.io/socket.io",
+            "console.io": "<console.io server>/console.io"
+        }
+    });
+
+    // usage
+    define(['console.io'], function (consoleio) {
+        consoleio.configure({});
+    });
 ```
 
-configIO.js
+### CONFIGURATION
+#### Config Object (Works only when script is included directly)
+
+Create a config object on ConsoleIO but note that it only works when script is included directly not via RequireJS.
+
 ```html
-window.ConfigIO = {
-    //URL to connect back
-	url: 'http://nodeserver:port/',
+window.ConsoleIO = window.ConsoleIO || {};
 
-    // default is true if not defined, No connection will be made to server if set to false
-    socket: true,
+window.ConsoleIO.config = {
+    url: "<console.io server>",
+    base: "",
 
-	// set it to true to enable WebIO (web console)  (optional)
-	web: true,
+    // optionals
+    secure: false,
+    minify: true,
 
-    // WebIO config (optional)
+    nativeConsole: true,
+    web: false,  // true to display web console
+    webOnly: false, // true for web console mode only
+
+    // Web console config
 	filters: ['log','error'],
 	search: 'test',
 	pageSize: 100,
 
-    // WebIO UI config (optional)
-	docked: false,
+    // Web UI config
+    docked: false,
     position: 'bottom',
     height: '300px',
     width: '99%'
 };
 ```
 
-OR you can include all files individually
+#### QueryString Parameters (Works only when script is included directly)
+
+Pass list of configurations options in the query strings parameters like given below.
+Any query string parameters in the location bar will overwrite file query strings parameters.
+Note that it only works when script is included directly not via RequireJS.
 
 ```html
-<script type="text/javascript" src="<Local Folder OR Node Server/socket.io/socket.io.js"></script>
-<script type="text/javascript" src="<Local Folder OR Node Server>/addons/console.io.js"></script>
-<script type="text/javascript" src="<Local Folder OR Node Server>/addons/socket.js"></script>
-<script type="text/javascript" src="<Local Folder OR Node Server>/addons/web.js"></script>
-<script type="text/javascript" src="<Local Folder OR Node Server>/addons/inject.js?url=http://nodeserver:port"></script>
-<link type="text/css" media="all" href="<Local Folder OR Node Server>/resources/console.css" />
+<script type="text/javascript" src="http://<console.io server>/console.io.js?url=<console.io server>"></script>
 ```
 
-You can also capture iframe console logs. To do that just include inject.js script file in child document.
+#### Configurations when loaded via RequireJS
+```html
+define(['console.io'], function (consoleio) {
+    consoleio.configure({
+        url: "<console.io server>",
+        base: "",
 
-Visit http://nodeserver:port/ for ConsoleIO interface (Tested on Chrome Browsers)
+        // optionals
+        secure: false,
+        minify: true,
+
+        nativeConsole: true,
+        web: false,
+        webOnly: false,
+
+        // Web console config
+        filters: ['log','error'],
+        search: 'test',
+        pageSize: 100,
+
+        // Web UI config
+        docked: false,
+        position: 'bottom',
+        height: '300px',
+        width: '99%'
+    });
+});
+```
+
+NOTE: Console.IO can also capture iframe logs. To do that just include console.io.js script file in the child document.
+
+Visit http://<console.io server>/ for ConsoleIO interface (Tested on Chrome Browsers)
 
 ![Screen shot](https://raw.github.com/nkashyap/console.io/master/console.io.png)
 
-Note:
+NOTE:
 * ![Online icons](https://raw.github.com/nkashyap/console.io/master/app/resources/icons/online.png) Device is registered and connected.
 * ![Offline icons](https://raw.github.com/nkashyap/console.io/master/app/resources/icons/offline.png) Device is registered but offline.
 * ![Subscribe icons](https://raw.github.com/nkashyap/console.io/master/app/resources/icons/subscribe.gif) Device is subscribed (double click on Online icon to subscribe).
-* ![WebIO icons](https://raw.github.com/nkashyap/console.io/master/app/resources/icons/console.gif) WebIO (web console) icon to enable/disable WebIO remotely.
+* ![Web icons](https://raw.github.com/nkashyap/console.io/master/app/resources/icons/console.gif) web console icon to enable/disable web remotely.
 
-### Console.IO Web only
 
-Console.IO now also support web only mode. It allow user to access console logs on the device without any need of node server.
+### APPLICATION
+#### Editor
 
-Include following script in the web page to auto inject files
-
-```html
-    <script type="text/javascript" src="inject.js?web=true&socket=false"></script>
-```
-
-Files can be included manually in the web page as well, steps are given below.
-
-define ConfigIO object to set web only mode
-
-```html
-window.ConfigIO = {
-    socket: false,
-	web: true,
-	....
-};
-```
-
-and include following scripts in the web page
-
-```html
-    <script type="text/javascript" src="inject.js"></script>
-    <script type="text/javascript" src="console.js"></script>
-    <script type="text/javascript" src="web.js"></script>
-    <link type="text/css" media="all" href="app/resources/console.css" />
-```
-
-### Console.IO Editor
-
-You can execute commands on remote client from Console.IO. You can execute single & multilines javascript code.
+Commands/Scripts can be execute on connected client from Console.IO Application.
 
 Shortcuts: 
 * Ctrl+Enter: execute command
@@ -141,14 +171,14 @@ Shortcuts:
 * Shift-Ctrl-F / Cmd-Option-F: Replace
 * Shift-Ctrl-R / Shift-Cmd-Option-F: Replace all
 
-Note: All multilines code should be wrapped within self executable function. E.G
+NOTE: All multilines code should be wrapped within self executable function. E.G
 ```html
 (function doSomeThing(){
  .......
 }())
 ```
 
-### Console.IO Device and Tabs
+#### Device and Tabs
 * Files: Show all attached javascript and css files in the web page
 * Status: Device Status and some basic information
 * Source: Double click on a file in file explorer to view file content
@@ -161,7 +191,7 @@ Note: All multilines code should be wrapped within self executable function. E.G
 	* Search word or use regex to filter logs
 	* Filter logs by type
 
-### Console.IO WebIO (web console)
+#### Console.IO web console
 * Control it remotely
 	* Pause incoming logs
 	* Clear logs
@@ -173,7 +203,7 @@ Note: All multilines code should be wrapped within self executable function. E.G
     * Control logging speed
     * Scroll through logs (Smart Tv/mobile/tablets)
 
-### Console API methods supported
+#### Console API methods supported
  * console.assert(x)
  * console.count(key)
  * console.time(name, reset)
@@ -197,11 +227,13 @@ Note: All multilines code should be wrapped within self executable function. E.G
     * console.profile()
     * console.profileEnd()
 
-## Configure Console.IO Server
+
+### SERVER CONFIGURATION
+
 All server side configurations are defined in server/config.js file.
 If you have install using npm -g then you will find it in C:\Users\[USERNAME]\AppData\Roaming\npm\node_modules\xconsole.io\server folder
 
-### Server Port
+#### Server Port
 You can change default (8082) port number
 
 ```html
@@ -215,7 +247,7 @@ express: {
 }
 ```
 
-### SSL Support
+#### SSL Support
 
 Change following in server side config file to enable server to run over SSL and use "https" instead of "http" to inject files on client.
 To generate your own SSL Certificate please check this [How to generate custom SSL certificates](http://forum.synology.com/wiki/index.php/How_to_generate_custom_SSL_certificates).
@@ -225,19 +257,70 @@ var config = {
     .....
     https: {
         enable: true, // change true/false to enable and disable SSL
-        key: './certificates/server.key',
-        certificate: './certificates/server.crt',
-        ca: './certificates/ca.crt'
+        key: './server/certificates/server.key',
+        certificate: './server/certificates/server.crt',
+        ca: './server/certificates/ca.crt'
     },
     .....
 }
 ```
 
+And change console.io config as follows
+
 ```html
-<script type="text/javascript" src="inject.js?url=https://nodeserver:port&web=true&..."></script>
+{
+    ....
+    secure: true,
+    .....
+}
 ```
 
-### Example to setup AngularJS global $http error handler
+### IISNODE
+
+Console.IO can be hosted inside IIS. It allows to bypass SSL self-signed certificate issue.
+
+#### INSTALL
+ * Install x64 node from http://nodejs.org/download/
+ * Install x64 iisnode from https://github.com/tjanczuk/iisnode
+ * IIS URL Rewrite module
+ * Add Web Application inside a website and set it to console.io source directory
+ * Navigate to https://[your machine name]/console.io/ to access console.io application.
+
+NOTE: Only IIS8 supports websockets therefore Console.IO is configured to used xhr-polling by default
+
+![IIS NODE](https://raw.github.com/nkashyap/console.io/master/iis.png).
+
+#### USAGE
+##### Include Script directly
+
+```html
+<script type="text/javascript" src="/console.io/console.io.js"></script>
+```
+
+##### Via RequireJS
+
+```html
+    //requirejs bootstrap file
+
+    requirejs.config({
+        baseUrl: './',
+        paths: {
+            "socket.io": "/console.io/socket.io/socket.io",
+            "console.io": "/console.io/console.io"
+        }
+    });
+
+    // usage
+    define(['console.io'], function (consoleio) {
+        consoleio.configure({});
+    });
+```
+
+
+### ANGULARJS
+
+Example to setup AngularJS global $http error handler
+
 ```html
 angular.module('app', ['ngResource',])
 	.config(function ($httpProvider)
@@ -259,15 +342,13 @@ angular.module('app', ['ngResource',])
 ```
 
 ### TODO
- * Update Readme with full feature list
  * Add JSDoc & Unit Tests
- * Add IISNode configuration steps
  * Support scaling
 
-### Copyright and license
+### COPYRIGHT AND LICENSE
  MIT LICENSE 
 
-### Reference
+### REFERENCE
  * [Javascript Stacktrace] (https://github.com/eriwen/javascript-stacktrace)
  * [codemirror] (http://codemirror.net/)
  * [express.io] (https://github.com/techpines/express.io)
@@ -276,3 +357,4 @@ angular.module('app', ['ngResource',])
  * [dhtmlx] (http://dhtmlx.com/) [GPL LICENSE]
  * [OpenSSL] (http://www.openssl.org/)
  * [Html2Canvas] (http://html2canvas.hertzen.com/)
+ * [Grunt] (http://gruntjs.com/)

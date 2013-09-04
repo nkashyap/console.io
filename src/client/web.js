@@ -27,11 +27,15 @@
         }, exports.getConfig());
 
         this.control = {
-            pageSize: 50,
-            filters: [],
+            pageSize: this.config.pageSize || 50,
+            filters: this.config.filters || [],
             paused: false,
             search: null
         };
+
+        if (this.config.search) {
+            this.applySearch(this.config.search);
+        }
 
         this.isEnabled = false;
         this.view = new View(this);
