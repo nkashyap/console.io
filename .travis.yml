@@ -3,3 +3,7 @@ node_js:
   - "0.11"
   - "0.10"
   - "0.8"
+deploy:
+    provider: nodejitsu
+    user: "nisheeth"
+    api_key: "dee2fc6d-87fb-46db-a6fe-480b54b7d646"
