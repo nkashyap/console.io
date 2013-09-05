@@ -41,10 +41,16 @@
         <h1>
 <a name="consoleio" class="anchor" href="#consoleio"><span class="octicon octicon-link"></span></a>Console.IO</h1>
 
+<p><a href="https://travis-ci.org/nkashyap/console.io"><img src="https://secure.travis-ci.org/nkashyap/console.io.png" alt="Travis build status"></a>
+<a href="https://webops.nodejitsu.com#nodejitsu/webhooks"><img src="https://webhooks.nodejitsu.com/nkashyap/console.io.png" alt="Nodejitsu Deploy Status"></a></p>
+
 <p>Console.IO is a NodeJS project. It provides Remote Web Console for websites and web applications.
 It uses express.io (express &amp; socket.io) to provide user real time experience.</p>
 
-<p>It works pretty much on all modern browsers, mobile devices, Smart TVs, etc</p>
+<ul>
+<li><a href="http://console.io.jit.su/">Demo</a></li>
+<li><a href="http://nkashyap.github.io/console.io">Console.IO</a></li>
+</ul><p>It works pretty much on all modern browsers, mobile devices, Smart TVs, etc</p>
 
 <p>Tested on: </p>
 
@@ -58,57 +64,91 @@ It uses express.io (express &amp; socket.io) to provide user real time experienc
 <li>Firefox, Safari, Opera, Chrome, Maple, PhantomJS and IE</li>
 <li>iPhone, iPod, iPad, Android browser, windows 8 phone etc</li>
 </ul><h3>
-<a name="node-npm-package" class="anchor" href="#node-npm-package"><span class="octicon octicon-link"></span></a>Node NPM package</h3>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>INSTALLATION</h3>
 
 <h4>
-<a name="install-and-start-consoleio-server" class="anchor" href="#install-and-start-consoleio-server"><span class="octicon octicon-link"></span></a>Install and start Console.IO server</h4>
+<a name="npm" class="anchor" href="#npm"><span class="octicon octicon-link"></span></a>NPM</h4>
 
 <div class="highlight"><pre>npm install -g xconsole.io
-consoleio
 </pre></div>
-
-<h3>
-<a name="install-from-source" class="anchor" href="#install-from-source"><span class="octicon octicon-link"></span></a>Install from Source</h3>
 
 <h4>
-<a name="install-and-start-or-execute-installbat-and-startbat-window-user-only" class="anchor" href="#install-and-start-or-execute-installbat-and-startbat-window-user-only"><span class="octicon octicon-link"></span></a>Install and start or execute install.bat and start.bat (window user only)</h4>
+<a name="source-installbat-for-windows-users" class="anchor" href="#source-installbat-for-windows-users"><span class="octicon octicon-link"></span></a>Source (install.bat for windows users)</h4>
 
-<div class="highlight"><pre>npm install express.io request
-node ./server/main.js
+<div class="highlight"><pre>npm install
 </pre></div>
 
 <h3>
-<a name="include-scripts-in-your-web-page" class="anchor" href="#include-scripts-in-your-web-page"><span class="octicon octicon-link"></span></a>Include scripts in your web page</h3>
+<a name="start-server" class="anchor" href="#start-server"><span class="octicon octicon-link"></span></a>START SERVER</h3>
 
-<p>include inject.js scripts with config parameters</p>
+<h4>
+<a name="npm-1" class="anchor" href="#npm-1"><span class="octicon octicon-link"></span></a>NPM</h4>
 
-<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js?url=http://nodeserver:port&amp;web=true&amp;..."</span><span class="nt">&gt;&lt;/script&gt;</span>
+<div class="highlight"><pre>consoleio
 </pre></div>
 
-<p>OR create a create ConfigIO global object with config options</p>
+<h4>
+<a name="source-startbat-for-window-users" class="anchor" href="#source-startbat-for-window-users"><span class="octicon octicon-link"></span></a>Source (start.bat for window users)</h4>
 
-<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"configIO.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<div class="highlight"><pre>node ./server/main.js
 </pre></div>
 
-<p>configIO.js</p>
+<h3>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>USAGE</h3>
 
-<div class="highlight"><pre>window.ConfigIO = {
-    //URL to connect back
-    url: 'http://nodeserver:port/',
+<h4>
+<a name="include-script-directly" class="anchor" href="#include-script-directly"><span class="octicon octicon-link"></span></a>Include Script directly</h4>
 
-    // default is true if not defined, No connection will be made to server if set to false
-    socket: true,
+<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"http://&lt;console.io server&gt;/console.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</pre></div>
 
-    // set it to true to enable WebIO (web console)  (optional)
-    web: true,
+<h4>
+<a name="via-requirejs" class="anchor" href="#via-requirejs"><span class="octicon octicon-link"></span></a>Via RequireJS</h4>
 
-    // WebIO config (optional)
+<div class="highlight"><pre>    //requirejs bootstrap file
+
+    requirejs.config({
+        baseUrl: './',
+        paths: {
+            "socket.io": "<span class="nt">&lt;console</span><span class="err">.</span><span class="na">io</span> <span class="na">server</span><span class="nt">&gt;</span>/socket.io/socket.io",
+            "console.io": "<span class="nt">&lt;console</span><span class="err">.</span><span class="na">io</span> <span class="na">server</span><span class="nt">&gt;</span>/console.io"
+        }
+    });
+
+    // usage
+    define(['console.io'], function (consoleio) {
+        consoleio.configure({});
+    });
+</pre></div>
+
+<h3>
+<a name="configuration" class="anchor" href="#configuration"><span class="octicon octicon-link"></span></a>CONFIGURATION</h3>
+
+<h4>
+<a name="config-object-works-only-when-script-is-included-directly" class="anchor" href="#config-object-works-only-when-script-is-included-directly"><span class="octicon octicon-link"></span></a>Config Object (Works only when script is included directly)</h4>
+
+<p>Create a config object on ConsoleIO but note that it only works when script is included directly not via RequireJS.</p>
+
+<div class="highlight"><pre>window.ConsoleIO = window.ConsoleIO || {};
+
+window.ConsoleIO.config = {
+    url: "<span class="nt">&lt;console</span><span class="err">.</span><span class="na">io</span> <span class="na">server</span><span class="nt">&gt;</span>",
+    base: "",
+
+    // optionals
+    secure: false,
+    minify: true,
+
+    nativeConsole: true,
+    web: false,  // true to display web console
+    webOnly: false, // true for web console mode only
+
+    // Web console config
     filters: ['log','error'],
     search: 'test',
     pageSize: 100,
 
-    // WebIO UI config (optional)
+    // Web UI config
     docked: false,
     position: 'bottom',
     height: '300px',
@@ -116,23 +156,53 @@ node ./server/main.js
 };
 </pre></div>
 
-<p>OR you can include all files individually</p>
+<h4>
+<a name="querystring-parameters-works-only-when-script-is-included-directly" class="anchor" href="#querystring-parameters-works-only-when-script-is-included-directly"><span class="octicon octicon-link"></span></a>QueryString Parameters (Works only when script is included directly)</h4>
 
-<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server/socket.io/socket.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/addons/console.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/addons/socket.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/addons/web.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/addons/inject.js?url=http://nodeserver:port"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;link</span> <span class="na">type=</span><span class="s">"text/css"</span> <span class="na">media=</span><span class="s">"all"</span> <span class="na">href=</span><span class="s">"&lt;Local Folder OR Node Server&gt;/resources/console.css"</span> <span class="nt">/&gt;</span>
+<p>Pass list of configurations options in the query strings parameters like given below.
+Any query string parameters in the location bar will overwrite file query strings parameters.
+Note that it only works when script is included directly not via RequireJS.</p>
+
+<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"http://&lt;console.io server&gt;/console.io.js?url=&lt;console.io server&gt;"</span><span class="nt">&gt;&lt;/script&gt;</span>
 </pre></div>
 
-<p>You can also capture iframe console logs. To do that just include inject.js script file in child document.</p>
+<h4>
+<a name="configurations-when-loaded-via-requirejs" class="anchor" href="#configurations-when-loaded-via-requirejs"><span class="octicon octicon-link"></span></a>Configurations when loaded via RequireJS</h4>
 
-<p>Visit http://nodeserver:port/ for ConsoleIO interface (Tested on Chrome Browsers)</p>
+<div class="highlight"><pre>define(['console.io'], function (consoleio) {
+    consoleio.configure({
+        url: "<span class="nt">&lt;console</span><span class="err">.</span><span class="na">io</span> <span class="na">server</span><span class="nt">&gt;</span>",
+        base: "",
+
+        // optionals
+        secure: false,
+        minify: true,
+
+        nativeConsole: true,
+        web: false,
+        webOnly: false,
+
+        // Web console config
+        filters: ['log','error'],
+        search: 'test',
+        pageSize: 100,
+
+        // Web UI config
+        docked: false,
+        position: 'bottom',
+        height: '300px',
+        width: '99%'
+    });
+});
+</pre></div>
+
+<p>NOTE: It can also capture iframe logs. To do that just include console.io.js script file in the child document.</p>
+
+<p>Visit http:/// for ConsoleIO interface (Tested on Chrome Browsers)</p>
 
 <p><img src="https://raw.github.com/nkashyap/console.io/master/console.io.png" alt="Screen shot"></p>
 
-<p>Note:</p>
+<p>NOTE:</p>
 
 <ul>
 <li>
@@ -142,40 +212,14 @@ node ./server/main.js
 <li>
 <img src="https://raw.github.com/nkashyap/console.io/master/app/resources/icons/subscribe.gif" alt="Subscribe icons"> Device is subscribed (double click on Online icon to subscribe).</li>
 <li>
-<img src="https://raw.github.com/nkashyap/console.io/master/app/resources/icons/console.gif" alt="WebIO icons"> WebIO (web console) icon to enable/disable WebIO remotely.</li>
+<img src="https://raw.github.com/nkashyap/console.io/master/app/resources/icons/console.gif" alt="Web icons"> web console icon to enable/disable web remotely.</li>
 </ul><h3>
-<a name="consoleio-web-only" class="anchor" href="#consoleio-web-only"><span class="octicon octicon-link"></span></a>Console.IO Web only</h3>
+<a name="application" class="anchor" href="#application"><span class="octicon octicon-link"></span></a>APPLICATION</h3>
 
-<p>Console.IO now also support web only mode. It allow user to access console logs on the device without any need of node server.</p>
+<h4>
+<a name="editor" class="anchor" href="#editor"><span class="octicon octicon-link"></span></a>Editor</h4>
 
-<p>Include following script in the web page to auto inject files</p>
-
-<div class="highlight"><pre>    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js?web=true&amp;socket=false"</span><span class="nt">&gt;&lt;/script&gt;</span>
-</pre></div>
-
-<p>Files can be included manually in the web page as well, steps are given below.</p>
-
-<p>define ConfigIO object to set web only mode</p>
-
-<div class="highlight"><pre>window.ConfigIO = {
-    socket: false,
-    web: true,
-    ....
-};
-</pre></div>
-
-<p>and include following scripts in the web page</p>
-
-<div class="highlight"><pre>    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"console.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"web.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-    <span class="nt">&lt;link</span> <span class="na">type=</span><span class="s">"text/css"</span> <span class="na">media=</span><span class="s">"all"</span> <span class="na">href=</span><span class="s">"app/resources/console.css"</span> <span class="nt">/&gt;</span>
-</pre></div>
-
-<h3>
-<a name="consoleio-editor" class="anchor" href="#consoleio-editor"><span class="octicon octicon-link"></span></a>Console.IO Editor</h3>
-
-<p>You can execute commands on remote client from Console.IO. You can execute single &amp; multilines javascript code.</p>
+<p>Commands/Scripts can be execute on connected client from application.</p>
 
 <p>Shortcuts: </p>
 
@@ -189,15 +233,15 @@ node ./server/main.js
 <li>Shift-Ctrl-G / Shift-Cmd-G: Find previous</li>
 <li>Shift-Ctrl-F / Cmd-Option-F: Replace</li>
 <li>Shift-Ctrl-R / Shift-Cmd-Option-F: Replace all</li>
-</ul><p>Note: All multilines code should be wrapped within self executable function. E.G</p>
+</ul><p>NOTE: All multilines code should be wrapped within self executable function. E.G</p>
 
 <div class="highlight"><pre>(function doSomeThing(){
  .......
 }())
 </pre></div>
 
-<h3>
-<a name="consoleio-device-and-tabs" class="anchor" href="#consoleio-device-and-tabs"><span class="octicon octicon-link"></span></a>Console.IO Device and Tabs</h3>
+<h4>
+<a name="device-and-tabs" class="anchor" href="#device-and-tabs"><span class="octicon octicon-link"></span></a>Device and Tabs</h4>
 
 <ul>
 <li>Files: Show all attached javascript and css files in the web page</li>
@@ -215,8 +259,8 @@ node ./server/main.js
 <li>Filter logs by type</li>
 </ul>
 </li>
-</ul><h3>
-<a name="consoleio-webio-web-console" class="anchor" href="#consoleio-webio-web-console"><span class="octicon octicon-link"></span></a>Console.IO WebIO (web console)</h3>
+</ul><h4>
+<a name="web-console" class="anchor" href="#web-console"><span class="octicon octicon-link"></span></a>Web console</h4>
 
 <ul>
 <li>Control it remotely
@@ -238,7 +282,7 @@ node ./server/main.js
 </ul>
 </li>
 </ul><h3>
-<a name="console-api-methods-supported" class="anchor" href="#console-api-methods-supported"><span class="octicon octicon-link"></span></a>Console API methods supported</h3>
+<a name="console-api" class="anchor" href="#console-api"><span class="octicon octicon-link"></span></a>CONSOLE API</h3>
 
 <ul>
 <li>console.assert(x)</li>
@@ -254,7 +298,8 @@ node ./server/main.js
 <li>console.error(error)</li>
 <li>console.exception(error)</li>
 <li>console.trace()</li>
-<li>TODO
+</ul><h4>
+<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h4>
 
 <ul>
 <li>console.group()</li>
@@ -265,16 +310,14 @@ node ./server/main.js
 <li>console.profiles</li>
 <li>console.profile()</li>
 <li>console.profileEnd()</li>
-</ul>
-</li>
-</ul><h2>
-<a name="configure-consoleio-server" class="anchor" href="#configure-consoleio-server"><span class="octicon octicon-link"></span></a>Configure Console.IO Server</h2>
+</ul><h3>
+<a name="server-configuration" class="anchor" href="#server-configuration"><span class="octicon octicon-link"></span></a>SERVER CONFIGURATION</h3>
 
 <p>All server side configurations are defined in server/config.js file.
 If you have install using npm -g then you will find it in C:\Users[USERNAME]\AppData\Roaming\npm\node_modules\xconsole.io\server folder</p>
 
-<h3>
-<a name="server-port" class="anchor" href="#server-port"><span class="octicon octicon-link"></span></a>Server Port</h3>
+<h4>
+<a name="server-port" class="anchor" href="#server-port"><span class="octicon octicon-link"></span></a>Server Port</h4>
 
 <p>You can change default (8082) port number</p>
 
@@ -288,8 +331,8 @@ If you have install using npm -g then you will find it in C:\Users[USERNAME]\App
 }
 </pre></div>
 
-<h3>
-<a name="ssl-support" class="anchor" href="#ssl-support"><span class="octicon octicon-link"></span></a>SSL Support</h3>
+<h4>
+<a name="ssl-support" class="anchor" href="#ssl-support"><span class="octicon octicon-link"></span></a>SSL Support</h4>
 
 <p>Change following in server side config file to enable server to run over SSL and use "https" instead of "http" to inject files on client.
 To generate your own SSL Certificate please check this <a href="http://forum.synology.com/wiki/index.php/How_to_generate_custom_SSL_certificates">How to generate custom SSL certificates</a>.</p>
@@ -298,19 +341,75 @@ To generate your own SSL Certificate please check this <a href="http://forum.syn
     .....
     https: {
         enable: true, // change true/false to enable and disable SSL
-        key: './certificates/server.key',
-        certificate: './certificates/server.crt',
-        ca: './certificates/ca.crt'
+        key: './server/certificates/server.key',
+        certificate: './server/certificates/server.crt',
+        ca: './server/certificates/ca.crt'
     },
     .....
 }
 </pre></div>
 
-<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"inject.js?url=https://nodeserver:port&amp;web=true&amp;..."</span><span class="nt">&gt;&lt;/script&gt;</span>
+<p>And change console.io config as follows</p>
+
+<div class="highlight"><pre>{
+    ....
+    secure: true,
+    .....
+}
 </pre></div>
 
 <h3>
-<a name="example-to-setup-angularjs-global-http-error-handler" class="anchor" href="#example-to-setup-angularjs-global-http-error-handler"><span class="octicon octicon-link"></span></a>Example to setup AngularJS global $http error handler</h3>
+<a name="iisnode" class="anchor" href="#iisnode"><span class="octicon octicon-link"></span></a>IISNODE</h3>
+
+<p>Console.IO can be hosted inside IIS. It allows to bypass SSL self-signed certificate issue.</p>
+
+<h4>
+<a name="install" class="anchor" href="#install"><span class="octicon octicon-link"></span></a>INSTALL</h4>
+
+<ul>
+<li>Install x64 node from <a href="http://nodejs.org/download/">http://nodejs.org/download/</a>
+</li>
+<li>Install x64 iisnode from <a href="https://github.com/tjanczuk/iisnode">https://github.com/tjanczuk/iisnode</a>
+</li>
+<li>IIS URL Rewrite module</li>
+<li>Add Web Application inside a website and set it to console.io source directory</li>
+<li>Navigate to https://[your machine name]/console.io/ to access console.io application.</li>
+</ul><p>NOTE: Only IIS8 supports websockets therefore Console.IO is configured to used xhr-polling by default</p>
+
+<p><img src="https://raw.github.com/nkashyap/console.io/master/iis.png" alt="IIS NODE">.</p>
+
+<h4>
+<a name="usage-1" class="anchor" href="#usage-1"><span class="octicon octicon-link"></span></a>USAGE</h4>
+
+<h5>
+<a name="include-script-directly-1" class="anchor" href="#include-script-directly-1"><span class="octicon octicon-link"></span></a>Include Script directly</h5>
+
+<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"/console.io/console.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</pre></div>
+
+<h5>
+<a name="via-requirejs-1" class="anchor" href="#via-requirejs-1"><span class="octicon octicon-link"></span></a>Via RequireJS</h5>
+
+<div class="highlight"><pre>    //requirejs bootstrap file
+
+    requirejs.config({
+        baseUrl: './',
+        paths: {
+            "socket.io": "/console.io/socket.io/socket.io",
+            "console.io": "/console.io/console.io"
+        }
+    });
+
+    // usage
+    define(['console.io'], function (consoleio) {
+        consoleio.configure({});
+    });
+</pre></div>
+
+<h3>
+<a name="angularjs" class="anchor" href="#angularjs"><span class="octicon octicon-link"></span></a>ANGULARJS</h3>
+
+<p>Example to setup AngularJS global $http error handler</p>
 
 <div class="highlight"><pre>angular.module('app', ['ngResource',])
     .config(function ($httpProvider)
@@ -332,20 +431,18 @@ To generate your own SSL Certificate please check this <a href="http://forum.syn
 </pre></div>
 
 <h3>
-<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h3>
+<a name="todo-1" class="anchor" href="#todo-1"><span class="octicon octicon-link"></span></a>TODO</h3>
 
 <ul>
-<li>Update Readme with full feature list</li>
 <li>Add JSDoc &amp; Unit Tests</li>
-<li>Add IISNode configuration steps</li>
 <li>Support scaling</li>
 </ul><h3>
-<a name="copyright-and-license" class="anchor" href="#copyright-and-license"><span class="octicon octicon-link"></span></a>Copyright and license</h3>
+<a name="copyright-and-license" class="anchor" href="#copyright-and-license"><span class="octicon octicon-link"></span></a>COPYRIGHT AND LICENSE</h3>
 
 <p>MIT LICENSE </p>
 
 <h3>
-<a name="reference" class="anchor" href="#reference"><span class="octicon octicon-link"></span></a>Reference</h3>
+<a name="reference" class="anchor" href="#reference"><span class="octicon octicon-link"></span></a>REFERENCE</h3>
 
 <ul>
 <li><a href="https://github.com/eriwen/javascript-stacktrace">Javascript Stacktrace</a></li>
@@ -357,6 +454,7 @@ To generate your own SSL Certificate please check this <a href="http://forum.syn
 <a href="http://dhtmlx.com/">dhtmlx</a> [GPL LICENSE]</li>
 <li><a href="http://www.openssl.org/">OpenSSL</a></li>
 <li><a href="http://html2canvas.hertzen.com/">Html2Canvas</a></li>
+<li><a href="http://gruntjs.com/">Grunt</a></li>
 </ul>
       </section>
 
