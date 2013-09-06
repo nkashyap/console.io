@@ -19,31 +19,57 @@ function main() {
         fs = require('fs'),
         manager = require('./manager');
 
-
     function Workers() {
         var app,
             base = '/',
             opts = {};
 
-        if (config.https.enable) {
-            if (config.https.pfx) {
-                opts.pfx = fs.readFileSync(config.https.pfx);
+        function getApp(config) {
+            var expressApp;
+            if (!config.https.enable) {
+                expressApp = express().http().io();
             } else {
-                opts.key = fs.readFileSync(config.https.key);
-                opts.cert = fs.readFileSync(config.https.certificate);
-                // This is necessary only if the client uses the self-signed certificate.
-                if (config.https.ca) {
-                    opts.ca = fs.readFileSync(config.https.ca);
+                if (config.https.pfx) {
+                    opts.pfx = fs.readFileSync(config.https.pfx);
+                } else {
+                    opts.key = fs.readFileSync(config.https.key);
+                    opts.cert = fs.readFileSync(config.https.certificate);
+                    // This is necessary only if the client uses the self-signed certificate.
+                    if (config.https.ca) {
+                        opts.ca = fs.readFileSync(config.https.ca);
+                    }
                 }
+
+                if (opts.requestCert) {
+                    opts.requestCert = config.https.requestCert;
+                }
+
+                expressApp = express().https(opts).io();
             }
 
-            if (opts.requestCert) {
-                opts.requestCert = config.https.requestCert;
+            return expressApp;
+        }
+
+        function getURL(url, base) {
+            url = url.replace(base, '/');
+
+            if (process.env.NODE_ENV === 'production') {
+                url = url.replace('.js', '.min.js');
+                url = url.replace('.css', '.min.css');
             }
 
-            app = express().https(opts).io();
-        } else {
-            app = express().http().io();
+            return url;
+        }
+
+
+        //if node env is not defined then set it to 'production'
+        if (!process.env.NODE_ENV) {
+            process.env.NODE_ENV = 'production';
+        }
+
+        //if env port no is not define then use one defined in config
+        if (!process.env.PORT) {
+            process.env.PORT = app.get('port-number');
         }
 
         // If this node.js application is hosted in IIS, assume it is hosted
@@ -56,12 +82,15 @@ function main() {
         config.io.development.set.push({ 'resource': base + 'socket.io' });
         config.io.production.set.push({ 'resource': base + 'socket.io' });
 
+
+        //get expressjs app
+        app = getApp(config);
+
         // configuration
         configure(app, 'development', config.express);
         configure(app, 'production', config.express);
         configure(app.io, 'development', config.io);
         configure(app.io, 'production', config.io);
-
 
         // Setup your sessions, just like normal.
         app.use(base, express.cookieParser());
@@ -82,15 +111,12 @@ function main() {
 
         //console client routes
         function client(req, res) {
-            res.sendfile('./dist/client' + req.originalUrl.replace(base, '/'));
+            res.sendfile('./dist/client' + getURL(req.originalUrl, base));
         }
 
         app.use(base + 'console.io.js', client);
-        app.use(base + 'console.io.min.js', client);
         app.use(base + 'console.css', client);
-        app.use(base + 'console.min.css', client);
         app.use(base + 'plugins/html2canvas.js', client);
-        app.use(base + 'plugins/html2canvas.min.js', client);
 
         //userdata app routes
         app.use(base + 'userdata/export', function download(req, res) {
@@ -104,14 +130,14 @@ function main() {
 
         //console app routes
         app.use(base, function app(req, res) {
-            res.sendfile('./dist/app' + req.originalUrl.replace(base, '/'));
+            res.sendfile('./dist/app' + getURL(req.originalUrl, base));
         });
 
         // initialize connection manager
         manager.setUp(app);
 
         // listen to port
-        app.listen(process.env.PORT || app.get('port-number'));
+        app.listen(process.env.PORT);
 
         //set GUID cookie handler
         (function setUpCookieHandler(express, app) {
@@ -237,7 +263,7 @@ function main() {
         }(express, app));
 
         //display remote ui url information
-        console.log(app.get('title') + ' is run at ' + (config.https.enable ? 'https' : 'http') + '://localhost:' + (process.env.PORT || app.get('port-number')));
+        console.log(app.get('title') + ' is run at ' + (config.https.enable ? 'https' : 'http') + '://localhost:' + process.env.PORT);
     }
 
     Workers();

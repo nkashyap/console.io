@@ -1,15 +1,15 @@
 /**
  * Name: console.io
- * Version: 0.2.0
+ * Version: 0.2.0-1
  * Description: Javascript Remote Web Console
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-04
+ * Date: 2013-09-06
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
-ConsoleIO.version = "0.2.0";
+ConsoleIO.version = "0.2.0-1";
 
 (function(){
 
@@ -364,7 +364,7 @@ ConsoleIO.version = "0.2.0";
         return styleNode.join("; ");
     };
 
-    util.getUrl = function getUrl(name, uncompressed) {
+    util.getUrl = function getUrl(name) {
         var config = exports.getConfig(),
             url = config.url,
             last = url.length - 1,
@@ -372,11 +372,6 @@ ConsoleIO.version = "0.2.0";
 
         if (url.charAt(last) === '/') {
             url = url.substr(0, last);
-        }
-
-        if (config.minify && !uncompressed) {
-            fileUrl = fileUrl.replace('.css', '.min.css');
-            fileUrl = fileUrl.replace('.js', '.min.js');
         }
 
         url += (config.base.length > 0 ? '/' + config.base : '/') + fileUrl;
@@ -2046,7 +2041,6 @@ ConsoleIO.version = "0.2.0";
         url: '',
         base: '',
         secure: false,
-        minify: true,
 
         html2canvas: "plugins/html2canvas.js",
         //"console.io": "console.io.js",
@@ -2123,7 +2117,7 @@ ConsoleIO.version = "0.2.0";
                 if (exports.util.foundRequireJS()) {
                     global.require(["socket.io"], setUp);
                 } else {
-                    exports.util.require(exports.util.getUrl("socket.io", true), setUp);
+                    exports.util.require(exports.util.getUrl("socket.io"), setUp);
                 }
             }
         } else {

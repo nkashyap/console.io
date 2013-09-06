@@ -88,7 +88,6 @@ window.ConsoleIO.config = {
 
     // optionals
     secure: false,
-    minify: true,
 
     nativeConsole: true,
     web: false,  // true to display web console
@@ -126,7 +125,6 @@ define(['console.io'], function (consoleio) {
 
         // optionals
         secure: false,
-        minify: true,
 
         nativeConsole: true,
         web: false,

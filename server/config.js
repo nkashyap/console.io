@@ -30,7 +30,7 @@
 
 var config = {
 
-    domain: null, //'.bbdev1.com',
+    domain: null,
 
     /** express configurations **/
     express: {

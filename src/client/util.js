@@ -349,7 +349,7 @@
         return styleNode.join("; ");
     };
 
-    util.getUrl = function getUrl(name, uncompressed) {
+    util.getUrl = function getUrl(name) {
         var config = exports.getConfig(),
             url = config.url,
             last = url.length - 1,
@@ -357,11 +357,6 @@
 
         if (url.charAt(last) === '/') {
             url = url.substr(0, last);
-        }
-
-        if (config.minify && !uncompressed) {
-            fileUrl = fileUrl.replace('.css', '.min.css');
-            fileUrl = fileUrl.replace('.js', '.min.js');
         }
 
         url += (config.base.length > 0 ? '/' + config.base : '/') + fileUrl;

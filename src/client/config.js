@@ -15,7 +15,6 @@
         url: '',
         base: '',
         secure: false,
-        minify: true,
 
         html2canvas: "plugins/html2canvas.js",
         //"console.io": "console.io.js",
@@ -92,7 +91,7 @@
                 if (exports.util.foundRequireJS()) {
                     global.require(["socket.io"], setUp);
                 } else {
-                    exports.util.require(exports.util.getUrl("socket.io", true), setUp);
+                    exports.util.require(exports.util.getUrl("socket.io"), setUp);
                 }
             }
         } else {
