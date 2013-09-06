@@ -27,13 +27,26 @@ var Utils = {
             }
         }
 
+        if (!filePath) {
+            var globalPath = [basePath, '_default_', file].join("/");
+            if (fs.existsSync(globalPath)) {
+                filePath = globalPath;
+            }
+        }
+
         return filePath;
     },
 
     getScript: function getScript(basePath, config, fileName) {
-        var file = this.getFile(basePath, config, fileName),
-            content = this.fileCache[file],
-            checkpoint = fs.statSync(file);
+        var checkpoint, content,
+            file = this.getFile(basePath, config, fileName);
+
+        if (!file) {
+            return false;
+        }
+
+        content = this.fileCache[file];
+        checkpoint = fs.statSync(file);
 
         if (!content || (content && content.checkpoint.mtime !== checkpoint.mtime)) {
             this.fileCache[file] = content = UglifyJS.minify(file);
