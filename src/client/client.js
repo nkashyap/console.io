@@ -388,6 +388,25 @@
         }
     }
 
+    client.getBrowserInfo = function getBrowserInfo(obj) {
+        var returnObj = {},
+            dataTypes = [
+                '[object Arguments]', '[object Array]',
+                '[object String]', '[object Number]', '[object Boolean]',
+                '[object Error]', '[object ErrorEvent]',
+                '[object Object]'
+            ];
+
+        exports.util.forEachProperty(obj, function (value, property) {
+            if (dataTypes.indexOf(exports.util.getObjectType(value)) > -1) {
+                returnObj[property] = exports.stringify.parse(value);
+            } else {
+                returnObj[property] = typeof value;
+            }
+        });
+
+        return returnObj;
+    };
 
     client.setUp = function setUp() {
         exports.transport.on('device:ready', onReady);
