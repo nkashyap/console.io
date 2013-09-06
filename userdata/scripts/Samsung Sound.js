@@ -46,7 +46,7 @@
 
     });
 
-    InjectIO.require(
+    ConsoleIO.util.require(
         [
             "$MANAGER_WIDGET\\Common\\API\\Plugin.js",
             "$MANAGER_WIDGET\\Common\\API\\TVKeyValue.js",

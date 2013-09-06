@@ -63,7 +63,7 @@
         }
     }
 
-    InjectIO.require(
+    ConsoleIO.util.require(
         [ //"$MANAGER_WIDGET\\Common\\webapi\\1.0\\deviceapis.js",
             "$MANAGER_WIDGET\\Common\\webapi\\1.0\\webapis.js",
             "$MANAGER_WIDGET\\Common\\af\\2.0.0\\loader.js",

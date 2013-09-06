@@ -5,7 +5,7 @@
     function networkSuccess(networks) {
 
         var networkInterface = [];
-        ConsoleIO.forEach(networks, function (network) {
+        ConsoleIO.util.forEach(networks, function (network) {
             var interface = {
                 kind: getNetworkType(network.interfaceType),
                 status: 'disconnected',
@@ -125,7 +125,7 @@
     }
 
 
-    InjectIO.require(
+    ConsoleIO.util.require(
         [
             "$MANAGER_WIDGET\\Common\\webapi\\1.0\\deviceapis.js",
             "$MANAGER_WIDGET\\Common\\API\\Plugin.js",
