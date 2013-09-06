@@ -92,46 +92,35 @@
 
         onStatus: function onStatus(exports, global) {
             var info = [],
-                plugin = exports.client.plugin,
+                deviceInfo = ("manufacturer,serialNumber,modelName,platform,chipset,hwVersion,version," +
+                    "swVersion,SDKVersion,osdResolution,supportMouse,supportVoiceRecog," +
+                    "supportPentouch,support3D,support3DMode,preferredSubtitleLanguage," +
+                    "preferredAudioLanguage,preferredSubtitleStatus,tvLanguage2,tvCountry2,timeZone").split(','),
+                networkInfo = ("networkType,net_isConnected,net_hasIP,net_dhcp,net_macAddress," +
+                    "net_ipAddress,net_dns1,net_dns2,net_gateway,net_netmask").split(','),
                 device = {
-                    manufacturer: plugin.manufacturer,
-                    serialNumber: plugin.serialNumber,
-                    model: plugin.modelName,
-                    processorArchitecture: navigator.platform,
-                    platform: plugin.platform,
-                    usedMemory: global.NetCastGetUsedMemorySize ? global.NetCastGetUsedMemorySize() : 0,
-                    chipset: plugin.chipset,
-                    //drmClientInfo: plugin.drmClientInfo,
-                    firmware: plugin.hwVersion,
-                    version: plugin.version,
-                    swVersion: plugin.swVersion,
-                    SDKVersion: plugin.SDKVersion,
-                    osdResolution: plugin.osdResolution,
-                    supportMouse: plugin.supportMouse,
-                    supportVoiceRecog: plugin.supportVoiceRecog,
-                    supportPentouch: plugin.supportPentouch,
-                    support3D: plugin.support3D,
-                    support3DMode: plugin.support3DMode,
-                    preferredSubtitleLanguage: plugin.preferredSubtitleLanguage,
-                    preferredAudioLanguage: plugin.preferredAudioLanguage,
-                    preferredSubtitleStatus: plugin.preferredSubtitleStatus,
-                    tvLanguage2: plugin.tvLanguage2,
-                    tvCountry2: plugin.tvCountry2,
-                    timeZone: plugin.timeZone
+                    usedMemory: global.NetCastGetUsedMemorySize ? global.NetCastGetUsedMemorySize() : 0
                 },
                 connection = {
-                    mode: exports.transport.connectionMode,
-                    kind: exports.client.getNetworkType(plugin.networkType),
-                    status: plugin.net_isConnected ? 'connected' : 'disconnected',
-                    hasIP: plugin.net_hasIP,
-                    dhcp: plugin.net_dhcp,
-                    mac: plugin.net_macAddress,
-                    ip: plugin.net_ipAddress,
-                    dns1: plugin.net_dns1,
-                    dns2: plugin.net_dns2,
-                    gateway: plugin.net_gateway,
-                    netmask: plugin.net_netmask
+                    mode: exports.transport.connectionMode
                 };
+
+            exports.util.forEach(deviceInfo, function (property) {
+                if (exports.client.plugin.hasOwnProperty(property)) {
+                    device[property] = exports.client.plugin[property];
+                }
+            });
+
+            exports.util.forEach(networkInfo, function (property) {
+                if (exports.client.plugin.hasOwnProperty(property)) {
+                    var value = exports.client.plugin[property];
+                    if (property === 'networkType') {
+                        connection[property] = exports.client.getNetworkType(value);
+                    } else {
+                        connection[property] = value;
+                    }
+                }
+            });
 
             info.push({ device: device });
             info.push({ connection: connection });

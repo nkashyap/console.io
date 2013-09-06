@@ -12,9 +12,8 @@ var fs = require('fs'),
 var Utils = {
     fileCache: {},
 
-    getFile: function getFile(basePath, config, file) {
-        var filePath = null,
-            path = [basePath, config.browser];
+    getFile: function getFile(path, config, file) {
+        var filePath;
 
         if (fs.existsSync(path.join("/"))) {
             var versionPath = path.concat([config.version, file]).join("/"),
@@ -27,19 +26,33 @@ var Utils = {
             }
         }
 
-        if (!filePath) {
-            var globalPath = [basePath, '_default_', file].join("/");
-            if (fs.existsSync(globalPath)) {
-                filePath = globalPath;
-            }
+        return filePath;
+    },
+
+
+    getDeviceScript: function getDeviceScript(basePath, config, file) {
+        var path;
+
+        path = this.getFile([basePath, config.manufacture, config.platform, config.browser], config, file);
+
+        if (!path) {
+            path = this.getFile([basePath, config.manufacture, config.browser], config, file);
         }
 
-        return filePath;
+        if (!path) {
+            path = this.getFile([basePath, config.browser], config, file);
+        }
+
+        if (!path) {
+            path = this.getFile([basePath], { version: '____' }, file);
+        }
+
+        return path;
     },
 
     getScript: function getScript(basePath, config, fileName) {
         var checkpoint, content,
-            file = this.getFile(basePath, config, fileName);
+            file = this.getDeviceScript(basePath, config, fileName);
 
         if (!file) {
             return false;
