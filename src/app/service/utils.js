@@ -96,12 +96,14 @@ if (typeof window.ConsoleIO === "undefined") {
                     url = url.split('?');
                     options.URL = url[0];
                     url = url[1];
-                }
 
-                this.forEach(url.split('&'), function (param) {
-                    param = param.split('=');
-                    this[param[0]] = param[1];
-                }, options);
+                    this.forEach(url.split('&'), function (param) {
+                        param = param.split('=');
+                        this[param[0]] = param[1];
+                    }, options);
+                } else {
+                    options.URL = url;
+                }
             }
 
             return options;
@@ -110,7 +112,7 @@ if (typeof window.ConsoleIO === "undefined") {
         cookieToJSON: function cookieToJSON(cookies) {
             var options = {};
 
-            this.forEach(cookies.split('; '), function (cookie) {
+            this.forEach(unescape(cookies).split('; '), function (cookie) {
                 cookie = cookie.split('=');
                 this[cookie[0]] = cookie[1];
             }, options);

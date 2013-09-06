@@ -8,7 +8,8 @@
 /**
  * require detectDevice module
  */
-var detectDevice = require('./detectdevice');
+var detectDevice = require('./detectdevice'),
+    utils = require('./utils');
 
 
 /**
@@ -43,6 +44,12 @@ function Device(application, request, manager) {
     this.device = detectDevice.get(request.data);
 
     /**
+     * Client specific script
+     * @member {object} client
+     */
+    this.client = utils.getScript('./server/platforms', this.device, 'client.js');
+
+    /**
      * GLOBAL Unique identity of the connected client
      * Server set the guid cookie on the client if not available
      * and use it to create socket room for communications
@@ -67,6 +74,10 @@ function Device(application, request, manager) {
      */
     this.isOnline = false;
 
+    /**
+     * Store console log active configuration
+     * @member {object} web
+     */
     this.web = {
         enabled: false,
         config: {}
@@ -94,7 +105,9 @@ function Device(application, request, manager) {
      * @property {string} name - device name
      * @property {string} guid - device GUID
      */
-    this.emit('ready', this.getInformation());
+    this.emit('ready', this.manager.extend(this.getInformation(), {
+        client: this.client
+    }));
 
     /**
      * Server log
@@ -210,7 +223,9 @@ Device.prototype.online = function online(request) {
      * @event Device#device:online
      * @type {object}
      */
-    this.manager.emit('device:online', this.getInformation());
+    this.manager.emit('device:online', this.manager.extend(this.getInformation(), {
+        client: this.client
+    }));
 };
 
 /**
@@ -270,19 +285,40 @@ Device.prototype.command = function command(name, data) {
  */
 Device.prototype.status = function status(data) {
 
+    var info = data.info,
+        extendedInfo = [],
+        deviceExtendInfo;
+
     /** extend response to add device information **/
-    data.device = {
-        name: this.name,
-        guid: this.guid
+    deviceExtendInfo = {
+        device: {
+            name: this.name,
+            guid: this.guid
+        }
     };
 
-    /** extend connection information to include timestamps **/
-    this.manager.extend(data.connection, {
-        online: this.isOnline,
-        registered: this.timeStamp.registered,
-        connected: this.timeStamp.connected,
-        dataReceived: this.timeStamp.dataReceived
-    });
+    extendedInfo.push(deviceExtendInfo);
+
+    info.forEach(function (item) {
+        if (item.device) {
+            this.manager.extend(deviceExtendInfo.device, item.device);
+            return false;
+        }
+
+        /** extend connection information to include timestamps **/
+        if (item.connection) {
+            this.manager.extend(item.connection, {
+                online: this.isOnline,
+                registered: this.timeStamp.registered,
+                connected: this.timeStamp.connected,
+                dataReceived: this.timeStamp.dataReceived
+            });
+        }
+
+        extendedInfo.push(item);
+    }, this);
+
+    data.info = extendedInfo;
 
     /**
      * device:name event is broadcast in the room

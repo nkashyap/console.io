@@ -61,15 +61,9 @@ function main() {
             return url;
         }
 
-
         //if node env is not defined then set it to 'production'
         if (!process.env.NODE_ENV) {
             process.env.NODE_ENV = 'production';
-        }
-
-        //if env port no is not define then use one defined in config
-        if (!process.env.PORT) {
-            process.env.PORT = app.get('port-number');
         }
 
         // If this node.js application is hosted in IIS, assume it is hosted
@@ -82,7 +76,6 @@ function main() {
         config.io.development.set.push({ 'resource': base + 'socket.io' });
         config.io.production.set.push({ 'resource': base + 'socket.io' });
 
-
         //get expressjs app
         app = getApp(config);
 
@@ -91,6 +84,11 @@ function main() {
         configure(app, 'production', config.express);
         configure(app.io, 'development', config.io);
         configure(app.io, 'production', config.io);
+
+        //if env port no is not define then use one defined in config
+        if (!process.env.PORT) {
+            process.env.PORT = app.get('port-number');
+        }
 
         // Setup your sessions, just like normal.
         app.use(base, express.cookieParser());

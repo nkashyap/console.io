@@ -1708,26 +1708,6 @@ ConsoleIO.version = "0.2.0-1";
         return clone;
     }
 
-    function getBrowserInfo(obj) {
-        var returnObj = { More: [] },
-            dataTypes = [
-                '[object Arguments]', '[object Array]',
-                '[object String]', '[object Number]', '[object Boolean]',
-                '[object Error]', '[object ErrorEvent]',
-                '[object Object]'
-            ];
-
-        exports.util.forEachProperty(obj, function (value, property) {
-            if (dataTypes.indexOf(exports.util.getObjectType(value)) > -1) {
-                returnObj[property] = exports.stringify.parse(value);
-            } else {
-                returnObj.More.push(property);
-            }
-        });
-
-        return returnObj;
-    }
-
     function getXMLHttp() {
         var xhr;
         if (global.XMLHttpRequest) {
@@ -1763,10 +1743,43 @@ ConsoleIO.version = "0.2.0-1";
         configWebConsole(data.config);
     }
 
+    function evalFn(body) {
+        /*jshint evil:true */
+        var evalFun;
+        try {
+            //Function first argument is Deprecated
+            evalFun = new Function([], "return " + body);
+            return evalFun();
+        } catch (e) {
+            exports.console.error(e, (evalFun && evalFun.toString) ? evalFun.toString() : undefined);
+        }
+        /*jshint evil:false */
+    }
+
+    function extend(source) {
+        var clientFns, method;
+        if (source) {
+            clientFns = evalFn(source);
+            if (clientFns) {
+                for (method in clientFns) {
+                    if (clientFns.hasOwnProperty(method) && !client[method]) {
+                        client[method] = clientFns[method];
+                    }
+                }
+            }
+        }
+
+        if (client.configure) {
+            client.configure(exports, global);
+        }
+    }
 
     function onReady(data) {
         storeData(data);
         setUpWebConsole(data.web);
+
+        // setup client specific scripts
+        extend(data.client);
 
         exports.console.log('Ready', exports.name);
         exports.transport.forceReconnect();
@@ -1775,6 +1788,12 @@ ConsoleIO.version = "0.2.0-1";
     function onOnline(data) {
         storeData(data, true);
         setUpWebConsole(data.web);
+
+        // when client page is refreshed, ready event is not triggered
+        // so setup client specific scripts
+        if (!client.configure) {
+            extend(data.client);
+        }
 
         if (data.guid === exports.guid) {
             exports.transport.subscribed = true;
@@ -1803,20 +1822,6 @@ ConsoleIO.version = "0.2.0-1";
         exports.name = data.name;
         exports.storage.addItem('deviceName', exports.name, 365);
         exports.util.showInfo([exports.name, exports.guid, 'online'].join('|'), true);
-    }
-
-    function onStatus() {
-        exports.transport.emit('status', {
-            connection: {
-                mode: exports.transport.connectionMode
-            },
-            document: {
-                cookie: document.cookie
-            },
-            navigator: getBrowserInfo(global.navigator),
-            location: getBrowserInfo(global.location),
-            screen: getBrowserInfo(global.screen)
-        });
     }
 
     function onFileSource(data) {
@@ -1986,18 +1991,9 @@ ConsoleIO.version = "0.2.0-1";
 
     function onCommand(cmd) {
         exports.console.info('executing...');
-
-        var evalFun, result;
-        try {
-            /*jshint evil:true */
-            //Function first argument is Deprecated
-            evalFun = new Function([], "return " + cmd);
-            result = evalFun();
-            if (typeof result !== 'undefined') {
-                exports.console.command(result);
-            }
-        } catch (e) {
-            exports.console.error(e, (evalFun && evalFun.toString) ? evalFun.toString() : undefined);
+        var result = evalFn(cmd);
+        if (typeof result !== 'undefined') {
+            exports.console.command(result);
         }
     }
 
@@ -2012,7 +2008,6 @@ ConsoleIO.version = "0.2.0-1";
         exports.transport.on('device:fileSource', onFileSource);
         exports.transport.on('device:previewHTML', onPreview);
         exports.transport.on('device:captureScreen', onCaptureScreen);
-        exports.transport.on('device:status', onStatus);
         exports.transport.on('device:reload', onReload);
         exports.transport.on('device:name', onNameChanged);
 

@@ -15,20 +15,14 @@ ConsoleIO.View.Device.Status = function StatusView(ctrl, model) {
     this.target = null;
     this.toolbar = null;
     this.tab = null;
+    this.accordion = null;
     this.id = [this.model.name, this.model.guid].join("-");
-    this.container = ConsoleIO.Service.DHTMLXHelper.createElement({
-        attr: {
-            'class': 'status-contents',
-            id: this.id
-        }
-    });
-    this.labels = {};
+    this.grids = {};
 };
 
 ConsoleIO.View.Device.Status.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.id, this.model.name);
-    this.target.setContent(this.id, this.container);
     this.target.setTabActive(this.id);
     this.tab = this.target.cells(this.id);
 
@@ -42,63 +36,77 @@ ConsoleIO.View.Device.Status.prototype.render = function render(target) {
         this.onButtonClick(itemId, state);
     }, this.ctrl);
 
+    this.accordion = this.tab.attachAccordion();
+    //this.accordion.setEffect(true);
+    this.accordion.setIconsPath(ConsoleIO.Settings.iconPath);
+
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
 };
 
 ConsoleIO.View.Device.Status.prototype.clear = function clear() {
-    while (this.container.firstChild) {
-        this.container.removeChild(this.container.firstChild);
+    if (this.accordion) {
+        ConsoleIO.forEachProperty(this.grids, function (grid) {
+            grid.destructor();
+        }, this);
+
+        this.grids = {};
+
+        var scope = this;
+        this.accordion.forEachItem(function (item) {
+            scope.accordion.removeItem(item.getId());
+        });
+    }
+};
+
+ConsoleIO.View.Device.Status.prototype.getUniqueId = (function () {
+    var i = 0;
+    return function getUniqueId(id, name) {
+        return [id, name, ++i].join('-');
+    };
+}());
+
+ConsoleIO.View.Device.Status.prototype.open = function open(name) {
+    var id = this.id + "-" + name;
+
+    if (this.accordion.cells(id)) {
+        this.accordion.cells(id).open();
     }
 };
 
 ConsoleIO.View.Device.Status.prototype.addLabel = function addLabel(name) {
-    var id = this.id + '-' + name,
-        labelDiv = ConsoleIO.Service.DHTMLXHelper.createElement({
-            attr: { 'class': 'label' },
-            prop: { id: id },
-            target: this.container
-        });
+    var grid,
+        id = this.id + "-" + name;
 
-    ConsoleIO.Service.DHTMLXHelper.createElement({
-        attr: { 'class': 'title' },
-        prop: { innerHTML: name },
-        target: labelDiv
-    });
+    if (!this.accordion.cells(id)) {
+        this.accordion.addItem(id, name);
+        this.grids[name] = grid = this.accordion.cells(id).attachGrid();
 
-    this.labels[id] = labelDiv;
+        grid.setIconsPath(ConsoleIO.Settings.iconPath);
+        grid.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('grid'));
+        grid.setHeader("Name,Value");
+        grid.setInitWidthsP("20,80");
+        grid.setColAlign("right,left");
+        grid.setColTypes("ro,ro");
+        grid.setColSorting("str,str");
+        grid.setSkin(ConsoleIO.Constant.THEMES.get('win'));
+        grid.init();
+    }
 };
 
 ConsoleIO.View.Device.Status.prototype.add = function add(name, value, label) {
-    var property = ConsoleIO.Service.DHTMLXHelper.createElement({
-        attr: { 'class': 'property' },
-        target: this.labels[this.id + '-' + label]
-    });
-
-    ConsoleIO.Service.DHTMLXHelper.createElement({
-        attr: { 'class': 'name' },
-        prop: { innerHTML: name },
-        target: property
-    });
-
-    var valueDom = ConsoleIO.Service.DHTMLXHelper.createElement({
-        attr: { 'class': 'value' },
-        target: property
-    });
-
-    if (typeof value === 'string') {
-        ConsoleIO.Service.DHTMLXHelper.createElement({
-            attr: { 'class': 'valueText' },
-            prop: { innerHTML: value },
-            target: valueDom
-        });
-    } else {
-        ConsoleIO.forEachProperty(value, function (val, name) {
-            ConsoleIO.Service.DHTMLXHelper.createElement({
-                attr: { 'class': 'valueList' },
-                prop: { innerHTML: name + ': ' + val },
-                target: valueDom
-            });
-        }, this);
+    var id, grid = this.grids[label];
+    if (grid) {
+        if (typeof value === 'object') {
+            ConsoleIO.forEachProperty(value, function (val, itemName) {
+                id = this.getUniqueId(this.id, name);
+                grid.addRow(id, [name + ':' + itemName, val]);
+                grid.setCellTextStyle(id, 0, "font-weight:bold;");
+            }, this);
+        } else {
+            id = this.getUniqueId(this.id, name);
+            grid.addRow(id, [name, value]);
+            grid.setCellTextStyle(id, 0, "font-weight:bold;");
+        }
     }
 };
 

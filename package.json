@@ -20,7 +20,8 @@
     ],
     "dependencies": {
         "express.io": "latest",
-        "request": "latest"
+        "request": "latest",
+        "uglify-js": "latest"
     },
     "devDependencies": {
         "grunt": "latest",
