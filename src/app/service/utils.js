@@ -127,6 +127,10 @@ if (typeof window.ConsoleIO === "undefined") {
             }
         },
 
+        toArray: function toArray(data) {
+            return Array.prototype.slice.call(data);
+        },
+
         extend: function extend(target, source) {
             this.forEachProperty(source, function (value, property) {
                 target[property] = value;

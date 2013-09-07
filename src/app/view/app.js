@@ -54,7 +54,6 @@ ConsoleIO.View.App.prototype.getContextById = function getContextById(contextId)
     return this.layout ? this.layout.cells(contextId) : null;
 };
 
-
 ConsoleIO.View.App.prototype.setTitle = function setTitle(contextId, title) {
     if (this.layout) {
         this.layout.cells(contextId).setText(title);

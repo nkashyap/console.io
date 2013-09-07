@@ -104,7 +104,9 @@ User.prototype.exportHTML = function exportHTML(data) {
 
     fs.readFile(cssFile, null, function (err, cssData) {
         if (err) {
-            scope.emit('error', { message: 'Reading CSS file: ' + cssFile });
+            scope.emit('error', {
+                message: 'Error reading CSS file: ' + cssFile
+            });
 
         } else {
             var content = [
@@ -114,9 +116,13 @@ User.prototype.exportHTML = function exportHTML(data) {
 
             fs.writeFile("./" + htmlFile, content, function (err) {
                 if (err) {
-                    scope.emit('error', { message: 'Saving HTML file: ' + htmlFile });
+                    scope.emit('error', {
+                        message: 'Error saving HTML file: ' + htmlFile
+                    });
                 } else {
-                    scope.emit('exportReady', { file: htmlFile });
+                    scope.emit('exportReady', {
+                        file: htmlFile
+                    });
                 }
             });
         }
@@ -125,9 +131,11 @@ User.prototype.exportHTML = function exportHTML(data) {
 
 User.prototype.listScripts = function listScripts() {
     var scope = this;
-    fs.readdir('./userdata/scripts', function (err, files) {
+    fs.readdir('./userdata/scripts', function callback(err, files) {
         if (err) {
-            scope.emit('error', { message: 'Reading Scripts: ./userdata/scripts' });
+            scope.emit('error', {
+                message: 'Error reading scripts: ./userdata/scripts'
+            });
         } else {
             scope.emit('listScripts', files);
         }
@@ -136,38 +144,49 @@ User.prototype.listScripts = function listScripts() {
 
 User.prototype.loadScript = function loadScript(data) {
     var scope = this,
-        file = './userdata/scripts/' + data.name;
+        file = './userdata/scripts/' + (data.name.indexOf('.js') > 0 ? data.name : data.name + '.js');
 
-    fs.readFile(file, 'utf8', function (err, content) {
+    function callback(err, content) {
         if (err) {
-            scope.emit('error', { message: 'Reading JS file: ' + file });
+            scope.emit('error', {
+                message: 'Error reading JS file: ' + file
+            });
         } else {
-            scope.emit('scriptContent', { name: data.name, content: content });
+            scope.emit('scriptContent', {
+                name: data.name,
+                content: content
+            });
         }
-    });
+    }
+
+    fs.readFile(file, 'utf8', callback);
 };
 
 User.prototype.saveScript = function saveScript(data) {
     var scope = this,
         file = './userdata/scripts/' + (data.name.indexOf('.js') > 0 ? data.name : data.name + '.js');
 
-    fs.writeFile(file, data.content, function (err) {
+    function callback(err) {
         if (err) {
-            scope.emit('error', { message: 'Writing JS file: ' + file });
+            scope.emit('error', {
+                message: 'Error writing JS file: ' + file
+            });
         } else {
-            scope.emit('scriptSaved', { name: data.name });
+            scope.emit('scriptSaved', {
+                name: data.name
+            });
         }
-    });
+    }
+
+    fs.writeFile(file, data.content, callback);
 };
 
 User.prototype.emit = function emit(name, data) {
     this.request.io.emit('user:' + name, data);
-    //console.log('user.emit', this.guid, name);
 };
 
 User.prototype.broadcast = function broadcast(name, data) {
     this.request.io.room(this.guid).broadcast('user:' + name, data);
-    //console.log('user.broadcast', this.guid, name);
 };
 
 module.exports = User;

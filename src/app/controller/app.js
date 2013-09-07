@@ -105,7 +105,7 @@ ConsoleIO.App.prototype.onDisconnect = function onDisconnect() {
 };
 
 ConsoleIO.App.prototype.notify = function notify() {
-    this.view.notify(arguments);
+    this.view.notify(ConsoleIO.toArray(arguments));
 };
 
 ConsoleIO.App.prototype.getActiveDeviceGuid = function getActiveDeviceGuid() {

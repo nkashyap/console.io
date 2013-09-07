@@ -137,6 +137,10 @@ if (typeof window.ConsoleIO === "undefined") {
             }
         },
 
+        toArray: function toArray(data) {
+            return Array.prototype.slice.call(data);
+        },
+
         extend: function extend(target, source) {
             this.forEachProperty(source, function (value, property) {
                 target[property] = value;
@@ -502,7 +506,6 @@ ConsoleIO.View.App.prototype.notify = function notify(data) {
 ConsoleIO.View.App.prototype.getContextById = function getContextById(contextId) {
     return this.layout ? this.layout.cells(contextId) : null;
 };
-
 
 ConsoleIO.View.App.prototype.setTitle = function setTitle(contextId, title) {
     if (this.layout) {
@@ -1256,6 +1259,13 @@ ConsoleIO.View.Editor.prototype.toggleButton = function toggleButton(id, state) 
     }
 };
 
+ConsoleIO.View.Editor.prototype.setItemText = function setItemText(id, text) {
+    if (this.toolbar) {
+        this.toolbar.setItemText(id, text);
+    }
+};
+
+
 /**
  * Created with IntelliJ IDEA.
  * User: nisheeth
@@ -1420,7 +1430,7 @@ ConsoleIO.App.prototype.onDisconnect = function onDisconnect() {
 };
 
 ConsoleIO.App.prototype.notify = function notify() {
-    this.view.notify(arguments);
+    this.view.notify(ConsoleIO.toArray(arguments));
 };
 
 ConsoleIO.App.prototype.getActiveDeviceGuid = function getActiveDeviceGuid() {
@@ -2347,6 +2357,8 @@ ConsoleIO.App.Editor = function EditorController(parent, model) {
         gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
     }, this.model.codeMirror);
     this.fileName = null;
+    this.fileCanBeSaved = false;
+
     this.view = new ConsoleIO.View.Editor(this, {
         guid: this.model.guid,
         placeholder: this.model.placeholder,
@@ -2355,14 +2367,22 @@ ConsoleIO.App.Editor = function EditorController(parent, model) {
 };
 
 ConsoleIO.App.Editor.prototype.render = function render(target) {
-    if (this.parent.setTitle) {
-        this.parent.setTitle(this.model.contextId || this.model.guid, this.model.title);
-    }
+    this.setTitle();
     this.editor = CodeMirror.fromTextArea(this.view.textArea, this.model.codeMirror);
     this.view.render(target);
 
     var scope = this;
     this.editor.on("change", function () {
+        if (scope.fileName) {
+            if (scope.fileCanBeSaved && !scope.getDoc().isClean()) {
+                scope.setTitle(scope.fileName, 'UNSAVED');
+            } else {
+                scope.fileCanBeSaved = true;
+                scope.setTitle(scope.fileName);
+                scope.getDoc().markClean();
+            }
+        }
+
         scope.updateButtonState();
     });
 };
@@ -2377,17 +2397,29 @@ ConsoleIO.App.Editor.prototype.listScripts = function listScripts(data) {
 
 ConsoleIO.App.Editor.prototype.addScript = function addScript(data) {
     this.view.addScript(data);
+    this.setTitle(this.fileName, 'SAVED');
+    this.fileCanBeSaved = false;
 };
 
 ConsoleIO.App.Editor.prototype.getDoc = function getDoc() {
     return this.editor.getDoc();
 };
 
+ConsoleIO.App.Editor.prototype.setTitle = function setTitle() {
+    if (this.parent.setTitle) {
+        var title = [this.model.title].concat(ConsoleIO.toArray(arguments));
+        this.parent.setTitle(this.model.contextId || this.model.guid, title.join(' : '));
+    }
+};
+
 ConsoleIO.App.Editor.prototype.add = function add(data) {
     if (data.name) {
         this.fileName = data.name;
+        this.setTitle(this.fileName);
+        this.view.setItemText(ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.id, 'Close');
     }
 
+    this.fileCanBeSaved = false;
     this.editor.setValue(data.content.replace(/%20/img, " "));
 };
 
@@ -2437,11 +2469,23 @@ ConsoleIO.App.Editor.prototype.redo = function redo() {
 };
 
 ConsoleIO.App.Editor.prototype.clear = function clear() {
+    if (this.fileName && !this.getDoc().isClean()) {
+        if (confirm("File is not saved!\nAre you sure you want to close it?")) {
+            this.close();
+        }
+    } else {
+        this.close();
+    }
+};
+
+ConsoleIO.App.Editor.prototype.close = function close() {
+    this.fileName = null;
     this.editor.setValue("");
     this.getDoc().markClean();
-    this.fileName = null;
-    //this.getDoc().clearHistory();
+    this.getDoc().clearHistory();
     this.updateButtonState();
+    this.setTitle();
+    this.view.setItemText(ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.id, ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.text);
 };
 
 ConsoleIO.App.Editor.prototype.save = function save(saveAs) {
@@ -2477,7 +2521,12 @@ ConsoleIO.App.Editor.prototype.updateButtonState = function updateButtonState() 
         var history = this.getDoc().historySize();
         this.view.toggleButton('undo', (history.undo > 0));
         this.view.toggleButton('redo', (history.redo > 0));
-        this.view.toggleButton('save', !this.getDoc().isClean());
+
+        if (this.fileName) {
+            this.view.toggleButton('save', (this.fileCanBeSaved && !this.getDoc().isClean()));
+        } else {
+            this.view.toggleButton('save', !this.getDoc().isClean());
+        }
     }
 };
 
