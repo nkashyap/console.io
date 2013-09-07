@@ -48,6 +48,7 @@
             var device = document.createElement('object');
             device.type = cfg.type;
             device.id = cfg.id;
+            device.style.visibility = "hidden";
             document.body.appendChild(device);
             return device;
         },
