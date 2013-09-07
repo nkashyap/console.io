@@ -57,10 +57,7 @@
         return 'other';
     }
 
-    stacktrace.allowedErrorStackLookUp = [
-        '[object Error]', '[object ErrorEvent]', '[object DOMException]',
-        '[object PositionError]'
-    ];
+    stacktrace.allowedErrorStackLookUp = ['Error', 'ErrorEvent', 'DOMException', 'PositionError'];
 
     stacktrace.get = function get(e) {
         e = e || create();
@@ -69,7 +66,7 @@
         if (typeof formatterFn === 'function') {
             return formatterFn(e);
         } else {
-            var errorClass = exports.util.getObjectType(e);
+            var errorClass = exports.util.getType(e);
             if (stacktrace.allowedErrorStackLookUp.indexOf(errorClass) === -1) {
                 return errorClass + ' is missing from "stacktrace.allowedErrorStackLookUp[' + stacktrace.allowedErrorStackLookUp.join(',') + ']";';
             }

@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-06
+ * Date: 2013-09-07
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -404,8 +404,8 @@ ConsoleIO.version = "0.2.0-1";
         return typeof define === "function" && define.amd;
     };
 
-    util.getObjectType = function getObjectType(data) {
-        return Object.prototype.toString.apply(data);
+    util.getType = function getType(data) {
+        return Object.prototype.toString.apply(data).replace('[object ', '').replace(']', '');
     };
 
     util.getFunctionName = function getFunctionName(data) {
@@ -762,27 +762,24 @@ ConsoleIO.version = "0.2.0-1";
     var stringify = exports.stringify = {};
 
     stringify.objects = [
-        '[object Arguments]', '[object Array]',
-        '[object String]', '[object Number]', '[object Boolean]',
-        '[object Function]', '[object Object]', '[object Geoposition]', '[object Coordinates]',
-        '[object CRuntimeObject]'
+        'Arguments', 'Array', 'String', 'Number', 'Boolean',
+        'Function', 'Object', 'Geoposition', 'Coordinates', 'CRuntimeObject'
     ];
 
     stringify.events = [
-        '[object Event]', '[object KeyboardEvent]', '[object MouseEvent]', '[object TouchEvent]',
-        '[object WheelEvent]', '[object UIEvent]', '[object CustomEvent]', '[object NotifyAudioAvailableEvent]',
-        '[object CompositionEvent]', '[object CloseEvent]', '[object MessageEvent]', '[object MessageEvent]',
-        '[object XMLHttpRequestProgressEvent]'
+        'Event', 'KeyboardEvent', 'MouseEvent', 'TouchEvent',
+        'WheelEvent', 'UIEvent', 'CustomEvent', 'NotifyAudioAvailableEvent',
+        'CompositionEvent', 'CloseEvent', 'MessageEvent', 'MessageEvent',
+        'XMLHttpRequestProgressEvent'
     ];
 
     stringify.errors = [
-        '[object Error]', '[object ErrorEvent]', '[object DOMException]',
-        '[object PositionError]'
+        'Error', 'ErrorEvent', 'DOMException', 'PositionError'
     ];
 
     stringify.parse = function parse(data, level, simple) {
         var value = '',
-            type = exports.util.getObjectType(data);
+            type = exports.util.getType(data);
 
         simple = typeof simple === 'undefined' ? true : simple;
         level = level || 1;
@@ -790,28 +787,28 @@ ConsoleIO.version = "0.2.0-1";
         if (stringify.objects.indexOf(type) > -1 || stringify.events.indexOf(type) > -1 || stringify.errors.indexOf(type) > -1) {
             /* jshint -W086 */
             switch (type) {
-                case '[object Error]':
-                case '[object ErrorEvent]':
+                case 'Error':
+                case 'ErrorEvent':
                     data = data.message;
-                case '[object String]':
+                case 'String':
                     value = stringify.parseString(data);
                     break;
 
-                case '[object Arguments]':
+                case 'Arguments':
                     data = exports.util.toArray(data);
-                case '[object Array]':
+                case 'Array':
                     value = stringify.parseArray(data, level);
                     break;
 
-                case '[object Number]':
+                case 'Number':
                     value = String(data);
                     break;
 
-                case '[object Boolean]':
+                case 'Boolean':
                     value = data ? 'true' : 'false';
                     break;
 
-                case '[object Function]':
+                case 'Function':
                     value = '"' + exports.util.getFunctionName(data) + '"';
                     break;
 
@@ -841,12 +838,12 @@ ConsoleIO.version = "0.2.0-1";
     };
 
     stringify.valueOf = function valueOf(data, skipGlobal, level) {
-        var type = exports.util.getObjectType(data);
+        var type = exports.util.getType(data);
 
         if ((stringify.objects.indexOf(type) > -1 || stringify.events.indexOf(type) > -1 || stringify.errors.indexOf(type) > -1) && !skipGlobal) {
             return this.parse(data, level);
         } else {
-            if (type === '[object Function]') {
+            if (type === 'Function') {
                 type = '[Function ' + exports.util.getFunctionName(data) + ']';
             } else if (data && data.constructor && data.constructor.name) {
                 type = '[object ' + data.constructor.name + ']';
@@ -861,16 +858,18 @@ ConsoleIO.version = "0.2.0-1";
     };
 
     stringify.parseArray = function parseArray(data, level) {
-        var target = [];
+        var target = [], txt;
         exports.util.forEach(data, function (item, index) {
             this[index] = stringify.valueOf(item, false, level);
         }, target);
 
         if (target.length > 0) {
-            return '[ ' + target.join(', ') + ' ]';
+            txt = '[ ' + target.join(', ') + ' ]';
         } else {
-            return '[ ' + data.toString() + ' ]';
+            txt = '[ ' + data.toString() + ' ]';
         }
+
+        return txt;
     };
 
     stringify.parseObject = function parseObject(type, data, level) {
@@ -878,7 +877,7 @@ ConsoleIO.version = "0.2.0-1";
             skipGlobal = type === '[object global]',
             tabAfter = (new Array(level)).join('\t'),
             tabBefore = (new Array(++level)).join('\t'),
-            target = [];
+            target = [], txt;
 
         if (data && data.constructor) {
             name = data.constructor.name;
@@ -889,10 +888,12 @@ ConsoleIO.version = "0.2.0-1";
         }, target);
 
         if (target.length > 0) {
-            return (name || type) + ': {\n' + target.join(',\n') + '\n' + tabAfter + '}';
+            txt = (name || type) + ': {\n' + target.join(',\n') + '\n' + tabAfter + '}';
         } else {
-            return data.toString() + '\n';
+            txt = data.toString() + '\n';
         }
+
+        return txt;
     };
 
 }('undefined' !== typeof ConsoleIO ? ConsoleIO : module.exports, this));
@@ -1152,10 +1153,7 @@ ConsoleIO.version = "0.2.0-1";
         return 'other';
     }
 
-    stacktrace.allowedErrorStackLookUp = [
-        '[object Error]', '[object ErrorEvent]', '[object DOMException]',
-        '[object PositionError]'
-    ];
+    stacktrace.allowedErrorStackLookUp = ['Error', 'ErrorEvent', 'DOMException', 'PositionError'];
 
     stacktrace.get = function get(e) {
         e = e || create();
@@ -1164,7 +1162,7 @@ ConsoleIO.version = "0.2.0-1";
         if (typeof formatterFn === 'function') {
             return formatterFn(e);
         } else {
-            var errorClass = exports.util.getObjectType(e);
+            var errorClass = exports.util.getType(e);
             if (stacktrace.allowedErrorStackLookUp.indexOf(errorClass) === -1) {
                 return errorClass + ' is missing from "stacktrace.allowedErrorStackLookUp[' + stacktrace.allowedErrorStackLookUp.join(',') + ']";';
             }
@@ -1997,6 +1995,23 @@ ConsoleIO.version = "0.2.0-1";
         }
     }
 
+    client.jsonify = function jsonify(obj) {
+        var returnObj = {},
+            dataTypes = [
+                'Arguments', 'Array', 'String', 'Number', 'Boolean',
+                'Error', 'ErrorEvent', 'Object'
+            ];
+
+        exports.util.forEachProperty(obj, function (value, property) {
+            if (dataTypes.indexOf(exports.util.getType(value)) > -1) {
+                returnObj[property] = exports.stringify.parse(value);
+            } else {
+                returnObj[property] = typeof value;
+            }
+        });
+
+        return returnObj;
+    };
 
     client.setUp = function setUp() {
         exports.transport.on('device:ready', onReady);

@@ -388,17 +388,15 @@
         }
     }
 
-    client.getBrowserInfo = function getBrowserInfo(obj) {
+    client.jsonify = function jsonify(obj) {
         var returnObj = {},
             dataTypes = [
-                '[object Arguments]', '[object Array]',
-                '[object String]', '[object Number]', '[object Boolean]',
-                '[object Error]', '[object ErrorEvent]',
-                '[object Object]'
+                'Arguments', 'Array', 'String', 'Number', 'Boolean',
+                'Error', 'ErrorEvent', 'Object'
             ];
 
         exports.util.forEachProperty(obj, function (value, property) {
-            if (dataTypes.indexOf(exports.util.getObjectType(value)) > -1) {
+            if (dataTypes.indexOf(exports.util.getType(value)) > -1) {
                 returnObj[property] = exports.stringify.parse(value);
             } else {
                 returnObj[property] = typeof value;

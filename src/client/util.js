@@ -389,8 +389,8 @@
         return typeof define === "function" && define.amd;
     };
 
-    util.getObjectType = function getObjectType(data) {
-        return Object.prototype.toString.apply(data);
+    util.getType = function getType(data) {
+        return Object.prototype.toString.apply(data).replace('[object ', '').replace(']', '');
     };
 
     util.getFunctionName = function getFunctionName(data) {

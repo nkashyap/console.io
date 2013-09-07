@@ -14,27 +14,24 @@
     var stringify = exports.stringify = {};
 
     stringify.objects = [
-        '[object Arguments]', '[object Array]',
-        '[object String]', '[object Number]', '[object Boolean]',
-        '[object Function]', '[object Object]', '[object Geoposition]', '[object Coordinates]',
-        '[object CRuntimeObject]'
+        'Arguments', 'Array', 'String', 'Number', 'Boolean',
+        'Function', 'Object', 'Geoposition', 'Coordinates', 'CRuntimeObject'
     ];
 
     stringify.events = [
-        '[object Event]', '[object KeyboardEvent]', '[object MouseEvent]', '[object TouchEvent]',
-        '[object WheelEvent]', '[object UIEvent]', '[object CustomEvent]', '[object NotifyAudioAvailableEvent]',
-        '[object CompositionEvent]', '[object CloseEvent]', '[object MessageEvent]', '[object MessageEvent]',
-        '[object XMLHttpRequestProgressEvent]'
+        'Event', 'KeyboardEvent', 'MouseEvent', 'TouchEvent',
+        'WheelEvent', 'UIEvent', 'CustomEvent', 'NotifyAudioAvailableEvent',
+        'CompositionEvent', 'CloseEvent', 'MessageEvent', 'MessageEvent',
+        'XMLHttpRequestProgressEvent'
     ];
 
     stringify.errors = [
-        '[object Error]', '[object ErrorEvent]', '[object DOMException]',
-        '[object PositionError]'
+        'Error', 'ErrorEvent', 'DOMException', 'PositionError'
     ];
 
     stringify.parse = function parse(data, level, simple) {
         var value = '',
-            type = exports.util.getObjectType(data);
+            type = exports.util.getType(data);
 
         simple = typeof simple === 'undefined' ? true : simple;
         level = level || 1;
@@ -42,28 +39,28 @@
         if (stringify.objects.indexOf(type) > -1 || stringify.events.indexOf(type) > -1 || stringify.errors.indexOf(type) > -1) {
             /* jshint -W086 */
             switch (type) {
-                case '[object Error]':
-                case '[object ErrorEvent]':
+                case 'Error':
+                case 'ErrorEvent':
                     data = data.message;
-                case '[object String]':
+                case 'String':
                     value = stringify.parseString(data);
                     break;
 
-                case '[object Arguments]':
+                case 'Arguments':
                     data = exports.util.toArray(data);
-                case '[object Array]':
+                case 'Array':
                     value = stringify.parseArray(data, level);
                     break;
 
-                case '[object Number]':
+                case 'Number':
                     value = String(data);
                     break;
 
-                case '[object Boolean]':
+                case 'Boolean':
                     value = data ? 'true' : 'false';
                     break;
 
-                case '[object Function]':
+                case 'Function':
                     value = '"' + exports.util.getFunctionName(data) + '"';
                     break;
 
@@ -93,12 +90,12 @@
     };
 
     stringify.valueOf = function valueOf(data, skipGlobal, level) {
-        var type = exports.util.getObjectType(data);
+        var type = exports.util.getType(data);
 
         if ((stringify.objects.indexOf(type) > -1 || stringify.events.indexOf(type) > -1 || stringify.errors.indexOf(type) > -1) && !skipGlobal) {
             return this.parse(data, level);
         } else {
-            if (type === '[object Function]') {
+            if (type === 'Function') {
                 type = '[Function ' + exports.util.getFunctionName(data) + ']';
             } else if (data && data.constructor && data.constructor.name) {
                 type = '[object ' + data.constructor.name + ']';
@@ -113,16 +110,18 @@
     };
 
     stringify.parseArray = function parseArray(data, level) {
-        var target = [];
+        var target = [], txt;
         exports.util.forEach(data, function (item, index) {
             this[index] = stringify.valueOf(item, false, level);
         }, target);
 
         if (target.length > 0) {
-            return '[ ' + target.join(', ') + ' ]';
+            txt = '[ ' + target.join(', ') + ' ]';
         } else {
-            return '[ ' + data.toString() + ' ]';
+            txt = '[ ' + data.toString() + ' ]';
         }
+
+        return txt;
     };
 
     stringify.parseObject = function parseObject(type, data, level) {
@@ -130,7 +129,7 @@
             skipGlobal = type === '[object global]',
             tabAfter = (new Array(level)).join('\t'),
             tabBefore = (new Array(++level)).join('\t'),
-            target = [];
+            target = [], txt;
 
         if (data && data.constructor) {
             name = data.constructor.name;
@@ -141,10 +140,12 @@
         }, target);
 
         if (target.length > 0) {
-            return (name || type) + ': {\n' + target.join(',\n') + '\n' + tabAfter + '}';
+            txt = (name || type) + ': {\n' + target.join(',\n') + '\n' + tabAfter + '}';
         } else {
-            return data.toString() + '\n';
+            txt = data.toString() + '\n';
         }
+
+        return txt;
     };
 
 }('undefined' !== typeof ConsoleIO ? ConsoleIO : module.exports, this));
