@@ -37,8 +37,10 @@ ConsoleIO.View.Device.Status.prototype.render = function render(target) {
     }, this.ctrl);
 
     this.accordion = this.tab.attachAccordion();
-    //this.accordion.setEffect(true);
     this.accordion.setIconsPath(ConsoleIO.Settings.iconPath);
+    this.accordion.attachEvent("onActive", function (itemId) {
+        this.activeTab = itemId.replace(this.view.id + '-', '');
+    }, this.ctrl);
 
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
 };

@@ -65,6 +65,10 @@ ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
         }, this);
 
     }, this);
+
+    ConsoleIO.forEach(this.store.folder, function (id) {
+        this.view.closeItem(id);
+    }, this);
 };
 
 ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {

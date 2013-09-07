@@ -859,6 +859,14 @@ ConsoleIO.View.Device.Explorer.prototype.deleteItem = function deleteItem(id) {
     this.tree.deleteItem(id);
 };
 
+ConsoleIO.View.Device.Explorer.prototype.closeItem = function closeItem(id, closeAll) {
+    if (!closeAll) {
+        this.tree.closeItem(id);
+    } else {
+        this.tree.closeAllItems(id);
+    }
+};
+
 /**
  * Created with IntelliJ IDEA.
  * User: nisheeth
@@ -1079,8 +1087,10 @@ ConsoleIO.View.Device.Status.prototype.render = function render(target) {
     }, this.ctrl);
 
     this.accordion = this.tab.attachAccordion();
-    //this.accordion.setEffect(true);
     this.accordion.setIconsPath(ConsoleIO.Settings.iconPath);
+    this.accordion.attachEvent("onActive", function (itemId) {
+        this.activeTab = itemId.replace(this.view.id + '-', '');
+    }, this.ctrl);
 
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
 };
@@ -1894,6 +1904,10 @@ ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
         }, this);
 
     }, this);
+
+    ConsoleIO.forEach(this.store.folder, function (id) {
+        this.view.closeItem(id);
+    }, this);
 };
 
 ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
@@ -2189,6 +2203,7 @@ ConsoleIO.namespace("ConsoleIO.App.Device.Status");
 ConsoleIO.App.Device.Status = function StatusController(parent, model) {
     this.parent = parent;
     this.model = model;
+    this.activeTab = ConsoleIO.Settings.defaultActiveStatusAccordion;
 
     ConsoleIO.Model.DHTMLX.ToolBarItem.DeviceNameText.value = this.model.name;
     this.view = new ConsoleIO.View.Device.Status(this, {
@@ -2253,7 +2268,7 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
 
     }, this);
 
-    this.view.open(ConsoleIO.Settings.defaultActiveStatusAccordion);
+    this.view.open(this.activeTab);
 };
 
 ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {

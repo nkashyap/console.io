@@ -12,6 +12,7 @@ ConsoleIO.namespace("ConsoleIO.App.Device.Status");
 ConsoleIO.App.Device.Status = function StatusController(parent, model) {
     this.parent = parent;
     this.model = model;
+    this.activeTab = ConsoleIO.Settings.defaultActiveStatusAccordion;
 
     ConsoleIO.Model.DHTMLX.ToolBarItem.DeviceNameText.value = this.model.name;
     this.view = new ConsoleIO.View.Device.Status(this, {
@@ -76,7 +77,7 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
 
     }, this);
 
-    this.view.open(ConsoleIO.Settings.defaultActiveStatusAccordion);
+    this.view.open(this.activeTab);
 };
 
 ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {

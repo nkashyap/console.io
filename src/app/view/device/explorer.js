@@ -60,3 +60,11 @@ ConsoleIO.View.Device.Explorer.prototype.setIcon = function setIcon(id, icon) {
 ConsoleIO.View.Device.Explorer.prototype.deleteItem = function deleteItem(id) {
     this.tree.deleteItem(id);
 };
+
+ConsoleIO.View.Device.Explorer.prototype.closeItem = function closeItem(id, closeAll) {
+    if (!closeAll) {
+        this.tree.closeItem(id);
+    } else {
+        this.tree.closeAllItems(id);
+    }
+};
