@@ -10,9 +10,17 @@
     return {
         configure: function configure(exports, global) {
             exports.client.api = global.BlinkBoxDevice;
+
             exports.transport.on('device:status', function () {
                 exports.client.onStatus(exports, global);
             });
+
+            if (!exports.serialNumber) {
+                exports.serialNumber = exports.client.api.getSerialNumber();
+                exports.storage.addItem('serialNumber', exports.serialNumber, 365);
+            }
+
+            exports.transport.emit('register');
         },
 
         onStatus: function onStatus(exports, global) {

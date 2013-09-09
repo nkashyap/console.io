@@ -14,18 +14,12 @@
     var client = exports.client = {};
 
     function storeData(data, online) {
-        if (!exports.guid) {
-            exports.guid = data.guid;
-
-            exports.storage.addItem("guid", data.guid, 365);
-        }
-
         if (!exports.name) {
             exports.name = data.name;
             exports.storage.addItem("deviceName", data.name, 365);
         }
 
-        exports.util.showInfo([exports.name, exports.guid, online ? 'online' : 'offline'].join('|'), online);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', online ? 'online' : 'offline'].join('|'), online);
     }
 
     function addBindSupport() {
@@ -186,7 +180,7 @@
             extend(data.client);
         }
 
-        if (data.guid === exports.guid) {
+        if (data.serialNumber === exports.serialNumber) {
             exports.transport.subscribed = true;
             exports.transport.clearPendingQueue();
 
@@ -199,7 +193,7 @@
     function onOffline(data) {
         storeData(data);
 
-        if (data.guid === exports.guid) {
+        if (data.serialNumber === exports.serialNumber) {
             exports.console.log('Offline', exports.name);
             exports.transport.subscribed = false;
         }
@@ -212,7 +206,7 @@
 
         exports.name = data.name;
         exports.storage.addItem('deviceName', exports.name, 365);
-        exports.util.showInfo([exports.name, exports.guid, 'online'].join('|'), true);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'online'].join('|'), true);
     }
 
     function onFileSource(data) {

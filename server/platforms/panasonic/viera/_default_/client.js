@@ -9,9 +9,16 @@
 (function client() {
     return {
         configure: function configure(exports, global) {
+            if (!exports.serialNumber) {
+                exports.serialNumber = ((new Date().getTime()) + "-" + Math.random()).replace(".", "");
+                exports.storage.addItem('serialNumber', exports.serialNumber, 365);
+            }
+
             exports.transport.on('device:status', function () {
                 exports.client.onStatus(exports, global);
             });
+
+            exports.transport.emit('register');
         },
 
         onStatus: function onStatus(exports, global) {

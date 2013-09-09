@@ -28,20 +28,27 @@
     }
 
     function onConnect() {
-        var navigator = global.navigator;
+        var navigator = global.navigator,
+            options = {
+                userAgent: navigator.userAgent,
+                appVersion: navigator.appVersion,
+                vendor: navigator.vendor,
+                platform: navigator.platform,
+                opera: !!global.opera,
+                params: exports.getConfig()
+            };
 
         exports.console.log('Connected to the Server');
 
-        transport.emit('setUp', {
-            guid: exports.guid,
-            deviceName: exports.name,
-            userAgent: navigator.userAgent,
-            appVersion: navigator.appVersion,
-            vendor: navigator.vendor,
-            platform: navigator.platform,
-            opera: !!global.opera,
-            params: exports.getConfig()
-        });
+        if (exports.serialNumber) {
+            options.serialNumber = exports.serialNumber;
+        }
+
+        if (exports.name) {
+            options.name = exports.name;
+        }
+
+        transport.emit('setUp', options);
 
         reconnectTryCount = 0;
 
@@ -51,7 +58,7 @@
     function onConnecting(mode) {
         transport.connectionMode = mode;
         exports.console.log('Connecting to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'connecting'].join('|'), false);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'connecting'].join('|'), false);
     }
 
     function onReconnect(mode, attempts) {
@@ -69,27 +76,27 @@
 
     function onReconnecting() {
         exports.console.log('Reconnecting to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'reconnecting'].join('|'), false);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'reconnecting'].join('|'), false);
     }
 
     function onDisconnect() {
         exports.console.log('Disconnected from the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'offline'].join('|'), false);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'offline'].join('|'), false);
     }
 
     function onConnectFailed() {
         exports.console.warn('Failed to connect to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'connection failed'].join('|'), false);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'connection failed'].join('|'), false);
     }
 
     function onReconnectFailed() {
         exports.console.warn('Failed to reconnect to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'reconnection failed'].join('|'), false);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'reconnection failed'].join('|'), false);
     }
 
     function onError() {
         exports.console.warn('Socket Error');
-        exports.util.showInfo([exports.name, exports.guid, 'connection error'].join('|'), false);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'connection error'].join('|'), false);
     }
 
 
@@ -97,9 +104,6 @@
     transport.subscribed = false;
 
     transport.setUp = function setUp() {
-        exports.guid = exports.storage.getItem('guid');
-        exports.name = exports.storage.getItem('deviceName');
-
         /** Fix for old Opera and Maple browsers
          * to process JSONP requests in a queue
          */

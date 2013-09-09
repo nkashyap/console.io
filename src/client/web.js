@@ -428,7 +428,7 @@
             web.console.setControl(data);
         }
 
-        var info = [exports.name, exports.guid, exports.transport.isConnected() ? 'online' : 'offline'];
+        var info = [exports.name || '', exports.serialNumber || '', exports.transport.isConnected() ? 'online' : 'offline'];
 
         if (data.paused) {
             info.push('paused');

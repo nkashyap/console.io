@@ -17,10 +17,17 @@
                     id: 'device'
                 });
             }
-            console.dir(exports.client.plugin);
+
             exports.transport.on('device:status', function () {
                 exports.client.onStatus(exports, global);
             });
+
+            if (!exports.serialNumber) {
+                exports.serialNumber = exports.client.plugin.DRMDeviceID;
+                exports.storage.addItem('serialNumber', exports.serialNumber, 365);
+            }
+
+            exports.transport.emit('register');
         },
 
         addDevicePlugin: function addDevicePlugin(cfg) {

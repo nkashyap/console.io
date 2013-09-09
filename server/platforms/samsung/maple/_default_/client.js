@@ -25,6 +25,13 @@
             exports.util.require(files, function () {
                 exports.console.log('webapis.js loaded');
                 exports.client.api = global.webapis;
+
+                if (!exports.serialNumber) {
+                    exports.serialNumber = exports.client.api.tv.info.getDeviceID();
+                    exports.storage.addItem('serialNumber', exports.serialNumber, 365);
+                }
+
+                exports.transport.emit('register');
             });
         },
 

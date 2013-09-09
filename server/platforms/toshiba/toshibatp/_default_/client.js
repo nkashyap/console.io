@@ -26,6 +26,13 @@
             exports.transport.on('device:status', function () {
                 exports.client.onStatus(exports, global);
             });
+
+            if (!exports.serialNumber) {
+                exports.serialNumber = exports.client.api.serialNumber;
+                exports.storage.addItem('serialNumber', exports.serialNumber, 365);
+            }
+
+            exports.transport.emit('register');
         },
 
         onStatus: function onStatus(exports, global) {

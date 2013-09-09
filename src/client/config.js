@@ -17,7 +17,6 @@
         secure: false,
 
         html2canvas: "plugins/html2canvas.js",
-        //"console.io": "console.io.js",
         "socket.io": "socket.io/socket.io.js",
         webStyle: "console.css",
         proxy: 'proxy',
@@ -76,10 +75,6 @@
             exports.web.setUp();
         }
     }
-
-
-    exports.guid = '';
-    exports.name = '';
 
     exports.configure = function configure(cfg) {
         exports.util.extend(defaultConfig, cfg);
