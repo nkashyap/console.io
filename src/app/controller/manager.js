@@ -14,7 +14,7 @@ ConsoleIO.App.Manager = function ManagerController(parent, model) {
     this.model = model;
     this.activeTab = null;
     this.store = {
-        guid: [],
+        serialNumber: [],
         device: []
     };
     this.exportFrame = null;
@@ -26,42 +26,42 @@ ConsoleIO.App.Manager = function ManagerController(parent, model) {
 };
 
 ConsoleIO.App.Manager.prototype.render = function render(target) {
-    this.parent.setTitle(this.model.contextId || this.model.guid, this.model.title);
+    this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
     this.view.render(target);
 };
 
 ConsoleIO.App.Manager.prototype.add = function add(data) {
-    if (this.store.guid.indexOf(data.guid) === -1) {
-        this.store.guid.push(data.guid);
-        this.view.add(data.guid, data.name, this.store.guid.length > 0);
+    if (this.store.serialNumber.indexOf(data.serialNumber) === -1) {
+        this.store.serialNumber.push(data.serialNumber);
+        this.view.add(data.serialNumber, data.name, this.store.serialNumber.length > 0);
 
         var device = new ConsoleIO.App.Device(this, data);
         this.store.device.push(device);
-        device.render(this.view.getContextById(data.guid));
+        device.render(this.view.getContextById(data.serialNumber));
     }
 };
 
 ConsoleIO.App.Manager.prototype.update = function update(data) {
-    if (this.store.guid.indexOf(data.guid) > -1) {
-        this.view.update(data.guid, data.name);
+    if (this.store.serialNumber.indexOf(data.serialNumber) > -1) {
+        this.view.update(data.serialNumber, data.name);
     }
 };
 
 ConsoleIO.App.Manager.prototype.remove = function remove(data) {
-    var index = this.store.guid.indexOf(data.guid);
+    var index = this.store.serialNumber.indexOf(data.serialNumber);
     if (index > -1) {
-        this.store.guid.splice(index, 1);
-        this.view.remove(data.guid);
+        this.store.serialNumber.splice(index, 1);
+        this.view.remove(data.serialNumber);
 
-        if (this.activeTab === data.guid) {
-            this.activeTab = this.store.guid[0];
+        if (this.activeTab === data.serialNumber) {
+            this.activeTab = this.store.serialNumber[0];
             if (this.activeTab) {
                 this.view.setActive(this.activeTab);
             }
         }
 
         ConsoleIO.every(this.store.device, function (device, index) {
-            if (device.model.guid === data.guid) {
+            if (device.model.serialNumber === data.serialNumber) {
                 this.store.device.splice(index, 1);
                 return false;
             }
@@ -82,9 +82,8 @@ ConsoleIO.App.Manager.prototype.exportReady = function exportReady(data) {
     this.exportFrame.src = data.file;
 };
 
-ConsoleIO.App.Manager.prototype.close = function close(guid) {
-    ConsoleIO.Service.Socket.emit('unSubscribe', guid);
-    //this.remove(itemId);
+ConsoleIO.App.Manager.prototype.close = function close(serialNumber) {
+    ConsoleIO.Service.Socket.emit('unSubscribe', serialNumber);
 };
 
 ConsoleIO.App.Manager.prototype.onTabClick = function onTabClick(tabId) {
@@ -107,15 +106,15 @@ ConsoleIO.App.Manager.prototype.onTabClick = function onTabClick(tabId) {
     }
 };
 
-ConsoleIO.App.Manager.prototype.getActiveDeviceGuid = function getActiveDeviceGuid() {
+ConsoleIO.App.Manager.prototype.getActiveDeviceSerialNumber = function getActiveDeviceSerialNumber() {
     return this.activeTab;
 };
 
-ConsoleIO.App.Manager.prototype.getDevice = function getDevice(guid) {
+ConsoleIO.App.Manager.prototype.getDevice = function getDevice(serialNumber) {
     var device;
 
     ConsoleIO.every(this.store.device, function (item) {
-        if (item.model.guid === guid) {
+        if (item.model.serialNumber === serialNumber) {
             device = item;
             return false;
         }

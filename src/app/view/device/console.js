@@ -15,7 +15,7 @@ ConsoleIO.View.Device.Console = function ConsoleView(ctrl, model) {
     this.target = null;
     this.tab = null;
     this.toolbar = null;
-    this.id = [this.model.name, this.model.guid].join("-");
+    this.id = [this.model.name, this.model.serialNumber].join("-");
     this.container = ConsoleIO.Service.DHTMLXHelper.createElement({
         attr: {
             id: 'console-' + this.id

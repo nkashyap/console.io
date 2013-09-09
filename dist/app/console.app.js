@@ -173,6 +173,12 @@ ConsoleIO.Service.Socket = {
     subscribed: false,
 
     connect: function init() {
+        ConsoleIO.Service.Socket.guid = ConsoleIO.Service.Storage.getItem('guid');
+        if (!ConsoleIO.Service.Socket.guid) {
+            ConsoleIO.Service.Socket.guid = ((new Date().getTime()) + "-" + Math.random()).replace(".", "");
+            ConsoleIO.Service.Storage.addItem('guid', ConsoleIO.Service.Socket.guid, 365);
+        }
+
         this.io = io.connect(window.location.origin, {
             secure: window.location.origin.indexOf("https") > -1,
             resource: (window.location.pathname.split('/').slice(0, -1).join('/') + '/socket.io').substring(1)
@@ -196,6 +202,11 @@ ConsoleIO.Service.Socket = {
     emit: function emit(name, data) {
         if (this.io && this.io.socket.connected) {
             data = data || {};
+
+            if (!data.guid && ConsoleIO.Service.Socket.guid) {
+                data.guid = ConsoleIO.Service.Socket.guid;
+            }
+
             this.io.emit('user:' + name, data);
         }
     },
@@ -282,6 +293,48 @@ ConsoleIO.Service.Socket = {
 
     onError: function onError() {
         console.warn('Socket Error');
+    }
+};
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: nisheeth
+ * Date: 26/08/13
+ * Time: 09:39
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ *
+ * Storage
+ */
+
+ConsoleIO.namespace("ConsoleIO.Service.Storage");
+
+ConsoleIO.Service.Storage = {
+    Store: {},
+
+    addItem: function addItem(name, value, days) {
+        if (!value || value === 'undefined') {
+            return;
+        }
+
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toGMTString();
+        }
+
+        document.cookie = name + "=" + value + expires + "; path=/";
+        ConsoleIO.Service.Storage.Store[name] = value;
+    },
+
+    removeItem : function removeItem(name) {
+        this.addItem(name, '', -1);
+        delete ConsoleIO.Service.Storage.Store[name];
+    },
+
+    getItem : function getItem(name) {
+        return ConsoleIO.Service.Storage.Store[name];
     }
 };
 
@@ -642,7 +695,7 @@ ConsoleIO.View.Device.Console = function ConsoleView(ctrl, model) {
     this.target = null;
     this.tab = null;
     this.toolbar = null;
-    this.id = [this.model.name, this.model.guid].join("-");
+    this.id = [this.model.name, this.model.serialNumber].join("-");
     this.container = ConsoleIO.Service.DHTMLXHelper.createElement({
         attr: {
             id: 'console-' + this.id
@@ -917,7 +970,7 @@ ConsoleIO.View.Device.Preview = function PreviewView(ctrl, model) {
     this.dhxWins = null;
     this.previewFrame = null;
     this.image = null;
-    this.id = [this.model.name, this.model.guid].join("-");
+    this.id = [this.model.name, this.model.serialNumber].join("-");
 };
 
 ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
@@ -1026,7 +1079,7 @@ ConsoleIO.View.Device.Source = function SourceView(ctrl, model) {
     this.target = null;
     this.toolbar = null;
     this.tab = null;
-    this.id = [this.model.name, this.model.guid].join("-");
+    this.id = [this.model.name, this.model.serialNumber].join("-");
 };
 
 ConsoleIO.View.Device.Source.prototype.render = function render(target) {
@@ -1069,7 +1122,7 @@ ConsoleIO.View.Device.Status = function StatusView(ctrl, model) {
     this.toolbar = null;
     this.tab = null;
     this.accordion = null;
-    this.id = [this.model.name, this.model.guid].join("-");
+    this.id = [this.model.name, this.model.serialNumber].join("-");
     this.grids = {};
 };
 
@@ -1433,8 +1486,8 @@ ConsoleIO.App.prototype.notify = function notify() {
     this.view.notify(ConsoleIO.toArray(arguments));
 };
 
-ConsoleIO.App.prototype.getActiveDeviceGuid = function getActiveDeviceGuid() {
-    return this.manager.getActiveDeviceGuid();
+ConsoleIO.App.prototype.getActiveDeviceSerialNumber = function getActiveDeviceSerialNumber() {
+    return this.manager.getActiveDeviceSerialNumber();
 };
 
 /**
@@ -1459,7 +1512,7 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.view = new ConsoleIO.View.Device(this, this.model);
     this.explorer = new ConsoleIO.App.Device.Explorer(this, {
         name: this.model.name,
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         title: 'Files',
         contextId: 'explorer',
         width: 200,
@@ -1523,41 +1576,41 @@ ConsoleIO.App.Browser = function BrowserController(parent, model) {
 };
 
 ConsoleIO.App.Browser.prototype.online = function online(data) {
-    var index = this.store.offline.indexOf(data.guid);
+    var index = this.store.offline.indexOf(data.serialNumber);
     if (index > -1) {
         this.store.offline.splice(index, 1);
     }
 
-    if (this.isSubscribed(data.guid)) {
+    if (this.isSubscribed(data.serialNumber)) {
         this.subscribed(data);
     } else {
-        this.view.setIcon(data.guid, ConsoleIO.Constant.ICONS.ONLINE);
+        this.view.setIcon(data.serialNumber, ConsoleIO.Constant.ICONS.ONLINE);
     }
 };
 
 ConsoleIO.App.Browser.prototype.offline = function offline(data) {
-    if (this.store.offline.indexOf(data.guid) === -1) {
-        this.store.offline.push(data.guid);
+    if (this.store.offline.indexOf(data.serialNumber) === -1) {
+        this.store.offline.push(data.serialNumber);
     }
-    this.view.setIcon(data.guid, ConsoleIO.Constant.ICONS.OFFLINE);
+    this.view.setIcon(data.serialNumber, ConsoleIO.Constant.ICONS.OFFLINE);
 };
 
-ConsoleIO.App.Browser.prototype.isSubscribed = function isSubscribed(guid) {
-    return this.store.subscribed.indexOf(guid) > -1;
+ConsoleIO.App.Browser.prototype.isSubscribed = function isSubscribed(serialNumber) {
+    return this.store.subscribed.indexOf(serialNumber) > -1;
 };
 
 ConsoleIO.App.Browser.prototype.subscribed = function subscribed(data) {
-    if (!this.isSubscribed(data.guid)) {
-        this.store.subscribed.push(data.guid);
+    if (!this.isSubscribed(data.serialNumber)) {
+        this.store.subscribed.push(data.serialNumber);
     }
-    this.view.setIcon(data.guid, ConsoleIO.Constant.ICONS.SUBSCRIBE);
+    this.view.setIcon(data.serialNumber, ConsoleIO.Constant.ICONS.SUBSCRIBE);
 };
 
 ConsoleIO.App.Browser.prototype.unSubscribed = function unSubscribed(data) {
-    var index = this.store.subscribed.indexOf(data.guid);
+    var index = this.store.subscribed.indexOf(data.serialNumber);
     if (index > -1) {
         this.store.subscribed.splice(index, 1);
-        if (this.store.offline.indexOf(data.guid) === -1) {
+        if (this.store.offline.indexOf(data.serialNumber) === -1) {
             this.online(data);
         } else {
             this.offline(data);
@@ -1590,7 +1643,7 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
         this.view.add(version, data.version, browser, ConsoleIO.Constant.ICONS.VERSION);
     }
 
-    this.view.addOrUpdate(data.guid, data.name.indexOf('|') > -1 ? data.browser : data.name, version);
+    this.view.addOrUpdate(data.serialNumber, data.name.indexOf('|') > -1 ? data.browser : data.name, version);
 
     //set correct icon
     if (data.subscribed && data.online) {
@@ -1603,7 +1656,7 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
 };
 
 ConsoleIO.App.Browser.prototype.render = function render(target) {
-    this.parent.setTitle(this.model.contextId || this.model.guid, this.model.title);
+    this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
     this.view.render(target);
 };
 
@@ -1630,9 +1683,9 @@ ConsoleIO.App.Browser.prototype.onButtonClick = function onButtonClick(btnId) {
     }
 };
 
-ConsoleIO.App.Browser.prototype.subscribe = function subscribe(guid) {
-    if (!this.isSubscribed(guid)) {
-        ConsoleIO.Service.Socket.emit('subscribe', guid);
+ConsoleIO.App.Browser.prototype.subscribe = function subscribe(serialNumber) {
+    if (!this.isSubscribed(serialNumber)) {
+        ConsoleIO.Service.Socket.emit('subscribe', serialNumber);
     }
 };
 
@@ -1679,7 +1732,7 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
 
     this.view = new ConsoleIO.View.Device.Console(this, {
         name: "Console",
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
             ConsoleIO.Model.DHTMLX.ToolBarItem.PlayPause,
@@ -1700,7 +1753,7 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
         ]
     });
 
-    ConsoleIO.Service.Socket.on('device:console:' + this.model.guid, this.add, this);
+    ConsoleIO.Service.Socket.on('device:console:' + this.model.serialNumber, this.add, this);
 };
 
 ConsoleIO.App.Device.Console.prototype.render = function render(target) {
@@ -1826,7 +1879,7 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
                     break;
                 case 'export':
                     ConsoleIO.Service.Socket.emit('exportHTML', {
-                        guid: this.model.guid,
+                        serialNumber: this.model.serialNumber,
                         name: this.model.name,
                         content: this.view.getHTML()
                     });
@@ -1838,7 +1891,7 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
 
 ConsoleIO.App.Device.Console.prototype.notify = function notify(clearAll) {
     ConsoleIO.Service.Socket.emit('webControl', {
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         pageSize: ConsoleIO.Settings.pageSize.active,
         filters: this.filters,
         search: this.view.getValue('searchText'),
@@ -1867,13 +1920,13 @@ ConsoleIO.App.Device.Explorer = function ExplorerController(parent, model) {
     };
 
     this.view = new ConsoleIO.View.Device.Explorer(this, this.model);
-    ConsoleIO.Service.Socket.on('device:files:' + this.model.guid, this.add, this);
+    ConsoleIO.Service.Socket.on('device:files:' + this.model.serialNumber, this.add, this);
 
     this.refresh();
 };
 
 ConsoleIO.App.Device.Explorer.prototype.render = function render(target) {
-    this.parent.setTitle(this.model.contextId || this.model.guid, this.model.title);
+    this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
     this.view.render(target);
 };
 
@@ -1934,7 +1987,7 @@ ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
         files: []
     };
 
-    ConsoleIO.Service.Socket.emit('reloadFiles', { guid: this.model.guid });
+    ConsoleIO.Service.Socket.emit('reloadFiles', { serialNumber: this.model.serialNumber });
 };
 
 ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(btnId) {
@@ -1945,7 +1998,7 @@ ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(b
 
 ConsoleIO.App.Device.Explorer.prototype.viewFile = function viewFile(fileId) {
     ConsoleIO.Service.Socket.emit('fileSource', {
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         url: (fileId.indexOf("http") === -1 ? '/' : '') + fileId.replace(/[|]/igm, "/")
     });
 };
@@ -2016,7 +2069,7 @@ ConsoleIO.App.Device.Panel.prototype.onButtonClick = function onButtonClick(tab,
 
     switch (btnId) {
         case 'reload':
-            ConsoleIO.Service.Socket.emit('reloadDevice', { guid: this.model.guid });
+            ConsoleIO.Service.Socket.emit('reloadDevice', { serialNumber: this.model.serialNumber });
             handled = true;
             break;
 
@@ -2061,7 +2114,7 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
 
     this.view = new ConsoleIO.View.Device.Preview(this, {
         name: "Preview",
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
@@ -2076,9 +2129,9 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
     });
     this.editor = new ConsoleIO.App.Editor(this, {});
 
-    ConsoleIO.Service.Socket.on('device:content:' + this.model.guid, this.add, this);
-    ConsoleIO.Service.Socket.on('device:previewContent:' + this.model.guid, this.preview, this);
-    ConsoleIO.Service.Socket.on('device:screenShot:' + this.model.guid, this.screenShot, this);
+    ConsoleIO.Service.Socket.on('device:content:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.on('device:previewContent:' + this.model.serialNumber, this.preview, this);
+    ConsoleIO.Service.Socket.on('device:screenShot:' + this.model.serialNumber, this.screenShot, this);
 };
 
 ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
@@ -2107,7 +2160,7 @@ ConsoleIO.App.Device.Preview.prototype.screenShot = function screenShot(data) {
 };
 
 ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
-    ConsoleIO.Service.Socket.emit('reloadHTML', { guid: this.model.guid });
+    ConsoleIO.Service.Socket.emit('reloadHTML', { serialNumber: this.model.serialNumber });
 };
 
 ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(btnId, state) {
@@ -2115,11 +2168,11 @@ ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(bt
         switch (btnId) {
             case 'preview':
                 this.view.toggleButton('preview', false);
-                ConsoleIO.Service.Socket.emit('previewHTML', { guid: this.model.guid });
+                ConsoleIO.Service.Socket.emit('previewHTML', { serialNumber: this.model.serialNumber });
                 break;
             case 'screenShot':
                 this.view.toggleButton('screenShot', false);
-                ConsoleIO.Service.Socket.emit('captureScreen', { guid: this.model.guid });
+                ConsoleIO.Service.Socket.emit('captureScreen', { serialNumber: this.model.serialNumber });
                 var scope = this;
                 setTimeout(function () {
                     scope.view.toggleButton('screenShot', true);
@@ -2147,7 +2200,7 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
 
     this.view = new ConsoleIO.View.Device.Source(this, {
         name: "Source",
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
@@ -2164,7 +2217,7 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
         }
     });
 
-    ConsoleIO.Service.Socket.on('device:source:' + this.model.guid, this.add, this);
+    ConsoleIO.Service.Socket.on('device:source:' + this.model.serialNumber, this.add, this);
 };
 
 ConsoleIO.App.Device.Source.prototype.render = function render(target) {
@@ -2187,7 +2240,7 @@ ConsoleIO.App.Device.Source.prototype.add = function add(data) {
 ConsoleIO.App.Device.Source.prototype.refresh = function refresh() {
     if (this.url) {
         ConsoleIO.Service.Socket.emit('fileSource', {
-            guid: this.model.guid,
+            serialNumber: this.model.serialNumber,
             url: this.url
         });
     }
@@ -2218,7 +2271,7 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
     ConsoleIO.Model.DHTMLX.ToolBarItem.DeviceNameText.value = this.model.name;
     this.view = new ConsoleIO.View.Device.Status(this, {
         name: "Status",
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
@@ -2230,8 +2283,8 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
         ]
     });
 
-    ConsoleIO.Service.Socket.on('device:status:' + this.model.guid, this.add, this);
-    ConsoleIO.Service.Socket.on('device:web:status:' + this.model.guid, this.web, this);
+    ConsoleIO.Service.Socket.on('device:status:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.on('device:web:status:' + this.model.serialNumber, this.web, this);
 };
 
 ConsoleIO.App.Device.Status.prototype.render = function render(target) {
@@ -2282,7 +2335,7 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
 };
 
 ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
-    ConsoleIO.Service.Socket.emit('deviceStatus', { guid: this.model.guid });
+    ConsoleIO.Service.Socket.emit('deviceStatus', { serialNumber: this.model.serialNumber });
 };
 
 ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btnId, state) {
@@ -2292,7 +2345,7 @@ ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btn
                 var name = this.view.getValue('deviceNameText');
                 if (!!name) {
                     ConsoleIO.Service.Socket.emit('deviceName', {
-                        guid: this.model.guid,
+                        serialNumber: this.model.serialNumber,
                         name: name
                     });
                     this.model.name = name;
@@ -2303,7 +2356,7 @@ ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btn
                 if (this.model.web.enabled !== state) {
                     this.model.web.enabled = state;
                     ConsoleIO.Service.Socket.emit('webConfig', {
-                        guid: this.model.guid,
+                        serialNumber: this.model.serialNumber,
                         enabled: this.model.web.enabled
                     });
                 }
@@ -2360,7 +2413,7 @@ ConsoleIO.App.Editor = function EditorController(parent, model) {
     this.fileCanBeSaved = false;
 
     this.view = new ConsoleIO.View.Editor(this, {
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         placeholder: this.model.placeholder,
         toolbar: this.model.toolbar
     });
@@ -2408,7 +2461,7 @@ ConsoleIO.App.Editor.prototype.getDoc = function getDoc() {
 ConsoleIO.App.Editor.prototype.setTitle = function setTitle() {
     if (this.parent.setTitle) {
         var title = [this.model.title].concat(ConsoleIO.toArray(arguments));
-        this.parent.setTitle(this.model.contextId || this.model.guid, title.join(' : '));
+        this.parent.setTitle(this.model.contextId || this.model.serialNumber, title.join(' : '));
     }
 };
 
@@ -2510,7 +2563,7 @@ ConsoleIO.App.Editor.prototype.command = function command() {
     var cmd = this.editor.getValue();
     if (cmd) {
         ConsoleIO.Service.Socket.emit('execute', {
-            guid: this.parent.getActiveDeviceGuid(),
+            serialNumber: this.parent.getActiveDeviceSerialNumber(),
             code: cmd
         });
     }
@@ -2591,7 +2644,7 @@ ConsoleIO.App.Manager = function ManagerController(parent, model) {
     this.model = model;
     this.activeTab = null;
     this.store = {
-        guid: [],
+        serialNumber: [],
         device: []
     };
     this.exportFrame = null;
@@ -2603,42 +2656,42 @@ ConsoleIO.App.Manager = function ManagerController(parent, model) {
 };
 
 ConsoleIO.App.Manager.prototype.render = function render(target) {
-    this.parent.setTitle(this.model.contextId || this.model.guid, this.model.title);
+    this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
     this.view.render(target);
 };
 
 ConsoleIO.App.Manager.prototype.add = function add(data) {
-    if (this.store.guid.indexOf(data.guid) === -1) {
-        this.store.guid.push(data.guid);
-        this.view.add(data.guid, data.name, this.store.guid.length > 0);
+    if (this.store.serialNumber.indexOf(data.serialNumber) === -1) {
+        this.store.serialNumber.push(data.serialNumber);
+        this.view.add(data.serialNumber, data.name, this.store.serialNumber.length > 0);
 
         var device = new ConsoleIO.App.Device(this, data);
         this.store.device.push(device);
-        device.render(this.view.getContextById(data.guid));
+        device.render(this.view.getContextById(data.serialNumber));
     }
 };
 
 ConsoleIO.App.Manager.prototype.update = function update(data) {
-    if (this.store.guid.indexOf(data.guid) > -1) {
-        this.view.update(data.guid, data.name);
+    if (this.store.serialNumber.indexOf(data.serialNumber) > -1) {
+        this.view.update(data.serialNumber, data.name);
     }
 };
 
 ConsoleIO.App.Manager.prototype.remove = function remove(data) {
-    var index = this.store.guid.indexOf(data.guid);
+    var index = this.store.serialNumber.indexOf(data.serialNumber);
     if (index > -1) {
-        this.store.guid.splice(index, 1);
-        this.view.remove(data.guid);
+        this.store.serialNumber.splice(index, 1);
+        this.view.remove(data.serialNumber);
 
-        if (this.activeTab === data.guid) {
-            this.activeTab = this.store.guid[0];
+        if (this.activeTab === data.serialNumber) {
+            this.activeTab = this.store.serialNumber[0];
             if (this.activeTab) {
                 this.view.setActive(this.activeTab);
             }
         }
 
         ConsoleIO.every(this.store.device, function (device, index) {
-            if (device.model.guid === data.guid) {
+            if (device.model.serialNumber === data.serialNumber) {
                 this.store.device.splice(index, 1);
                 return false;
             }
@@ -2659,9 +2712,8 @@ ConsoleIO.App.Manager.prototype.exportReady = function exportReady(data) {
     this.exportFrame.src = data.file;
 };
 
-ConsoleIO.App.Manager.prototype.close = function close(guid) {
-    ConsoleIO.Service.Socket.emit('unSubscribe', guid);
-    //this.remove(itemId);
+ConsoleIO.App.Manager.prototype.close = function close(serialNumber) {
+    ConsoleIO.Service.Socket.emit('unSubscribe', serialNumber);
 };
 
 ConsoleIO.App.Manager.prototype.onTabClick = function onTabClick(tabId) {
@@ -2684,15 +2736,15 @@ ConsoleIO.App.Manager.prototype.onTabClick = function onTabClick(tabId) {
     }
 };
 
-ConsoleIO.App.Manager.prototype.getActiveDeviceGuid = function getActiveDeviceGuid() {
+ConsoleIO.App.Manager.prototype.getActiveDeviceSerialNumber = function getActiveDeviceSerialNumber() {
     return this.activeTab;
 };
 
-ConsoleIO.App.Manager.prototype.getDevice = function getDevice(guid) {
+ConsoleIO.App.Manager.prototype.getDevice = function getDevice(serialNumber) {
     var device;
 
     ConsoleIO.every(this.store.device, function (item) {
-        if (item.model.guid === guid) {
+        if (item.model.serialNumber === serialNumber) {
             device = item;
             return false;
         }
@@ -2855,13 +2907,25 @@ ConsoleIO.ready(function () {
             var cmd = cm.getValue();
             if (cmd) {
                 ConsoleIO.Service.Socket.emit('execute', {
-                    guid: ConsoleIO.myApp.getActiveDeviceGuid(),
+                    serialNumber: ConsoleIO.myApp.getActiveDeviceSerialNumber(),
                     code: cmd
                 });
             }
         };
 
     }(CodeMirror, ConsoleIO));
+
+
+    var i, cookie, key, value,
+        cookies = document.cookie.split('; '),
+        length = cookies.length;
+
+    for (i = 0; i < length; i++) {
+        cookie = cookies[i].split('=');
+        key = cookie[0];
+        value = cookie[1];
+        ConsoleIO.Service.Storage.Store[key] = value;
+    }
 
     ConsoleIO.Service.Socket.connect();
     ConsoleIO.myApp = new ConsoleIO.App();

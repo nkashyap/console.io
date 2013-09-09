@@ -25,13 +25,25 @@ ConsoleIO.ready(function () {
             var cmd = cm.getValue();
             if (cmd) {
                 ConsoleIO.Service.Socket.emit('execute', {
-                    guid: ConsoleIO.myApp.getActiveDeviceGuid(),
+                    serialNumber: ConsoleIO.myApp.getActiveDeviceSerialNumber(),
                     code: cmd
                 });
             }
         };
 
     }(CodeMirror, ConsoleIO));
+
+
+    var i, cookie, key, value,
+        cookies = document.cookie.split('; '),
+        length = cookies.length;
+
+    for (i = 0; i < length; i++) {
+        cookie = cookies[i].split('=');
+        key = cookie[0];
+        value = cookie[1];
+        ConsoleIO.Service.Storage.Store[key] = value;
+    }
 
     ConsoleIO.Service.Socket.connect();
     ConsoleIO.myApp = new ConsoleIO.App();

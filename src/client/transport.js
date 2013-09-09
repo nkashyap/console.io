@@ -28,27 +28,9 @@
     }
 
     function onConnect() {
-        var navigator = global.navigator,
-            options = {
-                userAgent: navigator.userAgent,
-                appVersion: navigator.appVersion,
-                vendor: navigator.vendor,
-                platform: navigator.platform,
-                opera: !!global.opera,
-                params: exports.getConfig()
-            };
-
         exports.console.log('Connected to the Server');
 
-        if (exports.serialNumber) {
-            options.serialNumber = exports.serialNumber;
-        }
-
-        if (exports.name) {
-            options.name = exports.name;
-        }
-
-        transport.emit('detect', options);
+        transport.emit('setUp', exports.client.getInfo());
 
         reconnectTryCount = 0;
 
@@ -176,6 +158,12 @@
 
     transport.emit = function emit(name, data) {
         if (transport.isConnected()) {
+            data = data || {};
+
+            if (!data.serialNumber && exports.serialNumber) {
+                data.serialNumber = exports.serialNumber;
+            }
+
             transport.io.emit('device:' + name, data);
             return true;
         } else {

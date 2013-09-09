@@ -15,7 +15,7 @@ ConsoleIO.View.Device.Source = function SourceView(ctrl, model) {
     this.target = null;
     this.toolbar = null;
     this.tab = null;
-    this.id = [this.model.name, this.model.guid].join("-");
+    this.id = [this.model.name, this.model.serialNumber].join("-");
 };
 
 ConsoleIO.View.Device.Source.prototype.render = function render(target) {

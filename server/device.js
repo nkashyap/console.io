@@ -35,7 +35,6 @@ function Device(application, request, manager) {
     /** connection manager **/
     this.manager = manager;
 
-
     /**
      * Parse information provided by client to
      * detect device platform, manufacture, browser and version
@@ -49,7 +48,7 @@ function Device(application, request, manager) {
      */
     this.client = utils.getScript('./server/platforms', this.device, 'client.js');
 
-    this.serialNumber = this.request.cookies.serialNumber;
+    this.serialNumber = this.request.cookies.serialNumber || this.request.data.serialNumber;
 
     /**
      * When user explicitly set device name, it is stored as a cookie on client device
@@ -57,7 +56,7 @@ function Device(application, request, manager) {
      * @member {string} name
      * @private
      */
-    this.name = this.request.cookies.deviceName || this.getName();
+    this.name = this.request.cookies.deviceName || Device.getName(this.device);
 
     /**
      * flag for online/offlice state of the device
@@ -98,7 +97,7 @@ function Device(application, request, manager) {
      * @property {string} name - device name
      * @property {string} serialNumber - device serialNumber
      */
-    this.emit('ready', this.manager.extend(this.getInformation(), {
+    this.emit('ready', this.manager.extend(this.getInfo(), {
         client: this.client
     }));
 
@@ -110,27 +109,48 @@ function Device(application, request, manager) {
     }
 }
 
-Device.detect = function detect(request){
-    request.io.emit('device:ready', data);
-    var device = detectDevice.get(request.data);
-    return utils.getScript('./server/platforms', device, 'client.js');
+Device.detect = function detect(request) {
+    var config = detectDevice.get(request.data);
+
+    request.io.emit('device:registration', {
+        name : request.cookies.deviceName || Device.getName(config),
+        client: utils.getScript('./server/platforms', config, 'client.js')
+    });
+};
+
+Device.getName = function getName(data) {
+    /** use array to build name **/
+    var name = [data.browser || 'NoName'];
+
+    /** add version if defined **/
+    if (data.version) {
+        name.push(data.version);
+    }
+
+    /** add platform if defined **/
+    if (data.platform) {
+        name.push(data.platform);
+    }
+
+    /** add manufacture if defined **/
+    if (data.manufacture) {
+        name.push(data.manufacture);
+    }
+
+    /** join and return as string **/
+    return name.join("|");
 };
 
 
-
-
-Device.prototype.register = function register(data) {
-    this.serialNumber = data.serialNumber;
-};
 
 /**
  * Get device information
  *
  * @public
- * @method getInformation
+ * @method getInfo
  * @returns {object} device information object
  */
-Device.prototype.getInformation = function getInformation() {
+Device.prototype.getInfo = function getInfo() {
     return {
         name: this.name,
         serialNumber: this.serialNumber,
@@ -141,36 +161,6 @@ Device.prototype.getInformation = function getInformation() {
         manufacture: this.device.manufacture,
         version: this.device.version
     };
-};
-
-/**
- * Get device Name based on device information
- *
- * @public
- * @method getName
- * @returns {string} device name
- */
-Device.prototype.getName = function getName() {
-    /** use array to build name **/
-    var name = [this.device.browser || 'NoName'];
-
-    /** add version if defined **/
-    if (this.device.version) {
-        name.push(this.device.version);
-    }
-
-    /** add platform if defined **/
-    if (this.device.platform) {
-        name.push(this.device.platform);
-    }
-
-    /** add manufacture if defined **/
-    if (this.device.manufacture) {
-        name.push(this.device.manufacture);
-    }
-
-    /** join and return as string **/
-    return name.join("|");
 };
 
 /**
@@ -229,7 +219,7 @@ Device.prototype.online = function online(request) {
      * @event Device#device:online
      * @type {object}
      */
-    this.manager.emit('device:online', this.manager.extend(this.getInformation(), {
+    this.manager.emit('device:online', this.manager.extend(this.getInfo(), {
         client: this.client
     }));
 };
@@ -255,7 +245,7 @@ Device.prototype.offline = function offline() {
      * @event Device#device:offline
      * @type {object}
      */
-    this.manager.emit('device:offline', this.getInformation());
+    this.manager.emit('device:offline', this.getInfo());
 };
 
 /**

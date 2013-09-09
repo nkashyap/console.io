@@ -41,7 +41,7 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
 
     this.view = new ConsoleIO.View.Device.Console(this, {
         name: "Console",
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
             ConsoleIO.Model.DHTMLX.ToolBarItem.PlayPause,
@@ -62,7 +62,7 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
         ]
     });
 
-    ConsoleIO.Service.Socket.on('device:console:' + this.model.guid, this.add, this);
+    ConsoleIO.Service.Socket.on('device:console:' + this.model.serialNumber, this.add, this);
 };
 
 ConsoleIO.App.Device.Console.prototype.render = function render(target) {
@@ -188,7 +188,7 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
                     break;
                 case 'export':
                     ConsoleIO.Service.Socket.emit('exportHTML', {
-                        guid: this.model.guid,
+                        serialNumber: this.model.serialNumber,
                         name: this.model.name,
                         content: this.view.getHTML()
                     });
@@ -200,7 +200,7 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
 
 ConsoleIO.App.Device.Console.prototype.notify = function notify(clearAll) {
     ConsoleIO.Service.Socket.emit('webControl', {
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         pageSize: ConsoleIO.Settings.pageSize.active,
         filters: this.filters,
         search: this.view.getValue('searchText'),

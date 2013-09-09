@@ -37,7 +37,7 @@
                 exports.storage.addItem('serialNumber', exports.serialNumber, 365);
             }
 
-            exports.transport.emit('register');
+            exports.client.register();
         },
 
         addDevicePlugin: function addDevicePlugin(cfg) {

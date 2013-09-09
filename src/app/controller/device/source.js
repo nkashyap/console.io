@@ -16,7 +16,7 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
 
     this.view = new ConsoleIO.View.Device.Source(this, {
         name: "Source",
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
@@ -33,7 +33,7 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
         }
     });
 
-    ConsoleIO.Service.Socket.on('device:source:' + this.model.guid, this.add, this);
+    ConsoleIO.Service.Socket.on('device:source:' + this.model.serialNumber, this.add, this);
 };
 
 ConsoleIO.App.Device.Source.prototype.render = function render(target) {
@@ -56,7 +56,7 @@ ConsoleIO.App.Device.Source.prototype.add = function add(data) {
 ConsoleIO.App.Device.Source.prototype.refresh = function refresh() {
     if (this.url) {
         ConsoleIO.Service.Socket.emit('fileSource', {
-            guid: this.model.guid,
+            serialNumber: this.model.serialNumber,
             url: this.url
         });
     }

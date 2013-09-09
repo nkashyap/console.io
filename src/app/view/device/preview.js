@@ -18,7 +18,7 @@ ConsoleIO.View.Device.Preview = function PreviewView(ctrl, model) {
     this.dhxWins = null;
     this.previewFrame = null;
     this.image = null;
-    this.id = [this.model.name, this.model.guid].join("-");
+    this.id = [this.model.name, this.model.serialNumber].join("-");
 };
 
 ConsoleIO.View.Device.Preview.prototype.render = function render(target) {

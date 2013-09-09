@@ -63,6 +63,7 @@ module.exports = function (grunt) {
                 src: [
                     'src/app/service/utils.js',
                     'src/app/service/socket.js',
+                    'src/app/service/storage.js',
                     'src/app/service/dhtmlxHelper.js',
 
                     'src/app/model/dhtmlx.js',

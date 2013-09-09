@@ -108,6 +108,6 @@ ConsoleIO.App.prototype.notify = function notify() {
     this.view.notify(ConsoleIO.toArray(arguments));
 };
 
-ConsoleIO.App.prototype.getActiveDeviceGuid = function getActiveDeviceGuid() {
-    return this.manager.getActiveDeviceGuid();
+ConsoleIO.App.prototype.getActiveDeviceSerialNumber = function getActiveDeviceSerialNumber() {
+    return this.manager.getActiveDeviceSerialNumber();
 };

@@ -18,13 +18,13 @@ ConsoleIO.App.Device.Explorer = function ExplorerController(parent, model) {
     };
 
     this.view = new ConsoleIO.View.Device.Explorer(this, this.model);
-    ConsoleIO.Service.Socket.on('device:files:' + this.model.guid, this.add, this);
+    ConsoleIO.Service.Socket.on('device:files:' + this.model.serialNumber, this.add, this);
 
     this.refresh();
 };
 
 ConsoleIO.App.Device.Explorer.prototype.render = function render(target) {
-    this.parent.setTitle(this.model.contextId || this.model.guid, this.model.title);
+    this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
     this.view.render(target);
 };
 
@@ -85,7 +85,7 @@ ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
         files: []
     };
 
-    ConsoleIO.Service.Socket.emit('reloadFiles', { guid: this.model.guid });
+    ConsoleIO.Service.Socket.emit('reloadFiles', { serialNumber: this.model.serialNumber });
 };
 
 ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(btnId) {
@@ -96,7 +96,7 @@ ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(b
 
 ConsoleIO.App.Device.Explorer.prototype.viewFile = function viewFile(fileId) {
     ConsoleIO.Service.Socket.emit('fileSource', {
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         url: (fileId.indexOf("http") === -1 ? '/' : '') + fileId.replace(/[|]/igm, "/")
     });
 };

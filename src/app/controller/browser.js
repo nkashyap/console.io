@@ -33,41 +33,41 @@ ConsoleIO.App.Browser = function BrowserController(parent, model) {
 };
 
 ConsoleIO.App.Browser.prototype.online = function online(data) {
-    var index = this.store.offline.indexOf(data.guid);
+    var index = this.store.offline.indexOf(data.serialNumber);
     if (index > -1) {
         this.store.offline.splice(index, 1);
     }
 
-    if (this.isSubscribed(data.guid)) {
+    if (this.isSubscribed(data.serialNumber)) {
         this.subscribed(data);
     } else {
-        this.view.setIcon(data.guid, ConsoleIO.Constant.ICONS.ONLINE);
+        this.view.setIcon(data.serialNumber, ConsoleIO.Constant.ICONS.ONLINE);
     }
 };
 
 ConsoleIO.App.Browser.prototype.offline = function offline(data) {
-    if (this.store.offline.indexOf(data.guid) === -1) {
-        this.store.offline.push(data.guid);
+    if (this.store.offline.indexOf(data.serialNumber) === -1) {
+        this.store.offline.push(data.serialNumber);
     }
-    this.view.setIcon(data.guid, ConsoleIO.Constant.ICONS.OFFLINE);
+    this.view.setIcon(data.serialNumber, ConsoleIO.Constant.ICONS.OFFLINE);
 };
 
-ConsoleIO.App.Browser.prototype.isSubscribed = function isSubscribed(guid) {
-    return this.store.subscribed.indexOf(guid) > -1;
+ConsoleIO.App.Browser.prototype.isSubscribed = function isSubscribed(serialNumber) {
+    return this.store.subscribed.indexOf(serialNumber) > -1;
 };
 
 ConsoleIO.App.Browser.prototype.subscribed = function subscribed(data) {
-    if (!this.isSubscribed(data.guid)) {
-        this.store.subscribed.push(data.guid);
+    if (!this.isSubscribed(data.serialNumber)) {
+        this.store.subscribed.push(data.serialNumber);
     }
-    this.view.setIcon(data.guid, ConsoleIO.Constant.ICONS.SUBSCRIBE);
+    this.view.setIcon(data.serialNumber, ConsoleIO.Constant.ICONS.SUBSCRIBE);
 };
 
 ConsoleIO.App.Browser.prototype.unSubscribed = function unSubscribed(data) {
-    var index = this.store.subscribed.indexOf(data.guid);
+    var index = this.store.subscribed.indexOf(data.serialNumber);
     if (index > -1) {
         this.store.subscribed.splice(index, 1);
-        if (this.store.offline.indexOf(data.guid) === -1) {
+        if (this.store.offline.indexOf(data.serialNumber) === -1) {
             this.online(data);
         } else {
             this.offline(data);
@@ -100,7 +100,7 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
         this.view.add(version, data.version, browser, ConsoleIO.Constant.ICONS.VERSION);
     }
 
-    this.view.addOrUpdate(data.guid, data.name.indexOf('|') > -1 ? data.browser : data.name, version);
+    this.view.addOrUpdate(data.serialNumber, data.name.indexOf('|') > -1 ? data.browser : data.name, version);
 
     //set correct icon
     if (data.subscribed && data.online) {
@@ -113,7 +113,7 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
 };
 
 ConsoleIO.App.Browser.prototype.render = function render(target) {
-    this.parent.setTitle(this.model.contextId || this.model.guid, this.model.title);
+    this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
     this.view.render(target);
 };
 
@@ -140,8 +140,8 @@ ConsoleIO.App.Browser.prototype.onButtonClick = function onButtonClick(btnId) {
     }
 };
 
-ConsoleIO.App.Browser.prototype.subscribe = function subscribe(guid) {
-    if (!this.isSubscribed(guid)) {
-        ConsoleIO.Service.Socket.emit('subscribe', guid);
+ConsoleIO.App.Browser.prototype.subscribe = function subscribe(serialNumber) {
+    if (!this.isSubscribed(serialNumber)) {
+        ConsoleIO.Service.Socket.emit('subscribe', serialNumber);
     }
 };

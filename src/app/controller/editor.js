@@ -46,7 +46,7 @@ ConsoleIO.App.Editor = function EditorController(parent, model) {
     this.fileCanBeSaved = false;
 
     this.view = new ConsoleIO.View.Editor(this, {
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         placeholder: this.model.placeholder,
         toolbar: this.model.toolbar
     });
@@ -94,7 +94,7 @@ ConsoleIO.App.Editor.prototype.getDoc = function getDoc() {
 ConsoleIO.App.Editor.prototype.setTitle = function setTitle() {
     if (this.parent.setTitle) {
         var title = [this.model.title].concat(ConsoleIO.toArray(arguments));
-        this.parent.setTitle(this.model.contextId || this.model.guid, title.join(' : '));
+        this.parent.setTitle(this.model.contextId || this.model.serialNumber, title.join(' : '));
     }
 };
 
@@ -196,7 +196,7 @@ ConsoleIO.App.Editor.prototype.command = function command() {
     var cmd = this.editor.getValue();
     if (cmd) {
         ConsoleIO.Service.Socket.emit('execute', {
-            guid: this.parent.getActiveDeviceGuid(),
+            serialNumber: this.parent.getActiveDeviceSerialNumber(),
             code: cmd
         });
     }

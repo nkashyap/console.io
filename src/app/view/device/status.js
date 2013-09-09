@@ -16,7 +16,7 @@ ConsoleIO.View.Device.Status = function StatusView(ctrl, model) {
     this.toolbar = null;
     this.tab = null;
     this.accordion = null;
-    this.id = [this.model.name, this.model.guid].join("-");
+    this.id = [this.model.name, this.model.serialNumber].join("-");
     this.grids = {};
 };
 

@@ -159,12 +159,25 @@
         }
     }
 
+    function onRegistration(data) {
+        storeData(data);
+
+        // setup client specific scripts
+        extend(data.client);
+
+        exports.console.log('Registration', exports.name);
+    }
+
     function onReady(data) {
         storeData(data);
         setUpWebConsole(data.web);
 
-        // setup client specific scripts
-        extend(data.client);
+        // when client page is refreshed, ready event is not triggered and
+        // if connected for the first time registration event is triggered first
+        // so setup client specific scripts only once
+        if (!client.configure) {
+            extend(data.client);
+        }
 
         exports.console.log('Ready', exports.name);
         exports.transport.forceReconnect();
@@ -175,7 +188,7 @@
         setUpWebConsole(data.web);
 
         // when client page is refreshed, ready event is not triggered
-        // so setup client specific scripts
+        // so setup client specific scripts only once
         if (!client.configure) {
             extend(data.client);
         }
@@ -400,7 +413,34 @@
         return returnObj;
     };
 
+    client.getInfo = function getInfo() {
+        var navigator = global.navigator,
+            options = {
+                userAgent: navigator.userAgent,
+                appVersion: navigator.appVersion,
+                vendor: navigator.vendor,
+                platform: navigator.platform,
+                opera: !!global.opera,
+                params: exports.getConfig()
+            };
+
+        if (exports.serialNumber) {
+            options.serialNumber = exports.serialNumber;
+        }
+
+        if (exports.name) {
+            options.name = exports.name;
+        }
+
+        return options;
+    };
+
+    client.register = function register() {
+        exports.transport.emit('register', client.getInfo());
+    };
+
     client.setUp = function setUp() {
+        exports.transport.on('device:registration', onRegistration);
         exports.transport.on('device:ready', onReady);
         exports.transport.on('device:online', onOnline);
         exports.transport.on('device:offline', onOffline);

@@ -17,7 +17,7 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
     ConsoleIO.Model.DHTMLX.ToolBarItem.DeviceNameText.value = this.model.name;
     this.view = new ConsoleIO.View.Device.Status(this, {
         name: "Status",
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
@@ -29,8 +29,8 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
         ]
     });
 
-    ConsoleIO.Service.Socket.on('device:status:' + this.model.guid, this.add, this);
-    ConsoleIO.Service.Socket.on('device:web:status:' + this.model.guid, this.web, this);
+    ConsoleIO.Service.Socket.on('device:status:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.on('device:web:status:' + this.model.serialNumber, this.web, this);
 };
 
 ConsoleIO.App.Device.Status.prototype.render = function render(target) {
@@ -81,7 +81,7 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
 };
 
 ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
-    ConsoleIO.Service.Socket.emit('deviceStatus', { guid: this.model.guid });
+    ConsoleIO.Service.Socket.emit('deviceStatus', { serialNumber: this.model.serialNumber });
 };
 
 ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btnId, state) {
@@ -91,7 +91,7 @@ ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btn
                 var name = this.view.getValue('deviceNameText');
                 if (!!name) {
                     ConsoleIO.Service.Socket.emit('deviceName', {
-                        guid: this.model.guid,
+                        serialNumber: this.model.serialNumber,
                         name: name
                     });
                     this.model.name = name;
@@ -102,7 +102,7 @@ ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btn
                 if (this.model.web.enabled !== state) {
                     this.model.web.enabled = state;
                     ConsoleIO.Service.Socket.emit('webConfig', {
-                        guid: this.model.guid,
+                        serialNumber: this.model.serialNumber,
                         enabled: this.model.web.enabled
                     });
                 }

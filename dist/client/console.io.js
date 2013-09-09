@@ -508,30 +508,20 @@ ConsoleIO.version = "0.2.0-1";
             key = cookie[0];
             value = cookie[1];
             memoryStore[key] = value;
-
-            if (global.localStorage) {
-                if (!global.localStorage.getItem(key)) {
-                    global.localStorage.setItem(key, value);
-                }
-            }
         }
 
-        // override cookie with localstorage value
-        if (global.localStorage) {
-            var guid = global.localStorage.getItem('guid'),
-                deviceName = global.localStorage.getItem('deviceName');
-
-            if (guid && !memoryStore.guid) {
-                storage.addItem('guid', guid, 365, true);
+        exports.util.forEachProperty(memoryStore, function (value, property) {
+            if (property === 'serialNumber') {
+                exports.serialNumber = value;
             }
 
-            if (deviceName && !memoryStore.deviceName) {
-                storage.addItem('deviceName', deviceName, 365, true);
+            if (property === 'deviceName') {
+                exports.name = value;
             }
-        }
+        });
     });
 
-    storage.addItem = function addItem(name, value, days, skipLocalStorage) {
+    storage.addItem = function addItem(name, value, days) {
         if (!value || value === 'undefined') {
             return;
         }
@@ -545,25 +535,14 @@ ConsoleIO.version = "0.2.0-1";
 
         document.cookie = name + "=" + value + expires + "; path=/";
         memoryStore[name] = value;
-
-        if (!skipLocalStorage && global.localStorage) {
-            global.localStorage.setItem(name, value);
-        }
     };
 
     storage.removeItem = function removeItem(name) {
-        storage.addItem(name, '', -1, true);
+        storage.addItem(name, '', -1);
         delete memoryStore[name];
-
-        if (global.localStorage) {
-            global.localStorage.removeItem(name);
-        }
     };
 
     storage.getItem = function getItem(name) {
-        if (global.localStorage) {
-            return global.localStorage.getItem(name) || memoryStore[name];
-        }
         return memoryStore[name];
     };
 
@@ -1203,20 +1182,9 @@ ConsoleIO.version = "0.2.0-1";
     }
 
     function onConnect() {
-        var navigator = global.navigator;
-
         exports.console.log('Connected to the Server');
 
-        transport.emit('setUp', {
-            guid: exports.guid,
-            deviceName: exports.name,
-            userAgent: navigator.userAgent,
-            appVersion: navigator.appVersion,
-            vendor: navigator.vendor,
-            platform: navigator.platform,
-            opera: !!global.opera,
-            params: exports.getConfig()
-        });
+        transport.emit('setUp', exports.client.getInfo());
 
         reconnectTryCount = 0;
 
@@ -1226,7 +1194,7 @@ ConsoleIO.version = "0.2.0-1";
     function onConnecting(mode) {
         transport.connectionMode = mode;
         exports.console.log('Connecting to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'connecting'].join('|'), false);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'connecting'].join('|'), false);
     }
 
     function onReconnect(mode, attempts) {
@@ -1244,27 +1212,27 @@ ConsoleIO.version = "0.2.0-1";
 
     function onReconnecting() {
         exports.console.log('Reconnecting to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'reconnecting'].join('|'), false);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'reconnecting'].join('|'), false);
     }
 
     function onDisconnect() {
         exports.console.log('Disconnected from the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'offline'].join('|'), false);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'offline'].join('|'), false);
     }
 
     function onConnectFailed() {
         exports.console.warn('Failed to connect to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'connection failed'].join('|'), false);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'connection failed'].join('|'), false);
     }
 
     function onReconnectFailed() {
         exports.console.warn('Failed to reconnect to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'reconnection failed'].join('|'), false);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'reconnection failed'].join('|'), false);
     }
 
     function onError() {
         exports.console.warn('Socket Error');
-        exports.util.showInfo([exports.name, exports.guid, 'connection error'].join('|'), false);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'connection error'].join('|'), false);
     }
 
 
@@ -1272,9 +1240,6 @@ ConsoleIO.version = "0.2.0-1";
     transport.subscribed = false;
 
     transport.setUp = function setUp() {
-        exports.guid = exports.storage.getItem('guid');
-        exports.name = exports.storage.getItem('deviceName');
-
         /** Fix for old Opera and Maple browsers
          * to process JSONP requests in a queue
          */
@@ -1347,6 +1312,12 @@ ConsoleIO.version = "0.2.0-1";
 
     transport.emit = function emit(name, data) {
         if (transport.isConnected()) {
+            data = data || {};
+
+            if (!data.serialNumber && exports.serialNumber) {
+                data.serialNumber = exports.serialNumber;
+            }
+
             transport.io.emit('device:' + name, data);
             return true;
         } else {
@@ -1621,18 +1592,12 @@ ConsoleIO.version = "0.2.0-1";
     var client = exports.client = {};
 
     function storeData(data, online) {
-        if (!exports.guid) {
-            exports.guid = data.guid;
-
-            exports.storage.addItem("guid", data.guid, 365);
-        }
-
         if (!exports.name) {
             exports.name = data.name;
             exports.storage.addItem("deviceName", data.name, 365);
         }
 
-        exports.util.showInfo([exports.name, exports.guid, online ? 'online' : 'offline'].join('|'), online);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', online ? 'online' : 'offline'].join('|'), online);
     }
 
     function addBindSupport() {
@@ -1772,12 +1737,25 @@ ConsoleIO.version = "0.2.0-1";
         }
     }
 
+    function onRegistration(data) {
+        storeData(data);
+
+        // setup client specific scripts
+        extend(data.client);
+
+        exports.console.log('Registration', exports.name);
+    }
+
     function onReady(data) {
         storeData(data);
         setUpWebConsole(data.web);
 
-        // setup client specific scripts
-        extend(data.client);
+        // when client page is refreshed, ready event is not triggered and
+        // if connected for the first time registration event is triggered first
+        // so setup client specific scripts only once
+        if (!client.configure) {
+            extend(data.client);
+        }
 
         exports.console.log('Ready', exports.name);
         exports.transport.forceReconnect();
@@ -1788,12 +1766,12 @@ ConsoleIO.version = "0.2.0-1";
         setUpWebConsole(data.web);
 
         // when client page is refreshed, ready event is not triggered
-        // so setup client specific scripts
+        // so setup client specific scripts only once
         if (!client.configure) {
             extend(data.client);
         }
 
-        if (data.guid === exports.guid) {
+        if (data.serialNumber === exports.serialNumber) {
             exports.transport.subscribed = true;
             exports.transport.clearPendingQueue();
 
@@ -1806,7 +1784,7 @@ ConsoleIO.version = "0.2.0-1";
     function onOffline(data) {
         storeData(data);
 
-        if (data.guid === exports.guid) {
+        if (data.serialNumber === exports.serialNumber) {
             exports.console.log('Offline', exports.name);
             exports.transport.subscribed = false;
         }
@@ -1819,7 +1797,7 @@ ConsoleIO.version = "0.2.0-1";
 
         exports.name = data.name;
         exports.storage.addItem('deviceName', exports.name, 365);
-        exports.util.showInfo([exports.name, exports.guid, 'online'].join('|'), true);
+        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'online'].join('|'), true);
     }
 
     function onFileSource(data) {
@@ -2013,7 +1991,34 @@ ConsoleIO.version = "0.2.0-1";
         return returnObj;
     };
 
+    client.getInfo = function getInfo() {
+        var navigator = global.navigator,
+            options = {
+                userAgent: navigator.userAgent,
+                appVersion: navigator.appVersion,
+                vendor: navigator.vendor,
+                platform: navigator.platform,
+                opera: !!global.opera,
+                params: exports.getConfig()
+            };
+
+        if (exports.serialNumber) {
+            options.serialNumber = exports.serialNumber;
+        }
+
+        if (exports.name) {
+            options.name = exports.name;
+        }
+
+        return options;
+    };
+
+    client.register = function register() {
+        exports.transport.emit('register', client.getInfo());
+    };
+
     client.setUp = function setUp() {
+        exports.transport.on('device:registration', onRegistration);
         exports.transport.on('device:ready', onReady);
         exports.transport.on('device:online', onOnline);
         exports.transport.on('device:offline', onOffline);
@@ -2053,7 +2058,6 @@ ConsoleIO.version = "0.2.0-1";
         secure: false,
 
         html2canvas: "plugins/html2canvas.js",
-        //"console.io": "console.io.js",
         "socket.io": "socket.io/socket.io.js",
         webStyle: "console.css",
         proxy: 'proxy',
@@ -2112,10 +2116,6 @@ ConsoleIO.version = "0.2.0-1";
             exports.web.setUp();
         }
     }
-
-
-    exports.guid = '';
-    exports.name = '';
 
     exports.configure = function configure(cfg) {
         exports.util.extend(defaultConfig, cfg);
@@ -2667,7 +2667,7 @@ ConsoleIO.version = "0.2.0-1";
             web.console.setControl(data);
         }
 
-        var info = [exports.name, exports.guid, exports.transport.isConnected() ? 'online' : 'offline'];
+        var info = [exports.name || '', exports.serialNumber || '', exports.transport.isConnected() ? 'online' : 'offline'];
 
         if (data.paused) {
             info.push('paused');

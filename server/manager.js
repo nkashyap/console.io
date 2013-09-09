@@ -43,154 +43,122 @@ function Manager() {
         application.io.room(room).broadcast(name, data);
     }
 
-
-    function getCookieFromStore(cookies, name) {
-        var value;
-
-        if (cookies) {
-            cookies.every(function (cookie) {
-                if ((cookie.substr(0, cookie.indexOf("="))).replace(/^\s+|\s+$/g, "") === name) {
-                    value = unescape(cookie.substr(cookie.indexOf("=") + 1));
-                    return false;
-                }
-                return true;
-            });
-        }
-
-        return value;
-    }
-
-    function getCookie(requestHeaders, name) {
-        var value;
-        if (requestHeaders) {
-            if (requestHeaders.cookies) {
-                value = requestHeaders.cookies[name];
-            }
-
-            if (!value && requestHeaders.cookie) {
-                value = getCookieFromStore(requestHeaders.cookie.split(";"), name);
-            }
-        }
-
-        return value;
-    }
-
     //COMMON
-    function disconnect(request) {
-        var guid = application.getGUIDCookie(request),
-            client = devices[guid] || users[guid];
-
-        if (client) {
-            client.offline();
+    function getSerialNumber(request) {
+        if(request.cookies.serialNumber){
+            return request.cookies.serialNumber;
         }
 
-        console.log('disconnect', client ? client.guid : 'undefined');
+        if(request.data){
+            return request.data.serialNumber;
+        }
     }
 
-    function getDeviceByGuid(guid) {
-        var device;
-        Object.getOwnPropertyNames(devices).every(function (name) {
-            if (devices[name].guid === guid) {
-                device = devices[name];
-                return false;
-            }
-            return true;
-        });
+    function getGUID(request) {
+        if(request.cookies.guid){
+            return request.cookies.guid;
+        }
 
-        return device;
+        if(request.data){
+            return request.data.guid;
+        }
+    }
+
+    function disconnect(request) {
+        var clientDevice = getDeviceBySerialNumber(getSerialNumber(request));
+        if (clientDevice) {
+            clientDevice.offline();
+            console.log('disconnect', clientDevice.serialNumber);
+            return;
+        }
+
+        var activeUser = getUserByGUID(getGUID(request));
+        if (activeUser) {
+            activeUser.offline();
+            console.log('disconnect', activeUser.guid);
+        }
     }
 
     function getDeviceBySerialNumber(serialNumber) {
-        var device;
-        Object.getOwnPropertyNames(devices).every(function (name) {
-            if (devices[name].serialNumber === serialNumber) {
-                device = devices[name];
-                return false;
-            }
-            return true;
-        });
-
-        return device;
+        return devices[serialNumber];
+//        var device;
+//        Object.getOwnPropertyNames(devices).every(function (name) {
+//            if (devices[name].serialNumber === serialNumber) {
+//                device = devices[name];
+//                return false;
+//            }
+//            return true;
+//        });
+//
+//        return device;
     }
 
-    function defineRouteHandler(list, name) {
-        return function (request) {
-            var guid = application.getGUIDCookie(request),
-                reference = list[guid];
-
-            if (reference && reference[name]) {
-                reference[name](request.data);
-            }
-        };
+    function getUserByGUID(guid) {
+        return users[guid];
+//        var user;
+//        Object.getOwnPropertyNames(users).every(function (name) {
+//            if (users[name].guid === guid) {
+//                user = users[name];
+//                return false;
+//            }
+//            return true;
+//        });
+//
+//        return user;
     }
 
     // DEVICE
-    function defineDeviceCommandRouteHandler(property, name) {
+    function defineDeviceRouteHandler(name) {
         return function (request) {
-            var guid = application.getGUIDCookie(request),
-                device = devices[guid];
+            var clientDevice = getDeviceBySerialNumber(getSerialNumber(request));
 
-            if (device && device[property]) {
-                device[property](name, request.data);
+            if (clientDevice && clientDevice[name]) {
+                clientDevice[name](request.data);
             }
         };
     }
 
-    function detect(request) {
-        var serialNumber = request.cookies.serialNumber;
+    function defineDeviceCommandRouteHandler(property, name) {
+        return function (request) {
+            var clientDevice = getDeviceBySerialNumber(getSerialNumber(request));
+
+            if (clientDevice && clientDevice[property]) {
+                clientDevice[property](name, request.data);
+            }
+        };
+    }
+
+    function registerDevice(request) {
+        var serialNumber = getSerialNumber(request);
 
         // connecting for the first time
         if (!serialNumber) {
             Device.detect(request);
         } else {
-            if (!devices[serialNumber]) {
-                deviceReg = new Device(application, request, manage);
-                devices[serialNumber] = deviceReg;
+            var clientDevice = devices[serialNumber];
+            if (!clientDevice) {
+                devices[serialNumber] = clientDevice = new Device(application, request, manage);
+                emit('device:registered', clientDevice.getInfo());
             }
-            //emit('device:registered', deviceReg.getInformation());
+
+            clientDevice.online(request);
         }
-
-//        var guid = application.getGUIDCookie(request),
-//            deviceReg = devices[guid];
-
-//        if (!deviceReg && request.data.guid !== 'undefined' && request.data.guid !== guid) {
-//            console.log('new guid', guid, request.data.guid);
-//            deviceReg = devices[request.data.guid];
-//            application.update(request.data.guid, guid);
-//        }
-
-//        if (!deviceReg) {
-//            deviceReg = new Device(application, request, manage);
-//            devices[guid] = deviceReg;
-//            emit('device:registered', deviceReg.getInformation());
-//        }
-
-        //deviceReg.online(request);
-    }
-
-    function registerDevice(request) {
-        var guid = application.getGUIDCookie(request),
-            deviceReg = devices[guid];
-
-//        if (!deviceReg && request.data.guid !== 'undefined' && request.data.guid !== guid) {
-//            console.log('new guid', guid, request.data.guid);
-//            deviceReg = devices[request.data.guid];
-//            application.update(request.data.guid, guid);
-//        }
-
-        if (!deviceReg) {
-            deviceReg = new Device(application, request, manage);
-            devices[guid] = deviceReg;
-            emit('device:registered', deviceReg.getInformation());
-        }
-
-        deviceReg.online(request);
     }
 
     // USERS
+    function defineUserRouteHandler(name) {
+        return function (request) {
+            var activeUser = getUserByGUID(getGUID(request));
+
+            if (activeUser && activeUser[name]) {
+                activeUser[name](request.data);
+            }
+        };
+    }
+
     function defineDeviceMethodRouteHandler(property) {
         return function (request) {
-            var device = getDeviceByGuid(request.data.guid);
+            var device = getDeviceBySerialNumber(request.data.serialNumber);
             if (device && device[property]) {
                 device[property](request.data);
             }
@@ -199,7 +167,7 @@ function Manager() {
 
     function defineUserCommandRouteHandler(command, property) {
         return function (request) {
-            var device = getDeviceByGuid(request.data.guid);
+            var device = getDeviceBySerialNumber(request.data.serialNumber);
             if (device) {
                 device.emit(command, property === true ? request.data : property ? request.data[property] : null);
             }
@@ -207,36 +175,34 @@ function Manager() {
     }
 
     function notifyRegisteredDevicesToUser(request) {
-        var guid = application.getGUIDCookie(request),
-            userReg = users[guid];
+        var activeUser = getUserByGUID(getGUID(request));
 
-        if (userReg) {
+        if (activeUser) {
             forEach(devices, function (device) {
-                var deviceConfig = device.getInformation();
-                userReg.emit('registeredDevice', extend(deviceConfig, {
-                    subscribed: userReg.isSubscribed(deviceConfig.guid)
+                var deviceInfo = device.getInfo();
+
+                activeUser.emit('registeredDevice', extend(deviceInfo, {
+                    subscribed: activeUser.isSubscribed(deviceInfo.serialNumber)
                 }));
             });
         }
     }
 
     function changeDeviceName(request) {
-        var device = getDeviceByGuid(request.data.guid);
+        var device = getDeviceBySerialNumber(request.data.serialNumber);
+
         device.setName(request.data);
-        emit('device:registered', device.getInformation());
+
+        emit('device:registered', device.getInfo());
     }
 
     function registerUser(request) {
-        var guid = application.getGUIDCookie(request),
-            userReg = users[guid];
-
-        if (!userReg) {
-            userReg = new User(application, request, manage);
-            users[guid] = userReg;
+        var guid = getGUID(request),
+            activeUser = getUserByGUID(guid);
+        if (!activeUser) {
+            users[guid] = activeUser = new User(application, request, manage);
         }
-
-        userReg.online(request);
-
+        activeUser.online(request);
         notifyRegisteredDevicesToUser(request);
     }
 
@@ -245,17 +211,9 @@ function Manager() {
     extend(manage, {
         forEach: forEach,
         extend: extend,
-        defineRouteHandler: defineRouteHandler,
-        defineDeviceCommandRouteHandler: defineDeviceCommandRouteHandler,
-        defineUserCommandRouteHandler: defineUserCommandRouteHandler,
-        changeDeviceName: changeDeviceName,
-        registerDevice: registerDevice,
-        registerUser: registerUser,
-        disconnect: disconnect,
         emit: emit,
         broadcast: broadcast,
-        getDeviceByGuid: getDeviceByGuid,
-        notifyRegisteredDevicesToUser: notifyRegisteredDevicesToUser
+        getDeviceBySerialNumber: getDeviceBySerialNumber
     });
 
 
@@ -286,7 +244,7 @@ function Manager() {
             /**
              * Device registration handler
              */
-            detect: detect,
+            setUp: registerDevice,
 
             /**
              * Device registration handler
@@ -333,19 +291,19 @@ function Manager() {
              * Device status event routes handler.
              * gives device status information
              */
-            status: defineRouteHandler(devices, 'status'),
+            status: defineDeviceRouteHandler('status'),
 
             /**
              * Device web console event routes handler.
              * add web console
              */
-            webStatus: defineRouteHandler(devices, 'webStatus'),
+            webStatus: defineDeviceRouteHandler('webStatus'),
 
             /**
              * Device serial Number event routes handler.
              * sets device number
              */
-            serialNumber: defineRouteHandler(devices, 'setSerialNumber')
+            serialNumber: defineDeviceRouteHandler('setSerialNumber')
         });
 
         /**
@@ -420,27 +378,27 @@ function Manager() {
             /**
              * Save script route handler
              */
-            saveScript: defineRouteHandler(users, 'saveScript'),
+            saveScript: defineUserRouteHandler('saveScript'),
 
             /**
              * load script route handler
              */
-            loadScript: defineRouteHandler(users, 'loadScript'),
+            loadScript: defineUserRouteHandler('loadScript'),
 
             /**
              * Export logs route handler
              */
-            exportHTML: defineRouteHandler(users, 'exportHTML'),
+            exportHTML: defineUserRouteHandler('exportHTML'),
 
             /**
              * subscribe route handler
              */
-            subscribe: defineRouteHandler(users, 'subscribe'),
+            subscribe: defineUserRouteHandler('subscribe'),
 
             /**
              * unSubscribe route handler
              */
-            unSubscribe: defineRouteHandler(users, 'unSubscribe')
+            unSubscribe: defineUserRouteHandler('unSubscribe')
         });
     }
 

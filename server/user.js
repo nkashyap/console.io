@@ -12,8 +12,8 @@ function User(application, request, manager) {
     this.request = request;
     this.manager = manager;
 
-    this.guid = application.getGUIDCookie(this.request);
-    this.deviceGUIDs = [];
+    this.guid = this.request.cookies.guid || this.request.data.guid;
+    this.deviceSerialNumbers = [];
     this.isOnline = true;
 
     this.emit('ready', {
@@ -23,39 +23,39 @@ function User(application, request, manager) {
     });
 }
 
-User.prototype.isSubscribed = function isSubscribed(guid) {
-    return this.deviceGUIDs.indexOf(guid) > -1;
+User.prototype.isSubscribed = function isSubscribed(serialNumber) {
+    return this.deviceSerialNumbers.indexOf(serialNumber) > -1;
 };
 
-User.prototype.subscribe = function subscribe(guid) {
-    var device = this.manager.getDeviceByGuid(guid);
-    if (!this.isSubscribed(guid)) {
+User.prototype.subscribe = function subscribe(serialNumber) {
+    var device = this.manager.getDeviceBySerialNumber(serialNumber);
+    if (!this.isSubscribed(serialNumber)) {
         if (!device) {
-            console.log('Device not found: ', guid);
+            console.log('Device not found: ', serialNumber);
             return;
         }
-        this.deviceGUIDs.push(guid);
-        this.request.io.join(guid);
+        this.deviceSerialNumbers.push(serialNumber);
+        this.request.io.join(serialNumber);
     }
 
     if (device) {
-        this.emit('subscribed', device.getInformation());
-        console.log('subscribe', guid);
+        this.emit('subscribed', device.getInfo());
+        console.log('subscribe', serialNumber);
     }
 };
 
-User.prototype.unSubscribe = function unSubscribe(guid) {
-    var index = this.deviceGUIDs.indexOf(guid);
+User.prototype.unSubscribe = function unSubscribe(serialNumber) {
+    var index = this.deviceSerialNumbers.indexOf(serialNumber);
     if (index > -1) {
-        var device = this.manager.getDeviceByGuid(guid);
+        var device = this.manager.getDeviceBySerialNumber(serialNumber);
         if (!device) {
-            console.log('Device not found: ', guid);
+            console.log('Device not found: ', serialNumber);
             return;
         }
-        this.deviceGUIDs.splice(index, 1);
-        this.request.io.leave(guid);
-        this.emit('unSubscribed', device.getInformation());
-        console.log('unSubscribe', guid);
+        this.deviceSerialNumbers.splice(index, 1);
+        this.request.io.leave(serialNumber);
+        this.emit('unSubscribed', device.getInfo());
+        console.log('unSubscribe', serialNumber);
     }
 };
 
@@ -63,11 +63,10 @@ User.prototype.online = function online(request) {
     this.request = request;
     this.isOnline = true;
 
-    //subscribe again if device is online
-    this.deviceGUIDs.forEach(function (guid) {
-        var device = this.manager.getDeviceByGuid(guid).getInformation();
+    this.deviceSerialNumbers.forEach(function (serialNumber) {
+        var device = this.manager.getDeviceBySerialNumber(serialNumber).getInfo();
         if (device.online) {
-            this.request.io.join(guid);
+            this.request.io.join(serialNumber);
             this.emit('subscribed', device);
         }
     }, this);
@@ -83,9 +82,8 @@ User.prototype.online = function online(request) {
 User.prototype.offline = function offline() {
     this.isOnline = false;
 
-    //unsubscribe
-    this.deviceGUIDs.forEach(function (guid) {
-        this.request.io.leave(guid);
+    this.deviceSerialNumbers.forEach(function (serialNumber) {
+        this.request.io.leave(serialNumber);
     }, this);
 
     this.emit('offline', {
@@ -99,7 +97,7 @@ User.prototype.exportHTML = function exportHTML(data) {
     var scope = this,
         cssFile = './app/resources/console.css',
         htmlFile = [
-            "userdata/export/", data.name.replace(/[|]/ig, '-'), '-', data.guid, '-', (new Date()).getTime(), '.html'
+            "userdata/export/", data.name.replace(/[|]/ig, '-'), '-', data.serialNumber, '-', (new Date()).getTime(), '.html'
         ].join("");
 
     fs.readFile(cssFile, null, function (err, cssData) {

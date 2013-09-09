@@ -20,6 +20,12 @@ ConsoleIO.Service.Socket = {
     subscribed: false,
 
     connect: function init() {
+        ConsoleIO.Service.Socket.guid = ConsoleIO.Service.Storage.getItem('guid');
+        if (!ConsoleIO.Service.Socket.guid) {
+            ConsoleIO.Service.Socket.guid = ((new Date().getTime()) + "-" + Math.random()).replace(".", "");
+            ConsoleIO.Service.Storage.addItem('guid', ConsoleIO.Service.Socket.guid, 365);
+        }
+
         this.io = io.connect(window.location.origin, {
             secure: window.location.origin.indexOf("https") > -1,
             resource: (window.location.pathname.split('/').slice(0, -1).join('/') + '/socket.io').substring(1)
@@ -43,6 +49,11 @@ ConsoleIO.Service.Socket = {
     emit: function emit(name, data) {
         if (this.io && this.io.socket.connected) {
             data = data || {};
+
+            if (!data.guid && ConsoleIO.Service.Socket.guid) {
+                data.guid = ConsoleIO.Service.Socket.guid;
+            }
+
             this.io.emit('user:' + name, data);
         }
     },

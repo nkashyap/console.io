@@ -20,7 +20,7 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.view = new ConsoleIO.View.Device(this, this.model);
     this.explorer = new ConsoleIO.App.Device.Explorer(this, {
         name: this.model.name,
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         title: 'Files',
         contextId: 'explorer',
         width: 200,

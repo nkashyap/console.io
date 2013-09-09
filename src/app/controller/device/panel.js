@@ -64,7 +64,7 @@ ConsoleIO.App.Device.Panel.prototype.onButtonClick = function onButtonClick(tab,
 
     switch (btnId) {
         case 'reload':
-            ConsoleIO.Service.Socket.emit('reloadDevice', { guid: this.model.guid });
+            ConsoleIO.Service.Socket.emit('reloadDevice', { serialNumber: this.model.serialNumber });
             handled = true;
             break;
 

@@ -18,7 +18,7 @@
                 exports.client.onStatus(exports, global);
             });
 
-            exports.transport.emit('register');
+            exports.client.register();
         },
 
         onStatus: function onStatus(exports, global) {
