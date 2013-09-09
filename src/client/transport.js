@@ -48,7 +48,7 @@
             options.name = exports.name;
         }
 
-        transport.emit('setUp', options);
+        transport.emit('detect', options);
 
         reconnectTryCount = 0;
 

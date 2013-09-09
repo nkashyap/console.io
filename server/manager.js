@@ -43,6 +43,76 @@ function Manager() {
         application.io.room(room).broadcast(name, data);
     }
 
+
+    function getCookieFromStore(cookies, name) {
+        var value;
+
+        if (cookies) {
+            cookies.every(function (cookie) {
+                if ((cookie.substr(0, cookie.indexOf("="))).replace(/^\s+|\s+$/g, "") === name) {
+                    value = unescape(cookie.substr(cookie.indexOf("=") + 1));
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        return value;
+    }
+
+    function getCookie(requestHeaders, name) {
+        var value;
+        if (requestHeaders) {
+            if (requestHeaders.cookies) {
+                value = requestHeaders.cookies[name];
+            }
+
+            if (!value && requestHeaders.cookie) {
+                value = getCookieFromStore(requestHeaders.cookie.split(";"), name);
+            }
+        }
+
+        return value;
+    }
+
+    //COMMON
+    function disconnect(request) {
+        var guid = application.getGUIDCookie(request),
+            client = devices[guid] || users[guid];
+
+        if (client) {
+            client.offline();
+        }
+
+        console.log('disconnect', client ? client.guid : 'undefined');
+    }
+
+    function getDeviceByGuid(guid) {
+        var device;
+        Object.getOwnPropertyNames(devices).every(function (name) {
+            if (devices[name].guid === guid) {
+                device = devices[name];
+                return false;
+            }
+            return true;
+        });
+
+        return device;
+    }
+
+    function getDeviceBySerialNumber(serialNumber) {
+        var device;
+        Object.getOwnPropertyNames(devices).every(function (name) {
+            if (devices[name].serialNumber === serialNumber) {
+                device = devices[name];
+                return false;
+            }
+            return true;
+        });
+
+        return device;
+    }
+
     function defineRouteHandler(list, name) {
         return function (request) {
             var guid = application.getGUIDCookie(request),
@@ -54,6 +124,7 @@ function Manager() {
         };
     }
 
+    // DEVICE
     function defineDeviceCommandRouteHandler(property, name) {
         return function (request) {
             var guid = application.getGUIDCookie(request),
@@ -65,20 +136,72 @@ function Manager() {
         };
     }
 
-    function defineUserCommandRouteHandler(command, property) {
-        return function (request) {
-            var device = getDeviceByGuid(request.data.guid);
-            if (device) {
-                device.emit(command, property === true ? request.data : property ? request.data[property] : null);
+    function detect(request) {
+        var serialNumber = request.cookies.serialNumber;
+
+        // connecting for the first time
+        if (!serialNumber) {
+            Device.detect(request);
+        } else {
+            if (!devices[serialNumber]) {
+                deviceReg = new Device(application, request, manage);
+                devices[serialNumber] = deviceReg;
             }
-        };
+            //emit('device:registered', deviceReg.getInformation());
+        }
+
+//        var guid = application.getGUIDCookie(request),
+//            deviceReg = devices[guid];
+
+//        if (!deviceReg && request.data.guid !== 'undefined' && request.data.guid !== guid) {
+//            console.log('new guid', guid, request.data.guid);
+//            deviceReg = devices[request.data.guid];
+//            application.update(request.data.guid, guid);
+//        }
+
+//        if (!deviceReg) {
+//            deviceReg = new Device(application, request, manage);
+//            devices[guid] = deviceReg;
+//            emit('device:registered', deviceReg.getInformation());
+//        }
+
+        //deviceReg.online(request);
     }
 
+    function registerDevice(request) {
+        var guid = application.getGUIDCookie(request),
+            deviceReg = devices[guid];
+
+//        if (!deviceReg && request.data.guid !== 'undefined' && request.data.guid !== guid) {
+//            console.log('new guid', guid, request.data.guid);
+//            deviceReg = devices[request.data.guid];
+//            application.update(request.data.guid, guid);
+//        }
+
+        if (!deviceReg) {
+            deviceReg = new Device(application, request, manage);
+            devices[guid] = deviceReg;
+            emit('device:registered', deviceReg.getInformation());
+        }
+
+        deviceReg.online(request);
+    }
+
+    // USERS
     function defineDeviceMethodRouteHandler(property) {
         return function (request) {
             var device = getDeviceByGuid(request.data.guid);
             if (device && device[property]) {
                 device[property](request.data);
+            }
+        };
+    }
+
+    function defineUserCommandRouteHandler(command, property) {
+        return function (request) {
+            var device = getDeviceByGuid(request.data.guid);
+            if (device) {
+                device.emit(command, property === true ? request.data : property ? request.data[property] : null);
             }
         };
     }
@@ -103,25 +226,6 @@ function Manager() {
         emit('device:registered', device.getInformation());
     }
 
-    function registerDevice(request) {
-        var guid = application.getGUIDCookie(request),
-            deviceReg = devices[guid];
-
-        if (!deviceReg && request.data.guid !== 'undefined' && request.data.guid !== guid) {
-            console.log('new guid', guid, request.data.guid);
-            deviceReg = devices[request.data.guid];
-            application.update(request.data.guid, guid);
-        }
-
-        if (!deviceReg) {
-            deviceReg = new Device(application, request, manage);
-            devices[guid] = deviceReg;
-            emit('device:registered', deviceReg.getInformation());
-        }
-
-        deviceReg.online(request);
-    }
-
     function registerUser(request) {
         var guid = application.getGUIDCookie(request),
             userReg = users[guid];
@@ -134,30 +238,6 @@ function Manager() {
         userReg.online(request);
 
         notifyRegisteredDevicesToUser(request);
-    }
-
-    function disconnect(request) {
-        var guid = application.getGUIDCookie(request),
-            client = devices[guid] || users[guid];
-
-        if (client) {
-            client.offline();
-        }
-
-        console.log('disconnect', client ? client.guid : 'undefined');
-    }
-
-    function getDeviceByGuid(guid) {
-        var device;
-        Object.getOwnPropertyNames(devices).every(function (name) {
-            if (devices[name].guid == guid) {
-                device = devices[name];
-                return false;
-            }
-            return true;
-        });
-
-        return device;
     }
 
 
@@ -206,7 +286,12 @@ function Manager() {
             /**
              * Device registration handler
              */
-            setUp: registerDevice,
+            detect: detect,
+
+            /**
+             * Device registration handler
+             */
+            register: registerDevice,
 
             /**
              * Device console event routes handler.
@@ -254,7 +339,13 @@ function Manager() {
              * Device web console event routes handler.
              * add web console
              */
-            webStatus: defineRouteHandler(devices, 'webStatus')
+            webStatus: defineRouteHandler(devices, 'webStatus'),
+
+            /**
+             * Device serial Number event routes handler.
+             * sets device number
+             */
+            serialNumber: defineRouteHandler(devices, 'setSerialNumber')
         });
 
         /**

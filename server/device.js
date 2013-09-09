@@ -49,14 +49,7 @@ function Device(application, request, manager) {
      */
     this.client = utils.getScript('./server/platforms', this.device, 'client.js');
 
-    /**
-     * GLOBAL Unique identity of the connected client
-     * Server set the guid cookie on the client if not available
-     * and use it to create socket room for communications
-     * @member {string} guid
-     * @public
-     */
-    this.guid = application.getGUIDCookie(this.request);
+    this.serialNumber = this.request.cookies.serialNumber;
 
     /**
      * When user explicitly set device name, it is stored as a cookie on client device
@@ -64,7 +57,7 @@ function Device(application, request, manager) {
      * @member {string} name
      * @private
      */
-    this.name = this.request.cookies['deviceName'] || this.getName();
+    this.name = this.request.cookies.deviceName || this.getName();
 
     /**
      * flag for online/offlice state of the device
@@ -103,7 +96,7 @@ function Device(application, request, manager) {
      * @event Device#ready
      * @type {object}
      * @property {string} name - device name
-     * @property {string} guid - device GUID
+     * @property {string} serialNumber - device serialNumber
      */
     this.emit('ready', this.manager.extend(this.getInformation(), {
         client: this.client
@@ -117,6 +110,19 @@ function Device(application, request, manager) {
     }
 }
 
+Device.detect = function detect(request){
+    request.io.emit('device:ready', data);
+    var device = detectDevice.get(request.data);
+    return utils.getScript('./server/platforms', device, 'client.js');
+};
+
+
+
+
+Device.prototype.register = function register(data) {
+    this.serialNumber = data.serialNumber;
+};
+
 /**
  * Get device information
  *
@@ -127,7 +133,7 @@ function Device(application, request, manager) {
 Device.prototype.getInformation = function getInformation() {
     return {
         name: this.name,
-        guid: this.guid,
+        serialNumber: this.serialNumber,
         online: this.isOnline,
         web: this.web,
         browser: this.device.browser,
@@ -172,7 +178,7 @@ Device.prototype.getName = function getName() {
  *
  * @public
  * @method setName
- * @param {object} data device property object data.name & data.guid
+ * @param {object} data device property object data.name & data.serialNumber
  */
 Device.prototype.setName = function setName(data) {
 
@@ -185,7 +191,7 @@ Device.prototype.setName = function setName(data) {
      * @event Device#name
      * @type {object}
      * @property {string} name - device name
-     * @property {string} guid - device GUID
+     * @property {string} serialNumber - device serialNumber
      */
     this.emit('name', data);
 };
@@ -211,7 +217,7 @@ Device.prototype.online = function online(request) {
     this.isOnline = true;
 
     /** join the room **/
-    this.request.io.join(this.guid);
+    this.request.io.join(this.serialNumber);
 
     /** update connection time **/
     this.timeStamp.connected = (new Date()).toLocaleTimeString();
@@ -240,7 +246,7 @@ Device.prototype.offline = function offline() {
     this.isOnline = false;
 
     /** leave the room **/
-    this.request.io.leave(this.guid);
+    this.request.io.leave(this.serialNumber);
 
     /**
      * device:offline event is emitted at application level
@@ -272,8 +278,7 @@ Device.prototype.command = function command(name, data) {
      * @event Device#device:name
      * @type {object}
      */
-    this.broadcast(name + ':' + this.guid, data);
-    //console.log(name + ':' + this.guid, data.type);
+    this.broadcast(name + ':' + this.serialNumber, data);
 };
 
 /**
@@ -292,8 +297,7 @@ Device.prototype.status = function status(data) {
     /** extend response to add device information **/
     deviceExtendInfo = {
         device: {
-            name: this.name,
-            guid: this.guid
+            name: this.name
         }
     };
 
@@ -327,12 +331,12 @@ Device.prototype.status = function status(data) {
      * @event Device#device:status
      * @type {object}
      */
-    this.broadcast('status:' + this.guid, data);
+    this.broadcast('status:' + this.serialNumber, data);
 };
 
 Device.prototype.webStatus = function webStatus(data) {
     this.web.enabled = data.enabled;
-    this.broadcast('web:status:' + this.guid, data);
+    this.broadcast('web:status:' + this.serialNumber, data);
 };
 
 Device.prototype.control = function control(data) {
@@ -351,7 +355,6 @@ Device.prototype.control = function control(data) {
  */
 Device.prototype.emit = function emit(name, data) {
     this.request.io.emit('device:' + name, data);
-    //console.log('device.emit', this.guid, name);
 };
 
 /**
@@ -364,8 +367,7 @@ Device.prototype.emit = function emit(name, data) {
  * @param {object} data response parameter object
  */
 Device.prototype.broadcast = function broadcast(name, data) {
-    this.request.io.room(this.guid).broadcast('device:' + name, data);
-    //console.log('device.broadcast', this.guid, name);
+    this.request.io.room(this.serialNumber).broadcast('device:' + name, data);
 };
 
 
