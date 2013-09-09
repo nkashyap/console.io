@@ -11,6 +11,13 @@
         configure: function configure(exports, global) {
             var files = ["$MANAGER_WIDGET\\Common\\webapi\\1.0\\webapis.js"];
 
+            exports.client.CONST = {
+                NETWORK: {
+                    '0': 'WIFI',
+                    '1': 'LAN'
+                }
+            };
+
             exports.transport.on('device:status', function () {
                 exports.client.onStatus(exports, global);
             });
@@ -35,27 +42,13 @@
             }
         },
 
-        getNetworkType: function getNetworkType(exports) {
-            var api = exports.client.api;
-            if (api) {
-                switch (api._plugin("Network", "GetActiveType")) {
-                    case 0:
-                        return 'wifi';
-                    case 1:
-                        return 'lan';
-                    default:
-                        return 'no active connection';
-                }
-            }
-        },
-
         onStatus: function onStatus(exports, global) {
             var api = exports.client.api,
                 info = [],
                 queryParams = exports.util.getQueryParams(),
                 device = {
                     family: exports.client.getDeviceFamily(exports),
-                    model: api.tv.info.getModel(),
+                    modelName: api.tv.info.getModel(),
                     serialNumber: api.tv.info.getDeviceID(),
                     platform: api.platform,
                     version: api.tv.info.getVersion(),
@@ -67,7 +60,7 @@
                 },
                 network = {
                     mode: exports.transport.connectionMode,
-                    kind: exports.client.getNetworkType(exports)
+                    network: exports.client.CONST.NETWORK[api._plugin("Network", "GetActiveType")]
                 };
 
 
@@ -93,7 +86,7 @@
             if (api.network && api.network.getAvailableNetworks) {
                 api.network.getAvailableNetworks(function (networks) {
 
-                    network.interfaceCount = networks.length;
+                    network.interfaces = networks.length;
                     exports.util.every(networks, function (net) {
                         if (net.isActive()) {
                             network.mac = net.mac;

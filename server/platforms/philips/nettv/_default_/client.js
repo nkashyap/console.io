@@ -17,8 +17,7 @@
                     id: 'device'
                 });
             }
-
-//            return drmAgent.DRMDeviceID;
+            console.dir(exports.client.plugin);
             exports.transport.on('device:status', function () {
                 exports.client.onStatus(exports, global);
             });

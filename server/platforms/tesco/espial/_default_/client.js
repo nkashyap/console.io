@@ -16,12 +16,15 @@
         },
 
         onStatus: function onStatus(exports, global) {
-            var info = [],
-                device = {};
-
-            exports.util.forEachProperty(exports.client.api, function (value, property) {
-                device[property] = value;
-            });
+            var api = exports.client.api,
+                info = [],
+                device = {
+                    manufacturer: api.getManufacturer(),
+                    modelName: api.getModelName(),
+                    serialNumber: api.getSerialNumber(),
+                    version: api.getVersion(),
+                    outputProtectionEnabled: api.getOutputProtectionEnabled()
+                };
 
             info.push({ device: device });
             info.push({ connection: { mode: exports.transport.connectionMode }});

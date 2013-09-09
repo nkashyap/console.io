@@ -9,8 +9,13 @@
 (function client() {
     return {
         configure: function configure(exports, global) {
-
             exports.client.plugin = exports.client.getDevicePlugin(exports, 'application/x-netcast-info');
+            exports.client.CONST = {
+                NETWORK: {
+                    '0': 'LAN',
+                    '1': 'WIFI'
+                }
+            };
 
             if (!exports.client.plugin) {
                 exports.client.plugin = exports.client.addDevicePlugin({
@@ -26,22 +31,6 @@
             exports.transport.on('device:status', function () {
                 exports.client.onStatus(exports, global);
             });
-        },
-
-        getNetworkType: function getNetworkType(interfaceType) {
-            var type;
-            switch (interfaceType) {
-                case 0:
-                    type = 'lan';
-                    break;
-                case 1:
-                    type = 'wifi';
-                    break;
-                default:
-                    type = 'no active connection';
-                    break;
-            }
-            return type;
         },
 
         addDevicePlugin: function addDevicePlugin(cfg) {
@@ -96,7 +85,7 @@
                 if (exports.client.plugin.hasOwnProperty(property)) {
                     var value = exports.client.plugin[property];
                     if (property === 'networkType') {
-                        connection[property] = exports.client.getNetworkType(value);
+                        connection[property] = exports.client.CONST.NETWORK[value];
                     } else {
                         connection[property] = value;
                     }
