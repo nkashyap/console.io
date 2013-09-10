@@ -83,6 +83,12 @@
             //Request console.io.js file to get connect.sid cookie from the server
             //Socket.io use connection cookie
             if (!exports.util.isIFrameChild()) {
+
+                if (global.io) {
+                    setUp();
+                    return false;
+                }
+
                 if (exports.util.foundRequireJS()) {
                     global.require(["socket.io"], setUp);
                 } else {
@@ -154,11 +160,6 @@
      * set it to undefined to force other libraries to use addEventListener instead
      */
     if (global.navigator.userAgent.search(/Maple/i) > -1) {
-        /**
-         * override samsung maple logging
-         */
-        global.alert = global.console.info;
-
         if (typeof HTMLElement.prototype.addEventListener === 'function' &&
             typeof HTMLElement.prototype.attachEvent === 'function') {
             HTMLElement.prototype.attachEvent = undefined;

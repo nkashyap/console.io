@@ -58,6 +58,10 @@ function main() {
                 url = url.replace('.css', '.min.css');
             }
 
+            if (url.indexOf('?') > -1) {
+                url = url.split('?')[0];
+            }
+
             return url;
         }
 

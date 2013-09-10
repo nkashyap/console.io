@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-09
+ * Date: 2013-09-10
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -1172,6 +1172,39 @@ ConsoleIO.version = "0.2.0-1";
         config;
 
 
+    function getTitle(msg) {
+        var cfg = exports.getConfig(),
+            title = [];
+
+        if (exports.name) {
+            title.push(exports.name);
+        }
+
+        if (exports.serialNumber) {
+            title.push(exports.serialNumber);
+        }
+
+        if (cfg.secure) {
+            title.push('secure');
+        }
+
+        if (cfg.web) {
+            title.push('web');
+        }
+
+        if (cfg.url) {
+            title.push(cfg.url);
+        }
+
+        if (cfg.base) {
+            title.push(cfg.base);
+        }
+
+        title.push(msg);
+
+        return title.join('|');
+    }
+
     function onMessage(event) {
         var data = event.data;
         transport.emit(data.event, {
@@ -1194,7 +1227,7 @@ ConsoleIO.version = "0.2.0-1";
     function onConnecting(mode) {
         transport.connectionMode = mode;
         exports.console.log('Connecting to the Server');
-        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'connecting'].join('|'), false);
+        exports.util.showInfo(getTitle('connecting'), false);
     }
 
     function onReconnect(mode, attempts) {
@@ -1212,29 +1245,30 @@ ConsoleIO.version = "0.2.0-1";
 
     function onReconnecting() {
         exports.console.log('Reconnecting to the Server');
-        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'reconnecting'].join('|'), false);
+        exports.util.showInfo(getTitle('reconnecting'), false);
     }
 
     function onDisconnect() {
         exports.console.log('Disconnected from the Server');
-        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'offline'].join('|'), false);
+        exports.util.showInfo(getTitle('offline'), false);
     }
 
     function onConnectFailed() {
         exports.console.warn('Failed to connect to the Server');
-        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'connection failed'].join('|'), false);
+        exports.util.showInfo(getTitle('connection failed'), false);
     }
 
     function onReconnectFailed() {
         exports.console.warn('Failed to reconnect to the Server');
-        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'reconnection failed'].join('|'), false);
+        exports.util.showInfo(getTitle('reconnection failed'), false);
     }
 
     function onError() {
         exports.console.warn('Socket Error');
-        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'connection error'].join('|'), false);
-    }
+        exports.util.showInfo(getTitle('connection error'), false);
 
+        transport.forceReconnect();
+    }
 
     transport.connectionMode = '';
     transport.subscribed = false;
@@ -2124,6 +2158,12 @@ ConsoleIO.version = "0.2.0-1";
             //Request console.io.js file to get connect.sid cookie from the server
             //Socket.io use connection cookie
             if (!exports.util.isIFrameChild()) {
+
+                if (global.io) {
+                    setUp();
+                    return false;
+                }
+
                 if (exports.util.foundRequireJS()) {
                     global.require(["socket.io"], setUp);
                 } else {
@@ -2195,11 +2235,6 @@ ConsoleIO.version = "0.2.0-1";
      * set it to undefined to force other libraries to use addEventListener instead
      */
     if (global.navigator.userAgent.search(/Maple/i) > -1) {
-        /**
-         * override samsung maple logging
-         */
-        global.alert = global.console.info;
-
         if (typeof HTMLElement.prototype.addEventListener === 'function' &&
             typeof HTMLElement.prototype.attachEvent === 'function') {
             HTMLElement.prototype.attachEvent = undefined;
