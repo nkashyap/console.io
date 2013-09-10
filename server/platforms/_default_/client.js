@@ -23,6 +23,8 @@
 
         onStatus: function onStatus(exports, global) {
             var info = [];
+
+            info.push({ device: { serialNumber: exports.serialNumber }});
             info.push({ connection: { mode: exports.transport.connectionMode }});
             info.push({ document: { cookie: document.cookie }});
             info.push({ navigator: exports.client.jsonify(global.navigator) });

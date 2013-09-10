@@ -58,7 +58,10 @@ var Utils = {
             return false;
         }
 
-        content = this.fileCache[file];
+        if (process.env.NODE_ENV === 'production') {
+            content = this.fileCache[file];
+        }
+
         checkpoint = fs.statSync(file);
 
         if (!content || (content && content.checkpoint.mtime !== checkpoint.mtime)) {

@@ -48,6 +48,10 @@ function Device(application, request, manager) {
      */
     this.client = utils.getScript('./server/platforms', this.device, 'client.js');
 
+    /**
+     * Device serial Number
+     * @member {object} client
+     */
     this.serialNumber = this.request.cookies.serialNumber || this.request.data.serialNumber;
 
     /**
@@ -109,15 +113,43 @@ function Device(application, request, manager) {
     }
 }
 
+
+/**
+ * Detect remote device
+ *
+ * @static
+ * @requires module:detectDevice
+ * @param {object} request express.io request object
+ */
 Device.detect = function detect(request) {
+
+    /**
+     * Parse information provided by client to
+     * detect device platform, manufacture, browser and version
+     * @member {object} device
+     */
     var config = detectDevice.get(request.data);
 
+    /**
+     * registration event.
+     *
+     * @event Device#registration
+     * @type {object}
+     * @property {string} name - device name
+     * @property {object} client - device script
+     */
     request.io.emit('device:registration', {
         name : request.cookies.deviceName || Device.getName(config),
         client: utils.getScript('./server/platforms', config, 'client.js')
     });
 };
 
+/**
+ * Device Name
+ *
+ * @static
+ * @param {object} data detectDevice config
+ */
 Device.getName = function getName(data) {
     /** use array to build name **/
     var name = [data.browser || 'NoName'];
@@ -212,6 +244,11 @@ Device.prototype.online = function online(request) {
     /** update connection time **/
     this.timeStamp.connected = (new Date()).toLocaleTimeString();
 
+    /** get client script if in dev mode **/
+    if (process.env.NODE_ENV === 'development') {
+        this.client = utils.getScript('./server/platforms', this.device, 'client.js');
+    }
+
     /**
      * device:online event is emitted at application level
      * and is received by all connected clients
@@ -294,6 +331,7 @@ Device.prototype.status = function status(data) {
     extendedInfo.push(deviceExtendInfo);
 
     info.forEach(function (item) {
+        /** add device name **/
         if (item.device) {
             this.manager.extend(deviceExtendInfo.device, item.device);
             return false;
@@ -324,16 +362,29 @@ Device.prototype.status = function status(data) {
     this.broadcast('status:' + this.serialNumber, data);
 };
 
+/**
+ * broadcast & store device web console status event
+ *
+ * @public
+ * @method status
+ * @param {object} data response parameter object
+ */
 Device.prototype.webStatus = function webStatus(data) {
     this.web.enabled = data.enabled;
     this.broadcast('web:status:' + this.serialNumber, data);
 };
 
+/**
+ * broadcast & store device web console control event
+ *
+ * @public
+ * @method status
+ * @param {object} data response parameter object
+ */
 Device.prototype.control = function control(data) {
     this.web.config = data;
     this.emit('web:control', data);
 };
-
 
 /**
  * emits events
