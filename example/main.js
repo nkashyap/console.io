@@ -65,7 +65,7 @@ function requireScript(url, callback) {
     node.async = true;
 
     //IEMobile readyState "loaded" instead of "complete"
-    if (node.readyState === "complete" || node.readyState === "loaded") {
+    if (!window.opera && (node.readyState === "complete" || node.readyState === "loaded")) {
         setTimeout(function () {
             callback(url);
         }, 1);
@@ -78,7 +78,7 @@ function requireScript(url, callback) {
 
         } else if (node.attachEvent) {
             //IEMobile readyState "loaded" instead of "complete"
-            if (node.readyState === "complete" || node.readyState === "loaded") {
+            if (!window.opera && (node.readyState === "complete" || node.readyState === "loaded")) {
                 node.detachEvent('onreadystatechange', onScriptLoad);
                 callback(url);
             }
@@ -121,7 +121,7 @@ if (typeof define === "function" && define.amd) {
         url += ':' + window.SERVER_PORT + '/';
     }
 
-    requireScript(url + 'console.io.js', function () {
+    requireScript(url + 'console.io.js?web=true', function () {
         ConsoleIO.util.ready(init);
     });
 }

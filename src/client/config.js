@@ -113,9 +113,9 @@
         element.appendChild(document.createTextNode(""));
 
         // Add the <style> element to the page
-        document.head.appendChild(element);
+        document.getElementsByTagName('head')[0].appendChild(element);
 
-        return element.sheet;
+        return element.sheet || element.styleSheet;
     }());
 
     // Cover uncaught exceptions

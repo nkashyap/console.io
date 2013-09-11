@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-10
+ * Date: 2013-09-11
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -192,7 +192,7 @@ ConsoleIO.version = "0.2.0-1";
         node.async = true;
 
         //IEMobile readyState "loaded" instead of "complete"
-        if (node.readyState === "complete" || node.readyState === "loaded") {
+        if (!global.opera && (node.readyState === "complete" || node.readyState === "loaded")) {
             setTimeout(function () {
                 callback(url);
             }, 1);
@@ -205,7 +205,7 @@ ConsoleIO.version = "0.2.0-1";
 
             } else if (node.attachEvent) {
                 //IEMobile readyState "loaded" instead of "complete"
-                if (node.readyState === "complete" || node.readyState === "loaded") {
+                if (!global.opera && (node.readyState === "complete" || node.readyState === "loaded")) {
                     node.detachEvent('onreadystatechange', onScriptLoad);
                     callback(url);
                 }
@@ -314,23 +314,28 @@ ConsoleIO.version = "0.2.0-1";
     };
 
     util.addCSSRule = function addCSSRule(sheet, selector, rules, index) {
-        if (sheet.insertRule) {
-            sheet.insertRule(selector + "{" + rules + "}", index);
-        }
-        else {
-            sheet.addRule(selector, rules, index);
-        }
+        try{
+            if (sheet.insertRule) {
+                sheet.insertRule(selector + "{" + rules + "}", index);
+            }
+            else if (sheet.addRule){
+                sheet.addRule(selector, rules, index);
+            }
+        }catch(e){}
     };
 
     util.deleteCSSRule = function deleteCSSRule(sheet, selector) {
         var rules = sheet.cssRules || sheet.rules;
 
         util.forEach(util.toArray(rules), function (rule, index) {
-            if (rule.selectorText && rule.selectorText === selector) {
-                if (sheet.deleteRule) {
-                    sheet.deleteRule(index);
-                } else {
-                    sheet.removeRule(index);
+            if (rule.selectorText) {
+                // firefox switch double colon into single colon
+                if(rule.selectorText.replace('::', ':') === selector.replace('::', ':')){
+                    if (sheet.deleteRule) {
+                        sheet.deleteRule(index);
+                    } else if (sheet.removeRule) {
+                        sheet.removeRule(index);
+                    }
                 }
             }
         });
@@ -387,8 +392,8 @@ ConsoleIO.version = "0.2.0-1";
                 "background-color: " + bgColor + "; border: 1px solid rgb(0, 0, 0); " +
                 "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
 
-        util.deleteCSSRule(exports.styleSheet, "." + className + "::after");
-        util.addCSSRule(exports.styleSheet, "." + className + "::after", css);
+        util.deleteCSSRule(exports.styleSheet, "." + className + ":after");
+        util.addCSSRule(exports.styleSheet, "." + className + ":after", css);
         document.body.setAttribute("class", className);
     };
 
@@ -2188,9 +2193,9 @@ ConsoleIO.version = "0.2.0-1";
         element.appendChild(document.createTextNode(""));
 
         // Add the <style> element to the page
-        document.head.appendChild(element);
+        document.getElementsByTagName('head')[0].appendChild(element);
 
-        return element.sheet;
+        return element.sheet || element.styleSheet;
     }());
 
     // Cover uncaught exceptions
