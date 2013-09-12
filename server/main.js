@@ -75,6 +75,9 @@ function main() {
             base = '/console.io/';
             config.io.development.set.push({ 'transports': ['htmlfile', 'xhr-polling', 'jsonp-polling']});
             config.io.production.set.push({ 'transports': ['htmlfile', 'xhr-polling', 'jsonp-polling']});
+
+            // IISNODE set long connection timeout
+            config.io.production.set.push({ 'close timeout': 600 });
         }
 
         config.io.development.set.push({ 'resource': base + 'socket.io' });
@@ -106,9 +109,9 @@ function main() {
         });
 
         // add request logger
-        if(process.env.NODE_ENV === 'development'){
-            app.use(base, express.logger());
-        }
+        //if (process.env.NODE_ENV === 'development') {
+        //app.use(base, express.logger());
+        //}
 
         //console app resources routes
         app.use(base + 'resources', express.static('resources'));

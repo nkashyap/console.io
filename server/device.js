@@ -139,7 +139,7 @@ Device.detect = function detect(request) {
      * @property {object} client - device script
      */
     request.io.emit('device:registration', {
-        name : request.cookies.deviceName || Device.getName(config),
+        name: request.cookies.deviceName || Device.getName(config),
         client: utils.getScript('./server/platforms', config, 'client.js')
     });
 };
@@ -172,7 +172,6 @@ Device.getName = function getName(data) {
     /** join and return as string **/
     return name.join("|");
 };
-
 
 
 /**

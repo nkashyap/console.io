@@ -328,12 +328,12 @@ ConsoleIO.Service.Storage = {
         ConsoleIO.Service.Storage.Store[name] = value;
     },
 
-    removeItem : function removeItem(name) {
+    removeItem: function removeItem(name) {
         this.addItem(name, '', -1);
         delete ConsoleIO.Service.Storage.Store[name];
     },
 
-    getItem : function getItem(name) {
+    getItem: function getItem(name) {
         return ConsoleIO.Service.Storage.Store[name];
     }
 };

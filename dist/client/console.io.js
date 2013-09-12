@@ -314,14 +314,15 @@ ConsoleIO.version = "0.2.0-1";
     };
 
     util.addCSSRule = function addCSSRule(sheet, selector, rules, index) {
-        try{
+        try {
             if (sheet.insertRule) {
                 sheet.insertRule(selector + "{" + rules + "}", index);
             }
-            else if (sheet.addRule){
+            else if (sheet.addRule) {
                 sheet.addRule(selector, rules, index);
             }
-        }catch(e){}
+        } catch (e) {
+        }
     };
 
     util.deleteCSSRule = function deleteCSSRule(sheet, selector) {
@@ -330,7 +331,7 @@ ConsoleIO.version = "0.2.0-1";
         util.forEach(util.toArray(rules), function (rule, index) {
             if (rule.selectorText) {
                 // firefox switch double colon into single colon
-                if(rule.selectorText.replace('::', ':') === selector.replace('::', ':')){
+                if (rule.selectorText.replace('::', ':') === selector.replace('::', ':')) {
                     if (sheet.deleteRule) {
                         sheet.deleteRule(index);
                     } else if (sheet.removeRule) {
@@ -1803,7 +1804,7 @@ ConsoleIO.version = "0.2.0-1";
         }
 
         exports.console.log('Ready', exports.name);
-        //exports.transport.forceReconnect();
+        exports.transport.forceReconnect();
     }
 
     function onOnline(data) {
@@ -1823,7 +1824,7 @@ ConsoleIO.version = "0.2.0-1";
             exports.console.log('Online', exports.name);
         }
 
-        //exports.transport.forceReconnect();
+        exports.transport.forceReconnect();
     }
 
     function onOffline(data) {

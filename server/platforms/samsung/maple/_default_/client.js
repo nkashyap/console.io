@@ -11,7 +11,7 @@
         configure: function configure(exports, global) {
             var files = ["$MANAGER_WIDGET/Common/webapi/1.0/webapis.js"];
 
-            //global.alert = exports.console.info;
+            global.alert = exports.console.info;
 
             exports.client.CONST = {
                 NETWORK: {
@@ -36,7 +36,7 @@
                 exports.client.register();
             }
 
-            if (typeof global.webapis === 'undefined') {
+            if (!global.webapis) {
                 exports.util.require(files, load);
             } else {
                 load();

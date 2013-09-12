@@ -182,7 +182,7 @@
         }
 
         exports.console.log('Ready', exports.name);
-        //exports.transport.forceReconnect();
+        exports.transport.forceReconnect();
     }
 
     function onOnline(data) {
@@ -202,7 +202,7 @@
             exports.console.log('Online', exports.name);
         }
 
-        //exports.transport.forceReconnect();
+        exports.transport.forceReconnect();
     }
 
     function onOffline(data) {
