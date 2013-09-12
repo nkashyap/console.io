@@ -9,9 +9,9 @@
 (function client() {
     return {
         configure: function configure(exports, global) {
-            var files = ["$MANAGER_WIDGET\\Common\\webapi\\1.0\\webapis.js"];
+            var files = ["$MANAGER_WIDGET/Common/webapi/1.0/webapis.js"];
 
-            global.alert = exports.console.info;
+            //global.alert = exports.console.info;
 
             exports.client.CONST = {
                 NETWORK: {
@@ -24,8 +24,8 @@
                 exports.client.onStatus(exports, global);
             });
 
-            exports.util.require(files, function () {
-                exports.console.log('webapis.js loaded');
+            function load() {
+                exports.console.log('webapis.js loaded', typeof global.webapis);
                 exports.client.api = global.webapis;
 
                 if (!exports.serialNumber) {
@@ -34,7 +34,13 @@
                 }
 
                 exports.client.register();
-            });
+            }
+
+            if (typeof global.webapis === 'undefined') {
+                exports.util.require(files, load);
+            } else {
+                load();
+            }
         },
 
         getDeviceFamily: function getDeviceFamily(exports) {
@@ -60,7 +66,6 @@
                     modelName: api.tv.info.getModel(),
                     serialNumber: api.tv.info.getDeviceID(),
                     platform: api.platform,
-                    version: api.tv.info.getVersion(),
                     firmware: api.tv.info.getFirmware(),
                     esnWidevine: api.tv.info.getESN('WIDEVINE'),
                     apiVersion: api.ver,
@@ -72,6 +77,10 @@
                     network: exports.client.CONST.NETWORK[api._plugin("Network", "GetActiveType")]
                 };
 
+            try {
+                device.version = api.tv.info.getVersion();
+            } catch (e) {
+            }
 
             if (queryParams.totalMemory) {
                 device.totalMemory = queryParams.totalMemory;

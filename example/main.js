@@ -45,11 +45,11 @@ function init() {
         if (window.ConsoleIO) {
             var info = [
                 "Name: " + window.ConsoleIO.name,
-                "guid: " + window.ConsoleIO.guid,
+                "serialNumber: " + window.ConsoleIO.serialNumber,
                 "mode: " + window.ConsoleIO.transport.connectionMode,
                 "connected: " + window.ConsoleIO.transport.isConnected(),
                 "subscribed: " + window.ConsoleIO.transport.subscribed
-            ].join(", ");
+            ].join("<br>");
 
             connectionMode.innerHTML = info;
         }

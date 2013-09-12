@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-11
+ * Date: 2013-09-12
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -1283,6 +1283,10 @@ ConsoleIO.version = "0.2.0-1";
          * to process JSONP requests in a queue
          */
         (function overrideJsonPolling(io) {
+            if (!io.Transport["jsonp-polling"]) {
+                return;
+            }
+
             var original = io.Transport["jsonp-polling"].prototype.post;
 
             io.Transport["jsonp-polling"].prototype.requestQueue = [];
@@ -1636,7 +1640,9 @@ ConsoleIO.version = "0.2.0-1";
             exports.storage.addItem("deviceName", data.name, 365);
         }
 
-        exports.util.showInfo([exports.name || '', exports.serialNumber || '', online ? 'online' : 'offline'].join('|'), online);
+        if (data.serialNumber === exports.serialNumber) {
+            exports.util.showInfo([exports.name || '', exports.serialNumber || '', online ? 'online' : 'offline'].join('|'), online);
+        }
     }
 
     function addBindSupport() {
@@ -1797,7 +1803,7 @@ ConsoleIO.version = "0.2.0-1";
         }
 
         exports.console.log('Ready', exports.name);
-        exports.transport.forceReconnect();
+        //exports.transport.forceReconnect();
     }
 
     function onOnline(data) {
@@ -1817,7 +1823,7 @@ ConsoleIO.version = "0.2.0-1";
             exports.console.log('Online', exports.name);
         }
 
-        exports.transport.forceReconnect();
+        //exports.transport.forceReconnect();
     }
 
     function onOffline(data) {
@@ -2102,7 +2108,7 @@ ConsoleIO.version = "0.2.0-1";
         proxy: 'proxy',
 
         forceReconnect: true,
-        forceReconnectInterval: 5000,
+        forceReconnectInterval: 10000,
         forceReconnectMaxTry: 10,
 
         nativeConsole: true,

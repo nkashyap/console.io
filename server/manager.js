@@ -45,21 +45,21 @@ function Manager() {
 
     //COMMON
     function getSerialNumber(request) {
-        if(request.cookies.serialNumber){
+        if (request.cookies.serialNumber) {
             return request.cookies.serialNumber;
         }
 
-        if(request.data){
+        if (request.data) {
             return request.data.serialNumber;
         }
     }
 
     function getGUID(request) {
-        if(request.cookies.guid){
+        if (request.cookies.guid) {
             return request.cookies.guid;
         }
 
-        if(request.data){
+        if (request.data) {
             return request.data.guid;
         }
     }

@@ -19,7 +19,9 @@
             exports.storage.addItem("deviceName", data.name, 365);
         }
 
-        exports.util.showInfo([exports.name || '', exports.serialNumber || '', online ? 'online' : 'offline'].join('|'), online);
+        if (data.serialNumber === exports.serialNumber) {
+            exports.util.showInfo([exports.name || '', exports.serialNumber || '', online ? 'online' : 'offline'].join('|'), online);
+        }
     }
 
     function addBindSupport() {
@@ -180,7 +182,7 @@
         }
 
         exports.console.log('Ready', exports.name);
-        exports.transport.forceReconnect();
+        //exports.transport.forceReconnect();
     }
 
     function onOnline(data) {
@@ -200,7 +202,7 @@
             exports.console.log('Online', exports.name);
         }
 
-        exports.transport.forceReconnect();
+        //exports.transport.forceReconnect();
     }
 
     function onOffline(data) {

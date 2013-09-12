@@ -124,6 +124,10 @@
          * to process JSONP requests in a queue
          */
         (function overrideJsonPolling(io) {
+            if (!io.Transport["jsonp-polling"]) {
+                return;
+            }
+
             var original = io.Transport["jsonp-polling"].prototype.post;
 
             io.Transport["jsonp-polling"].prototype.requestQueue = [];

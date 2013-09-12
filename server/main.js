@@ -106,7 +106,9 @@ function main() {
         });
 
         // add request logger
-        //app.use(base, express.logger());
+        if(process.env.NODE_ENV === 'development'){
+            app.use(base, express.logger());
+        }
 
         //console app resources routes
         app.use(base + 'resources', express.static('resources'));

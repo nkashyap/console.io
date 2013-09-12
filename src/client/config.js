@@ -22,7 +22,7 @@
         proxy: 'proxy',
 
         forceReconnect: true,
-        forceReconnectInterval: 5000,
+        forceReconnectInterval: 10000,
         forceReconnectMaxTry: 10,
 
         nativeConsole: true,
