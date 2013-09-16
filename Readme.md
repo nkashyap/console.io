@@ -14,10 +14,12 @@ It works pretty much on all modern browsers, mobile devices, Smart TVs, etc
 Tested on: 
 * Toshiba TV (2011, 2012, 2013)
 * LG NetCast TV (2011, 2012, 2013)
-* Philips NetTV (2011, 2012)
+* Philips NetTV (2011, 2012, 2013)
 * Samsung TV (2010, 2011, 2012, 2013)
-* Panasonic TV (2013)
+* Panasonic TV (2012, 2013)
 * Technika Avtrex STB
+* Sony (BDP-S4100)
+* Hopper Dish (Hopper)
 * Firefox, Safari, Opera, Chrome, Maple, PhantomJS and IE
 * iPhone, iPod, iPad, Android browser, windows 8 phone etc
 
