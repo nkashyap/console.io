@@ -67,14 +67,14 @@ function Manager() {
     function disconnect(request) {
         var clientDevice = getDeviceBySerialNumber(getSerialNumber(request));
         if (clientDevice) {
-            clientDevice.offline();
+            clientDevice.disconnect();
             console.log('disconnect', clientDevice.serialNumber);
             return;
         }
 
         var activeUser = users[getGUID(request)];
         if (activeUser) {
-            activeUser.offline();
+            activeUser.disconnect();
             console.log('disconnect', activeUser.guid);
         }
     }

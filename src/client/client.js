@@ -13,14 +13,14 @@
 
     var client = exports.client = {};
 
-    function storeData(data, online) {
+    function storeData(data, msg, online) {
         if (!exports.name) {
             exports.name = data.name;
             exports.storage.addItem("deviceName", data.name, 365);
         }
 
         if (data.serialNumber === exports.serialNumber) {
-            exports.util.showInfo([exports.name || '', exports.serialNumber || '', online ? 'online' : 'offline'].join('|'), online);
+            exports.transport.showInfoBar(msg, online);
         }
     }
 
@@ -162,7 +162,7 @@
     }
 
     function onRegistration(data) {
-        storeData(data);
+        storeData(data, 'registration');
 
         // setup client specific scripts
         extend(data.client);
@@ -171,7 +171,7 @@
     }
 
     function onReady(data) {
-        storeData(data);
+        storeData(data, 'ready');
         setUpWebConsole(data.web);
 
         // when client page is refreshed, ready event is not triggered and
@@ -186,7 +186,7 @@
     }
 
     function onOnline(data) {
-        storeData(data, true);
+        storeData(data, 'online', true);
         setUpWebConsole(data.web);
 
         // when client page is refreshed, ready event is not triggered
@@ -196,21 +196,25 @@
         }
 
         if (data.serialNumber === exports.serialNumber) {
-            exports.transport.subscribed = true;
             exports.transport.clearPendingQueue();
-
             exports.console.log('Online', exports.name);
         }
-
-        exports.transport.forceReconnect();
     }
 
     function onOffline(data) {
-        storeData(data);
+        storeData(data, 'offline');
 
         if (data.serialNumber === exports.serialNumber) {
             exports.console.log('Offline', exports.name);
-            exports.transport.subscribed = false;
+        }
+    }
+
+    function onClientDisconnect(data) {
+        storeData(data, 'client disconnect');
+
+        if (data.serialNumber === exports.serialNumber) {
+            exports.console.log('client disconnected', exports.serialNumber);
+            exports.transport.forceReconnect();
         }
     }
 
@@ -446,6 +450,7 @@
         exports.transport.on('device:ready', onReady);
         exports.transport.on('device:online', onOnline);
         exports.transport.on('device:offline', onOffline);
+        exports.transport.on('device:disconnect', onClientDisconnect);
         exports.transport.on('device:command', onCommand);
         exports.transport.on('device:fileList', onFileList);
         exports.transport.on('device:htmlContent', onHTMLContent);

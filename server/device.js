@@ -217,6 +217,9 @@ Device.prototype.setName = function setName(data) {
     this.emit('name', data);
 };
 
+Device.prototype.disconnect = function disconnect() {
+    this.offline('device:disconnect');
+};
 
 /**
  * Set device status to online
@@ -266,7 +269,7 @@ Device.prototype.online = function online(request) {
  * @public
  * @method offline
  */
-Device.prototype.offline = function offline() {
+Device.prototype.offline = function offline(name) {
 
     /** set online flag to false **/
     this.isOnline = false;
@@ -281,7 +284,7 @@ Device.prototype.offline = function offline() {
      * @event Device#device:offline
      * @type {object}
      */
-    this.manager.emit('device:offline', this.getInfo());
+    this.manager.emit(typeof name === 'string' ? name : 'device:offline', this.getInfo());
 };
 
 /**

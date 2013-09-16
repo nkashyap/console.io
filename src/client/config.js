@@ -21,10 +21,6 @@
         webStyle: "console.css",
         proxy: 'proxy',
 
-        forceReconnect: true,
-        forceReconnectInterval: 10000,
-        forceReconnectMaxTry: 10,
-
         nativeConsole: true,
         web: false,
         webOnly: false,

@@ -59,6 +59,10 @@ User.prototype.unSubscribe = function unSubscribe(serialNumber) {
     }
 };
 
+User.prototype.disconnect = function disconnect() {
+    this.offline('disconnect');
+};
+
 User.prototype.online = function online(request) {
     this.request = request;
     this.isOnline = true;
@@ -79,14 +83,14 @@ User.prototype.online = function online(request) {
     this.listScripts();
 };
 
-User.prototype.offline = function offline() {
+User.prototype.offline = function offline(name) {
     this.isOnline = false;
 
     this.deviceSerialNumbers.forEach(function (serialNumber) {
         this.request.io.leave(serialNumber);
     }, this);
 
-    this.emit('offline', {
+    this.emit(typeof name === 'string' ? name : 'offline', {
         name: this.guid,
         guid: this.guid,
         subscribed: this.isOnline
@@ -97,7 +101,8 @@ User.prototype.exportHTML = function exportHTML(data) {
     var scope = this,
         cssFile = './app/resources/console.css',
         htmlFile = [
-            "userdata/export/", data.name.replace(/[|]/ig, '-'), '-', data.serialNumber, '-', (new Date()).getTime(), '.html'
+            "userdata/export/", data.name.replace(/[|]/ig, '-'), '-', data.serialNumber, '-', (new Date()).getTime(),
+            '.html'
         ].join("");
 
     fs.readFile(cssFile, null, function (err, cssData) {
