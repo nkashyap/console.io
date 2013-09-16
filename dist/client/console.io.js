@@ -1194,14 +1194,14 @@ ConsoleIO.version = "0.2.0-1";
         transport.connectionMode = mode;
         transport.showInfoBar('connecting', false);
 
-        exports.console.log('Connecting to the Server', arguments);
+        exports.console.log('Connecting to the Server', mode);
     }
 
     function onReconnect(mode, attempts) {
         transport.connectionMode = mode;
         transport.emit('online', exports.client.getInfo());
 
-        exports.console.log('Reconnected to the Server after ' + attempts + ' attempts.', arguments);
+        exports.console.log('Reconnected to the Server after ' + attempts + ' attempts.', mode, attempts);
     }
 
     function onReconnecting() {
@@ -1211,7 +1211,7 @@ ConsoleIO.version = "0.2.0-1";
 
     function onDisconnect(reason) {
         transport.showInfoBar('disconnect', false);
-        exports.console.log('Disconnected from the Server', arguments);
+        exports.console.log('Disconnected from the Server', reason);
         if (!reason || (reason && reason !== 'booted')) {
             transport.forceReconnect();
         }
@@ -1227,9 +1227,9 @@ ConsoleIO.version = "0.2.0-1";
         exports.console.warn('Failed to reconnect to the Server', arguments);
     }
 
-    function onError() {
+    function onError(e) {
         transport.showInfoBar('connection error', false);
-        exports.console.warn('Socket Error', arguments);
+        exports.console.warn('Socket Error', e);
     }
 
     transport.connectionMode = '';
@@ -1327,11 +1327,9 @@ ConsoleIO.version = "0.2.0-1";
     };
 
     transport.on = function on(name, callback, scope) {
-        if (transport.io) {
-            transport.io.on(name, function () {
-                callback.apply(scope || this, arguments);
-            });
-        }
+        transport.io.on(name, function () {
+            callback.apply(scope || this, arguments);
+        });
     };
 
     transport.isConnected = function isConnected() {
@@ -1339,8 +1337,12 @@ ConsoleIO.version = "0.2.0-1";
     };
 
     transport.forceReconnect = function forceReconnect() {
-        transport.io.socket.disconnectSync();
-        transport.io.socket.reconnect();
+        try {
+            transport.io.socket.disconnectSync();
+            transport.io.socket.reconnect();
+        } catch (e) {
+            exports.console.error(e);
+        }
     };
 
     transport.showInfoBar = function showInfoBar(msg, isOnline) {
@@ -1760,7 +1762,7 @@ ConsoleIO.version = "0.2.0-1";
     }
 
     function onReady(data) {
-        storeData(data,'ready');
+        storeData(data, 'ready');
         setUpWebConsole(data.web);
 
         // when client page is refreshed, ready event is not triggered and
@@ -1771,37 +1773,34 @@ ConsoleIO.version = "0.2.0-1";
         }
 
         exports.console.log('Ready', exports.name);
-        exports.transport.forceReconnect();
     }
 
     function onOnline(data) {
-        storeData(data,'online', true);
-        setUpWebConsole(data.web);
-
-        // when client page is refreshed, ready event is not triggered
-        // so setup client specific scripts only once
-        if (!client.configure) {
-            extend(data.client);
-        }
-
         if (data.serialNumber === exports.serialNumber) {
+            storeData(data, 'online', true);
+            setUpWebConsole(data.web);
+
+            // when client page is refreshed, ready event is not triggered
+            // so setup client specific scripts only once
+            if (!client.configure) {
+                extend(data.client);
+            }
+
             exports.transport.clearPendingQueue();
             exports.console.log('Online', exports.name);
         }
     }
 
     function onOffline(data) {
-        storeData(data, 'offline');
-
         if (data.serialNumber === exports.serialNumber) {
+            storeData(data, 'offline');
             exports.console.log('Offline', exports.name);
         }
     }
 
     function onClientDisconnect(data) {
-        storeData(data, 'client disconnect');
-
         if (data.serialNumber === exports.serialNumber) {
+            storeData(data, 'client disconnect');
             exports.console.log('client disconnected', exports.serialNumber);
             exports.transport.forceReconnect();
         }
@@ -1814,7 +1813,7 @@ ConsoleIO.version = "0.2.0-1";
 
         exports.name = data.name;
         exports.storage.addItem('deviceName', exports.name, 365);
-        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'online'].join('|'), true);
+        exports.transport.showInfoBar('new name', true);
     }
 
     function onFileSource(data) {
@@ -2682,7 +2681,9 @@ ConsoleIO.version = "0.2.0-1";
             web.console.setControl(data);
         }
 
-        var info = [exports.name || '', exports.serialNumber || '', exports.transport.isConnected() ? 'online' : 'offline'];
+        var info = [
+            exports.name || '', exports.serialNumber || '', exports.transport.isConnected() ? 'online' : 'offline'
+        ];
 
         if (data.paused) {
             info.push('paused');

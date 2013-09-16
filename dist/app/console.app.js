@@ -217,9 +217,13 @@ ConsoleIO.Service.Socket = {
     },
 
     forceReconnect: function forceReconnect() {
-        var scope = ConsoleIO.Service.Socket;
-        scope.io.socket.disconnectSync();
-        scope.io.socket.reconnect();
+        try {
+            var scope = ConsoleIO.Service.Socket;
+            scope.io.socket.disconnectSync();
+            scope.io.socket.reconnect();
+        } catch (e) {
+            console.warn(e);
+        }
     },
 
     onReady: function onReady(data) {
@@ -251,12 +255,12 @@ ConsoleIO.Service.Socket = {
 
     onConnecting: function onConnecting(mode) {
         ConsoleIO.Service.Socket.connectionMode = mode;
-        console.log('Connecting to the Server', arguments);
+        console.log('Connecting to the Server', mode);
     },
 
     onReconnect: function onReconnect(mode, attempts) {
         ConsoleIO.Service.Socket.connectionMode = mode;
-        console.log('Reconnected to the Server after ' + attempts + ' attempts.', arguments);
+        console.log('Reconnected to the Server after ' + attempts + ' attempts.', mode, attempts);
     },
 
     onReconnecting: function onReconnecting() {
@@ -264,7 +268,7 @@ ConsoleIO.Service.Socket = {
     },
 
     onDisconnect: function onDisconnect(reason) {
-        console.log('Disconnected from the Server', arguments);
+        console.log('Disconnected from the Server', reason);
         if (!reason || (reason && reason !== 'booted')) {
             ConsoleIO.Service.Socket.forceReconnect();
         }
@@ -278,8 +282,8 @@ ConsoleIO.Service.Socket = {
         console.warn('Failed to reconnect to the Server', arguments);
     },
 
-    onError: function onError() {
-        console.warn('Socket Error', arguments);
+    onError: function onError(e) {
+        console.warn('Socket Error', e);
     }
 };
 
@@ -1466,6 +1470,7 @@ ConsoleIO.App.prototype.onConnect = function onConnect() {
 };
 
 ConsoleIO.App.prototype.onDisconnect = function onDisconnect() {
+    this.browser.clear();
     this.view.offline();
 };
 
@@ -1647,7 +1652,7 @@ ConsoleIO.App.Browser.prototype.render = function render(target) {
     this.view.render(target);
 };
 
-ConsoleIO.App.Browser.prototype.refresh = function refresh() {
+ConsoleIO.App.Browser.prototype.clear = function clear() {
     ConsoleIO.forEach(this.store.platform, function (platform) {
         this.deleteItem(platform);
     }, this.view);
@@ -1660,7 +1665,10 @@ ConsoleIO.App.Browser.prototype.refresh = function refresh() {
         offline: [],
         subscribed: []
     };
+};
 
+ConsoleIO.App.Browser.prototype.refresh = function refresh() {
+    this.clear();
     ConsoleIO.Service.Socket.emit('refreshRegisteredDeviceList');
 };
 

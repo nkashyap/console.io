@@ -117,7 +117,7 @@ ConsoleIO.App.Browser.prototype.render = function render(target) {
     this.view.render(target);
 };
 
-ConsoleIO.App.Browser.prototype.refresh = function refresh() {
+ConsoleIO.App.Browser.prototype.clear = function clear() {
     ConsoleIO.forEach(this.store.platform, function (platform) {
         this.deleteItem(platform);
     }, this.view);
@@ -130,7 +130,10 @@ ConsoleIO.App.Browser.prototype.refresh = function refresh() {
         offline: [],
         subscribed: []
     };
+};
 
+ConsoleIO.App.Browser.prototype.refresh = function refresh() {
+    this.clear();
     ConsoleIO.Service.Socket.emit('refreshRegisteredDeviceList');
 };
 

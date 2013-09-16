@@ -47,8 +47,7 @@ function init() {
                 "Name: " + window.ConsoleIO.name,
                 "serialNumber: " + window.ConsoleIO.serialNumber,
                 "mode: " + window.ConsoleIO.transport.connectionMode,
-                "connected: " + window.ConsoleIO.transport.isConnected(),
-                "subscribed: " + window.ConsoleIO.transport.subscribed
+                "connected: " + window.ConsoleIO.transport.isConnected()
             ].join("<br>");
 
             connectionMode.innerHTML = info;

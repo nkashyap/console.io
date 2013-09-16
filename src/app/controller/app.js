@@ -101,6 +101,7 @@ ConsoleIO.App.prototype.onConnect = function onConnect() {
 };
 
 ConsoleIO.App.prototype.onDisconnect = function onDisconnect() {
+    this.browser.clear();
     this.view.offline();
 };
 

@@ -34,14 +34,14 @@
         transport.connectionMode = mode;
         transport.showInfoBar('connecting', false);
 
-        exports.console.log('Connecting to the Server', arguments);
+        exports.console.log('Connecting to the Server', mode);
     }
 
     function onReconnect(mode, attempts) {
         transport.connectionMode = mode;
         transport.emit('online', exports.client.getInfo());
 
-        exports.console.log('Reconnected to the Server after ' + attempts + ' attempts.', arguments);
+        exports.console.log('Reconnected to the Server after ' + attempts + ' attempts.', mode, attempts);
     }
 
     function onReconnecting() {
@@ -51,7 +51,7 @@
 
     function onDisconnect(reason) {
         transport.showInfoBar('disconnect', false);
-        exports.console.log('Disconnected from the Server', arguments);
+        exports.console.log('Disconnected from the Server', reason);
         if (!reason || (reason && reason !== 'booted')) {
             transport.forceReconnect();
         }
@@ -67,9 +67,9 @@
         exports.console.warn('Failed to reconnect to the Server', arguments);
     }
 
-    function onError() {
+    function onError(e) {
         transport.showInfoBar('connection error', false);
-        exports.console.warn('Socket Error', arguments);
+        exports.console.warn('Socket Error', e);
     }
 
     transport.connectionMode = '';
@@ -167,11 +167,9 @@
     };
 
     transport.on = function on(name, callback, scope) {
-        if (transport.io) {
-            transport.io.on(name, function () {
-                callback.apply(scope || this, arguments);
-            });
-        }
+        transport.io.on(name, function () {
+            callback.apply(scope || this, arguments);
+        });
     };
 
     transport.isConnected = function isConnected() {
@@ -179,8 +177,12 @@
     };
 
     transport.forceReconnect = function forceReconnect() {
-        transport.io.socket.disconnectSync();
-        transport.io.socket.reconnect();
+        try {
+            transport.io.socket.disconnectSync();
+            transport.io.socket.reconnect();
+        } catch (e) {
+            exports.console.error(e);
+        }
     };
 
     transport.showInfoBar = function showInfoBar(msg, isOnline) {

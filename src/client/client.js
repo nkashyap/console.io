@@ -182,37 +182,34 @@
         }
 
         exports.console.log('Ready', exports.name);
-        exports.transport.forceReconnect();
     }
 
     function onOnline(data) {
-        storeData(data, 'online', true);
-        setUpWebConsole(data.web);
-
-        // when client page is refreshed, ready event is not triggered
-        // so setup client specific scripts only once
-        if (!client.configure) {
-            extend(data.client);
-        }
-
         if (data.serialNumber === exports.serialNumber) {
+            storeData(data, 'online', true);
+            setUpWebConsole(data.web);
+
+            // when client page is refreshed, ready event is not triggered
+            // so setup client specific scripts only once
+            if (!client.configure) {
+                extend(data.client);
+            }
+
             exports.transport.clearPendingQueue();
             exports.console.log('Online', exports.name);
         }
     }
 
     function onOffline(data) {
-        storeData(data, 'offline');
-
         if (data.serialNumber === exports.serialNumber) {
+            storeData(data, 'offline');
             exports.console.log('Offline', exports.name);
         }
     }
 
     function onClientDisconnect(data) {
-        storeData(data, 'client disconnect');
-
         if (data.serialNumber === exports.serialNumber) {
+            storeData(data, 'client disconnect');
             exports.console.log('client disconnected', exports.serialNumber);
             exports.transport.forceReconnect();
         }
@@ -225,7 +222,7 @@
 
         exports.name = data.name;
         exports.storage.addItem('deviceName', exports.name, 365);
-        exports.util.showInfo([exports.name || '', exports.serialNumber || '', 'online'].join('|'), true);
+        exports.transport.showInfoBar('new name', true);
     }
 
     function onFileSource(data) {
