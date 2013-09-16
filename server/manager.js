@@ -72,7 +72,7 @@ function Manager() {
             return;
         }
 
-        var activeUser = getUserByGUID(getGUID(request));
+        var activeUser = users[getGUID(request)];
         if (activeUser) {
             activeUser.offline();
             console.log('disconnect', activeUser.guid);
@@ -81,30 +81,6 @@ function Manager() {
 
     function getDeviceBySerialNumber(serialNumber) {
         return devices[serialNumber];
-//        var device;
-//        Object.getOwnPropertyNames(devices).every(function (name) {
-//            if (devices[name].serialNumber === serialNumber) {
-//                device = devices[name];
-//                return false;
-//            }
-//            return true;
-//        });
-//
-//        return device;
-    }
-
-    function getUserByGUID(guid) {
-        return users[guid];
-//        var user;
-//        Object.getOwnPropertyNames(users).every(function (name) {
-//            if (users[name].guid === guid) {
-//                user = users[name];
-//                return false;
-//            }
-//            return true;
-//        });
-//
-//        return user;
     }
 
     // DEVICE
@@ -148,7 +124,7 @@ function Manager() {
     // USERS
     function defineUserRouteHandler(name) {
         return function (request) {
-            var activeUser = getUserByGUID(getGUID(request));
+            var activeUser = users[getGUID(request)];
 
             if (activeUser && activeUser[name]) {
                 activeUser[name](request.data);
@@ -175,7 +151,7 @@ function Manager() {
     }
 
     function notifyRegisteredDevicesToUser(request) {
-        var activeUser = getUserByGUID(getGUID(request));
+        var activeUser = users[getGUID(request)];
 
         if (activeUser) {
             forEach(devices, function (device) {
@@ -198,7 +174,7 @@ function Manager() {
 
     function registerUser(request) {
         var guid = getGUID(request),
-            activeUser = getUserByGUID(guid);
+            activeUser = users[guid];
         if (!activeUser) {
             users[guid] = activeUser = new User(application, request, manage);
         }

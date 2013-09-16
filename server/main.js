@@ -78,6 +78,8 @@ function main() {
 
             // IISNODE set long connection timeout
             config.io.production.set.push({ 'close timeout': 600 });
+//            var Transport = require('../node_modules/express.io/node_modules/socket.io/lib/transport');
+//            Transport.prototype.setCloseTimeout = function(){};
         }
 
         config.io.development.set.push({ 'resource': base + 'socket.io' });

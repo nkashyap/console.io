@@ -71,8 +71,9 @@ var config = {
         production: {
             enable: [
                 'browser client minification',
-                'browser client etag',
-                'browser client gzip'
+                'browser client etag'
+                // sometime socket.io crash
+                //'browser client gzip'
             ],
             disable: [],
             set: [
