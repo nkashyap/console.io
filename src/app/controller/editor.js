@@ -106,7 +106,18 @@ ConsoleIO.App.Editor.prototype.add = function add(data) {
     }
 
     this.fileCanBeSaved = false;
-    this.editor.setValue(data.content.replace(/%20/img, " "));
+
+    var content = data.content.replace(/%20/img, " "),
+        lastLine;
+    if (!data.start || data.start === 0) {
+        this.editor.setValue(content);
+    } else if (data.start > 0) {
+        lastLine = this.editor.lastLine();
+        this.editor.replaceRange(content, {
+            line: lastLine,
+            ch: this.editor.getLine(lastLine).length
+        });
+    }
 };
 
 ConsoleIO.App.Editor.prototype.setOption = function setOption(option, value) {

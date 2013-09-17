@@ -240,7 +240,7 @@
                             content = xmlhttp.statusText;
                         }
 
-                        exports.transport.emit('source', {
+                        dataPacket('source', {
                             url: data.url,
                             content: content
                         });
@@ -299,11 +299,9 @@
 
     function onHTMLContent() {
         exports.web.hide();
-
-        exports.transport.emit('content', {
+        dataPacket('content', {
             content: document.documentElement.innerHTML
         });
-
         exports.web.show();
     }
 
@@ -398,6 +396,35 @@
         }
     }
 
+
+    function dataPacket(name, data) {
+        var content = data.content,
+            length = content.length,
+            config = exports.getConfig(),
+            start = 0;
+
+        while (start < length) {
+            dispatchPacket(name, data, content.substr(start, config.maxDataPacketSize), start, config.maxDataPacketSize);
+
+            if (start === 0) {
+                start = config.maxDataPacketSize;
+            } else {
+                start += config.maxDataPacketSize;
+            }
+        }
+    }
+
+    function dispatchPacket(name, params, content, start, length) {
+        setTimeout((function (exports, name, params, content, start, length) {
+            var data = exports.util.extend({}, params);
+            data.content = content;
+            data.start = start;
+            data.length = length;
+            exports.transport.emit(name, data);
+
+        }(exports, name, params, content, start, length)), 100);
+    }
+
     client.jsonify = function jsonify(obj) {
         var returnObj = {},
             dataTypes = [
@@ -416,7 +443,7 @@
         return returnObj;
     };
 
-    client.getInfo = function getInfo() {
+    client.getConfig = function getConfig() {
         var navigator = global.navigator,
             options = {
                 userAgent: navigator.userAgent,
@@ -439,7 +466,7 @@
     };
 
     client.register = function register() {
-        exports.transport.emit('register', client.getInfo());
+        exports.transport.emit('register', client.getConfig());
     };
 
     client.setUp = function setUp() {

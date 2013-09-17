@@ -20,6 +20,7 @@
         "socket.io": "socket.io/socket.io.js",
         webStyle: "console.css",
         proxy: 'proxy',
+        maxDataPacketSize: 2500,
 
         nativeConsole: true,
         web: false,
@@ -31,22 +32,6 @@
         height: '300px',
         width: '99%'
     };
-
-    function debug(msg) {
-        var log = document.getElementById('log'), li;
-
-        if (!log && document.body) {
-            log = document.createElement('ul');
-            log.setAttribute('id', 'log');
-            document.body.insertBefore(log, exports.util.getFirstElement(document.body));
-        }
-
-        if (log) {
-            li = document.createElement('li');
-            li.innerHTML = msg;
-            log.insertBefore(li, exports.util.getFirstElement(log));
-        }
-    }
 
     function getSettings() {
         var config = exports.config || exports.util.queryParams();
@@ -114,6 +99,31 @@
         return element.sheet || element.styleSheet;
     }());
 
+    exports.debug = function debug(msg) {
+        var log = document.getElementById('log'), li;
+
+        if (!log && document.body) {
+            log = document.createElement('ul');
+            log.setAttribute('id', 'log');
+            log.style.position = 'absolute';
+            log.style.background = 'rgb(48, 46, 46)';
+            log.style.height = '200px';
+            log.style.width = '800px';
+            log.style.top = '20px';
+            log.style.left = '50px';
+            log.style.margin = '10px';
+            log.style.paddingTop = '10px';
+            log.style.zIndex = 6000;
+            document.body.insertBefore(log, exports.util.getFirstElement(document.body));
+        }
+
+        if (log) {
+            li = document.createElement('li');
+            li.innerHTML = msg;
+            log.insertBefore(li, exports.util.getFirstElement(log));
+        }
+    };
+
     // Cover uncaught exceptions
     // Returning true will surpress the default browser handler,
     // returning false will let it run.
@@ -134,7 +144,7 @@
         } else if (exports.util.isIFrameChild()) {
             exports.console.exception(error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo);
         } else {
-            debug([error, filePath, lineNo].join("; "));
+            exports.debug([error, filePath, lineNo].join("; "));
         }
 
         return result;

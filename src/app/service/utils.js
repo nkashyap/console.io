@@ -137,6 +137,37 @@ if (typeof window.ConsoleIO === "undefined") {
             });
 
             return target;
+        },
+
+        addCSSRule: function addCSSRule(selector, rules, index) {
+            var sheet = ConsoleIO.styleSheet;
+            try {
+                if (sheet.insertRule) {
+                    sheet.insertRule(selector + "{" + rules + "}", index);
+                }
+                else if (sheet.addRule) {
+                    sheet.addRule(selector, rules, index);
+                }
+            } catch (e) {
+            }
+        },
+
+        deleteCSSRule: function deleteCSSRule(selector) {
+            var sheet = ConsoleIO.styleSheet,
+                rules = sheet.cssRules || sheet.rules;
+
+            this.forEach(this.toArray(rules), function (rule, index) {
+                if (rule.selectorText) {
+                    // firefox switch double colon into single colon
+                    if (rule.selectorText.replace('::', ':') === selector.replace('::', ':')) {
+                        if (sheet.deleteRule) {
+                            sheet.deleteRule(index);
+                        } else if (sheet.removeRule) {
+                            sheet.removeRule(index);
+                        }
+                    }
+                }
+            });
         }
     };
 }

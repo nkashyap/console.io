@@ -52,6 +52,8 @@ ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData
 
     var tag = 'code',
         css = data.type,
+        origin = data.origin,
+        originClass,
         stackMessage,
         messagePreview,
         message = ConsoleIO.Service.DHTMLXHelper.stripBrackets(data.message);
@@ -88,9 +90,20 @@ ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData
         tag = 'pre';
     }
 
+    if (origin) {
+        origin = data.origin.replace(/(\/|:|\.)/igm, '');
+        originClass = "content: 'iframe:" + data.origin + "'; position: absolute; top: 0px; right: 0px; padding: 2px 8px; " +
+            "font-size: 12px; color: lightgrey; " +
+            "background-color: rgba(0, 0, 0, 0.6); " +
+            "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
+
+        ConsoleIO.deleteCSSRule('.' + origin + ":before");
+        ConsoleIO.addCSSRule('.' + origin + ":before", originClass);
+    }
+
     return {
         tag: tag,
-        className: 'console type-' + css,
+        className: 'console type-' + css + (origin ? ' ' + origin : ''),
         message: (messagePreview || '.')
     };
 };

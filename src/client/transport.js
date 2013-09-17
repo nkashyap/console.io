@@ -20,12 +20,13 @@
         transport.emit(data.event, {
             type: data.type,
             message: data.message,
-            stack: data.stack
+            stack: data.stack,
+            origin: event.origin
         });
     }
 
     function onConnect() {
-        transport.emit('setUp', exports.client.getInfo());
+        transport.emit('setUp', exports.client.getConfig());
 
         exports.console.log('Connected to the Server', arguments);
     }
@@ -39,7 +40,7 @@
 
     function onReconnect(mode, attempts) {
         transport.connectionMode = mode;
-        transport.emit('online', exports.client.getInfo());
+        transport.emit('online', exports.client.getConfig());
 
         exports.console.log('Reconnected to the Server after ' + attempts + ' attempts.', mode, attempts);
     }

@@ -45,6 +45,20 @@ ConsoleIO.ready(function () {
         ConsoleIO.Service.Storage.Store[key] = value;
     }
 
+    ConsoleIO.styleSheet = (function styleSheet() {
+        var element = document.createElement("style");
+        element.type = 'text/css';
+        element.id = 'console.io.style';
+
+        // WebKit hack :(
+        element.appendChild(document.createTextNode(""));
+
+        // Add the <style> element to the page
+        document.getElementsByTagName('head')[0].appendChild(element);
+
+        return element.sheet || element.styleSheet;
+    }());
+
     ConsoleIO.Service.Socket.connect();
     ConsoleIO.myApp = new ConsoleIO.App();
     ConsoleIO.myApp.render();

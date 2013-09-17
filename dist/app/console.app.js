@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-16
+ * Date: 2013-09-17
 */
 
 /**
@@ -147,6 +147,37 @@ if (typeof window.ConsoleIO === "undefined") {
             });
 
             return target;
+        },
+
+        addCSSRule: function addCSSRule(selector, rules, index) {
+            var sheet = ConsoleIO.styleSheet;
+            try {
+                if (sheet.insertRule) {
+                    sheet.insertRule(selector + "{" + rules + "}", index);
+                }
+                else if (sheet.addRule) {
+                    sheet.addRule(selector, rules, index);
+                }
+            } catch (e) {
+            }
+        },
+
+        deleteCSSRule: function deleteCSSRule(selector) {
+            var sheet = ConsoleIO.styleSheet,
+                rules = sheet.cssRules || sheet.rules;
+
+            this.forEach(this.toArray(rules), function (rule, index) {
+                if (rule.selectorText) {
+                    // firefox switch double colon into single colon
+                    if (rule.selectorText.replace('::', ':') === selector.replace('::', ':')) {
+                        if (sheet.deleteRule) {
+                            sheet.deleteRule(index);
+                        } else if (sheet.removeRule) {
+                            sheet.removeRule(index);
+                        }
+                    }
+                }
+            });
         }
     };
 }
@@ -723,6 +754,8 @@ ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData
 
     var tag = 'code',
         css = data.type,
+        origin = data.origin,
+        originClass,
         stackMessage,
         messagePreview,
         message = ConsoleIO.Service.DHTMLXHelper.stripBrackets(data.message);
@@ -759,9 +792,20 @@ ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData
         tag = 'pre';
     }
 
+    if (origin) {
+        origin = data.origin.replace(/(\/|:|\.)/igm, '');
+        originClass = "content: 'iframe:" + data.origin + "'; position: absolute; top: 0px; right: 0px; padding: 2px 8px; " +
+            "font-size: 12px; color: lightgrey; " +
+            "background-color: rgba(0, 0, 0, 0.6); " +
+            "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
+
+        ConsoleIO.deleteCSSRule('.' + origin + ":before");
+        ConsoleIO.addCSSRule('.' + origin + ":before", originClass);
+    }
+
     return {
         tag: tag,
-        className: 'console type-' + css,
+        className: 'console type-' + css + (origin ? ' ' + origin : ''),
         message: (messagePreview || '.')
     };
 };
@@ -2468,7 +2512,18 @@ ConsoleIO.App.Editor.prototype.add = function add(data) {
     }
 
     this.fileCanBeSaved = false;
-    this.editor.setValue(data.content.replace(/%20/img, " "));
+
+    var content = data.content.replace(/%20/img, " "),
+        lastLine;
+    if (!data.start || data.start === 0) {
+        this.editor.setValue(content);
+    } else if (data.start > 0) {
+        lastLine = this.editor.lastLine();
+        this.editor.replaceRange(content, {
+            line: lastLine,
+            ch: this.editor.getLine(lastLine).length
+        });
+    }
 };
 
 ConsoleIO.App.Editor.prototype.setOption = function setOption(option, value) {
@@ -2921,6 +2976,20 @@ ConsoleIO.ready(function () {
         value = cookie[1];
         ConsoleIO.Service.Storage.Store[key] = value;
     }
+
+    ConsoleIO.styleSheet = (function styleSheet() {
+        var element = document.createElement("style");
+        element.type = 'text/css';
+        element.id = 'console.io.style';
+
+        // WebKit hack :(
+        element.appendChild(document.createTextNode(""));
+
+        // Add the <style> element to the page
+        document.getElementsByTagName('head')[0].appendChild(element);
+
+        return element.sheet || element.styleSheet;
+    }());
 
     ConsoleIO.Service.Socket.connect();
     ConsoleIO.myApp = new ConsoleIO.App();

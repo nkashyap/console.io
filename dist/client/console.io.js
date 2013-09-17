@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-16
+ * Date: 2013-09-17
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -1180,12 +1180,13 @@ ConsoleIO.version = "0.2.0-1";
         transport.emit(data.event, {
             type: data.type,
             message: data.message,
-            stack: data.stack
+            stack: data.stack,
+            origin: event.origin
         });
     }
 
     function onConnect() {
-        transport.emit('setUp', exports.client.getInfo());
+        transport.emit('setUp', exports.client.getConfig());
 
         exports.console.log('Connected to the Server', arguments);
     }
@@ -1199,7 +1200,7 @@ ConsoleIO.version = "0.2.0-1";
 
     function onReconnect(mode, attempts) {
         transport.connectionMode = mode;
-        transport.emit('online', exports.client.getInfo());
+        transport.emit('online', exports.client.getConfig());
 
         exports.console.log('Reconnected to the Server after ' + attempts + ' attempts.', mode, attempts);
     }
@@ -1831,7 +1832,7 @@ ConsoleIO.version = "0.2.0-1";
                             content = xmlhttp.statusText;
                         }
 
-                        exports.transport.emit('source', {
+                        dataPacket('source', {
                             url: data.url,
                             content: content
                         });
@@ -1890,11 +1891,9 @@ ConsoleIO.version = "0.2.0-1";
 
     function onHTMLContent() {
         exports.web.hide();
-
-        exports.transport.emit('content', {
+        dataPacket('content', {
             content: document.documentElement.innerHTML
         });
-
         exports.web.show();
     }
 
@@ -1989,6 +1988,35 @@ ConsoleIO.version = "0.2.0-1";
         }
     }
 
+
+    function dataPacket(name, data) {
+        var content = data.content,
+            length = content.length,
+            config = exports.getConfig(),
+            start = 0;
+
+        while (start < length) {
+            dispatchPacket(name, data, content.substr(start, config.maxDataPacketSize), start, config.maxDataPacketSize);
+
+            if (start === 0) {
+                start = config.maxDataPacketSize;
+            } else {
+                start += config.maxDataPacketSize;
+            }
+        }
+    }
+
+    function dispatchPacket(name, params, content, start, length) {
+        setTimeout((function (exports, name, params, content, start, length) {
+            var data = exports.util.extend({}, params);
+            data.content = content;
+            data.start = start;
+            data.length = length;
+            exports.transport.emit(name, data);
+
+        }(exports, name, params, content, start, length)), 100);
+    }
+
     client.jsonify = function jsonify(obj) {
         var returnObj = {},
             dataTypes = [
@@ -2007,7 +2035,7 @@ ConsoleIO.version = "0.2.0-1";
         return returnObj;
     };
 
-    client.getInfo = function getInfo() {
+    client.getConfig = function getConfig() {
         var navigator = global.navigator,
             options = {
                 userAgent: navigator.userAgent,
@@ -2030,7 +2058,7 @@ ConsoleIO.version = "0.2.0-1";
     };
 
     client.register = function register() {
-        exports.transport.emit('register', client.getInfo());
+        exports.transport.emit('register', client.getConfig());
     };
 
     client.setUp = function setUp() {
@@ -2078,6 +2106,7 @@ ConsoleIO.version = "0.2.0-1";
         "socket.io": "socket.io/socket.io.js",
         webStyle: "console.css",
         proxy: 'proxy',
+        maxDataPacketSize: 2500,
 
         nativeConsole: true,
         web: false,
@@ -2089,22 +2118,6 @@ ConsoleIO.version = "0.2.0-1";
         height: '300px',
         width: '99%'
     };
-
-    function debug(msg) {
-        var log = document.getElementById('log'), li;
-
-        if (!log && document.body) {
-            log = document.createElement('ul');
-            log.setAttribute('id', 'log');
-            document.body.insertBefore(log, exports.util.getFirstElement(document.body));
-        }
-
-        if (log) {
-            li = document.createElement('li');
-            li.innerHTML = msg;
-            log.insertBefore(li, exports.util.getFirstElement(log));
-        }
-    }
 
     function getSettings() {
         var config = exports.config || exports.util.queryParams();
@@ -2172,6 +2185,31 @@ ConsoleIO.version = "0.2.0-1";
         return element.sheet || element.styleSheet;
     }());
 
+    exports.debug = function debug(msg) {
+        var log = document.getElementById('log'), li;
+
+        if (!log && document.body) {
+            log = document.createElement('ul');
+            log.setAttribute('id', 'log');
+            log.style.position = 'absolute';
+            log.style.background = 'rgb(48, 46, 46)';
+            log.style.height = '200px';
+            log.style.width = '800px';
+            log.style.top = '20px';
+            log.style.left = '50px';
+            log.style.margin = '10px';
+            log.style.paddingTop = '10px';
+            log.style.zIndex = 6000;
+            document.body.insertBefore(log, exports.util.getFirstElement(document.body));
+        }
+
+        if (log) {
+            li = document.createElement('li');
+            li.innerHTML = msg;
+            log.insertBefore(li, exports.util.getFirstElement(log));
+        }
+    };
+
     // Cover uncaught exceptions
     // Returning true will surpress the default browser handler,
     // returning false will let it run.
@@ -2192,7 +2230,7 @@ ConsoleIO.version = "0.2.0-1";
         } else if (exports.util.isIFrameChild()) {
             exports.console.exception(error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo);
         } else {
-            debug([error, filePath, lineNo].join("; "));
+            exports.debug([error, filePath, lineNo].join("; "));
         }
 
         return result;
@@ -2308,6 +2346,13 @@ ConsoleIO.version = "0.2.0-1";
             this.isEnabled = true;
             this.view.render(document.body);
             exports.console.on('console', exports.web.logger);
+
+            if (global.addEventListener) {
+                global.addEventListener("message", exports.web.onMessage, false);
+            } else if (global.detachEvent) {
+                global.detachEvent('onmessage', exports.web.onMessage);
+            }
+
             exports.transport.emit('webStatus', { enabled: true });
         }
     };
@@ -2316,6 +2361,13 @@ ConsoleIO.version = "0.2.0-1";
         if (this.isEnabled) {
             this.isEnabled = false;
             exports.console.removeListener('console', exports.web.logger);
+
+            if (global.removeEventListener) {
+                global.removeEventListener("message", exports.web.onMessage, false);
+            } else if (global.attachEvent) {
+                global.attachEvent('onmessage', exports.web.onMessage);
+            }
+
             exports.transport.emit('webStatus', { enabled: false });
             this.view.destroy();
         }
@@ -2545,6 +2597,8 @@ ConsoleIO.version = "0.2.0-1";
     View.prototype.getElementData = function getElementData(data) {
         var tag = 'code',
             css = data.type,
+            origin = data.origin,
+            originClass,
             stackMessage,
             message = this.stripBrackets(data.message);
 
@@ -2578,9 +2632,20 @@ ConsoleIO.version = "0.2.0-1";
             tag = 'pre';
         }
 
+        if (origin) {
+            origin = data.origin.replace(/(\/|:|\.)/igm, '');
+            originClass = "content: 'iframe:" + data.origin + "'; position: absolute; top: 0px; right: 0px; padding: 2px 8px; " +
+                "font-size: 12px; color: lightgrey !important; " +
+                "background-color: black; " +
+                "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
+
+            exports.util.deleteCSSRule(exports.styleSheet, '.' + origin + ":before");
+            exports.util.addCSSRule(exports.styleSheet, '.' + origin + ":before", originClass);
+        }
+
         return {
             tag: tag,
-            className: 'console type-' + css,
+            className: 'console type-' + css + (origin ? ' ' + origin : ''),
             message: (message || '.')
         };
     };
@@ -2651,6 +2716,20 @@ ConsoleIO.version = "0.2.0-1";
     web.logger = function logger(data) {
         if (exports.web.console) {
             exports.web.console.add(data);
+        }
+    };
+
+    web.onMessage = function onMessage(event) {
+        if (exports.web.console) {
+            var data = event.data;
+            if (data.event === 'console') {
+                exports.web.console.add({
+                    type: data.type,
+                    message: unescape(data.message),
+                    stack: data.stack,
+                    origin: event.origin
+                });
+            }
         }
     };
 
