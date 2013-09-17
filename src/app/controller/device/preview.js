@@ -40,6 +40,14 @@ ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
     this.editor.render(this.view.tab);
 };
 
+ConsoleIO.App.Device.Preview.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:content:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.off('device:previewContent:' + this.model.serialNumber, this.preview, this);
+    ConsoleIO.Service.Socket.off('device:screenShot:' + this.model.serialNumber, this.screenShot, this);
+    this.editor = this.editor.destroy();
+    this.view = this.view.destroy();
+};
+
 ConsoleIO.App.Device.Preview.prototype.activate = function activate(state) {
     if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
         this.refresh();
@@ -61,7 +69,9 @@ ConsoleIO.App.Device.Preview.prototype.screenShot = function screenShot(data) {
 };
 
 ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
-    ConsoleIO.Service.Socket.emit('reloadHTML', { serialNumber: this.model.serialNumber });
+    ConsoleIO.Service.Socket.emit('reloadHTML', {
+        serialNumber: this.model.serialNumber
+    });
 };
 
 ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(btnId, state) {
@@ -69,11 +79,15 @@ ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(bt
         switch (btnId) {
             case 'preview':
                 this.view.toggleButton('preview', false);
-                ConsoleIO.Service.Socket.emit('previewHTML', { serialNumber: this.model.serialNumber });
+                ConsoleIO.Service.Socket.emit('previewHTML', {
+                    serialNumber: this.model.serialNumber
+                });
                 break;
             case 'screenShot':
                 this.view.toggleButton('screenShot', false);
-                ConsoleIO.Service.Socket.emit('captureScreen', { serialNumber: this.model.serialNumber });
+                ConsoleIO.Service.Socket.emit('captureScreen', {
+                    serialNumber: this.model.serialNumber
+                });
                 var scope = this;
                 setTimeout(function () {
                     scope.view.toggleButton('screenShot', true);

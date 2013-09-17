@@ -63,6 +63,16 @@ ConsoleIO.Service.Socket = {
         });
     },
 
+    off: function off(name, callback, scope) {
+        this.io.removeListener(name, function () {
+            callback.apply(scope || this, arguments);
+        });
+
+        if (!ConsoleIO.isArray(this.io.$events[name])) {
+            delete this.io.$events[name];
+        }
+    },
+
     forceReconnect: function forceReconnect() {
         try {
             var scope = ConsoleIO.Service.Socket;

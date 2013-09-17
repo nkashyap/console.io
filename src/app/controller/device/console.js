@@ -79,6 +79,11 @@ ConsoleIO.App.Device.Console.prototype.render = function render(target) {
     }, this);
 };
 
+ConsoleIO.App.Device.Console.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:console:' + this.model.serialNumber, this.add, this);
+    this.view = this.view.destroy();
+};
+
 ConsoleIO.App.Device.Console.prototype.activate = function activate(state) {
     this.active = state;
     this.addBatch();

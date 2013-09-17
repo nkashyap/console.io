@@ -72,8 +72,7 @@ html, body {
 }
 
 .dhx_tabcontent_zone > div[tab_id^=Console] > div[ida=dhxMainCont],
-.dhx_tabcontent_zone > div[tab_id^=Preview] > div[ida=dhxMainCont],
-.dhx_tabcontent_zone > div[tab_id^=Source] > div[ida=dhxMainCont] {
+.dhx_tabcontent_zone > div[tab_id^=Preview] > div[ida=dhxMainCont] {
     overflow: auto !important;
 }
 

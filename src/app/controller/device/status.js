@@ -38,6 +38,12 @@ ConsoleIO.App.Device.Status.prototype.render = function render(target) {
     this.view.setItemState('web', this.model.web.enabled);
 };
 
+ConsoleIO.App.Device.Status.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:status:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.off('device:web:status:' + this.model.serialNumber, this.web, this);
+    this.view = this.view.destroy();
+};
+
 ConsoleIO.App.Device.Status.prototype.web = function web(data) {
     this.model.web.enabled = data.enabled;
     this.view.setItemState('web', data.enabled);
@@ -81,7 +87,9 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
 };
 
 ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
-    ConsoleIO.Service.Socket.emit('deviceStatus', { serialNumber: this.model.serialNumber });
+    ConsoleIO.Service.Socket.emit('deviceStatus', {
+        serialNumber: this.model.serialNumber
+    });
 };
 
 ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btnId, state) {

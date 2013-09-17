@@ -14,6 +14,7 @@ ConsoleIO.View.Device.Source = function SourceView(ctrl, model) {
     this.model = model;
     this.target = null;
     this.toolbar = null;
+    this.layout = null;
     this.tab = null;
     this.id = [this.model.name, this.model.serialNumber].join("-");
 };
@@ -22,8 +23,9 @@ ConsoleIO.View.Device.Source.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.id, this.model.name);
     this.tab = this.target.cells(this.id);
+    this.layout = this.tab.attachLayout("2U");
 
-    this.toolbar = this.tab.attachToolbar();
+    this.toolbar = this.getContextById(this.ctrl.context.source).attachToolbar();
     this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
     this.toolbar.attachEvent("onClick", function (itemId) {
         this.onButtonClick(itemId);
@@ -36,6 +38,18 @@ ConsoleIO.View.Device.Source.prototype.render = function render(target) {
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
 };
 
-ConsoleIO.View.Device.Source.prototype.setActive = function setActive() {
-    this.target.setTabActive(this.id);
+ConsoleIO.View.Device.Source.prototype.destroy = function destroy() {
+    //this.toolbar.unload();
+    this.target.removeTab(this.id, true);
+};
+
+ConsoleIO.View.Device.Source.prototype.getContextById = function getContextById(contextId) {
+    return this.layout ? this.layout.cells(contextId) : null;
+};
+
+ConsoleIO.View.Device.Source.prototype.setTitle = function setTitle(contextId, title) {
+    if (this.layout) {
+        this.layout.cells(contextId).setText(title);
+        this.layout.setCollapsedText(contextId, title);
+    }
 };

@@ -59,6 +59,14 @@ ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
     this.dhxWins.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('win'));
 };
 
+ConsoleIO.View.Device.Preview.prototype.destroy = function destroy() {
+    //this.toolbar.unload();
+    document.body.removeChild(this.previewFrame);
+    document.body.removeChild(this.image);
+    this.dhxWins.unload();
+    this.target.removeTab(this.id, true);
+};
+
 ConsoleIO.View.Device.Preview.prototype.toggleButton = function toggleButton(id, state) {
     if (this.toolbar) {
         if (state) {

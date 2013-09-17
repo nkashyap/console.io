@@ -45,6 +45,11 @@ ConsoleIO.View.Device.Explorer.prototype.render = function render(target) {
     }, this.ctrl);
 };
 
+ConsoleIO.View.Device.Explorer.prototype.destroy = function destroy() {
+    //this.toolbar.unload();
+    this.tree.destructor();
+};
+
 ConsoleIO.View.Device.Explorer.prototype.add = function add(id, name, parentId, icon) {
     if (icon) {
         this.tree.insertNewItem(parentId, id, name, 0, icon, icon, icon);

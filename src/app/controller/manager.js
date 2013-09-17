@@ -50,6 +50,16 @@ ConsoleIO.App.Manager.prototype.update = function update(data) {
 ConsoleIO.App.Manager.prototype.remove = function remove(data) {
     var index = this.store.serialNumber.indexOf(data.serialNumber);
     if (index > -1) {
+        ConsoleIO.every(this.store.device, function (device, index) {
+            if (device.model.serialNumber === data.serialNumber) {
+                device = device.destroy();
+                this.store.device.splice(index, 1);
+                return false;
+            }
+
+            return true;
+        }, this);
+
         this.store.serialNumber.splice(index, 1);
         this.view.remove(data.serialNumber);
 
@@ -60,14 +70,6 @@ ConsoleIO.App.Manager.prototype.remove = function remove(data) {
             }
         }
 
-        ConsoleIO.every(this.store.device, function (device, index) {
-            if (device.model.serialNumber === data.serialNumber) {
-                this.store.device.splice(index, 1);
-                return false;
-            }
-
-            return true;
-        }, this);
     }
 };
 

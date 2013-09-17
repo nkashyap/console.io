@@ -73,6 +73,10 @@ ConsoleIO.App.Editor.prototype.render = function render(target) {
     });
 };
 
+ConsoleIO.App.Editor.prototype.destroy = function destroy() {
+    this.view = this.view.destroy();
+};
+
 ConsoleIO.App.Editor.prototype.foldCode = function foldCode(where) {
     this.editor.foldCode(where, this.model.codeMirror.mode === 'javascript' ? CodeMirror.braceRangeFinder : CodeMirror.tagRangeFinder);
 };

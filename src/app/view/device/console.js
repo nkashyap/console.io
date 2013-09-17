@@ -46,6 +46,13 @@ ConsoleIO.View.Device.Console.prototype.render = function render(target) {
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
 };
 
+ConsoleIO.View.Device.Console.prototype.destroy = function destroy() {
+    this.clear();
+    this.container.parentNode.removeChild(this.container);
+    //this.toolbar.unload();
+    this.target.removeTab(this.id, true);
+};
+
 ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData(data) {
 
     data.message = unescape(data.message);

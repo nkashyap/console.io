@@ -45,6 +45,12 @@ ConsoleIO.View.Device.Status.prototype.render = function render(target) {
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
 };
 
+ConsoleIO.View.Device.Status.prototype.destroy = function destroy() {
+    //this.toolbar.unload();
+    //this.accordion.unload();
+    this.target.removeTab(this.id, true);
+};
+
 ConsoleIO.View.Device.Status.prototype.clear = function clear() {
     if (this.accordion) {
         ConsoleIO.forEachProperty(this.grids, function (grid) {

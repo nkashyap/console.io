@@ -40,6 +40,14 @@ ConsoleIO.View.Editor.prototype.render = function render(target) {
     }
 };
 
+ConsoleIO.View.Editor.prototype.destroy = function destroy() {
+    this.container.removeChild(this.textArea);
+    this.container.parentNode.removeChild(this.container);
+    if(this.toolbar){
+        this.toolbar.unload();
+    }
+};
+
 ConsoleIO.View.Editor.prototype.listScripts = function listScripts(data) {
     var scope = this;
     this.toolbar.forEachListOption('open', function (id) {

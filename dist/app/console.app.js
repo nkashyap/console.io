@@ -141,6 +141,10 @@ if (typeof window.ConsoleIO === "undefined") {
             return Array.prototype.slice.call(data);
         },
 
+        isArray : Array.isArray || function (obj) {
+            return Object.prototype.toString.call(obj) === '[object Array]';
+        },
+
         extend: function extend(target, source) {
             this.forEachProperty(source, function (value, property) {
                 target[property] = value;
@@ -245,6 +249,16 @@ ConsoleIO.Service.Socket = {
         this.io.on(name, function () {
             callback.apply(scope || this, arguments);
         });
+    },
+
+    off: function off(name, callback, scope) {
+        this.io.removeListener(name, function () {
+            callback.apply(scope || this, arguments);
+        });
+
+        if (!ConsoleIO.isArray(this.io.$events[name])) {
+            delete this.io.$events[name];
+        }
     },
 
     forceReconnect: function forceReconnect() {
@@ -604,23 +618,20 @@ ConsoleIO.View.Device = function DeviceView(ctrl, model) {
     this.ctrl = ctrl;
     this.model = model;
     this.target = null;
-    this.layout = null;
+    this.tabs = null;
 };
 
 ConsoleIO.View.Device.prototype.render = function render(target) {
     this.target = target;
-    this.layout = this.target.attachLayout("2U");
+    this.tabs = this.target.attachTabbar();
+    this.tabs.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tab'));
+    this.tabs.attachEvent("onTabClick", function (tabId) {
+        this.onTabClick(tabId);
+    }, this.ctrl);
 };
 
-ConsoleIO.View.Device.prototype.getContextById = function getContextById(contextId) {
-    return this.layout ? this.layout.cells(contextId) : null;
-};
-
-ConsoleIO.View.Device.prototype.setTitle = function setTitle(contextId, title) {
-    if (this.layout) {
-        this.layout.cells(contextId).setText(title);
-        this.layout.setCollapsedText(contextId, title);
-    }
+ConsoleIO.View.Device.prototype.destroy = function destroy() {
+    this.tabs.clearAll();
 };
 
 /**
@@ -746,6 +757,13 @@ ConsoleIO.View.Device.Console.prototype.render = function render(target) {
     }, this.ctrl);
 
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
+};
+
+ConsoleIO.View.Device.Console.prototype.destroy = function destroy() {
+    this.clear();
+    this.container.parentNode.removeChild(this.container);
+    //this.toolbar.unload();
+    this.target.removeTab(this.id, true);
 };
 
 ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData(data) {
@@ -934,6 +952,11 @@ ConsoleIO.View.Device.Explorer.prototype.render = function render(target) {
     }, this.ctrl);
 };
 
+ConsoleIO.View.Device.Explorer.prototype.destroy = function destroy() {
+    //this.toolbar.unload();
+    this.tree.destructor();
+};
+
 ConsoleIO.View.Device.Explorer.prototype.add = function add(id, name, parentId, icon) {
     if (icon) {
         this.tree.insertNewItem(parentId, id, name, 0, icon, icon, icon);
@@ -956,33 +979,6 @@ ConsoleIO.View.Device.Explorer.prototype.closeItem = function closeItem(id, clos
     } else {
         this.tree.closeAllItems(id);
     }
-};
-
-/**
- * Created with IntelliJ IDEA.
- * User: nisheeth
- * Date: 27/08/13
- * Time: 12:17
- * Email: nisheeth.k.kashyap@gmail.com
- * Repositories: https://github.com/nkashyap
- */
-
-ConsoleIO.namespace("ConsoleIO.View.Device.Panel");
-
-ConsoleIO.View.Device.Panel = function PanelView(ctrl, model) {
-    this.ctrl = ctrl;
-    this.model = model;
-    this.target = null;
-    this.tabs = null;
-};
-
-ConsoleIO.View.Device.Panel.prototype.render = function render(target) {
-    this.target = target;
-    this.tabs = this.target.attachTabbar();
-    this.tabs.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tab'));
-    this.tabs.attachEvent("onTabClick", function (tabId) {
-        this.onTabClick(tabId);
-    }, this.ctrl);
 };
 
 /**
@@ -1044,6 +1040,14 @@ ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
     this.dhxWins.attachViewportTo(document.body);
     this.dhxWins.setSkin(ConsoleIO.Constant.THEMES.get('win'));
     this.dhxWins.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('win'));
+};
+
+ConsoleIO.View.Device.Preview.prototype.destroy = function destroy() {
+    //this.toolbar.unload();
+    document.body.removeChild(this.previewFrame);
+    document.body.removeChild(this.image);
+    this.dhxWins.unload();
+    this.target.removeTab(this.id, true);
 };
 
 ConsoleIO.View.Device.Preview.prototype.toggleButton = function toggleButton(id, state) {
@@ -1113,6 +1117,7 @@ ConsoleIO.View.Device.Source = function SourceView(ctrl, model) {
     this.model = model;
     this.target = null;
     this.toolbar = null;
+    this.layout = null;
     this.tab = null;
     this.id = [this.model.name, this.model.serialNumber].join("-");
 };
@@ -1121,8 +1126,9 @@ ConsoleIO.View.Device.Source.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.id, this.model.name);
     this.tab = this.target.cells(this.id);
+    this.layout = this.tab.attachLayout("2U");
 
-    this.toolbar = this.tab.attachToolbar();
+    this.toolbar = this.getContextById(this.ctrl.context.source).attachToolbar();
     this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
     this.toolbar.attachEvent("onClick", function (itemId) {
         this.onButtonClick(itemId);
@@ -1135,8 +1141,20 @@ ConsoleIO.View.Device.Source.prototype.render = function render(target) {
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
 };
 
-ConsoleIO.View.Device.Source.prototype.setActive = function setActive() {
-    this.target.setTabActive(this.id);
+ConsoleIO.View.Device.Source.prototype.destroy = function destroy() {
+    //this.toolbar.unload();
+    this.target.removeTab(this.id, true);
+};
+
+ConsoleIO.View.Device.Source.prototype.getContextById = function getContextById(contextId) {
+    return this.layout ? this.layout.cells(contextId) : null;
+};
+
+ConsoleIO.View.Device.Source.prototype.setTitle = function setTitle(contextId, title) {
+    if (this.layout) {
+        this.layout.cells(contextId).setText(title);
+        this.layout.setCollapsedText(contextId, title);
+    }
 };
 
 /**
@@ -1184,6 +1202,12 @@ ConsoleIO.View.Device.Status.prototype.render = function render(target) {
     }, this.ctrl);
 
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
+};
+
+ConsoleIO.View.Device.Status.prototype.destroy = function destroy() {
+    //this.toolbar.unload();
+    //this.accordion.unload();
+    this.target.removeTab(this.id, true);
 };
 
 ConsoleIO.View.Device.Status.prototype.clear = function clear() {
@@ -1302,6 +1326,14 @@ ConsoleIO.View.Editor.prototype.render = function render(target) {
         }, this.ctrl);
 
         ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
+    }
+};
+
+ConsoleIO.View.Editor.prototype.destroy = function destroy() {
+    this.container.removeChild(this.textArea);
+    this.container.parentNode.removeChild(this.container);
+    if(this.toolbar){
+        this.toolbar.unload();
     }
 };
 
@@ -1540,41 +1572,94 @@ ConsoleIO.namespace("ConsoleIO.App.Device");
 ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.parent = parent;
     this.model = model;
-    this.context = {
-        explorer: "a",
-        panel: "b"
-    };
+    this.activeTab = null;
 
+    this.console = new ConsoleIO.App.Device.Console(this, this.model);
+    this.source = new ConsoleIO.App.Device.Source(this, this.model);
+    this.preview = new ConsoleIO.App.Device.Preview(this, this.model);
+    this.status = new ConsoleIO.App.Device.Status(this, this.model);
     this.view = new ConsoleIO.View.Device(this, this.model);
-    this.explorer = new ConsoleIO.App.Device.Explorer(this, {
-        name: this.model.name,
-        serialNumber: this.model.serialNumber,
-        title: 'Files',
-        contextId: 'explorer',
-        width: 200,
-        toolbar: [
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh
-        ]
-    });
-    this.panel = new ConsoleIO.App.Device.Panel(this, this.model);
 };
 
 ConsoleIO.App.Device.prototype.render = function render(target) {
     this.view.render(target);
-    this.explorer.render(this.view.getContextById(this.context.explorer));
-    this.panel.render(this.view.getContextById(this.context.panel));
+    this.status.render(this.view.tabs);
+    this.source.render(this.view.tabs);
+    this.preview.render(this.view.tabs);
+    this.console.render(this.view.tabs);
+};
+
+ConsoleIO.App.Device.prototype.destroy = function destroy() {
+    this.console = this.console.destroy();
+    this.source = this.source.destroy();
+    this.preview = this.preview.destroy();
+    this.status = this.status.destroy();
+    this.view = this.view.destroy();
 };
 
 ConsoleIO.App.Device.prototype.update = function update(data) {
     this.parent.update(data);
 };
 
-ConsoleIO.App.Device.prototype.setTitle = function setTitle(contextId, title) {
-    this.view.setTitle(this.context[contextId], title);
+ConsoleIO.App.Device.prototype.activate = function activate(state) {
+    if (!state) {
+        this.status.activate(state);
+        this.source.activate(state);
+        this.preview.activate(state);
+        this.console.activate(state);
+    } else if (this.activeTab) {
+        this[this.activeTab].activate(state);
+    }
 };
 
-ConsoleIO.App.Device.prototype.activate = function activate(state) {
-    this.panel.activate(state);
+ConsoleIO.App.Device.prototype.onTabClick = function onTabClick(tabId) {
+    var newTab = (tabId.split('-')[0]).toLowerCase();
+
+    if (this.activeTab && this.activeTab === newTab) {
+        return;
+    }
+
+    if (this.activeTab) {
+        this[this.activeTab].activate(false);
+    }
+
+    this.activeTab = newTab;
+    this[this.activeTab].activate(true);
+};
+
+ConsoleIO.App.Device.prototype.onButtonClick = function onButtonClick(tab, btnId, state) {
+    var handled = false;
+
+    switch (btnId) {
+        case 'reload':
+            ConsoleIO.Service.Socket.emit('reloadDevice', {
+                serialNumber: this.model.serialNumber
+            });
+            handled = true;
+            break;
+
+        //common on Status, Source and Preview Tabs
+        case 'refresh':
+            tab.refresh();
+            handled = true;
+            break;
+
+        //common on Source and Preview Tabs
+        case 'wordwrap':
+            tab.editor.setOption('lineWrapping', state);
+            handled = true;
+            break;
+        case 'selectAll':
+            tab.editor.selectAll();
+            handled = true;
+            break;
+        case 'copy':
+            tab.editor.copy();
+            handled = true;
+            break;
+    }
+
+    return handled;
 };
 
 /**
@@ -1809,6 +1894,11 @@ ConsoleIO.App.Device.Console.prototype.render = function render(target) {
     }, this);
 };
 
+ConsoleIO.App.Device.Console.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:console:' + this.model.serialNumber, this.add, this);
+    this.view = this.view.destroy();
+};
+
 ConsoleIO.App.Device.Console.prototype.activate = function activate(state) {
     this.active = state;
     this.addBatch();
@@ -1960,13 +2050,17 @@ ConsoleIO.App.Device.Explorer = function ExplorerController(parent, model) {
 
     this.view = new ConsoleIO.View.Device.Explorer(this, this.model);
     ConsoleIO.Service.Socket.on('device:files:' + this.model.serialNumber, this.add, this);
-
-    this.refresh();
 };
 
 ConsoleIO.App.Device.Explorer.prototype.render = function render(target) {
     this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
     this.view.render(target);
+};
+
+ConsoleIO.App.Device.Explorer.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:files:' + this.model.serialNumber, this.add, this);
+    this.clear();
+    this.view = this.view.destroy();
 };
 
 ConsoleIO.App.Device.Explorer.prototype.getParentId = function getParentId(list, item) {
@@ -2012,7 +2106,7 @@ ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
     }, this);
 };
 
-ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
+ConsoleIO.App.Device.Explorer.prototype.clear = function clear() {
     ConsoleIO.forEach(this.store.folder, function (folder) {
         this.deleteItem(folder);
     }, this.view);
@@ -2025,8 +2119,14 @@ ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
         folder: [],
         files: []
     };
+};
 
-    ConsoleIO.Service.Socket.emit('reloadFiles', { serialNumber: this.model.serialNumber });
+ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
+    this.clear();
+
+    ConsoleIO.Service.Socket.emit('reloadFiles', {
+        serialNumber: this.model.serialNumber
+    });
 };
 
 ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(btnId) {
@@ -2040,100 +2140,6 @@ ConsoleIO.App.Device.Explorer.prototype.viewFile = function viewFile(fileId) {
         serialNumber: this.model.serialNumber,
         url: (fileId.indexOf("http") === -1 ? '/' : '') + fileId.replace(/[|]/igm, "/")
     });
-};
-
-/**
- * Created with IntelliJ IDEA.
- * User: nisheeth
- * Date: 27/08/13
- * Time: 12:17
- * Email: nisheeth.k.kashyap@gmail.com
- * Repositories: https://github.com/nkashyap
- */
-
-ConsoleIO.namespace("ConsoleIO.App.Device.Panel");
-
-ConsoleIO.App.Device.Panel = function PanelController(parent, model) {
-    this.parent = parent;
-    this.model = model;
-    this.activeTab = null;
-
-    this.view = new ConsoleIO.View.Device.Panel(this, this.model);
-    this.console = new ConsoleIO.App.Device.Console(this, this.model);
-    this.source = new ConsoleIO.App.Device.Source(this, this.model);
-    this.preview = new ConsoleIO.App.Device.Preview(this, this.model);
-    this.status = new ConsoleIO.App.Device.Status(this, this.model);
-};
-
-ConsoleIO.App.Device.Panel.prototype.render = function render(target) {
-    this.view.render(target);
-    this.status.render(this.view.tabs);
-    this.source.render(this.view.tabs);
-    this.preview.render(this.view.tabs);
-    this.console.render(this.view.tabs);
-};
-
-ConsoleIO.App.Device.Panel.prototype.update = function update(data) {
-    this.parent.update(data);
-};
-
-ConsoleIO.App.Device.Panel.prototype.onTabClick = function onTabClick(tabId) {
-    var newTab = (tabId.split('-')[0]).toLowerCase();
-
-    if (this.activeTab && this.activeTab === newTab) {
-        return;
-    }
-
-    if (this.activeTab) {
-        this[this.activeTab].activate(false);
-    }
-
-    this.activeTab = newTab;
-    this[this.activeTab].activate(true);
-};
-
-ConsoleIO.App.Device.Panel.prototype.activate = function activate(state) {
-    if (!state) {
-        this.status.activate(state);
-        this.source.activate(state);
-        this.preview.activate(state);
-        this.console.activate(state);
-    } else if (this.activeTab) {
-        this[this.activeTab].activate(state);
-    }
-};
-
-ConsoleIO.App.Device.Panel.prototype.onButtonClick = function onButtonClick(tab, btnId, state) {
-    var handled = false;
-
-    switch (btnId) {
-        case 'reload':
-            ConsoleIO.Service.Socket.emit('reloadDevice', { serialNumber: this.model.serialNumber });
-            handled = true;
-            break;
-
-        //common on Status, Source and Preview Tabs
-        case 'refresh':
-            tab.refresh();
-            handled = true;
-            break;
-
-        //common on Source and Preview Tabs
-        case 'wordwrap':
-            tab.editor.setOption('lineWrapping', state);
-            handled = true;
-            break;
-        case 'selectAll':
-            tab.editor.selectAll();
-            handled = true;
-            break;
-        case 'copy':
-            tab.editor.copy();
-            handled = true;
-            break;
-    }
-
-    return handled;
 };
 
 /**
@@ -2178,6 +2184,14 @@ ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
     this.editor.render(this.view.tab);
 };
 
+ConsoleIO.App.Device.Preview.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:content:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.off('device:previewContent:' + this.model.serialNumber, this.preview, this);
+    ConsoleIO.Service.Socket.off('device:screenShot:' + this.model.serialNumber, this.screenShot, this);
+    this.editor = this.editor.destroy();
+    this.view = this.view.destroy();
+};
+
 ConsoleIO.App.Device.Preview.prototype.activate = function activate(state) {
     if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
         this.refresh();
@@ -2199,7 +2213,9 @@ ConsoleIO.App.Device.Preview.prototype.screenShot = function screenShot(data) {
 };
 
 ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
-    ConsoleIO.Service.Socket.emit('reloadHTML', { serialNumber: this.model.serialNumber });
+    ConsoleIO.Service.Socket.emit('reloadHTML', {
+        serialNumber: this.model.serialNumber
+    });
 };
 
 ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(btnId, state) {
@@ -2207,11 +2223,15 @@ ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(bt
         switch (btnId) {
             case 'preview':
                 this.view.toggleButton('preview', false);
-                ConsoleIO.Service.Socket.emit('previewHTML', { serialNumber: this.model.serialNumber });
+                ConsoleIO.Service.Socket.emit('previewHTML', {
+                    serialNumber: this.model.serialNumber
+                });
                 break;
             case 'screenShot':
                 this.view.toggleButton('screenShot', false);
-                ConsoleIO.Service.Socket.emit('captureScreen', { serialNumber: this.model.serialNumber });
+                ConsoleIO.Service.Socket.emit('captureScreen', {
+                    serialNumber: this.model.serialNumber
+                });
                 var scope = this;
                 setTimeout(function () {
                     scope.view.toggleButton('screenShot', true);
@@ -2236,6 +2256,10 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
     this.parent = parent;
     this.model = model;
     this.url = null;
+    this.context = {
+        explorer: "a",
+        source: "b"
+    };
 
     this.view = new ConsoleIO.View.Device.Source(this, {
         name: "Source",
@@ -2249,11 +2273,22 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy
         ]
     });
-
+    this.explorer = new ConsoleIO.App.Device.Explorer(this, {
+        name: this.model.name,
+        serialNumber: this.model.serialNumber,
+        title: 'Files',
+        contextId: 'explorer',
+        width: 200,
+        toolbar: [
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh
+        ]
+    });
     this.editor = new ConsoleIO.App.Editor(this, {
         codeMirror: {
             mode: 'javascript'
-        }
+        },
+        title: 'Code',
+        contextId: 'source'
     });
 
     ConsoleIO.Service.Socket.on('device:source:' + this.model.serialNumber, this.add, this);
@@ -2261,19 +2296,32 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
 
 ConsoleIO.App.Device.Source.prototype.render = function render(target) {
     this.view.render(target);
-    this.editor.render(this.view.tab);
+    this.explorer.render(this.view.getContextById(this.context.explorer));
+    this.editor.render(this.view.getContextById(this.context.source));
+};
+
+ConsoleIO.App.Device.Source.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:source:' + this.model.serialNumber, this.add, this);
+    this.explorer = this.explorer.destroy();
+    this.editor = this.editor.destroy();
+    this.view = this.view.destroy();
 };
 
 ConsoleIO.App.Device.Source.prototype.activate = function activate(state) {
     if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
         this.refresh();
+        this.explorer.refresh();
     }
+};
+
+ConsoleIO.App.Device.Source.prototype.setTitle = function setTitle(contextId, title) {
+    this.view.setTitle(this.context[contextId], title);
 };
 
 ConsoleIO.App.Device.Source.prototype.add = function add(data) {
     this.url = data.url;
     this.editor.add(data);
-    this.view.setActive();
+    this.setTitle('source', this.url);
 };
 
 ConsoleIO.App.Device.Source.prototype.refresh = function refresh() {
@@ -2331,6 +2379,12 @@ ConsoleIO.App.Device.Status.prototype.render = function render(target) {
     this.view.setItemState('web', this.model.web.enabled);
 };
 
+ConsoleIO.App.Device.Status.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:status:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.off('device:web:status:' + this.model.serialNumber, this.web, this);
+    this.view = this.view.destroy();
+};
+
 ConsoleIO.App.Device.Status.prototype.web = function web(data) {
     this.model.web.enabled = data.enabled;
     this.view.setItemState('web', data.enabled);
@@ -2374,7 +2428,9 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
 };
 
 ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
-    ConsoleIO.Service.Socket.emit('deviceStatus', { serialNumber: this.model.serialNumber });
+    ConsoleIO.Service.Socket.emit('deviceStatus', {
+        serialNumber: this.model.serialNumber
+    });
 };
 
 ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btnId, state) {
@@ -2477,6 +2533,10 @@ ConsoleIO.App.Editor.prototype.render = function render(target) {
 
         scope.updateButtonState();
     });
+};
+
+ConsoleIO.App.Editor.prototype.destroy = function destroy() {
+    this.view = this.view.destroy();
 };
 
 ConsoleIO.App.Editor.prototype.foldCode = function foldCode(where) {
@@ -2730,6 +2790,16 @@ ConsoleIO.App.Manager.prototype.update = function update(data) {
 ConsoleIO.App.Manager.prototype.remove = function remove(data) {
     var index = this.store.serialNumber.indexOf(data.serialNumber);
     if (index > -1) {
+        ConsoleIO.every(this.store.device, function (device, index) {
+            if (device.model.serialNumber === data.serialNumber) {
+                device = device.destroy();
+                this.store.device.splice(index, 1);
+                return false;
+            }
+
+            return true;
+        }, this);
+
         this.store.serialNumber.splice(index, 1);
         this.view.remove(data.serialNumber);
 
@@ -2740,14 +2810,6 @@ ConsoleIO.App.Manager.prototype.remove = function remove(data) {
             }
         }
 
-        ConsoleIO.every(this.store.device, function (device, index) {
-            if (device.model.serialNumber === data.serialNumber) {
-                this.store.device.splice(index, 1);
-                return false;
-            }
-
-            return true;
-        }, this);
     }
 };
 

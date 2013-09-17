@@ -131,6 +131,10 @@ if (typeof window.ConsoleIO === "undefined") {
             return Array.prototype.slice.call(data);
         },
 
+        isArray : Array.isArray || function (obj) {
+            return Object.prototype.toString.call(obj) === '[object Array]';
+        },
+
         extend: function extend(target, source) {
             this.forEachProperty(source, function (value, property) {
                 target[property] = value;
