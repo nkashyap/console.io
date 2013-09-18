@@ -35,6 +35,7 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
     ConsoleIO.Service.Socket.on('device:screenShot:' + this.model.serialNumber, this.screenShot, this);
 };
 
+
 ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
     this.view.render(target);
     this.editor.render(this.view.tab);
@@ -47,6 +48,7 @@ ConsoleIO.App.Device.Preview.prototype.destroy = function destroy() {
     this.editor = this.editor.destroy();
     this.view = this.view.destroy();
 };
+
 
 ConsoleIO.App.Device.Preview.prototype.activate = function activate(state) {
     if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
@@ -73,6 +75,12 @@ ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
         serialNumber: this.model.serialNumber
     });
 };
+
+
+ConsoleIO.App.Device.Preview.prototype.setTabActive = function setTabActive() {
+    this.view.setTabActive();
+};
+
 
 ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {

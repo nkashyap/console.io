@@ -25,10 +25,12 @@ ConsoleIO.App.Manager = function ManagerController(parent, model) {
     ConsoleIO.Service.Socket.on('user:exportReady', this.exportReady, this);
 };
 
+
 ConsoleIO.App.Manager.prototype.render = function render(target) {
     this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
     this.view.render(target);
 };
+
 
 ConsoleIO.App.Manager.prototype.add = function add(data) {
     if (this.store.serialNumber.indexOf(data.serialNumber) === -1) {
@@ -88,25 +90,6 @@ ConsoleIO.App.Manager.prototype.close = function close(serialNumber) {
     ConsoleIO.Service.Socket.emit('unSubscribe', serialNumber);
 };
 
-ConsoleIO.App.Manager.prototype.onTabClick = function onTabClick(tabId) {
-    if (this.activeTab && this.activeTab === tabId) {
-        return;
-    }
-
-    var device;
-    if (this.activeTab) {
-        device = this.getDevice(this.activeTab);
-        if (device) {
-            device.activate(false);
-        }
-    }
-
-    this.activeTab = tabId;
-    device = this.getDevice(this.activeTab);
-    if (device) {
-        device.activate(true);
-    }
-};
 
 ConsoleIO.App.Manager.prototype.getActiveDeviceSerialNumber = function getActiveDeviceSerialNumber() {
     return this.activeTab;
@@ -125,4 +108,25 @@ ConsoleIO.App.Manager.prototype.getDevice = function getDevice(serialNumber) {
     }, this);
 
     return device;
+};
+
+
+ConsoleIO.App.Manager.prototype.onTabClick = function onTabClick(tabId) {
+    if (this.activeTab && this.activeTab === tabId) {
+        return;
+    }
+
+    var device;
+    if (this.activeTab) {
+        device = this.getDevice(this.activeTab);
+        if (device) {
+            device.activate(false);
+        }
+    }
+
+    this.activeTab = tabId;
+    device = this.getDevice(this.activeTab);
+    if (device) {
+        device.activate(true);
+    }
 };

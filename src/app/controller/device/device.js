@@ -12,7 +12,7 @@ ConsoleIO.namespace("ConsoleIO.App.Device");
 ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.parent = parent;
     this.model = model;
-    this.activeTab = null;
+    this.activeTab = ConsoleIO.Settings.defaultTab;
 
     this.console = new ConsoleIO.App.Device.Console(this, this.model);
     this.source = new ConsoleIO.App.Device.Source(this, this.model);
@@ -21,12 +21,18 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.view = new ConsoleIO.View.Device(this, this.model);
 };
 
+
 ConsoleIO.App.Device.prototype.render = function render(target) {
     this.view.render(target);
     this.status.render(this.view.tabs);
     this.source.render(this.view.tabs);
     this.preview.render(this.view.tabs);
     this.console.render(this.view.tabs);
+
+    var panel = this[this.activeTab];
+    if (panel) {
+        panel.setTabActive();
+    }
 };
 
 ConsoleIO.App.Device.prototype.destroy = function destroy() {
@@ -36,6 +42,7 @@ ConsoleIO.App.Device.prototype.destroy = function destroy() {
     this.status = this.status.destroy();
     this.view = this.view.destroy();
 };
+
 
 ConsoleIO.App.Device.prototype.update = function update(data) {
     this.parent.update(data);
@@ -52,10 +59,9 @@ ConsoleIO.App.Device.prototype.activate = function activate(state) {
     }
 };
 
-ConsoleIO.App.Device.prototype.onTabClick = function onTabClick(tabId) {
-    var newTab = (tabId.split('-')[0]).toLowerCase();
 
-    if (this.activeTab && this.activeTab === newTab) {
+ConsoleIO.App.Device.prototype.onTabClick = function onTabClick(tabId) {
+    if (this.activeTab && this.activeTab === tabId) {
         return;
     }
 
@@ -63,7 +69,7 @@ ConsoleIO.App.Device.prototype.onTabClick = function onTabClick(tabId) {
         this[this.activeTab].activate(false);
     }
 
-    this.activeTab = newTab;
+    this.activeTab = tabId;
     this[this.activeTab].activate(true);
 };
 

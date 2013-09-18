@@ -21,6 +21,7 @@ ConsoleIO.View.Editor = function EditorView(ctrl, model) {
     this.createElements();
 };
 
+
 ConsoleIO.View.Editor.prototype.render = function render(target) {
     this.target = target;
     this.target.attachObject(this.container);
@@ -47,6 +48,7 @@ ConsoleIO.View.Editor.prototype.destroy = function destroy() {
         this.toolbar.unload();
     }
 };
+
 
 ConsoleIO.View.Editor.prototype.listScripts = function listScripts(data) {
     var scope = this;
@@ -89,6 +91,7 @@ ConsoleIO.View.Editor.prototype.toggleButton = function toggleButton(id, state) 
         }
     }
 };
+
 
 ConsoleIO.View.Editor.prototype.setItemText = function setItemText(id, text) {
     if (this.toolbar) {

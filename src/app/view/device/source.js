@@ -19,6 +19,7 @@ ConsoleIO.View.Device.Source = function SourceView(ctrl, model) {
     this.id = [this.model.name, this.model.serialNumber].join("-");
 };
 
+
 ConsoleIO.View.Device.Source.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.id, this.model.name);
@@ -42,8 +43,14 @@ ConsoleIO.View.Device.Source.prototype.destroy = function destroy() {
     this.target.removeTab(this.id, true);
 };
 
+
 ConsoleIO.View.Device.Source.prototype.getContextById = function getContextById(contextId) {
     return this.layout ? this.layout.cells(contextId) : null;
+};
+
+
+ConsoleIO.View.Device.Source.prototype.setTabActive = function setTabActive() {
+    this.target.setTabActive(this.id);
 };
 
 ConsoleIO.View.Device.Source.prototype.setTitle = function setTitle(contextId, title) {

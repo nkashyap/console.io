@@ -51,6 +51,7 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
     ConsoleIO.Service.Socket.on('device:source:' + this.model.serialNumber, this.add, this);
 };
 
+
 ConsoleIO.App.Device.Source.prototype.render = function render(target) {
     this.view.render(target);
     this.explorer.render(this.view.getContextById(this.context.explorer));
@@ -63,6 +64,7 @@ ConsoleIO.App.Device.Source.prototype.destroy = function destroy() {
     this.editor = this.editor.destroy();
     this.view = this.view.destroy();
 };
+
 
 ConsoleIO.App.Device.Source.prototype.activate = function activate(state) {
     if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
@@ -89,6 +91,12 @@ ConsoleIO.App.Device.Source.prototype.refresh = function refresh() {
         });
     }
 };
+
+
+ConsoleIO.App.Device.Source.prototype.setTabActive = function setTabActive() {
+    this.view.setTabActive();
+};
+
 
 ConsoleIO.App.Device.Source.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {

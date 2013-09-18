@@ -72,6 +72,7 @@ ConsoleIO.App = function AppController() {
     ConsoleIO.Service.Socket.on('user:scriptSaved', this.scriptSaved, this);
 };
 
+
 ConsoleIO.App.prototype.render = function render() {
     this.view.render();
     this.browser.render(this.view.getContextById(this.context.browser));
@@ -79,9 +80,6 @@ ConsoleIO.App.prototype.render = function render() {
     this.manager.render(this.view.getContextById(this.context.manager));
 };
 
-ConsoleIO.App.prototype.setTitle = function setTitle(name, title) {
-    this.view.setTitle(this.context[name], title);
-};
 
 ConsoleIO.App.prototype.listScripts = function listScripts(files) {
     this.editor.listScripts(files);
@@ -92,9 +90,24 @@ ConsoleIO.App.prototype.scriptSaved = function scriptSaved(file) {
     this.editor.addScript(file);
 };
 
+ConsoleIO.App.prototype.notify = function notify() {
+    this.view.notify(ConsoleIO.toArray(arguments));
+};
+
 ConsoleIO.App.prototype.add = function add(data) {
     this.editor.add(data);
 };
+
+
+ConsoleIO.App.prototype.setTitle = function setTitle(name, title) {
+    this.view.setTitle(this.context[name], title);
+};
+
+
+ConsoleIO.App.prototype.getActiveDeviceSerialNumber = function getActiveDeviceSerialNumber() {
+    return this.manager.getActiveDeviceSerialNumber();
+};
+
 
 ConsoleIO.App.prototype.onConnect = function onConnect() {
     this.view.online();
@@ -103,12 +116,4 @@ ConsoleIO.App.prototype.onConnect = function onConnect() {
 ConsoleIO.App.prototype.onDisconnect = function onDisconnect() {
     this.browser.clear();
     this.view.offline();
-};
-
-ConsoleIO.App.prototype.notify = function notify() {
-    this.view.notify(ConsoleIO.toArray(arguments));
-};
-
-ConsoleIO.App.prototype.getActiveDeviceSerialNumber = function getActiveDeviceSerialNumber() {
-    return this.manager.getActiveDeviceSerialNumber();
 };

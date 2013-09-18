@@ -17,5 +17,6 @@ ConsoleIO.Settings = {
         active: 50,
         list: [50, 100, 250, 500]
     },
-    defaultActiveStatusAccordion: 'device'
+    defaultTab: 'console',
+    defaultAccordion: 'device'
 };

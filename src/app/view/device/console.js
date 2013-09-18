@@ -23,6 +23,7 @@ ConsoleIO.View.Device.Console = function ConsoleView(ctrl, model) {
     });
 };
 
+
 ConsoleIO.View.Device.Console.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.id, this.model.name);
@@ -51,6 +52,81 @@ ConsoleIO.View.Device.Console.prototype.destroy = function destroy() {
     this.container.parentNode.removeChild(this.container);
     this.target.removeTab(this.id, true);
 };
+
+
+ConsoleIO.View.Device.Console.prototype.add = function add(data) {
+    var element = this.getElementData(data);
+
+    ConsoleIO.Service.DHTMLXHelper.createElement({
+        tag: element.tag,
+        attr: {
+            'class': element.className
+        },
+        prop: {
+            innerHTML: element.message
+        },
+        target: this.container,
+        insert: 'top'
+    });
+
+    this.removeOverflowElement();
+};
+
+ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
+    if (store.length > 0) {
+        var fragment = document.createDocumentFragment();
+
+        ConsoleIO.forEach(store, function (item) {
+            var element = this.getElementData(item);
+            ConsoleIO.Service.DHTMLXHelper.createElement({
+                tag: element.tag,
+                attr: {
+                    'class': element.className
+                },
+                prop: {
+                    innerHTML: element.message
+                },
+                target: fragment,
+                insert: 'bottom'
+            });
+        }, this);
+
+        this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);
+        this.removeOverflowElement();
+    }
+};
+
+ConsoleIO.View.Device.Console.prototype.clear = function clear() {
+    while (this.container.firstChild) {
+        this.container.removeChild(this.container.firstChild);
+    }
+};
+
+ConsoleIO.View.Device.Console.prototype.removeOverflowElement = function removeOverflowElement() {
+    var length = this.container.childElementCount || this.container.children.length;
+    while (length > ConsoleIO.Settings.pageSize.active) {
+        this.container.removeChild(this.container.lastElementChild || this.container.lastChild);
+        length--;
+    }
+};
+
+
+ConsoleIO.View.Device.Console.prototype.setTabActive = function setTabActive() {
+    this.target.setTabActive(this.id);
+};
+
+ConsoleIO.View.Device.Console.prototype.setItemState = function setItemState(id, state) {
+    if (this.toolbar) {
+        this.toolbar.setItemState(id, state);
+    }
+};
+
+ConsoleIO.View.Device.Console.prototype.setValue = function setValue(id, text) {
+    if (this.toolbar) {
+        this.toolbar.setValue(id, text);
+    }
+};
+
 
 ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData(data) {
 
@@ -114,78 +190,10 @@ ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData
     };
 };
 
-ConsoleIO.View.Device.Console.prototype.add = function add(data) {
-    var element = this.getElementData(data);
-
-    ConsoleIO.Service.DHTMLXHelper.createElement({
-        tag: element.tag,
-        attr: {
-            'class': element.className
-        },
-        prop: {
-            innerHTML: element.message
-        },
-        target: this.container,
-        insert: 'top'
-    });
-
-    this.removeOverflowElement();
-};
-
-ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
-    if (store.length > 0) {
-        var fragment = document.createDocumentFragment();
-
-        ConsoleIO.forEach(store, function (item) {
-            var element = this.getElementData(item);
-            ConsoleIO.Service.DHTMLXHelper.createElement({
-                tag: element.tag,
-                attr: {
-                    'class': element.className
-                },
-                prop: {
-                    innerHTML: element.message
-                },
-                target: fragment,
-                insert: 'bottom'
-            });
-        }, this);
-
-        this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);
-        this.removeOverflowElement();
-    }
-};
-
 ConsoleIO.View.Device.Console.prototype.getHTML = function getHTML() {
     return this.container.innerHTML;
 };
 
 ConsoleIO.View.Device.Console.prototype.getValue = function getValue(id) {
     return this.toolbar.getValue(id);
-};
-
-ConsoleIO.View.Device.Console.prototype.clear = function clear() {
-    while (this.container.firstChild) {
-        this.container.removeChild(this.container.firstChild);
-    }
-};
-
-ConsoleIO.View.Device.Console.prototype.removeOverflowElement = function removeOverflowElement() {
-    var length = this.container.childElementCount || this.container.children.length;
-    while (length > ConsoleIO.Settings.pageSize.active) {
-        this.container.removeChild(this.container.lastElementChild || this.container.lastChild);
-        length--;
-    }
-};
-
-ConsoleIO.View.Device.Console.prototype.setItemState = function setItemState(id, state) {
-    if (this.toolbar) {
-        this.toolbar.setItemState(id, state);
-    }
-};
-
-ConsoleIO.View.Device.Console.prototype.setValue = function setValue(id, text) {
-    if (this.toolbar) {
-        this.toolbar.setValue(id, text);
-    }
 };

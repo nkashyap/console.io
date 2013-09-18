@@ -518,10 +518,12 @@ ConsoleIO.Model.DHTMLX = {
         Refresh: { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' },
         Reload: { id: 'reload', type: 'button', text: 'Reload', imgEnabled: 'reload.png', tooltip: 'Reload Browser' },
 
-        Open: { id: 'open', type: 'select', text: 'Open', imgEnabled: 'open.gif', imgDisabled: 'open_dis.gif', tooltip: 'Open', opts: [] },
-        Save: { id: 'save', type: 'select', text: 'Save', imgEnabled: 'save.gif', imgDisabled: 'save_dis.gif', tooltip: 'Save', disabled: true, opts: [
-            ['saveAs', 'obj', 'Save As', 'save_as.gif']
-        ]},
+        Open: { id: 'open', type: 'select', text: 'Open', imgEnabled: 'open.gif', imgDisabled: 'open_dis.gif', tooltip: 'Open', opts:
+            [] },
+        Save: { id: 'save', type: 'select', text: 'Save', imgEnabled: 'save.gif', imgDisabled: 'save_dis.gif', tooltip: 'Save', disabled: true, opts:
+            [
+                ['saveAs', 'obj', 'Save As', 'save_as.gif']
+            ]},
         Export: { id: 'export', type: 'button', text: 'Export', imgEnabled: 'downloads.gif', tooltip: 'Export' },
 
         Undo: { id: 'undo', type: 'button', text: 'Undo', imgEnabled: 'undo.gif', imgDisabled: 'undo_dis.gif', tooltip: 'Undo', disabled: true },
@@ -564,6 +566,7 @@ ConsoleIO.View.App = function AppView(ctrl, model) {
     this.statusBar = null;
 };
 
+
 ConsoleIO.View.App.prototype.render = function render() {
     this.layout = new dhtmlXLayoutObject(this.model.target, this.model.type, ConsoleIO.Constant.THEMES.get('layout'));
 
@@ -580,9 +583,6 @@ ConsoleIO.View.App.prototype.render = function render() {
     this.offline();
 };
 
-ConsoleIO.View.App.prototype.getContextById = function getContextById(contextId) {
-    return this.layout ? this.layout.cells(contextId) : null;
-};
 
 ConsoleIO.View.App.prototype.online = function online() {
     var icon = '<img src="' + ConsoleIO.Settings.iconPath + 'online.png" class="status">';
@@ -598,15 +598,17 @@ ConsoleIO.View.App.prototype.notify = function notify(data) {
     console.log(data);
 };
 
-ConsoleIO.View.App.prototype.getContextById = function getContextById(contextId) {
-    return this.layout ? this.layout.cells(contextId) : null;
-};
 
 ConsoleIO.View.App.prototype.setTitle = function setTitle(contextId, title) {
     if (this.layout) {
         this.layout.cells(contextId).setText(title);
         this.layout.setCollapsedText(contextId, title);
     }
+};
+
+
+ConsoleIO.View.App.prototype.getContextById = function getContextById(contextId) {
+    return this.layout ? this.layout.cells(contextId) : null;
 };
 
 /**
@@ -627,12 +629,13 @@ ConsoleIO.View.Device = function DeviceView(ctrl, model) {
     this.tabs = null;
 };
 
+
 ConsoleIO.View.Device.prototype.render = function render(target) {
     this.target = target;
     this.tabs = this.target.attachTabbar();
     this.tabs.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tab'));
     this.tabs.attachEvent("onTabClick", function (tabId) {
-        this.onTabClick(tabId);
+        this.onTabClick(tabId.split('-')[0].toLowerCase());
     }, this.ctrl);
 };
 
@@ -658,6 +661,7 @@ ConsoleIO.View.Browser = function BrowserView(ctrl, model) {
     this.target = null;
     this.toolbar = null;
 };
+
 
 ConsoleIO.View.Browser.prototype.render = function render(target) {
     var scope = this;
@@ -693,6 +697,7 @@ ConsoleIO.View.Browser.prototype.render = function render(target) {
     }, this.ctrl);
 };
 
+
 ConsoleIO.View.Browser.prototype.add = function add(id, name, parentId, icon) {
     if (!this.tree.getParentId(id)) {
         if (icon) {
@@ -715,9 +720,6 @@ ConsoleIO.View.Browser.prototype.addOrUpdate = function addOrUpdate(id, name, pa
     }
 };
 
-ConsoleIO.View.Browser.prototype.setIcon = function setIcon(id, icon) {
-    this.tree.setItemImage(id, icon);
-};
 
 ConsoleIO.View.Browser.prototype.deleteItem = function deleteItem(id) {
     this.tree.deleteItem(id);
@@ -729,6 +731,11 @@ ConsoleIO.View.Browser.prototype.closeItem = function closeItem(id, closeAll) {
     } else {
         this.tree.closeAllItems(id);
     }
+};
+
+
+ConsoleIO.View.Browser.prototype.setIcon = function setIcon(id, icon) {
+    this.tree.setItemImage(id, icon);
 };
 
 /**
@@ -755,6 +762,7 @@ ConsoleIO.View.Device.Console = function ConsoleView(ctrl, model) {
         }
     });
 };
+
 
 ConsoleIO.View.Device.Console.prototype.render = function render(target) {
     this.target = target;
@@ -784,6 +792,81 @@ ConsoleIO.View.Device.Console.prototype.destroy = function destroy() {
     this.container.parentNode.removeChild(this.container);
     this.target.removeTab(this.id, true);
 };
+
+
+ConsoleIO.View.Device.Console.prototype.add = function add(data) {
+    var element = this.getElementData(data);
+
+    ConsoleIO.Service.DHTMLXHelper.createElement({
+        tag: element.tag,
+        attr: {
+            'class': element.className
+        },
+        prop: {
+            innerHTML: element.message
+        },
+        target: this.container,
+        insert: 'top'
+    });
+
+    this.removeOverflowElement();
+};
+
+ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
+    if (store.length > 0) {
+        var fragment = document.createDocumentFragment();
+
+        ConsoleIO.forEach(store, function (item) {
+            var element = this.getElementData(item);
+            ConsoleIO.Service.DHTMLXHelper.createElement({
+                tag: element.tag,
+                attr: {
+                    'class': element.className
+                },
+                prop: {
+                    innerHTML: element.message
+                },
+                target: fragment,
+                insert: 'bottom'
+            });
+        }, this);
+
+        this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);
+        this.removeOverflowElement();
+    }
+};
+
+ConsoleIO.View.Device.Console.prototype.clear = function clear() {
+    while (this.container.firstChild) {
+        this.container.removeChild(this.container.firstChild);
+    }
+};
+
+ConsoleIO.View.Device.Console.prototype.removeOverflowElement = function removeOverflowElement() {
+    var length = this.container.childElementCount || this.container.children.length;
+    while (length > ConsoleIO.Settings.pageSize.active) {
+        this.container.removeChild(this.container.lastElementChild || this.container.lastChild);
+        length--;
+    }
+};
+
+
+ConsoleIO.View.Device.Console.prototype.setTabActive = function setTabActive() {
+    this.target.setTabActive(this.id);
+};
+
+ConsoleIO.View.Device.Console.prototype.setItemState = function setItemState(id, state) {
+    if (this.toolbar) {
+        this.toolbar.setItemState(id, state);
+    }
+};
+
+ConsoleIO.View.Device.Console.prototype.setValue = function setValue(id, text) {
+    if (this.toolbar) {
+        this.toolbar.setValue(id, text);
+    }
+};
+
 
 ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData(data) {
 
@@ -847,48 +930,6 @@ ConsoleIO.View.Device.Console.prototype.getElementData = function getElementData
     };
 };
 
-ConsoleIO.View.Device.Console.prototype.add = function add(data) {
-    var element = this.getElementData(data);
-
-    ConsoleIO.Service.DHTMLXHelper.createElement({
-        tag: element.tag,
-        attr: {
-            'class': element.className
-        },
-        prop: {
-            innerHTML: element.message
-        },
-        target: this.container,
-        insert: 'top'
-    });
-
-    this.removeOverflowElement();
-};
-
-ConsoleIO.View.Device.Console.prototype.addBatch = function addBatch(store) {
-    if (store.length > 0) {
-        var fragment = document.createDocumentFragment();
-
-        ConsoleIO.forEach(store, function (item) {
-            var element = this.getElementData(item);
-            ConsoleIO.Service.DHTMLXHelper.createElement({
-                tag: element.tag,
-                attr: {
-                    'class': element.className
-                },
-                prop: {
-                    innerHTML: element.message
-                },
-                target: fragment,
-                insert: 'bottom'
-            });
-        }, this);
-
-        this.container.insertBefore(fragment, this.container.firstElementChild || this.container.firstChild);
-        this.removeOverflowElement();
-    }
-};
-
 ConsoleIO.View.Device.Console.prototype.getHTML = function getHTML() {
     return this.container.innerHTML;
 };
@@ -896,33 +937,6 @@ ConsoleIO.View.Device.Console.prototype.getHTML = function getHTML() {
 ConsoleIO.View.Device.Console.prototype.getValue = function getValue(id) {
     return this.toolbar.getValue(id);
 };
-
-ConsoleIO.View.Device.Console.prototype.clear = function clear() {
-    while (this.container.firstChild) {
-        this.container.removeChild(this.container.firstChild);
-    }
-};
-
-ConsoleIO.View.Device.Console.prototype.removeOverflowElement = function removeOverflowElement() {
-    var length = this.container.childElementCount || this.container.children.length;
-    while (length > ConsoleIO.Settings.pageSize.active) {
-        this.container.removeChild(this.container.lastElementChild || this.container.lastChild);
-        length--;
-    }
-};
-
-ConsoleIO.View.Device.Console.prototype.setItemState = function setItemState(id, state) {
-    if (this.toolbar) {
-        this.toolbar.setItemState(id, state);
-    }
-};
-
-ConsoleIO.View.Device.Console.prototype.setValue = function setValue(id, text) {
-    if (this.toolbar) {
-        this.toolbar.setValue(id, text);
-    }
-};
-
 
 /**
  * Created with IntelliJ IDEA.
@@ -942,6 +956,7 @@ ConsoleIO.View.Device.Explorer = function ExplorerView(ctrl, model) {
     this.target = null;
     this.toolbar = null;
 };
+
 
 ConsoleIO.View.Device.Explorer.prototype.render = function render(target) {
     var scope = this;
@@ -981,16 +996,13 @@ ConsoleIO.View.Device.Explorer.prototype.destroy = function destroy() {
     this.tree.destructor();
 };
 
+
 ConsoleIO.View.Device.Explorer.prototype.add = function add(id, name, parentId, icon) {
     if (icon) {
         this.tree.insertNewItem(parentId, id, name, 0, icon, icon, icon);
     } else {
         this.tree.insertNewItem(parentId, id, name);
     }
-};
-
-ConsoleIO.View.Device.Explorer.prototype.setIcon = function setIcon(id, icon) {
-    this.tree.setItemImage(id, icon);
 };
 
 ConsoleIO.View.Device.Explorer.prototype.deleteItem = function deleteItem(id) {
@@ -1003,6 +1015,11 @@ ConsoleIO.View.Device.Explorer.prototype.closeItem = function closeItem(id, clos
     } else {
         this.tree.closeAllItems(id);
     }
+};
+
+
+ConsoleIO.View.Device.Explorer.prototype.setIcon = function setIcon(id, icon) {
+    this.tree.setItemImage(id, icon);
 };
 
 /**
@@ -1027,6 +1044,7 @@ ConsoleIO.View.Device.Preview = function PreviewView(ctrl, model) {
     this.image = null;
     this.id = [this.model.name, this.model.serialNumber].join("-");
 };
+
 
 ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
     this.target = target;
@@ -1072,6 +1090,7 @@ ConsoleIO.View.Device.Preview.prototype.destroy = function destroy() {
     this.dhxWins.unload();
     this.target.removeTab(this.id, true);
 };
+
 
 ConsoleIO.View.Device.Preview.prototype.toggleButton = function toggleButton(id, state) {
     if (this.toolbar) {
@@ -1124,6 +1143,11 @@ ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
     }
 };
 
+
+ConsoleIO.View.Device.Preview.prototype.setTabActive = function setTabActive() {
+    this.target.setTabActive(this.id);
+};
+
 /**
  * Created with IntelliJ IDEA.
  * User: nisheeth
@@ -1144,6 +1168,7 @@ ConsoleIO.View.Device.Source = function SourceView(ctrl, model) {
     this.tab = null;
     this.id = [this.model.name, this.model.serialNumber].join("-");
 };
+
 
 ConsoleIO.View.Device.Source.prototype.render = function render(target) {
     this.target = target;
@@ -1168,8 +1193,14 @@ ConsoleIO.View.Device.Source.prototype.destroy = function destroy() {
     this.target.removeTab(this.id, true);
 };
 
+
 ConsoleIO.View.Device.Source.prototype.getContextById = function getContextById(contextId) {
     return this.layout ? this.layout.cells(contextId) : null;
+};
+
+
+ConsoleIO.View.Device.Source.prototype.setTabActive = function setTabActive() {
+    this.target.setTabActive(this.id);
 };
 
 ConsoleIO.View.Device.Source.prototype.setTitle = function setTitle(contextId, title) {
@@ -1201,10 +1232,10 @@ ConsoleIO.View.Device.Status = function StatusView(ctrl, model) {
     this.grids = {};
 };
 
+
 ConsoleIO.View.Device.Status.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.id, this.model.name);
-    this.target.setTabActive(this.id);
     this.tab = this.target.cells(this.id);
 
     this.toolbar = this.tab.attachToolbar();
@@ -1220,7 +1251,7 @@ ConsoleIO.View.Device.Status.prototype.render = function render(target) {
     this.accordion = this.tab.attachAccordion();
     this.accordion.setIconsPath(ConsoleIO.Settings.iconPath);
     this.accordion.attachEvent("onActive", function (itemId) {
-        this.activeTab = itemId.replace(this.view.id + '-', '');
+        this.setActive(itemId.replace(this.view.id + '-', ''));
     }, this.ctrl);
 
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
@@ -1229,6 +1260,7 @@ ConsoleIO.View.Device.Status.prototype.render = function render(target) {
 ConsoleIO.View.Device.Status.prototype.destroy = function destroy() {
     this.target.removeTab(this.id, true);
 };
+
 
 ConsoleIO.View.Device.Status.prototype.clear = function clear() {
     if (this.accordion) {
@@ -1244,13 +1276,6 @@ ConsoleIO.View.Device.Status.prototype.clear = function clear() {
         });
     }
 };
-
-ConsoleIO.View.Device.Status.prototype.getUniqueId = (function () {
-    var i = 0;
-    return function getUniqueId(id, name) {
-        return [id, name, ++i].join('-');
-    };
-}());
 
 ConsoleIO.View.Device.Status.prototype.open = function open(name) {
     var id = this.id + "-" + name;
@@ -1297,8 +1322,9 @@ ConsoleIO.View.Device.Status.prototype.add = function add(name, value, label) {
     }
 };
 
-ConsoleIO.View.Device.Status.prototype.getValue = function getValue(id) {
-    return this.toolbar.getValue(id);
+
+ConsoleIO.View.Device.Status.prototype.setTabActive = function setTabActive() {
+    this.target.setTabActive(this.id);
 };
 
 ConsoleIO.View.Device.Status.prototype.setItemState = function setItemState(id, state) {
@@ -1306,6 +1332,19 @@ ConsoleIO.View.Device.Status.prototype.setItemState = function setItemState(id, 
         this.toolbar.setItemState(id, state);
     }
 };
+
+
+ConsoleIO.View.Device.Status.prototype.getUniqueId = (function () {
+    var i = 0;
+    return function getUniqueId(id, name) {
+        return [id, name, ++i].join('-');
+    };
+}());
+
+ConsoleIO.View.Device.Status.prototype.getValue = function getValue(id) {
+    return this.toolbar.getValue(id);
+};
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -1329,6 +1368,7 @@ ConsoleIO.View.Editor = function EditorView(ctrl, model) {
 
     this.createElements();
 };
+
 
 ConsoleIO.View.Editor.prototype.render = function render(target) {
     this.target = target;
@@ -1356,6 +1396,7 @@ ConsoleIO.View.Editor.prototype.destroy = function destroy() {
         this.toolbar.unload();
     }
 };
+
 
 ConsoleIO.View.Editor.prototype.listScripts = function listScripts(data) {
     var scope = this;
@@ -1399,6 +1440,7 @@ ConsoleIO.View.Editor.prototype.toggleButton = function toggleButton(id, state) 
     }
 };
 
+
 ConsoleIO.View.Editor.prototype.setItemText = function setItemText(id, text) {
     if (this.toolbar) {
         this.toolbar.setItemText(id, text);
@@ -1425,6 +1467,7 @@ ConsoleIO.View.Manager = function ManagerView(ctrl, model) {
     this.tabs = null;
 };
 
+
 ConsoleIO.View.Manager.prototype.render = function render(target) {
     this.target = target;
     this.tabs = this.target.attachTabbar();
@@ -1439,6 +1482,7 @@ ConsoleIO.View.Manager.prototype.render = function render(target) {
         this.onTabClick(tabId);
     }, this.ctrl);
 };
+
 
 ConsoleIO.View.Manager.prototype.add = function add(id, name, isActive) {
     this.tabs.addTab(id, name);
@@ -1455,12 +1499,14 @@ ConsoleIO.View.Manager.prototype.remove = function remove(id) {
     this.tabs.removeTab(id);
 };
 
-ConsoleIO.View.Manager.prototype.getContextById = function getContextById(contextId) {
-    return this.tabs ? this.tabs.cells(contextId) : null;
-};
 
 ConsoleIO.View.Manager.prototype.setActive = function setActive(id) {
     this.tabs.setTabActive(id);
+};
+
+
+ConsoleIO.View.Manager.prototype.getContextById = function getContextById(contextId) {
+    return this.tabs ? this.tabs.cells(contextId) : null;
 };
 
 /**
@@ -1537,6 +1583,7 @@ ConsoleIO.App = function AppController() {
     ConsoleIO.Service.Socket.on('user:scriptSaved', this.scriptSaved, this);
 };
 
+
 ConsoleIO.App.prototype.render = function render() {
     this.view.render();
     this.browser.render(this.view.getContextById(this.context.browser));
@@ -1544,9 +1591,6 @@ ConsoleIO.App.prototype.render = function render() {
     this.manager.render(this.view.getContextById(this.context.manager));
 };
 
-ConsoleIO.App.prototype.setTitle = function setTitle(name, title) {
-    this.view.setTitle(this.context[name], title);
-};
 
 ConsoleIO.App.prototype.listScripts = function listScripts(files) {
     this.editor.listScripts(files);
@@ -1557,9 +1601,24 @@ ConsoleIO.App.prototype.scriptSaved = function scriptSaved(file) {
     this.editor.addScript(file);
 };
 
+ConsoleIO.App.prototype.notify = function notify() {
+    this.view.notify(ConsoleIO.toArray(arguments));
+};
+
 ConsoleIO.App.prototype.add = function add(data) {
     this.editor.add(data);
 };
+
+
+ConsoleIO.App.prototype.setTitle = function setTitle(name, title) {
+    this.view.setTitle(this.context[name], title);
+};
+
+
+ConsoleIO.App.prototype.getActiveDeviceSerialNumber = function getActiveDeviceSerialNumber() {
+    return this.manager.getActiveDeviceSerialNumber();
+};
+
 
 ConsoleIO.App.prototype.onConnect = function onConnect() {
     this.view.online();
@@ -1568,14 +1627,6 @@ ConsoleIO.App.prototype.onConnect = function onConnect() {
 ConsoleIO.App.prototype.onDisconnect = function onDisconnect() {
     this.browser.clear();
     this.view.offline();
-};
-
-ConsoleIO.App.prototype.notify = function notify() {
-    this.view.notify(ConsoleIO.toArray(arguments));
-};
-
-ConsoleIO.App.prototype.getActiveDeviceSerialNumber = function getActiveDeviceSerialNumber() {
-    return this.manager.getActiveDeviceSerialNumber();
 };
 
 /**
@@ -1592,7 +1643,7 @@ ConsoleIO.namespace("ConsoleIO.App.Device");
 ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.parent = parent;
     this.model = model;
-    this.activeTab = null;
+    this.activeTab = ConsoleIO.Settings.defaultTab;
 
     this.console = new ConsoleIO.App.Device.Console(this, this.model);
     this.source = new ConsoleIO.App.Device.Source(this, this.model);
@@ -1601,12 +1652,18 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.view = new ConsoleIO.View.Device(this, this.model);
 };
 
+
 ConsoleIO.App.Device.prototype.render = function render(target) {
     this.view.render(target);
     this.status.render(this.view.tabs);
     this.source.render(this.view.tabs);
     this.preview.render(this.view.tabs);
     this.console.render(this.view.tabs);
+
+    var panel = this[this.activeTab];
+    if (panel) {
+        panel.setTabActive();
+    }
 };
 
 ConsoleIO.App.Device.prototype.destroy = function destroy() {
@@ -1616,6 +1673,7 @@ ConsoleIO.App.Device.prototype.destroy = function destroy() {
     this.status = this.status.destroy();
     this.view = this.view.destroy();
 };
+
 
 ConsoleIO.App.Device.prototype.update = function update(data) {
     this.parent.update(data);
@@ -1632,10 +1690,9 @@ ConsoleIO.App.Device.prototype.activate = function activate(state) {
     }
 };
 
-ConsoleIO.App.Device.prototype.onTabClick = function onTabClick(tabId) {
-    var newTab = (tabId.split('-')[0]).toLowerCase();
 
-    if (this.activeTab && this.activeTab === newTab) {
+ConsoleIO.App.Device.prototype.onTabClick = function onTabClick(tabId) {
+    if (this.activeTab && this.activeTab === tabId) {
         return;
     }
 
@@ -1643,7 +1700,7 @@ ConsoleIO.App.Device.prototype.onTabClick = function onTabClick(tabId) {
         this[this.activeTab].activate(false);
     }
 
-    this.activeTab = newTab;
+    this.activeTab = tabId;
     this[this.activeTab].activate(true);
 };
 
@@ -1720,10 +1777,12 @@ ConsoleIO.App.Browser = function BrowserController(parent, model) {
     ConsoleIO.Service.Socket.on('device:offline', this.offline, this);
 };
 
+
 ConsoleIO.App.Browser.prototype.render = function render(target) {
     this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
     this.view.render(target);
 };
+
 
 ConsoleIO.App.Browser.prototype.online = function online(data) {
     var index = this.store.offline.indexOf(data.serialNumber);
@@ -1743,10 +1802,6 @@ ConsoleIO.App.Browser.prototype.offline = function offline(data) {
         this.store.offline.push(data.serialNumber);
     }
     this.view.setIcon(data.serialNumber, ConsoleIO.Constant.ICONS.OFFLINE);
-};
-
-ConsoleIO.App.Browser.prototype.isSubscribed = function isSubscribed(serialNumber) {
-    return this.store.subscribed.indexOf(serialNumber) > -1;
 };
 
 ConsoleIO.App.Browser.prototype.subscribe = function subscribe(serialNumber) {
@@ -1802,7 +1857,8 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
     this.view.addOrUpdate(data.serialNumber, data.name.indexOf('|') > -1 ? data.browser : data.name, version);
 
     this.nodes.processing = true;
-    ConsoleIO.forEach([].concat(this.store.platform, this.store.manufacture, this.store.browser, this.store.version), function (id) {
+    ConsoleIO.forEach([
+    ].concat(this.store.platform, this.store.manufacture, this.store.browser, this.store.version), function (id) {
         if (this.nodes.closed.indexOf(id) > -1) {
             this.view.closeItem(id);
         }
@@ -1853,6 +1909,12 @@ ConsoleIO.App.Browser.prototype.refresh = function refresh() {
     this.clear();
     ConsoleIO.Service.Socket.emit('refreshRegisteredDeviceList');
 };
+
+
+ConsoleIO.App.Browser.prototype.isSubscribed = function isSubscribed(serialNumber) {
+    return this.store.subscribed.indexOf(serialNumber) > -1;
+};
+
 
 ConsoleIO.App.Browser.prototype.onButtonClick = function onButtonClick(btnId) {
     if (btnId === 'refresh') {
@@ -1927,6 +1989,7 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
     ConsoleIO.Service.Socket.on('device:console:' + this.model.serialNumber, this.add, this);
 };
 
+
 ConsoleIO.App.Device.Console.prototype.render = function render(target) {
     this.view.render(target);
     this.view.setItemState('playPause', this.paused);
@@ -1946,25 +2009,10 @@ ConsoleIO.App.Device.Console.prototype.destroy = function destroy() {
     this.view = this.view.destroy();
 };
 
+
 ConsoleIO.App.Device.Console.prototype.activate = function activate(state) {
     this.active = state;
     this.addBatch();
-};
-
-ConsoleIO.App.Device.Console.prototype.getData = function getData(store) {
-    var count = 0, dataStore = [];
-    if (store.length > 0) {
-        ConsoleIO.every([].concat(store).reverse(), function (item) {
-            if (this.isFiltered(item) && this.isSearchFiltered(item)) {
-                dataStore.push(item);
-                count++;
-            }
-
-            return ConsoleIO.Settings.pageSize.active > count;
-        }, this);
-    }
-
-    return dataStore;
 };
 
 ConsoleIO.App.Device.Console.prototype.add = function add(data) {
@@ -2002,6 +2050,18 @@ ConsoleIO.App.Device.Console.prototype.applySearch = function applySearch(value)
     this.view.addBatch(this.getData(this.store.added));
 };
 
+ConsoleIO.App.Device.Console.prototype.notify = function notify(clearAll) {
+    ConsoleIO.Service.Socket.emit('webControl', {
+        serialNumber: this.model.serialNumber,
+        pageSize: ConsoleIO.Settings.pageSize.active,
+        filters: this.filters,
+        search: this.view.getValue('searchText'),
+        paused: this.paused,
+        clear: !!clearAll
+    });
+};
+
+
 ConsoleIO.App.Device.Console.prototype.isSearchFiltered = function isSearchFiltered(data) {
     return this.searchRegex ? data.message.search(this.searchRegex) > -1 : true;
 };
@@ -2009,6 +2069,29 @@ ConsoleIO.App.Device.Console.prototype.isSearchFiltered = function isSearchFilte
 ConsoleIO.App.Device.Console.prototype.isFiltered = function isFiltered(data) {
     return this.filters.length === 0 || (this.filters.length > 0 && this.filters.indexOf(data.type) > -1);
 };
+
+
+ConsoleIO.App.Device.Console.prototype.setTabActive = function setTabActive() {
+    this.view.setTabActive();
+};
+
+
+ConsoleIO.App.Device.Console.prototype.getData = function getData(store) {
+    var count = 0, dataStore = [];
+    if (store.length > 0) {
+        ConsoleIO.every([].concat(store).reverse(), function (item) {
+            if (this.isFiltered(item) && this.isSearchFiltered(item)) {
+                dataStore.push(item);
+                count++;
+            }
+
+            return ConsoleIO.Settings.pageSize.active > count;
+        }, this);
+    }
+
+    return dataStore;
+};
+
 
 ConsoleIO.App.Device.Console.prototype.onPageSizeChanged = function onPageSizeChanged(btnId) {
     ConsoleIO.Settings.pageSize.active = btnId.split("-")[1];
@@ -2065,17 +2148,6 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
     }
 };
 
-ConsoleIO.App.Device.Console.prototype.notify = function notify(clearAll) {
-    ConsoleIO.Service.Socket.emit('webControl', {
-        serialNumber: this.model.serialNumber,
-        pageSize: ConsoleIO.Settings.pageSize.active,
-        filters: this.filters,
-        search: this.view.getValue('searchText'),
-        paused: this.paused,
-        clear: !!clearAll
-    });
-};
-
 /**
  * Created with IntelliJ IDEA.
  * User: nisheeth
@@ -2103,6 +2175,7 @@ ConsoleIO.App.Device.Explorer = function ExplorerController(parent, model) {
     ConsoleIO.Service.Socket.on('device:files:' + this.model.serialNumber, this.add, this);
 };
 
+
 ConsoleIO.App.Device.Explorer.prototype.render = function render(target) {
     this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
     this.view.render(target);
@@ -2114,13 +2187,6 @@ ConsoleIO.App.Device.Explorer.prototype.destroy = function destroy() {
     this.view = this.view.destroy();
 };
 
-ConsoleIO.App.Device.Explorer.prototype.getParentId = function getParentId(list, item) {
-    var index = list.indexOf(item);
-    if (index > 0) {
-        return (list.slice(0, index)).join('|');
-    }
-    return 0;
-};
 
 ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
     ConsoleIO.forEach(data.files, function (file) {
@@ -2206,6 +2272,16 @@ ConsoleIO.App.Device.Explorer.prototype.viewFile = function viewFile(fileId) {
     });
 };
 
+
+ConsoleIO.App.Device.Explorer.prototype.getParentId = function getParentId(list, item) {
+    var index = list.indexOf(item);
+    if (index > 0) {
+        return (list.slice(0, index)).join('|');
+    }
+    return 0;
+};
+
+
 ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(btnId) {
     if (btnId === 'refresh') {
         this.refresh();
@@ -2251,6 +2327,7 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
     ConsoleIO.Service.Socket.on('device:screenShot:' + this.model.serialNumber, this.screenShot, this);
 };
 
+
 ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
     this.view.render(target);
     this.editor.render(this.view.tab);
@@ -2263,6 +2340,7 @@ ConsoleIO.App.Device.Preview.prototype.destroy = function destroy() {
     this.editor = this.editor.destroy();
     this.view = this.view.destroy();
 };
+
 
 ConsoleIO.App.Device.Preview.prototype.activate = function activate(state) {
     if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
@@ -2289,6 +2367,12 @@ ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
         serialNumber: this.model.serialNumber
     });
 };
+
+
+ConsoleIO.App.Device.Preview.prototype.setTabActive = function setTabActive() {
+    this.view.setTabActive();
+};
+
 
 ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
@@ -2366,6 +2450,7 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
     ConsoleIO.Service.Socket.on('device:source:' + this.model.serialNumber, this.add, this);
 };
 
+
 ConsoleIO.App.Device.Source.prototype.render = function render(target) {
     this.view.render(target);
     this.explorer.render(this.view.getContextById(this.context.explorer));
@@ -2378,6 +2463,7 @@ ConsoleIO.App.Device.Source.prototype.destroy = function destroy() {
     this.editor = this.editor.destroy();
     this.view = this.view.destroy();
 };
+
 
 ConsoleIO.App.Device.Source.prototype.activate = function activate(state) {
     if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
@@ -2405,6 +2491,12 @@ ConsoleIO.App.Device.Source.prototype.refresh = function refresh() {
     }
 };
 
+
+ConsoleIO.App.Device.Source.prototype.setTabActive = function setTabActive() {
+    this.view.setTabActive();
+};
+
+
 ConsoleIO.App.Device.Source.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
         console.log('onButtonClick', btnId);
@@ -2425,7 +2517,7 @@ ConsoleIO.namespace("ConsoleIO.App.Device.Status");
 ConsoleIO.App.Device.Status = function StatusController(parent, model) {
     this.parent = parent;
     this.model = model;
-    this.activeTab = ConsoleIO.Settings.defaultActiveStatusAccordion;
+    this.activeAccordion = ConsoleIO.Settings.defaultAccordion;
 
     ConsoleIO.Model.DHTMLX.ToolBarItem.DeviceNameText.value = this.model.name;
     this.view = new ConsoleIO.View.Device.Status(this, {
@@ -2446,6 +2538,7 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
     ConsoleIO.Service.Socket.on('device:web:status:' + this.model.serialNumber, this.web, this);
 };
 
+
 ConsoleIO.App.Device.Status.prototype.render = function render(target) {
     this.view.render(target);
     this.view.setItemState('web', this.model.web.enabled);
@@ -2456,6 +2549,7 @@ ConsoleIO.App.Device.Status.prototype.destroy = function destroy() {
     ConsoleIO.Service.Socket.off('device:web:status:' + this.model.serialNumber, this.web, this);
     this.view = this.view.destroy();
 };
+
 
 ConsoleIO.App.Device.Status.prototype.web = function web(data) {
     this.model.web.enabled = data.enabled;
@@ -2496,7 +2590,7 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
 
     }, this);
 
-    this.view.open(this.activeTab);
+    this.view.open(this.activeAccordion);
 };
 
 ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
@@ -2504,6 +2598,16 @@ ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
         serialNumber: this.model.serialNumber
     });
 };
+
+
+ConsoleIO.App.Device.Status.prototype.setTabActive = function setTabActive() {
+    this.view.setTabActive();
+};
+
+ConsoleIO.App.Device.Status.prototype.setActive = function setActive(id) {
+    this.activeAccordion = id;
+};
+
 
 ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
@@ -2586,6 +2690,7 @@ ConsoleIO.App.Editor = function EditorController(parent, model) {
     });
 };
 
+
 ConsoleIO.App.Editor.prototype.render = function render(target) {
     this.setTitle();
     this.editor = CodeMirror.fromTextArea(this.view.textArea, this.model.codeMirror);
@@ -2611,6 +2716,7 @@ ConsoleIO.App.Editor.prototype.destroy = function destroy() {
     this.view = this.view.destroy();
 };
 
+
 ConsoleIO.App.Editor.prototype.foldCode = function foldCode(where) {
     this.editor.foldCode(where, this.model.codeMirror.mode === 'javascript' ? CodeMirror.braceRangeFinder : CodeMirror.tagRangeFinder);
 };
@@ -2623,17 +2729,6 @@ ConsoleIO.App.Editor.prototype.addScript = function addScript(data) {
     this.view.addScript(data);
     this.setTitle(this.fileName, 'SAVED');
     this.fileCanBeSaved = false;
-};
-
-ConsoleIO.App.Editor.prototype.getDoc = function getDoc() {
-    return this.editor.getDoc();
-};
-
-ConsoleIO.App.Editor.prototype.setTitle = function setTitle() {
-    if (this.parent.setTitle) {
-        var title = [this.model.title].concat(ConsoleIO.toArray(arguments));
-        this.parent.setTitle(this.model.contextId || this.model.serialNumber, title.join(' : '));
-    }
 };
 
 ConsoleIO.App.Editor.prototype.add = function add(data) {
@@ -2656,10 +2751,6 @@ ConsoleIO.App.Editor.prototype.add = function add(data) {
             ch: this.editor.getLine(lastLine).length
         });
     }
-};
-
-ConsoleIO.App.Editor.prototype.setOption = function setOption(option, value) {
-    this.editor.setOption(option, value);
 };
 
 ConsoleIO.App.Editor.prototype.selectAll = function selectAll() {
@@ -2765,6 +2856,24 @@ ConsoleIO.App.Editor.prototype.updateButtonState = function updateButtonState() 
     }
 };
 
+
+ConsoleIO.App.Editor.prototype.setTitle = function setTitle() {
+    if (this.parent.setTitle) {
+        var title = [this.model.title].concat(ConsoleIO.toArray(arguments));
+        this.parent.setTitle(this.model.contextId || this.model.serialNumber, title.join(' : '));
+    }
+};
+
+ConsoleIO.App.Editor.prototype.setOption = function setOption(option, value) {
+    this.editor.setOption(option, value);
+};
+
+
+ConsoleIO.App.Editor.prototype.getDoc = function getDoc() {
+    return this.editor.getDoc();
+};
+
+
 ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (btnId.indexOf('script-') === 0) {
         ConsoleIO.Service.Socket.emit('loadScript', {
@@ -2837,10 +2946,12 @@ ConsoleIO.App.Manager = function ManagerController(parent, model) {
     ConsoleIO.Service.Socket.on('user:exportReady', this.exportReady, this);
 };
 
+
 ConsoleIO.App.Manager.prototype.render = function render(target) {
     this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
     this.view.render(target);
 };
+
 
 ConsoleIO.App.Manager.prototype.add = function add(data) {
     if (this.store.serialNumber.indexOf(data.serialNumber) === -1) {
@@ -2900,25 +3011,6 @@ ConsoleIO.App.Manager.prototype.close = function close(serialNumber) {
     ConsoleIO.Service.Socket.emit('unSubscribe', serialNumber);
 };
 
-ConsoleIO.App.Manager.prototype.onTabClick = function onTabClick(tabId) {
-    if (this.activeTab && this.activeTab === tabId) {
-        return;
-    }
-
-    var device;
-    if (this.activeTab) {
-        device = this.getDevice(this.activeTab);
-        if (device) {
-            device.activate(false);
-        }
-    }
-
-    this.activeTab = tabId;
-    device = this.getDevice(this.activeTab);
-    if (device) {
-        device.activate(true);
-    }
-};
 
 ConsoleIO.App.Manager.prototype.getActiveDeviceSerialNumber = function getActiveDeviceSerialNumber() {
     return this.activeTab;
@@ -2937,6 +3029,27 @@ ConsoleIO.App.Manager.prototype.getDevice = function getDevice(serialNumber) {
     }, this);
 
     return device;
+};
+
+
+ConsoleIO.App.Manager.prototype.onTabClick = function onTabClick(tabId) {
+    if (this.activeTab && this.activeTab === tabId) {
+        return;
+    }
+
+    var device;
+    if (this.activeTab) {
+        device = this.getDevice(this.activeTab);
+        if (device) {
+            device.activate(false);
+        }
+    }
+
+    this.activeTab = tabId;
+    device = this.getDevice(this.activeTab);
+    if (device) {
+        device.activate(true);
+    }
 };
 
 /**
@@ -2958,7 +3071,8 @@ ConsoleIO.Settings = {
         active: 50,
         list: [50, 100, 250, 500]
     },
-    defaultActiveStatusAccordion: 'device'
+    defaultTab: 'console',
+    defaultAccordion: 'device'
 };
 
 /**

@@ -16,12 +16,13 @@ ConsoleIO.View.Device = function DeviceView(ctrl, model) {
     this.tabs = null;
 };
 
+
 ConsoleIO.View.Device.prototype.render = function render(target) {
     this.target = target;
     this.tabs = this.target.attachTabbar();
     this.tabs.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tab'));
     this.tabs.attachEvent("onTabClick", function (tabId) {
-        this.onTabClick(tabId);
+        this.onTabClick(tabId.split('-')[0].toLowerCase());
     }, this.ctrl);
 };
 

@@ -21,6 +21,7 @@ ConsoleIO.View.Device.Preview = function PreviewView(ctrl, model) {
     this.id = [this.model.name, this.model.serialNumber].join("-");
 };
 
+
 ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.id, this.model.name);
@@ -65,6 +66,7 @@ ConsoleIO.View.Device.Preview.prototype.destroy = function destroy() {
     this.dhxWins.unload();
     this.target.removeTab(this.id, true);
 };
+
 
 ConsoleIO.View.Device.Preview.prototype.toggleButton = function toggleButton(id, state) {
     if (this.toolbar) {
@@ -115,4 +117,9 @@ ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
             alert("Sorry!, Console.IO was unable to capture screen. Check console for more details.");
         }
     }
+};
+
+
+ConsoleIO.View.Device.Preview.prototype.setTabActive = function setTabActive() {
+    this.target.setTabActive(this.id);
 };

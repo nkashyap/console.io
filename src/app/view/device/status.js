@@ -20,10 +20,10 @@ ConsoleIO.View.Device.Status = function StatusView(ctrl, model) {
     this.grids = {};
 };
 
+
 ConsoleIO.View.Device.Status.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.id, this.model.name);
-    this.target.setTabActive(this.id);
     this.tab = this.target.cells(this.id);
 
     this.toolbar = this.tab.attachToolbar();
@@ -39,7 +39,7 @@ ConsoleIO.View.Device.Status.prototype.render = function render(target) {
     this.accordion = this.tab.attachAccordion();
     this.accordion.setIconsPath(ConsoleIO.Settings.iconPath);
     this.accordion.attachEvent("onActive", function (itemId) {
-        this.activeTab = itemId.replace(this.view.id + '-', '');
+        this.setActive(itemId.replace(this.view.id + '-', ''));
     }, this.ctrl);
 
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
@@ -48,6 +48,7 @@ ConsoleIO.View.Device.Status.prototype.render = function render(target) {
 ConsoleIO.View.Device.Status.prototype.destroy = function destroy() {
     this.target.removeTab(this.id, true);
 };
+
 
 ConsoleIO.View.Device.Status.prototype.clear = function clear() {
     if (this.accordion) {
@@ -63,13 +64,6 @@ ConsoleIO.View.Device.Status.prototype.clear = function clear() {
         });
     }
 };
-
-ConsoleIO.View.Device.Status.prototype.getUniqueId = (function () {
-    var i = 0;
-    return function getUniqueId(id, name) {
-        return [id, name, ++i].join('-');
-    };
-}());
 
 ConsoleIO.View.Device.Status.prototype.open = function open(name) {
     var id = this.id + "-" + name;
@@ -116,12 +110,25 @@ ConsoleIO.View.Device.Status.prototype.add = function add(name, value, label) {
     }
 };
 
-ConsoleIO.View.Device.Status.prototype.getValue = function getValue(id) {
-    return this.toolbar.getValue(id);
+
+ConsoleIO.View.Device.Status.prototype.setTabActive = function setTabActive() {
+    this.target.setTabActive(this.id);
 };
 
 ConsoleIO.View.Device.Status.prototype.setItemState = function setItemState(id, state) {
     if (this.toolbar) {
         this.toolbar.setItemState(id, state);
     }
+};
+
+
+ConsoleIO.View.Device.Status.prototype.getUniqueId = (function () {
+    var i = 0;
+    return function getUniqueId(id, name) {
+        return [id, name, ++i].join('-');
+    };
+}());
+
+ConsoleIO.View.Device.Status.prototype.getValue = function getValue(id) {
+    return this.toolbar.getValue(id);
 };

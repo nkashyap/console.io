@@ -52,6 +52,7 @@ ConsoleIO.App.Editor = function EditorController(parent, model) {
     });
 };
 
+
 ConsoleIO.App.Editor.prototype.render = function render(target) {
     this.setTitle();
     this.editor = CodeMirror.fromTextArea(this.view.textArea, this.model.codeMirror);
@@ -77,6 +78,7 @@ ConsoleIO.App.Editor.prototype.destroy = function destroy() {
     this.view = this.view.destroy();
 };
 
+
 ConsoleIO.App.Editor.prototype.foldCode = function foldCode(where) {
     this.editor.foldCode(where, this.model.codeMirror.mode === 'javascript' ? CodeMirror.braceRangeFinder : CodeMirror.tagRangeFinder);
 };
@@ -89,17 +91,6 @@ ConsoleIO.App.Editor.prototype.addScript = function addScript(data) {
     this.view.addScript(data);
     this.setTitle(this.fileName, 'SAVED');
     this.fileCanBeSaved = false;
-};
-
-ConsoleIO.App.Editor.prototype.getDoc = function getDoc() {
-    return this.editor.getDoc();
-};
-
-ConsoleIO.App.Editor.prototype.setTitle = function setTitle() {
-    if (this.parent.setTitle) {
-        var title = [this.model.title].concat(ConsoleIO.toArray(arguments));
-        this.parent.setTitle(this.model.contextId || this.model.serialNumber, title.join(' : '));
-    }
 };
 
 ConsoleIO.App.Editor.prototype.add = function add(data) {
@@ -122,10 +113,6 @@ ConsoleIO.App.Editor.prototype.add = function add(data) {
             ch: this.editor.getLine(lastLine).length
         });
     }
-};
-
-ConsoleIO.App.Editor.prototype.setOption = function setOption(option, value) {
-    this.editor.setOption(option, value);
 };
 
 ConsoleIO.App.Editor.prototype.selectAll = function selectAll() {
@@ -230,6 +217,24 @@ ConsoleIO.App.Editor.prototype.updateButtonState = function updateButtonState() 
         }
     }
 };
+
+
+ConsoleIO.App.Editor.prototype.setTitle = function setTitle() {
+    if (this.parent.setTitle) {
+        var title = [this.model.title].concat(ConsoleIO.toArray(arguments));
+        this.parent.setTitle(this.model.contextId || this.model.serialNumber, title.join(' : '));
+    }
+};
+
+ConsoleIO.App.Editor.prototype.setOption = function setOption(option, value) {
+    this.editor.setOption(option, value);
+};
+
+
+ConsoleIO.App.Editor.prototype.getDoc = function getDoc() {
+    return this.editor.getDoc();
+};
+
 
 ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (btnId.indexOf('script-') === 0) {

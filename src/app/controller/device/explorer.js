@@ -25,6 +25,7 @@ ConsoleIO.App.Device.Explorer = function ExplorerController(parent, model) {
     ConsoleIO.Service.Socket.on('device:files:' + this.model.serialNumber, this.add, this);
 };
 
+
 ConsoleIO.App.Device.Explorer.prototype.render = function render(target) {
     this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
     this.view.render(target);
@@ -36,13 +37,6 @@ ConsoleIO.App.Device.Explorer.prototype.destroy = function destroy() {
     this.view = this.view.destroy();
 };
 
-ConsoleIO.App.Device.Explorer.prototype.getParentId = function getParentId(list, item) {
-    var index = list.indexOf(item);
-    if (index > 0) {
-        return (list.slice(0, index)).join('|');
-    }
-    return 0;
-};
 
 ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
     ConsoleIO.forEach(data.files, function (file) {
@@ -127,6 +121,16 @@ ConsoleIO.App.Device.Explorer.prototype.viewFile = function viewFile(fileId) {
         url: (fileId.indexOf("http") === -1 ? '/' : '') + fileId.replace(/[|]/igm, "/")
     });
 };
+
+
+ConsoleIO.App.Device.Explorer.prototype.getParentId = function getParentId(list, item) {
+    var index = list.indexOf(item);
+    if (index > 0) {
+        return (list.slice(0, index)).join('|');
+    }
+    return 0;
+};
+
 
 ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(btnId) {
     if (btnId === 'refresh') {

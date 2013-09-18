@@ -36,10 +36,12 @@ ConsoleIO.App.Browser = function BrowserController(parent, model) {
     ConsoleIO.Service.Socket.on('device:offline', this.offline, this);
 };
 
+
 ConsoleIO.App.Browser.prototype.render = function render(target) {
     this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
     this.view.render(target);
 };
+
 
 ConsoleIO.App.Browser.prototype.online = function online(data) {
     var index = this.store.offline.indexOf(data.serialNumber);
@@ -59,10 +61,6 @@ ConsoleIO.App.Browser.prototype.offline = function offline(data) {
         this.store.offline.push(data.serialNumber);
     }
     this.view.setIcon(data.serialNumber, ConsoleIO.Constant.ICONS.OFFLINE);
-};
-
-ConsoleIO.App.Browser.prototype.isSubscribed = function isSubscribed(serialNumber) {
-    return this.store.subscribed.indexOf(serialNumber) > -1;
 };
 
 ConsoleIO.App.Browser.prototype.subscribe = function subscribe(serialNumber) {
@@ -118,7 +116,8 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
     this.view.addOrUpdate(data.serialNumber, data.name.indexOf('|') > -1 ? data.browser : data.name, version);
 
     this.nodes.processing = true;
-    ConsoleIO.forEach([].concat(this.store.platform, this.store.manufacture, this.store.browser, this.store.version), function (id) {
+    ConsoleIO.forEach([
+    ].concat(this.store.platform, this.store.manufacture, this.store.browser, this.store.version), function (id) {
         if (this.nodes.closed.indexOf(id) > -1) {
             this.view.closeItem(id);
         }
@@ -169,6 +168,12 @@ ConsoleIO.App.Browser.prototype.refresh = function refresh() {
     this.clear();
     ConsoleIO.Service.Socket.emit('refreshRegisteredDeviceList');
 };
+
+
+ConsoleIO.App.Browser.prototype.isSubscribed = function isSubscribed(serialNumber) {
+    return this.store.subscribed.indexOf(serialNumber) > -1;
+};
+
 
 ConsoleIO.App.Browser.prototype.onButtonClick = function onButtonClick(btnId) {
     if (btnId === 'refresh') {

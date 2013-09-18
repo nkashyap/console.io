@@ -12,7 +12,7 @@ ConsoleIO.namespace("ConsoleIO.App.Device.Status");
 ConsoleIO.App.Device.Status = function StatusController(parent, model) {
     this.parent = parent;
     this.model = model;
-    this.activeTab = ConsoleIO.Settings.defaultActiveStatusAccordion;
+    this.activeAccordion = ConsoleIO.Settings.defaultAccordion;
 
     ConsoleIO.Model.DHTMLX.ToolBarItem.DeviceNameText.value = this.model.name;
     this.view = new ConsoleIO.View.Device.Status(this, {
@@ -33,6 +33,7 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
     ConsoleIO.Service.Socket.on('device:web:status:' + this.model.serialNumber, this.web, this);
 };
 
+
 ConsoleIO.App.Device.Status.prototype.render = function render(target) {
     this.view.render(target);
     this.view.setItemState('web', this.model.web.enabled);
@@ -43,6 +44,7 @@ ConsoleIO.App.Device.Status.prototype.destroy = function destroy() {
     ConsoleIO.Service.Socket.off('device:web:status:' + this.model.serialNumber, this.web, this);
     this.view = this.view.destroy();
 };
+
 
 ConsoleIO.App.Device.Status.prototype.web = function web(data) {
     this.model.web.enabled = data.enabled;
@@ -83,7 +85,7 @@ ConsoleIO.App.Device.Status.prototype.add = function add(data) {
 
     }, this);
 
-    this.view.open(this.activeTab);
+    this.view.open(this.activeAccordion);
 };
 
 ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
@@ -91,6 +93,16 @@ ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
         serialNumber: this.model.serialNumber
     });
 };
+
+
+ConsoleIO.App.Device.Status.prototype.setTabActive = function setTabActive() {
+    this.view.setTabActive();
+};
+
+ConsoleIO.App.Device.Status.prototype.setActive = function setActive(id) {
+    this.activeAccordion = id;
+};
+
 
 ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {

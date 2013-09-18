@@ -17,6 +17,7 @@ ConsoleIO.View.Browser = function BrowserView(ctrl, model) {
     this.toolbar = null;
 };
 
+
 ConsoleIO.View.Browser.prototype.render = function render(target) {
     var scope = this;
     this.target = target;
@@ -51,6 +52,7 @@ ConsoleIO.View.Browser.prototype.render = function render(target) {
     }, this.ctrl);
 };
 
+
 ConsoleIO.View.Browser.prototype.add = function add(id, name, parentId, icon) {
     if (!this.tree.getParentId(id)) {
         if (icon) {
@@ -73,9 +75,6 @@ ConsoleIO.View.Browser.prototype.addOrUpdate = function addOrUpdate(id, name, pa
     }
 };
 
-ConsoleIO.View.Browser.prototype.setIcon = function setIcon(id, icon) {
-    this.tree.setItemImage(id, icon);
-};
 
 ConsoleIO.View.Browser.prototype.deleteItem = function deleteItem(id) {
     this.tree.deleteItem(id);
@@ -87,4 +86,9 @@ ConsoleIO.View.Browser.prototype.closeItem = function closeItem(id, closeAll) {
     } else {
         this.tree.closeAllItems(id);
     }
+};
+
+
+ConsoleIO.View.Browser.prototype.setIcon = function setIcon(id, icon) {
+    this.tree.setItemImage(id, icon);
 };
