@@ -415,14 +415,17 @@
     }
 
     function dispatchPacket(name, params, content, start, length) {
-        setTimeout((function (exports, name, params, content, start, length) {
-            var data = exports.util.extend({}, params);
-            data.content = content;
-            data.start = start;
-            data.length = length;
-            exports.transport.emit(name, data);
+        var fn = (function (exports, name, params, content, start, length) {
+            return function () {
+                var data = exports.util.extend({}, params);
+                data.content = content;
+                data.start = start;
+                data.length = length;
+                exports.transport.emit(name, data);
+            };
+        }(exports, name, params, content, start, length));
 
-        }(exports, name, params, content, start, length)), 100);
+        setTimeout(fn, 100);
     }
 
     client.jsonify = function jsonify(obj) {

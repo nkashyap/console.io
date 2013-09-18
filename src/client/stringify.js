@@ -22,7 +22,7 @@
         'Event', 'KeyboardEvent', 'MouseEvent', 'TouchEvent',
         'WheelEvent', 'UIEvent', 'CustomEvent', 'NotifyAudioAvailableEvent',
         'CompositionEvent', 'CloseEvent', 'MessageEvent', 'MessageEvent',
-        'XMLHttpRequestProgressEvent'
+        'XMLHttpRequestProgressEvent', 'ProgressEvent'
     ];
 
     stringify.errors = [
