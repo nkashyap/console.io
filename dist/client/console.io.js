@@ -1681,7 +1681,7 @@ ConsoleIO.version = "0.2.0-1";
         return clone;
     }
 
-    function getXMLHttp() {
+    function getXHR() {
         var xhr;
         if (global.XMLHttpRequest) {
             xhr = new XMLHttpRequest();
@@ -1749,6 +1749,38 @@ ConsoleIO.version = "0.2.0-1";
         }
     }
 
+    function dataPacket(name, data) {
+        var content = data.content,
+            length = content.length,
+            config = exports.getConfig(),
+            start = 0;
+
+        while (start < length) {
+            dispatchPacket(name, data, content.substr(start, config.maxDataPacketSize), start, config.maxDataPacketSize);
+
+            if (start === 0) {
+                start = config.maxDataPacketSize;
+            } else {
+                start += config.maxDataPacketSize;
+            }
+        }
+    }
+
+    function dispatchPacket(name, params, content, start, length) {
+        var fn = (function (exports, name, params, content, start, length) {
+            return function () {
+                var data = exports.util.extend({}, params);
+                data.content = content;
+                data.start = start;
+                data.length = length;
+                exports.transport.emit(name, data);
+            };
+        }(exports, name, params, content, start, length));
+
+        setTimeout(fn, 100);
+    }
+
+
     function onRegistration(data) {
         storeData(data, 'registration');
 
@@ -1815,54 +1847,62 @@ ConsoleIO.version = "0.2.0-1";
 
     function onFileSource(data) {
         try {
-            //TODO use proxy for cross-domain files
-            var xmlhttp = getXMLHttp();
-            if (xmlhttp) {
-                xmlhttp.open("GET", data.url, true);
-                xmlhttp.onreadystatechange = function () {
-                    if (xmlhttp.readyState === 4) {
+            var xhr = getXHR(),
+                proxy = exports.util.getUrl('proxy');
+
+            if (xhr) {
+                xhr.open("GET", data.url, true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
                         var content;
-                        if (xmlhttp.status === 200) {
-                            content = xmlhttp.responseText;
+                        if (xhr.status === 200) {
+                            content = xhr.responseText;
                         } else {
-                            content = xmlhttp.statusText;
+                            content = xhr.statusText;
                         }
 
                         dataPacket('source', {
-                            url: data.url,
+                            url: decodeURIComponent(data.url),
                             content: content
                         });
                     }
                 };
 
-                xmlhttp.onloadend = function onloadend(e) {
+                xhr.onloadend = function onloadend(e) {
                     exports.console.info('file:onloadend', e);
                 };
 
-                xmlhttp.onloadstart = function onloadstart(e) {
+                xhr.onloadstart = function onloadstart(e) {
                     exports.console.info('file:onloadstart', e);
                 };
 
-                xmlhttp.onprogress = function onprogress(e) {
+                xhr.onprogress = function onprogress(e) {
                     exports.console.info('file:onprogress', e);
                 };
 
-                xmlhttp.onload = function onload(e) {
+                xhr.onload = function onload(e) {
                     exports.console.info('file:onload', e);
                 };
 
-                xmlhttp.onerror = function (e) {
-                    exports.console.exception('file:onerror', e);
-                    exports.transport.emit('source', {
-                        url: data.url,
-                        content: 'XMLHttpRequest Error: Possibally Access-Control-Allow-Origin security issue.'
-                    });
+                xhr.onerror = function (e) {
+                    // if xhr fails to get file content use proxy to retrieve it
+                    // it might be because of cross domain issue
+                    if (data.url.indexOf(proxy) === -1) {
+                        data.url = proxy + '?url=' + encodeURIComponent(data.url);
+                        onFileSource(data);
+                    } else {
+                        exports.console.exception('file:onerror', e);
+                        exports.transport.emit('source', {
+                            url: decodeURIComponent(data.url),
+                            content: 'XMLHttpRequest Error: Possibally Access-Control-Allow-Origin security issue.'
+                        });
+                    }
                 };
 
-                xmlhttp.send(null);
+                xhr.send(null);
             } else {
                 exports.transport.emit('source', {
-                    url: data.url,
+                    url: decodeURIComponent(data.url),
                     content: 'XMLHttpRequest request not supported by the browser.'
                 });
             }
@@ -1984,37 +2024,6 @@ ConsoleIO.version = "0.2.0-1";
         }
     }
 
-
-    function dataPacket(name, data) {
-        var content = data.content,
-            length = content.length,
-            config = exports.getConfig(),
-            start = 0;
-
-        while (start < length) {
-            dispatchPacket(name, data, content.substr(start, config.maxDataPacketSize), start, config.maxDataPacketSize);
-
-            if (start === 0) {
-                start = config.maxDataPacketSize;
-            } else {
-                start += config.maxDataPacketSize;
-            }
-        }
-    }
-
-    function dispatchPacket(name, params, content, start, length) {
-        var fn = (function (exports, name, params, content, start, length) {
-            return function () {
-                var data = exports.util.extend({}, params);
-                data.content = content;
-                data.start = start;
-                data.length = length;
-                exports.transport.emit(name, data);
-            };
-        }(exports, name, params, content, start, length));
-
-        setTimeout(fn, 100);
-    }
 
     client.jsonify = function jsonify(obj) {
         var returnObj = {},
