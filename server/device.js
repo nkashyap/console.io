@@ -53,6 +53,7 @@ function Device(application, request, manager) {
      * @member {object} client
      */
     this.serialNumber = this.request.cookies.serialNumber || this.request.data.serialNumber;
+    this.sid = this.request.cookies['connect.sid'];
 
     /**
      * When user explicitly set device name, it is stored as a cookie on client device
@@ -236,6 +237,7 @@ Device.prototype.online = function online(request) {
      * this method register new request for future communication
      */
     this.request = request;
+    this.sid = this.request.cookies['connect.sid'];
 
     /** set online flag to true **/
     this.isOnline = true;
@@ -284,7 +286,11 @@ Device.prototype.offline = function offline(name) {
      * @event Device#device:offline
      * @type {object}
      */
-    this.manager.emit(typeof name === 'string' ? name : 'device:offline', this.getInfo());
+    if (typeof name === 'string') {
+        this.emit(name, this.getInfo());
+    } else {
+        this.manager.emit('device:offline', this.getInfo());
+    }
 };
 
 /**

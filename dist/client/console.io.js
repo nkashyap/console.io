@@ -1313,13 +1313,7 @@ ConsoleIO.version = "0.2.0-1";
 
     transport.emit = function emit(name, data) {
         if (transport.isConnected()) {
-            data = data || {};
-
-            if (!data.serialNumber && exports.serialNumber) {
-                data.serialNumber = exports.serialNumber;
-            }
-
-            transport.io.emit('device:' + name, data);
+            transport.io.emit('device:' + name, data || {});
             return true;
         } else {
             pending.push({ name: name, data: data });

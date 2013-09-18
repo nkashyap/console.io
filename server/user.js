@@ -13,6 +13,7 @@ function User(application, request, manager) {
     this.manager = manager;
 
     this.guid = this.request.cookies.guid || this.request.data.guid;
+    this.sid = this.request.cookies['connect.sid'];
     this.deviceSerialNumbers = [];
     this.isOnline = true;
 
@@ -65,6 +66,7 @@ User.prototype.disconnect = function disconnect() {
 
 User.prototype.online = function online(request) {
     this.request = request;
+    this.sid = this.request.cookies['connect.sid'];
     this.isOnline = true;
 
     this.deviceSerialNumbers.forEach(function (serialNumber) {

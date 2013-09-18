@@ -45,38 +45,61 @@ function Manager() {
 
     //COMMON
     function getSerialNumber(request) {
-        if (request.cookies.serialNumber) {
-            return request.cookies.serialNumber;
+        var serialNumber = request.cookies.serialNumber,
+            sid = request.cookies['connect.sid'];
+
+        if (!serialNumber && request.data) {
+            serialNumber = request.data.serialNumber;
         }
 
-        if (request.data) {
-            return request.data.serialNumber;
+        if (!serialNumber) {
+            forEach(devices, function (device) {
+                if (device.sid === sid) {
+                    serialNumber = device.serialNumber;
+                }
+            });
         }
+
+        return serialNumber;
     }
 
     function getGUID(request) {
-        if (request.cookies.guid) {
-            return request.cookies.guid;
+        var guid = request.cookies.guid,
+            sid = request.cookies['connect.sid'];
+
+        if (!guid && request.data) {
+            guid = request.data.guid;
         }
 
-        if (request.data) {
-            return request.data.guid;
+        if (!guid) {
+            forEach(users, function (user) {
+                if (user.sid === sid) {
+                    guid = user.serialNumber;
+                }
+            });
         }
+
+        return guid;
     }
 
     function disconnect(request) {
         var clientDevice = getDeviceBySerialNumber(getSerialNumber(request));
         if (clientDevice) {
+            clientDevice.offline();
             clientDevice.disconnect();
-            console.log('disconnect', clientDevice.serialNumber);
+            console.log('disconnect client:', clientDevice.serialNumber);
             return;
         }
 
         var activeUser = users[getGUID(request)];
         if (activeUser) {
+            activeUser.offline();
             activeUser.disconnect();
-            console.log('disconnect', activeUser.guid);
+            console.log('disconnect user:', activeUser.guid);
+            return;
         }
+
+        console.log('disconnect - client not found', request);
     }
 
     function getDeviceBySerialNumber(serialNumber) {

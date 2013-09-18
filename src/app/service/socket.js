@@ -47,13 +47,7 @@ ConsoleIO.Service.Socket = {
 
     emit: function emit(name, data) {
         if (this.io && this.io.socket.connected) {
-            data = data || {};
-
-            if (!data.guid && ConsoleIO.Service.Socket.guid) {
-                data.guid = ConsoleIO.Service.Socket.guid;
-            }
-
-            this.io.emit('user:' + name, data);
+            this.io.emit('user:' + name, data || {});
         }
     },
 
