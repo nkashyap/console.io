@@ -39,7 +39,6 @@ ConsoleIO.View.Device.Source.prototype.render = function render(target) {
 };
 
 ConsoleIO.View.Device.Source.prototype.destroy = function destroy() {
-    //this.toolbar.unload();
     this.target.removeTab(this.id, true);
 };
 

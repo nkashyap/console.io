@@ -131,7 +131,7 @@ if (typeof window.ConsoleIO === "undefined") {
             return Array.prototype.slice.call(data);
         },
 
-        isArray : Array.isArray || function (obj) {
+        isArray: Array.isArray || function (obj) {
             return Object.prototype.toString.call(obj) === '[object Array]';
         },
 
@@ -141,6 +141,12 @@ if (typeof window.ConsoleIO === "undefined") {
             });
 
             return target;
+        },
+
+        async: function async(fn, scope, timeout) {
+            return setTimeout(function () {
+                fn.call(scope);
+            }, timeout);
         },
 
         addCSSRule: function addCSSRule(selector, rules, index) {

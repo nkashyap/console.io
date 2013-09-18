@@ -43,7 +43,7 @@ ConsoleIO.View.Editor.prototype.render = function render(target) {
 ConsoleIO.View.Editor.prototype.destroy = function destroy() {
     this.container.removeChild(this.textArea);
     this.container.parentNode.removeChild(this.container);
-    if(this.toolbar){
+    if (this.toolbar) {
         this.toolbar.unload();
     }
 };

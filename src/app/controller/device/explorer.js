@@ -16,6 +16,10 @@ ConsoleIO.App.Device.Explorer = function ExplorerController(parent, model) {
         folder: [],
         files: []
     };
+    this.nodes = {
+        processing: false,
+        opened: []
+    };
 
     this.view = new ConsoleIO.View.Device.Explorer(this, this.model);
     ConsoleIO.Service.Socket.on('device:files:' + this.model.serialNumber, this.add, this);
@@ -70,9 +74,16 @@ ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
 
     }, this);
 
+    this.nodes.processing = true;
     ConsoleIO.forEach(this.store.folder, function (id) {
-        this.view.closeItem(id);
+        if (this.nodes.opened.indexOf(id) === -1) {
+            this.view.closeItem(id);
+        }
     }, this);
+
+    ConsoleIO.async(function () {
+        this.nodes.processing = false;
+    }, this, 100);
 };
 
 ConsoleIO.App.Device.Explorer.prototype.clear = function clear() {
@@ -98,9 +109,15 @@ ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
     });
 };
 
-ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(btnId) {
-    if (btnId === 'refresh') {
-        this.refresh();
+ConsoleIO.App.Device.Explorer.prototype.openNode = function openNode(itemId, state) {
+    if (!this.nodes.processing) {
+        var index = this.nodes.opened.indexOf(itemId);
+
+        if (state === 1 && index === -1) {
+            this.nodes.opened.push(itemId);
+        } else if (index > -1) {
+            this.nodes.opened.splice(index, 1);
+        }
     }
 };
 
@@ -110,3 +127,10 @@ ConsoleIO.App.Device.Explorer.prototype.viewFile = function viewFile(fileId) {
         url: (fileId.indexOf("http") === -1 ? '/' : '') + fileId.replace(/[|]/igm, "/")
     });
 };
+
+ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(btnId) {
+    if (btnId === 'refresh') {
+        this.refresh();
+    }
+};
+

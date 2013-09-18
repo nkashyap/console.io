@@ -20,6 +20,10 @@ ConsoleIO.App.Browser = function BrowserController(parent, model) {
         offline: [],
         subscribed: []
     };
+    this.nodes = {
+        processing: false,
+        closed: []
+    };
 
     this.view = new ConsoleIO.View.Browser(this, this.model);
 
@@ -30,6 +34,11 @@ ConsoleIO.App.Browser = function BrowserController(parent, model) {
     ConsoleIO.Service.Socket.on('device:registered', this.add, this);
     ConsoleIO.Service.Socket.on('device:online', this.online, this);
     ConsoleIO.Service.Socket.on('device:offline', this.offline, this);
+};
+
+ConsoleIO.App.Browser.prototype.render = function render(target) {
+    this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
+    this.view.render(target);
 };
 
 ConsoleIO.App.Browser.prototype.online = function online(data) {
@@ -54,6 +63,12 @@ ConsoleIO.App.Browser.prototype.offline = function offline(data) {
 
 ConsoleIO.App.Browser.prototype.isSubscribed = function isSubscribed(serialNumber) {
     return this.store.subscribed.indexOf(serialNumber) > -1;
+};
+
+ConsoleIO.App.Browser.prototype.subscribe = function subscribe(serialNumber) {
+    if (!this.isSubscribed(serialNumber)) {
+        ConsoleIO.Service.Socket.emit('subscribe', serialNumber);
+    }
 };
 
 ConsoleIO.App.Browser.prototype.subscribed = function subscribed(data) {
@@ -102,6 +117,17 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
 
     this.view.addOrUpdate(data.serialNumber, data.name.indexOf('|') > -1 ? data.browser : data.name, version);
 
+    this.nodes.processing = true;
+    ConsoleIO.forEach([].concat(this.store.platform, this.store.manufacture, this.store.browser, this.store.version), function (id) {
+        if (this.nodes.closed.indexOf(id) > -1) {
+            this.view.closeItem(id);
+        }
+    }, this);
+
+    ConsoleIO.async(function () {
+        this.nodes.processing = false;
+    }, this, 100);
+
     //set correct icon
     if (data.subscribed && data.online) {
         this.subscribed(data);
@@ -112,9 +138,16 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
     }
 };
 
-ConsoleIO.App.Browser.prototype.render = function render(target) {
-    this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
-    this.view.render(target);
+ConsoleIO.App.Browser.prototype.openNode = function openNode(itemId, state) {
+    if (!this.nodes.processing) {
+        var index = this.nodes.closed.indexOf(itemId);
+
+        if (state === -1 && index === -1) {
+            this.nodes.closed.push(itemId);
+        } else if (index > -1) {
+            this.nodes.closed.splice(index, 1);
+        }
+    }
 };
 
 ConsoleIO.App.Browser.prototype.clear = function clear() {
@@ -140,11 +173,5 @@ ConsoleIO.App.Browser.prototype.refresh = function refresh() {
 ConsoleIO.App.Browser.prototype.onButtonClick = function onButtonClick(btnId) {
     if (btnId === 'refresh') {
         this.refresh();
-    }
-};
-
-ConsoleIO.App.Browser.prototype.subscribe = function subscribe(serialNumber) {
-    if (!this.isSubscribed(serialNumber)) {
-        ConsoleIO.Service.Socket.emit('subscribe', serialNumber);
     }
 };

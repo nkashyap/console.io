@@ -43,10 +43,15 @@ ConsoleIO.View.Device.Explorer.prototype.render = function render(target) {
             this.viewFile(itemId);
         }
     }, this.ctrl);
+
+    this.tree.attachEvent("onOpenEnd", function (itemId, state) {
+        if (scope.tree.hasChildren(itemId)) {
+            this.openNode(itemId, state);
+        }
+    }, this.ctrl);
 };
 
 ConsoleIO.View.Device.Explorer.prototype.destroy = function destroy() {
-    //this.toolbar.unload();
     this.tree.destructor();
 };
 

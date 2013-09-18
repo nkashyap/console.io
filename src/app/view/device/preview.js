@@ -60,7 +60,6 @@ ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
 };
 
 ConsoleIO.View.Device.Preview.prototype.destroy = function destroy() {
-    //this.toolbar.unload();
     document.body.removeChild(this.previewFrame);
     document.body.removeChild(this.image);
     this.dhxWins.unload();
