@@ -66,10 +66,7 @@ ConsoleIO.App = function AppController() {
         title: 'Server',
         contextId: 'server',
         width: 200,
-        height: 250,
-        toolbar: [
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh
-        ]
+        height: 250
     });
 
     this.manager = new ConsoleIO.App.Manager(this, {

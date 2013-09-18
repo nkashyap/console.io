@@ -13,7 +13,7 @@ ConsoleIO.App.Server = function ServerController(parent, model) {
     this.parent = parent;
     this.model = model;
     this.view = new ConsoleIO.View.Server(this, this.model);
-
+    this.isReady = false;
     ConsoleIO.Service.Socket.on('connect', this.onConnect, this);
     ConsoleIO.Service.Socket.on('connecting', this.onConnecting, this);
     ConsoleIO.Service.Socket.on('reconnect', this.onReconnect, this);
@@ -37,26 +37,30 @@ ConsoleIO.App.Server.prototype.render = function render(target) {
 };
 
 ConsoleIO.App.Server.prototype.update = function update(data) {
-    console.log(data);
+    if (!data.mode) {
+        data.mode = ConsoleIO.Service.Socket.connectionMode;
+    }
+
+    this.view.update(data);
 };
 
 
 ConsoleIO.App.Server.prototype.onConnect = function onConnect() {
     this.update({
-        status:  'Connected'
+        status: 'Connected'
     });
 };
 
 ConsoleIO.App.Server.prototype.onConnecting = function onConnecting(mode) {
     this.update({
-        status:  'Connecting',
+        status: 'Connecting',
         mode: mode
     });
 };
 
 ConsoleIO.App.Server.prototype.onReconnect = function onReconnect(mode, attempts) {
     this.update({
-        status:  'Reconnected',
+        status: 'Reconnected',
         mode: mode,
         attempts: attempts
     });
@@ -64,7 +68,7 @@ ConsoleIO.App.Server.prototype.onReconnect = function onReconnect(mode, attempts
 
 ConsoleIO.App.Server.prototype.onReconnecting = function onReconnecting(timeout, attempts) {
     this.update({
-        status:  'Reconnecting',
+        status: 'Reconnecting',
         timeout: timeout,
         attempts: attempts
     });
@@ -72,67 +76,72 @@ ConsoleIO.App.Server.prototype.onReconnecting = function onReconnecting(timeout,
 
 ConsoleIO.App.Server.prototype.onDisconnect = function onDisconnect(reason) {
     this.update({
-        status:  'Disconnected',
+        status: 'Disconnected',
         reason: reason
     });
-    this.parent.browser.clear();
 };
 
 ConsoleIO.App.Server.prototype.onConnectFailed = function onConnectFailed() {
     this.update({
-        status:  'Connection failed',
-        args: ConsoleIO.toArray(arguments)
+        status: 'Connection failed',
+        args: ConsoleIO.toArray(arguments).join(', ')
     });
 };
 
 ConsoleIO.App.Server.prototype.onReconnectFailed = function onReconnectFailed() {
     this.update({
-        status:  'Reconnection failed',
-        args: ConsoleIO.toArray(arguments)
+        status: 'Reconnection failed',
+        args: ConsoleIO.toArray(arguments).join(', ')
     });
 };
 
 ConsoleIO.App.Server.prototype.onError = function onError(error) {
     this.update({
-        status:  'Connection error',
-        error: error
+        status: 'Connection error',
+        error: [error.type, error.message || ''].join(', ')
     });
 };
 
 
-
 ConsoleIO.App.Server.prototype.onReady = function onReady(data) {
+    if (this.isReady) {
+        this.parent.browser.clear();
+        this.parent.manager.removeAll();
+    }
+
+    this.isReady = true;
     ConsoleIO.extend(ConsoleIO.Service.Socket, data);
     this.update({
-        status:  'Ready'
+        status: 'Ready'
     });
 };
 
 ConsoleIO.App.Server.prototype.onOnline = function onOnline(data) {
+    this.isReady = true;
     ConsoleIO.extend(ConsoleIO.Service.Socket, data);
     this.update({
-        status:  'Online'
+        status: 'Online'
     });
 };
 
 ConsoleIO.App.Server.prototype.onOffline = function onOffline(data) {
     ConsoleIO.extend(ConsoleIO.Service.Socket, data);
     this.update({
-        status:  'Offline'
+        status: 'Offline'
     });
 };
 
 ConsoleIO.App.Server.prototype.onUserDisconnect = function onUserDisconnect(data) {
     ConsoleIO.extend(ConsoleIO.Service.Socket, data);
     this.update({
-        status:  'User disconnected'
+        status: 'User disconnected'
     });
     ConsoleIO.Service.Socket.forceReconnect();
 };
 
 ConsoleIO.App.Server.prototype.onUserError = function onUserError(data) {
     this.update({
-        status:  'Server error',
+        status: 'Server error',
         message: data.message
     });
 };

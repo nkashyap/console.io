@@ -75,6 +75,20 @@ ConsoleIO.App.Manager.prototype.remove = function remove(data) {
     }
 };
 
+ConsoleIO.App.Manager.prototype.removeAll = function removeAll() {
+    ConsoleIO.forEach(this.store.device, function (device, index) {
+        device.destroy();
+        this.store.device.splice(index, 1);
+    }, this);
+
+    ConsoleIO.forEach(this.store.serialNumber, function (serialNumber, index) {
+        this.view.remove(serialNumber);
+        this.store.serialNumber.splice(index, 1);
+    }, this);
+
+    this.activeTab = null;
+};
+
 ConsoleIO.App.Manager.prototype.exportReady = function exportReady(data) {
     if (!this.exportFrame) {
         this.exportFrame = ConsoleIO.Service.DHTMLXHelper.createElement({

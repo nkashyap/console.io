@@ -13,7 +13,7 @@ ConsoleIO.View.Server = function ServerView(ctrl, model) {
     this.ctrl = ctrl;
     this.model = model;
     this.target = null;
-    this.toolbar = null;
+    this.grid = null;
 };
 
 
@@ -22,11 +22,26 @@ ConsoleIO.View.Server.prototype.render = function render(target) {
     this.target.setWidth(this.model.width);
     this.target.setHeight(this.model.height);
 
-    this.toolbar = this.target.attachToolbar();
-    this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
-    this.toolbar.attachEvent("onClick", function (itemId) {
-        this.onButtonClick(itemId);
-    }, this.ctrl);
+    this.grid = this.target.attachGrid();
+    this.grid.setIconsPath(ConsoleIO.Settings.iconPath);
+    this.grid.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('grid'));
+    this.grid.setHeader("Name,Value");
+    this.grid.setInitWidthsP("40,60");
+    this.grid.setColAlign("left,left");
+    this.grid.setColTypes("ro,ro");
+    this.grid.setColSorting("str,str");
+    this.grid.setSkin(ConsoleIO.Constant.THEMES.get('win'));
+    this.grid.init();
+};
 
-    ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
+
+ConsoleIO.View.Server.prototype.update = function update(data) {
+    ConsoleIO.forEach(this.grid.getAllRowIds().split(','), function (id) {
+        this.grid.deleteRow(id);
+    }, this);
+
+    ConsoleIO.forEachProperty(data, function (value, property) {
+        this.grid.addRow(property, [property, value]);
+        this.grid.setCellTextStyle(property, 0, "font-weight:bold;text-transform: capitalize;");
+    }, this);
 };
