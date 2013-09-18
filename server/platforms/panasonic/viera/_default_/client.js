@@ -9,6 +9,8 @@
 (function client() {
     return {
         configure: function configure(exports, global) {
+            exports.client.api = global.PanasonicDevice;
+
             if (!exports.serialNumber) {
                 exports.serialNumber = ((new Date().getTime()) + "-" + Math.random()).replace(".", "");
                 exports.storage.addItem('serialNumber', exports.serialNumber, 365);
@@ -22,8 +24,18 @@
         },
 
         onStatus: function onStatus(exports, global) {
-            var info = [];
-            info.push({ connection: { mode: exports.transport.connectionMode }});
+            var info = [],
+                network = exports.client.api.configuration.localSystem.networkInterfaces.item(0);
+
+            info.push({ device: {
+                apiVersion: exports.client.api
+            }});
+
+            info.push({ connection: {
+                mode: exports.transport.connectionMode,
+                macAddress: network.macAddress
+            }});
+
             info.push({ document: { cookie: document.cookie }});
             info.push({ navigator: exports.client.jsonify(global.navigator) });
             info.push({ location: exports.client.jsonify(global.location) });
