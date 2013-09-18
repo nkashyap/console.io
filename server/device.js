@@ -76,7 +76,6 @@ function Device(application, request, manager) {
      * @member {object} web
      */
     this.web = {
-        enabled: false,
         config: {}
     };
 

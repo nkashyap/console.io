@@ -121,10 +121,12 @@
     }
 
     function setUpWebConsole(data) {
-        if (data.enabled) {
-            exports.web.enabled();
-        } else {
-            exports.web.disabled();
+        if (typeof data.enabled !== 'undefined') {
+            if (data.enabled) {
+                exports.web.enabled();
+            } else {
+                exports.web.disabled();
+            }
         }
 
         configWebConsole(data.config);
