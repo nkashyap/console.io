@@ -13,13 +13,16 @@ ConsoleIO.App = function AppController() {
     this.context = {
         browser: "a",
         editor: "b",
-        manager: "c"
+        server: "c",
+        manager: "d"
     };
 
     this.view = new ConsoleIO.View.App(this, {
         target: document.body,
-        type: "3U",
-        status: "<a style='float:left;' target='_blank' href='http://nkashyap.github.io/console.io/'>Welcome to Console.IO</a><span style='float:right;'>Author: Nisheeth Kashyap, Email: nisheeth.k.kashyap@gmail.com</span>"
+        type: "4U",
+        status: "<a style='float:left;' target='_blank' href='http://nkashyap.github.io/console.io/'>" +
+                "Welcome to Console.IO</a><span style='float:right;'>" +
+                "Author: Nisheeth Kashyap, Email: nisheeth.k.kashyap@gmail.com</span>"
     });
 
     this.browser = new ConsoleIO.App.Browser(this, {
@@ -59,16 +62,23 @@ ConsoleIO.App = function AppController() {
         ]
     });
 
+    this.server = new ConsoleIO.App.Server(this, {
+        title: 'Server',
+        contextId: 'server',
+        width: 200,
+        height: 250,
+        toolbar: [
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh
+        ]
+    });
+
     this.manager = new ConsoleIO.App.Manager(this, {
         title: 'Manager',
         contextId: 'manager'
     });
 
-    ConsoleIO.Service.Socket.on('connect', this.onConnect, this);
-    ConsoleIO.Service.Socket.on('disconnect', this.onDisconnect, this);
-    ConsoleIO.Service.Socket.on('user:error', this.notify, this);
     ConsoleIO.Service.Socket.on('user:listScripts', this.listScripts, this);
-    ConsoleIO.Service.Socket.on('user:scriptContent', this.add, this);
+    ConsoleIO.Service.Socket.on('user:scriptContent', this.loadScript, this);
     ConsoleIO.Service.Socket.on('user:scriptSaved', this.scriptSaved, this);
 };
 
@@ -77,6 +87,7 @@ ConsoleIO.App.prototype.render = function render() {
     this.view.render();
     this.browser.render(this.view.getContextById(this.context.browser));
     this.editor.render(this.view.getContextById(this.context.editor));
+    this.server.render(this.view.getContextById(this.context.server));
     this.manager.render(this.view.getContextById(this.context.manager));
 };
 
@@ -90,11 +101,7 @@ ConsoleIO.App.prototype.scriptSaved = function scriptSaved(file) {
     this.editor.addScript(file);
 };
 
-ConsoleIO.App.prototype.notify = function notify() {
-    this.view.notify(ConsoleIO.toArray(arguments));
-};
-
-ConsoleIO.App.prototype.add = function add(data) {
+ConsoleIO.App.prototype.loadScript = function loadScript(data) {
     this.editor.add(data);
 };
 
@@ -106,14 +113,4 @@ ConsoleIO.App.prototype.setTitle = function setTitle(name, title) {
 
 ConsoleIO.App.prototype.getActiveDeviceSerialNumber = function getActiveDeviceSerialNumber() {
     return this.manager.getActiveDeviceSerialNumber();
-};
-
-
-ConsoleIO.App.prototype.onConnect = function onConnect() {
-    this.view.online();
-};
-
-ConsoleIO.App.prototype.onDisconnect = function onDisconnect() {
-    this.browser.clear();
-    this.view.offline();
 };

@@ -30,22 +30,7 @@ ConsoleIO.View.App.prototype.render = function render() {
 
     this.statusBar = this.layout.attachStatusBar();
 
-    this.offline();
-};
-
-
-ConsoleIO.View.App.prototype.online = function online() {
-    var icon = '<img src="' + ConsoleIO.Settings.iconPath + 'online.png" class="status">';
-    this.statusBar.setText(icon + this.model.status);
-};
-
-ConsoleIO.View.App.prototype.offline = function offline() {
-    var icon = '<img src="' + ConsoleIO.Settings.iconPath + 'offline.png" class="status">';
-    this.statusBar.setText(icon + this.model.status);
-};
-
-ConsoleIO.View.App.prototype.notify = function notify(data) {
-    console.log(data);
+    this.statusBar.setText(this.model.status);
 };
 
 

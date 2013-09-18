@@ -227,16 +227,16 @@ ConsoleIO.Service.Socket = {
         this.io.on('connect', this.onConnect);
         this.io.on('connecting', this.onConnecting);
         this.io.on('reconnect', this.onReconnect);
-        this.io.on('reconnecting', this.onReconnecting);
+//        this.io.on('reconnecting', this.onReconnecting);
         this.io.on('disconnect', this.onDisconnect);
-        this.io.on('connect_failed', this.onConnectFailed);
-        this.io.on('reconnect_failed', this.onReconnectFailed);
-        this.io.on('error', this.onError);
+//        this.io.on('connect_failed', this.onConnectFailed);
+//        this.io.on('reconnect_failed', this.onReconnectFailed);
+//        this.io.on('error', this.onError);
 
-        this.io.on('user:ready', this.onReady);
-        this.io.on('user:online', this.onOnline);
-        this.io.on('user:offline', this.onOffline);
-        this.io.on('user:disconnect', this.onUserDisconnect);
+//        this.io.on('user:ready', this.onReady);
+//        this.io.on('user:online', this.onOnline);
+//        this.io.on('user:offline', this.onOffline);
+//        this.io.on('user:disconnect', this.onUserDisconnect);
     },
 
     emit: function emit(name, data) {
@@ -271,65 +271,65 @@ ConsoleIO.Service.Socket = {
         }
     },
 
-    onReady: function onReady(data) {
-        var scope = window.ConsoleIO.extend(ConsoleIO.Service.Socket, data);
-        console.log('onReady', scope.name);
-    },
+//    onReady: function onReady(data) {
+//        var scope = window.ConsoleIO.extend(ConsoleIO.Service.Socket, data);
+//        console.log('onReady', scope.name);
+//    },
 
-    onOnline: function onOnline(data) {
-        var scope = window.ConsoleIO.extend(ConsoleIO.Service.Socket, data);
-        console.log('Online', scope.name);
-    },
+//    onOnline: function onOnline(data) {
+//        var scope = window.ConsoleIO.extend(ConsoleIO.Service.Socket, data);
+//        console.log('Online', scope.name);
+//    },
 
-    onOffline: function onOffline(data) {
-        var scope = window.ConsoleIO.extend(ConsoleIO.Service.Socket, data);
-        console.log('Offline', scope.name);
-    },
+//    onOffline: function onOffline(data) {
+//        var scope = window.ConsoleIO.extend(ConsoleIO.Service.Socket, data);
+//        console.log('Offline', scope.name);
+//    },
 
-    onUserDisconnect: function onUserDisconnect(data) {
-        var scope = window.ConsoleIO.extend(ConsoleIO.Service.Socket, data);
-        scope.forceReconnect();
-
-        console.log('user disconnected', scope.name);
-    },
+//    onUserDisconnect: function onUserDisconnect(data) {
+//        var scope = window.ConsoleIO.extend(ConsoleIO.Service.Socket, data);
+//        scope.forceReconnect();
+//
+//        console.log('user disconnected', scope.name);
+//    },
 
     onConnect: function onConnect() {
         ConsoleIO.Service.Socket.emit('setUp');
-        console.log('Connected to the Server', arguments);
+        //console.log('Connected to the Server', arguments);
     },
 
     onConnecting: function onConnecting(mode) {
         ConsoleIO.Service.Socket.connectionMode = mode;
-        console.log('Connecting to the Server', mode);
+        //console.log('Connecting to the Server', mode);
     },
 
     onReconnect: function onReconnect(mode, attempts) {
         ConsoleIO.Service.Socket.connectionMode = mode;
-        console.log('Reconnected to the Server after ' + attempts + ' attempts.', mode, attempts);
+        //console.log('Reconnected to the Server after ' + attempts + ' attempts.', mode, attempts);
     },
 
-    onReconnecting: function onReconnecting() {
-        console.log('Reconnecting to the Server', arguments);
-    },
+//    onReconnecting: function onReconnecting() {
+//        console.log('Reconnecting to the Server', arguments);
+//    },
 
     onDisconnect: function onDisconnect(reason) {
-        console.log('Disconnected from the Server', reason);
+        //console.log('Disconnected from the Server', reason);
         if (!reason || (reason && reason !== 'booted')) {
             ConsoleIO.Service.Socket.forceReconnect();
         }
-    },
-
-    onConnectFailed: function onConnectFailed() {
-        console.warn('Failed to connect to the Server', arguments);
-    },
-
-    onReconnectFailed: function onReconnectFailed() {
-        console.warn('Failed to reconnect to the Server', arguments);
-    },
-
-    onError: function onError(e) {
-        console.warn('Socket Error', e);
     }
+
+//    onConnectFailed: function onConnectFailed() {
+//        console.warn('Failed to connect to the Server', arguments);
+//    },
+//
+//    onReconnectFailed: function onReconnectFailed() {
+//        console.warn('Failed to reconnect to the Server', arguments);
+//    },
+//
+//    onError: function onError(e) {
+//        console.warn('Socket Error', e);
+//    }
 };
 
 /**
@@ -574,22 +574,7 @@ ConsoleIO.View.App.prototype.render = function render() {
 
     this.statusBar = this.layout.attachStatusBar();
 
-    this.offline();
-};
-
-
-ConsoleIO.View.App.prototype.online = function online() {
-    var icon = '<img src="' + ConsoleIO.Settings.iconPath + 'online.png" class="status">';
-    this.statusBar.setText(icon + this.model.status);
-};
-
-ConsoleIO.View.App.prototype.offline = function offline() {
-    var icon = '<img src="' + ConsoleIO.Settings.iconPath + 'offline.png" class="status">';
-    this.statusBar.setText(icon + this.model.status);
-};
-
-ConsoleIO.View.App.prototype.notify = function notify(data) {
-    console.log(data);
+    this.statusBar.setText(this.model.status);
 };
 
 
@@ -1504,6 +1489,39 @@ ConsoleIO.View.Manager.prototype.getContextById = function getContextById(contex
 };
 
 /**
+ * Created with JetBrains WebStorm.
+ * User: nisheeth
+ * Date: 18/09/13
+ * Time: 15:52
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ */
+
+ConsoleIO.namespace("ConsoleIO.View.Server");
+
+ConsoleIO.View.Server = function ServerView(ctrl, model) {
+    this.ctrl = ctrl;
+    this.model = model;
+    this.target = null;
+    this.toolbar = null;
+};
+
+
+ConsoleIO.View.Server.prototype.render = function render(target) {
+    this.target = target;
+    this.target.setWidth(this.model.width);
+    this.target.setHeight(this.model.height);
+
+    this.toolbar = this.target.attachToolbar();
+    this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
+    this.toolbar.attachEvent("onClick", function (itemId) {
+        this.onButtonClick(itemId);
+    }, this.ctrl);
+
+    ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
+};
+
+/**
  * Created with IntelliJ IDEA.
  * User: nisheeth
  * Date: 27/08/13
@@ -1518,13 +1536,16 @@ ConsoleIO.App = function AppController() {
     this.context = {
         browser: "a",
         editor: "b",
-        manager: "c"
+        server: "c",
+        manager: "d"
     };
 
     this.view = new ConsoleIO.View.App(this, {
         target: document.body,
-        type: "3U",
-        status: "<a style='float:left;' target='_blank' href='http://nkashyap.github.io/console.io/'>Welcome to Console.IO</a><span style='float:right;'>Author: Nisheeth Kashyap, Email: nisheeth.k.kashyap@gmail.com</span>"
+        type: "4U",
+        status: "<a style='float:left;' target='_blank' href='http://nkashyap.github.io/console.io/'>" +
+                "Welcome to Console.IO</a><span style='float:right;'>" +
+                "Author: Nisheeth Kashyap, Email: nisheeth.k.kashyap@gmail.com</span>"
     });
 
     this.browser = new ConsoleIO.App.Browser(this, {
@@ -1564,16 +1585,23 @@ ConsoleIO.App = function AppController() {
         ]
     });
 
+    this.server = new ConsoleIO.App.Server(this, {
+        title: 'Server',
+        contextId: 'server',
+        width: 200,
+        height: 250,
+        toolbar: [
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh
+        ]
+    });
+
     this.manager = new ConsoleIO.App.Manager(this, {
         title: 'Manager',
         contextId: 'manager'
     });
 
-    ConsoleIO.Service.Socket.on('connect', this.onConnect, this);
-    ConsoleIO.Service.Socket.on('disconnect', this.onDisconnect, this);
-    ConsoleIO.Service.Socket.on('user:error', this.notify, this);
     ConsoleIO.Service.Socket.on('user:listScripts', this.listScripts, this);
-    ConsoleIO.Service.Socket.on('user:scriptContent', this.add, this);
+    ConsoleIO.Service.Socket.on('user:scriptContent', this.loadScript, this);
     ConsoleIO.Service.Socket.on('user:scriptSaved', this.scriptSaved, this);
 };
 
@@ -1582,6 +1610,7 @@ ConsoleIO.App.prototype.render = function render() {
     this.view.render();
     this.browser.render(this.view.getContextById(this.context.browser));
     this.editor.render(this.view.getContextById(this.context.editor));
+    this.server.render(this.view.getContextById(this.context.server));
     this.manager.render(this.view.getContextById(this.context.manager));
 };
 
@@ -1595,11 +1624,7 @@ ConsoleIO.App.prototype.scriptSaved = function scriptSaved(file) {
     this.editor.addScript(file);
 };
 
-ConsoleIO.App.prototype.notify = function notify() {
-    this.view.notify(ConsoleIO.toArray(arguments));
-};
-
-ConsoleIO.App.prototype.add = function add(data) {
+ConsoleIO.App.prototype.loadScript = function loadScript(data) {
     this.editor.add(data);
 };
 
@@ -1611,16 +1636,6 @@ ConsoleIO.App.prototype.setTitle = function setTitle(name, title) {
 
 ConsoleIO.App.prototype.getActiveDeviceSerialNumber = function getActiveDeviceSerialNumber() {
     return this.manager.getActiveDeviceSerialNumber();
-};
-
-
-ConsoleIO.App.prototype.onConnect = function onConnect() {
-    this.view.online();
-};
-
-ConsoleIO.App.prototype.onDisconnect = function onDisconnect() {
-    this.browser.clear();
-    this.view.offline();
 };
 
 /**
@@ -3045,6 +3060,147 @@ ConsoleIO.App.Manager.prototype.onTabClick = function onTabClick(tabId) {
         device.activate(true);
     }
 };
+
+/**
+ * Created with JetBrains WebStorm.
+ * User: nisheeth
+ * Date: 18/09/13
+ * Time: 15:52
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ */
+
+ConsoleIO.namespace("ConsoleIO.App.Server");
+
+ConsoleIO.App.Server = function ServerController(parent, model) {
+    this.parent = parent;
+    this.model = model;
+    this.view = new ConsoleIO.View.Server(this, this.model);
+
+    ConsoleIO.Service.Socket.on('connect', this.onConnect, this);
+    ConsoleIO.Service.Socket.on('connecting', this.onConnecting, this);
+    ConsoleIO.Service.Socket.on('reconnect', this.onReconnect, this);
+    ConsoleIO.Service.Socket.on('reconnecting', this.onReconnecting, this);
+    ConsoleIO.Service.Socket.on('disconnect', this.onDisconnect, this);
+    ConsoleIO.Service.Socket.on('connect_failed', this.onConnectFailed, this);
+    ConsoleIO.Service.Socket.on('reconnect_failed', this.onReconnectFailed, this);
+    ConsoleIO.Service.Socket.on('error', this.onError, this);
+
+    ConsoleIO.Service.Socket.on('user:ready', this.onReady, this);
+    ConsoleIO.Service.Socket.on('user:online', this.onOnline, this);
+    ConsoleIO.Service.Socket.on('user:offline', this.onOffline, this);
+    ConsoleIO.Service.Socket.on('user:disconnect', this.onUserDisconnect, this);
+    ConsoleIO.Service.Socket.on('user:error', this.onUserError, this);
+};
+
+
+ConsoleIO.App.Server.prototype.render = function render(target) {
+    this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
+    this.view.render(target);
+};
+
+ConsoleIO.App.Server.prototype.update = function update(data) {
+    console.log(data);
+};
+
+
+ConsoleIO.App.Server.prototype.onConnect = function onConnect() {
+    this.update({
+        status:  'Connected'
+    });
+};
+
+ConsoleIO.App.Server.prototype.onConnecting = function onConnecting(mode) {
+    this.update({
+        status:  'Connecting',
+        mode: mode
+    });
+};
+
+ConsoleIO.App.Server.prototype.onReconnect = function onReconnect(mode, attempts) {
+    this.update({
+        status:  'Reconnected',
+        mode: mode,
+        attempts: attempts
+    });
+};
+
+ConsoleIO.App.Server.prototype.onReconnecting = function onReconnecting(timeout, attempts) {
+    this.update({
+        status:  'Reconnecting',
+        timeout: timeout,
+        attempts: attempts
+    });
+};
+
+ConsoleIO.App.Server.prototype.onDisconnect = function onDisconnect(reason) {
+    this.update({
+        status:  'Disconnected',
+        reason: reason
+    });
+    this.parent.browser.clear();
+};
+
+ConsoleIO.App.Server.prototype.onConnectFailed = function onConnectFailed() {
+    this.update({
+        status:  'Connection failed',
+        args: ConsoleIO.toArray(arguments)
+    });
+};
+
+ConsoleIO.App.Server.prototype.onReconnectFailed = function onReconnectFailed() {
+    this.update({
+        status:  'Reconnection failed',
+        args: ConsoleIO.toArray(arguments)
+    });
+};
+
+ConsoleIO.App.Server.prototype.onError = function onError(error) {
+    this.update({
+        status:  'Connection error',
+        error: error
+    });
+};
+
+
+
+ConsoleIO.App.Server.prototype.onReady = function onReady(data) {
+    ConsoleIO.extend(ConsoleIO.Service.Socket, data);
+    this.update({
+        status:  'Ready'
+    });
+};
+
+ConsoleIO.App.Server.prototype.onOnline = function onOnline(data) {
+    ConsoleIO.extend(ConsoleIO.Service.Socket, data);
+    this.update({
+        status:  'Online'
+    });
+};
+
+ConsoleIO.App.Server.prototype.onOffline = function onOffline(data) {
+    ConsoleIO.extend(ConsoleIO.Service.Socket, data);
+    this.update({
+        status:  'Offline'
+    });
+};
+
+ConsoleIO.App.Server.prototype.onUserDisconnect = function onUserDisconnect(data) {
+    ConsoleIO.extend(ConsoleIO.Service.Socket, data);
+    this.update({
+        status:  'User disconnected'
+    });
+    ConsoleIO.Service.Socket.forceReconnect();
+};
+
+ConsoleIO.App.Server.prototype.onUserError = function onUserError(data) {
+    this.update({
+        status:  'Server error',
+        message: data.message
+    });
+};
+
+
 
 /**
  * Created with IntelliJ IDEA.
