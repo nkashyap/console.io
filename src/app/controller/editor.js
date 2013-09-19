@@ -93,28 +93,6 @@ ConsoleIO.App.Editor.prototype.addScript = function addScript(data) {
     this.fileCanBeSaved = false;
 };
 
-ConsoleIO.App.Editor.prototype.add = function add(data) {
-    if (data.name) {
-        this.fileName = data.name;
-        this.setTitle(this.fileName);
-        this.view.setItemText(ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.id, 'Close');
-    }
-
-    this.fileCanBeSaved = false;
-
-    var content = data.content.replace(/%20/img, " "),
-        lastLine;
-    if (!data.start || data.start === 0) {
-        this.editor.setValue(content);
-    } else if (data.start > 0) {
-        lastLine = this.editor.lastLine();
-        this.editor.replaceRange(content, {
-            line: lastLine,
-            ch: this.editor.getLine(lastLine).length
-        });
-    }
-};
-
 ConsoleIO.App.Editor.prototype.selectAll = function selectAll() {
     var doc = this.getDoc();
     doc.setSelection({line: 0, ch: 0}, {line: doc.lineCount(), ch: 0});
@@ -195,11 +173,11 @@ ConsoleIO.App.Editor.prototype.save = function save(saveAs) {
 };
 
 ConsoleIO.App.Editor.prototype.command = function command() {
-    var cmd = this.editor.getValue();
-    if (cmd) {
+    var content = this.editor.getValue();
+    if (content) {
         ConsoleIO.Service.Socket.emit('execute', {
             serialNumber: this.parent.getActiveDeviceSerialNumber(),
-            code: cmd
+            code: content
         });
     }
 };
@@ -218,6 +196,26 @@ ConsoleIO.App.Editor.prototype.updateButtonState = function updateButtonState() 
     }
 };
 
+
+ConsoleIO.App.Editor.prototype.setValue = function setValue(data) {
+    if (data.name) {
+        this.fileName = data.name;
+        this.setTitle(this.fileName);
+        this.view.setItemText(ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.id, 'Close');
+    }
+
+    var content = data.content.replace(/%20/img, " "),
+        lastLine;
+    if (!data.start || data.start === 0) {
+        this.editor.setValue(content);
+    } else if (data.start > 0) {
+        lastLine = this.editor.lastLine();
+        this.editor.replaceRange(content, {
+            line: lastLine,
+            ch: this.editor.getLine(lastLine).length
+        });
+    }
+};
 
 ConsoleIO.App.Editor.prototype.setTitle = function setTitle() {
     if (this.parent.setTitle) {
@@ -247,7 +245,6 @@ ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, sta
     switch (btnId) {
         case 'beautify':
             ConsoleIO.Service.Socket.emit('beautify', {
-                state: state,
                 name: this.fileName || '',
                 content: this.editor.getValue()
             });

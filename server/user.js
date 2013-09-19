@@ -142,12 +142,8 @@ User.prototype.exportLog = function exportLog(data) {
 };
 
 User.prototype.beautify = function beautify(data) {
-    if (data.state) {
-        data.content = utils.getContent(data.content, 'js');
-        this.emit('fileContent', data);
-    } else {
-        this.readFile(data);
-    }
+    data.content = utils.getContent(data.content, 'js');
+    this.emit('contentBeautified', data);
 };
 
 User.prototype.fileList = function fileList() {

@@ -1560,7 +1560,7 @@ ConsoleIO.App = function AppController() {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Redo,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify
+            ConsoleIO.extend(ConsoleIO.extend({}, ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify), { type: 'button' })
         ]
     });
 
@@ -1579,6 +1579,7 @@ ConsoleIO.App = function AppController() {
     ConsoleIO.Service.Socket.on('user:fileList', this.fileList, this);
     ConsoleIO.Service.Socket.on('user:fileContent', this.fileContent, this);
     ConsoleIO.Service.Socket.on('user:fileSaved', this.fileSaved, this);
+    ConsoleIO.Service.Socket.on('user:contentBeautified', this.contentBeautified, this);
 };
 
 
@@ -1601,7 +1602,13 @@ ConsoleIO.App.prototype.fileSaved = function fileSaved(file) {
 };
 
 ConsoleIO.App.prototype.fileContent = function fileContent(data) {
-    this.editor.add(data);
+    this.editor.fileCanBeSaved = false;
+    this.editor.setValue(data);
+};
+
+ConsoleIO.App.prototype.contentBeautified = function contentBeautified(data) {
+    this.editor.fileCanBeSaved = true;
+    this.editor.setValue(data);
 };
 
 
@@ -2337,7 +2344,7 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
     });
     this.editor = new ConsoleIO.App.Editor(this, {});
 
-    ConsoleIO.Service.Socket.on('device:content:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.on('device:content:' + this.model.serialNumber, this.addContent, this);
     ConsoleIO.Service.Socket.on('device:previewContent:' + this.model.serialNumber, this.preview, this);
     ConsoleIO.Service.Socket.on('device:screenShot:' + this.model.serialNumber, this.screenShot, this);
 };
@@ -2349,7 +2356,7 @@ ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
 };
 
 ConsoleIO.App.Device.Preview.prototype.destroy = function destroy() {
-    ConsoleIO.Service.Socket.off('device:content:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.off('device:content:' + this.model.serialNumber, this.addContent, this);
     ConsoleIO.Service.Socket.off('device:previewContent:' + this.model.serialNumber, this.preview, this);
     ConsoleIO.Service.Socket.off('device:screenShot:' + this.model.serialNumber, this.screenShot, this);
     this.editor = this.editor.destroy();
@@ -2364,8 +2371,8 @@ ConsoleIO.App.Device.Preview.prototype.activate = function activate(state) {
     }
 };
 
-ConsoleIO.App.Device.Preview.prototype.add = function add(data) {
-    this.editor.add(data);
+ConsoleIO.App.Device.Preview.prototype.addContent = function addContent(data) {
+    this.editor.setValue(data);
 };
 
 ConsoleIO.App.Device.Preview.prototype.preview = function preview(data) {
@@ -2480,7 +2487,7 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
         contextId: 'source'
     });
 
-    ConsoleIO.Service.Socket.on('device:source:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.on('device:source:' + this.model.serialNumber, this.addContent, this);
 };
 
 
@@ -2491,7 +2498,7 @@ ConsoleIO.App.Device.Source.prototype.render = function render(target) {
 };
 
 ConsoleIO.App.Device.Source.prototype.destroy = function destroy() {
-    ConsoleIO.Service.Socket.off('device:source:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.off('device:source:' + this.model.serialNumber, this.addContent, this);
     this.explorer = this.explorer.destroy();
     this.editor = this.editor.destroy();
     this.view = this.view.destroy();
@@ -2506,9 +2513,9 @@ ConsoleIO.App.Device.Source.prototype.activate = function activate(state) {
     }
 };
 
-ConsoleIO.App.Device.Source.prototype.add = function add(data) {
+ConsoleIO.App.Device.Source.prototype.addContent = function addContent(data) {
     this.url = data.url;
-    this.editor.add(data);
+    this.editor.setValue(data);
     this.setTitle('source', this.url);
 };
 
@@ -2781,28 +2788,6 @@ ConsoleIO.App.Editor.prototype.addScript = function addScript(data) {
     this.fileCanBeSaved = false;
 };
 
-ConsoleIO.App.Editor.prototype.add = function add(data) {
-    if (data.name) {
-        this.fileName = data.name;
-        this.setTitle(this.fileName);
-        this.view.setItemText(ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.id, 'Close');
-    }
-
-    this.fileCanBeSaved = false;
-
-    var content = data.content.replace(/%20/img, " "),
-        lastLine;
-    if (!data.start || data.start === 0) {
-        this.editor.setValue(content);
-    } else if (data.start > 0) {
-        lastLine = this.editor.lastLine();
-        this.editor.replaceRange(content, {
-            line: lastLine,
-            ch: this.editor.getLine(lastLine).length
-        });
-    }
-};
-
 ConsoleIO.App.Editor.prototype.selectAll = function selectAll() {
     var doc = this.getDoc();
     doc.setSelection({line: 0, ch: 0}, {line: doc.lineCount(), ch: 0});
@@ -2883,11 +2868,11 @@ ConsoleIO.App.Editor.prototype.save = function save(saveAs) {
 };
 
 ConsoleIO.App.Editor.prototype.command = function command() {
-    var cmd = this.editor.getValue();
-    if (cmd) {
+    var content = this.editor.getValue();
+    if (content) {
         ConsoleIO.Service.Socket.emit('execute', {
             serialNumber: this.parent.getActiveDeviceSerialNumber(),
-            code: cmd
+            code: content
         });
     }
 };
@@ -2906,6 +2891,26 @@ ConsoleIO.App.Editor.prototype.updateButtonState = function updateButtonState() 
     }
 };
 
+
+ConsoleIO.App.Editor.prototype.setValue = function setValue(data) {
+    if (data.name) {
+        this.fileName = data.name;
+        this.setTitle(this.fileName);
+        this.view.setItemText(ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.id, 'Close');
+    }
+
+    var content = data.content.replace(/%20/img, " "),
+        lastLine;
+    if (!data.start || data.start === 0) {
+        this.editor.setValue(content);
+    } else if (data.start > 0) {
+        lastLine = this.editor.lastLine();
+        this.editor.replaceRange(content, {
+            line: lastLine,
+            ch: this.editor.getLine(lastLine).length
+        });
+    }
+};
 
 ConsoleIO.App.Editor.prototype.setTitle = function setTitle() {
     if (this.parent.setTitle) {
@@ -2935,7 +2940,6 @@ ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, sta
     switch (btnId) {
         case 'beautify':
             ConsoleIO.Service.Socket.emit('beautify', {
-                state: state,
                 name: this.fileName || '',
                 content: this.editor.getValue()
             });

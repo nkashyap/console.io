@@ -1,5 +1,6 @@
 (function getWindowInterface() {
-    var winList = [], win = {};
+    var winList = [],
+        win = {};
 
     for (var prop in window) {
         winList.push({
@@ -8,7 +9,7 @@
         });
     }
 
-    winList.sort(function (a, b) {
+    winList.sort(function(a, b) {
         if (a.name > b.name)
             return 1;
         if (a.name < b.name)

@@ -59,7 +59,7 @@ ConsoleIO.App = function AppController() {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Redo,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify
+            ConsoleIO.extend(ConsoleIO.extend({}, ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify), { type: 'button' })
         ]
     });
 
@@ -78,6 +78,7 @@ ConsoleIO.App = function AppController() {
     ConsoleIO.Service.Socket.on('user:fileList', this.fileList, this);
     ConsoleIO.Service.Socket.on('user:fileContent', this.fileContent, this);
     ConsoleIO.Service.Socket.on('user:fileSaved', this.fileSaved, this);
+    ConsoleIO.Service.Socket.on('user:contentBeautified', this.contentBeautified, this);
 };
 
 
@@ -100,7 +101,13 @@ ConsoleIO.App.prototype.fileSaved = function fileSaved(file) {
 };
 
 ConsoleIO.App.prototype.fileContent = function fileContent(data) {
-    this.editor.add(data);
+    this.editor.fileCanBeSaved = false;
+    this.editor.setValue(data);
+};
+
+ConsoleIO.App.prototype.contentBeautified = function contentBeautified(data) {
+    this.editor.fileCanBeSaved = true;
+    this.editor.setValue(data);
 };
 
 

@@ -87,7 +87,7 @@ var Utils = {
                     "indent_level": 0,
                     "indent_with_tabs": false,
                     "preserve_newlines": true,
-                    "max_preserve_newlines": 10,
+                    "max_preserve_newlines": 5,
                     "jslint_happy": false,
                     "brace_style": "collapse",
                     "keep_array_indentation": false,

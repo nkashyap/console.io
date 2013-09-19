@@ -53,7 +53,7 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
         contextId: 'source'
     });
 
-    ConsoleIO.Service.Socket.on('device:source:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.on('device:source:' + this.model.serialNumber, this.addContent, this);
 };
 
 
@@ -64,7 +64,7 @@ ConsoleIO.App.Device.Source.prototype.render = function render(target) {
 };
 
 ConsoleIO.App.Device.Source.prototype.destroy = function destroy() {
-    ConsoleIO.Service.Socket.off('device:source:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.off('device:source:' + this.model.serialNumber, this.addContent, this);
     this.explorer = this.explorer.destroy();
     this.editor = this.editor.destroy();
     this.view = this.view.destroy();
@@ -79,9 +79,9 @@ ConsoleIO.App.Device.Source.prototype.activate = function activate(state) {
     }
 };
 
-ConsoleIO.App.Device.Source.prototype.add = function add(data) {
+ConsoleIO.App.Device.Source.prototype.addContent = function addContent(data) {
     this.url = data.url;
-    this.editor.add(data);
+    this.editor.setValue(data);
     this.setTitle('source', this.url);
 };
 

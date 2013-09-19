@@ -32,7 +32,7 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
     });
     this.editor = new ConsoleIO.App.Editor(this, {});
 
-    ConsoleIO.Service.Socket.on('device:content:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.on('device:content:' + this.model.serialNumber, this.addContent, this);
     ConsoleIO.Service.Socket.on('device:previewContent:' + this.model.serialNumber, this.preview, this);
     ConsoleIO.Service.Socket.on('device:screenShot:' + this.model.serialNumber, this.screenShot, this);
 };
@@ -44,7 +44,7 @@ ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
 };
 
 ConsoleIO.App.Device.Preview.prototype.destroy = function destroy() {
-    ConsoleIO.Service.Socket.off('device:content:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.off('device:content:' + this.model.serialNumber, this.addContent, this);
     ConsoleIO.Service.Socket.off('device:previewContent:' + this.model.serialNumber, this.preview, this);
     ConsoleIO.Service.Socket.off('device:screenShot:' + this.model.serialNumber, this.screenShot, this);
     this.editor = this.editor.destroy();
@@ -59,8 +59,8 @@ ConsoleIO.App.Device.Preview.prototype.activate = function activate(state) {
     }
 };
 
-ConsoleIO.App.Device.Preview.prototype.add = function add(data) {
-    this.editor.add(data);
+ConsoleIO.App.Device.Preview.prototype.addContent = function addContent(data) {
+    this.editor.setValue(data);
 };
 
 ConsoleIO.App.Device.Preview.prototype.preview = function preview(data) {
