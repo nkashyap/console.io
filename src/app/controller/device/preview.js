@@ -21,6 +21,8 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
@@ -52,6 +54,7 @@ ConsoleIO.App.Device.Preview.prototype.destroy = function destroy() {
 
 ConsoleIO.App.Device.Preview.prototype.activate = function activate(state) {
     if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
+        this.editor.setOption('lineWrapping', this.parent.wordWrap);
         this.refresh();
     }
 };
@@ -72,13 +75,18 @@ ConsoleIO.App.Device.Preview.prototype.screenShot = function screenShot(data) {
 
 ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
     ConsoleIO.Service.Socket.emit('reloadHTML', {
-        serialNumber: this.model.serialNumber
+        serialNumber: this.model.serialNumber,
+        beautify: this.parent.beautify
     });
 };
 
 
 ConsoleIO.App.Device.Preview.prototype.setTabActive = function setTabActive() {
     this.view.setTabActive();
+};
+
+ConsoleIO.App.Device.Preview.prototype.setItemState = function setItemState(id, state) {
+    this.view.setItemState(id, state);
 };
 
 
@@ -100,6 +108,13 @@ ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(bt
                 setTimeout(function () {
                     scope.view.toggleButton('screenShot', true);
                 }, 10000);
+                break;
+            default:
+                this.parent.parent.parent.server.update({
+                    status: 'Unhandled event',
+                    btnId: btnId,
+                    state: state
+                });
                 break;
         }
     }

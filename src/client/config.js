@@ -20,7 +20,7 @@
         "socket.io": "socket.io/socket.io.js",
         webStyle: "console.css",
         proxy: 'proxy',
-        maxDataPacketSize: 2500,
+        maxDataPacketSize: 5000,
 
         nativeConsole: true,
         web: false,

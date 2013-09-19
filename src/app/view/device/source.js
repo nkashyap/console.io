@@ -40,7 +40,7 @@ ConsoleIO.View.Device.Source.prototype.render = function render(target) {
 };
 
 ConsoleIO.View.Device.Source.prototype.destroy = function destroy() {
-    this.target.removeTab(this.id, true);
+    this.target.removeTab(this.id);
 };
 
 
@@ -57,5 +57,11 @@ ConsoleIO.View.Device.Source.prototype.setTitle = function setTitle(contextId, t
     if (this.layout) {
         this.layout.cells(contextId).setText(title);
         this.layout.setCollapsedText(contextId, title);
+    }
+};
+
+ConsoleIO.View.Device.Source.prototype.setItemState = function setItemState(id, state) {
+    if (this.toolbar) {
+        this.toolbar.setItemState(id, state);
     }
 };

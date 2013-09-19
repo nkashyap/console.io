@@ -7,7 +7,8 @@
  */
 
 var fs = require('fs'),
-    UglifyJS = require('uglify-js');
+    UglifyJS = require('uglify-js'),
+    beautify = require('js-beautify');
 
 var Utils = {
     fileCache: {},
@@ -28,7 +29,6 @@ var Utils = {
 
         return filePath;
     },
-
 
     getDeviceScript: function getDeviceScript(basePath, config, file) {
         var path;
@@ -70,6 +70,52 @@ var Utils = {
         }
 
         return content.code.indexOf('!') === 0 ? content.code.substring(1, content.code.length) : content.code;
+    },
+
+    getContent: function getContent(content, type) {
+        switch (type) {
+            case 'css':
+                content = beautify.css_beautify(content, {
+                    "indent_size": 4,
+                    "indent_char": " "
+                });
+                break;
+            case 'js':
+                content = beautify.js_beautify(content, {
+                    "indent_size": 4,
+                    "indent_char": " ",
+                    "indent_level": 0,
+                    "indent_with_tabs": false,
+                    "preserve_newlines": true,
+                    "max_preserve_newlines": 10,
+                    "jslint_happy": false,
+                    "brace_style": "collapse",
+                    "keep_array_indentation": false,
+                    "keep_function_indentation": false,
+                    "space_before_conditional": true,
+                    "break_chained_methods": false,
+                    "eval_code": false,
+                    "unescape_strings": false,
+                    "wrap_line_length": 0
+                });
+
+                break;
+            default:
+                content = beautify.html_beautify(content, {
+                    "indent_inner_html": true,
+                    "indent_size": 4,
+                    "indent_char": " ",
+                    "brace_style": "collapse",
+                    "indent_scripts": "normal",
+                    "wrap_line_length": 0,
+                    "preserve_newlines": true,
+                    "max_preserve_newlines": 10
+                });
+                break;
+        }
+
+        console.log('Content beautify as ' + type);
+        return content;
     }
 };
 

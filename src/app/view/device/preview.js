@@ -64,7 +64,7 @@ ConsoleIO.View.Device.Preview.prototype.destroy = function destroy() {
     document.body.removeChild(this.previewFrame);
     document.body.removeChild(this.image);
     this.dhxWins.unload();
-    this.target.removeTab(this.id, true);
+    this.target.removeTab(this.id);
 };
 
 
@@ -122,4 +122,10 @@ ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
 
 ConsoleIO.View.Device.Preview.prototype.setTabActive = function setTabActive() {
     this.target.setTabActive(this.id);
+};
+
+ConsoleIO.View.Device.Preview.prototype.setItemState = function setItemState(id, state) {
+    if (this.toolbar) {
+        this.toolbar.setItemState(id, state);
+    }
 };

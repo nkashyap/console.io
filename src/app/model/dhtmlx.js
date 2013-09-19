@@ -26,7 +26,7 @@ ConsoleIO.Model.DHTMLX = {
 
         SearchText: { id: 'searchText', type: 'input', value: '', width: 100, tooltip: 'Search Text' },
         Search: { id: 'search', type: 'button', imgEnabled: 'search.gif', imgDisabled: 'search_dis.gif', tooltip: 'Search' },
-        Execute: { id: 'execute', type: 'button', text: 'Execute', imgEnabled: 'execute.png', imgDisabled: 'execute_dis.png', tooltip: 'Execute Script' },
+        Execute: { id: 'execute', type: 'button', text: 'Execute', imgEnabled: 'execute.png', imgDisabled: 'execute_dis.png', tooltip: 'Execute (Ctrl+Enter)' },
 
         Clear: { id: 'clear', type: 'button', text: 'Clear', imgEnabled: 'clear.gif', tooltip: 'Clear' },
         Refresh: { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' },
@@ -51,6 +51,7 @@ ConsoleIO.Model.DHTMLX = {
         Web: { id: 'web', type: 'twoState', text: 'Web Console', imgEnabled: 'console.gif', tooltip: 'Web Console', pressed: false },
         PlayPause: { id: 'playPause', type: 'twoState', text: 'Pause', imgEnabled: 'pause.png', tooltip: 'Pause logs', pressed: false },
         WordWrap: { id: 'wordwrap', type: 'twoState', text: 'Word-Wrap', imgEnabled: 'word_wrap.gif', tooltip: 'Word Wrap', pressed: false },
+        Beautify: { id: 'beautify', type: 'twoState', text: 'Beautify', imgEnabled: 'beautify.png', tooltip: 'Beautify', pressed: false },
 
         FilterLabel: { id: 'filterLabel', type: 'text', text: 'Filters:', tooltip: 'Filter Console Logs' },
         Info: { id: 'filter-info', type: 'twoState', text: 'Info', imgEnabled: 'info.gif', tooltip: 'Info', pressed: false },

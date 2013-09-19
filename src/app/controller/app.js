@@ -21,8 +21,8 @@ ConsoleIO.App = function AppController() {
         target: document.body,
         type: "4U",
         status: "<a style='float:left;' target='_blank' href='http://nkashyap.github.io/console.io/'>" +
-                "Welcome to Console.IO</a><span style='float:right;'>" +
-                "Author: Nisheeth Kashyap, Email: nisheeth.k.kashyap@gmail.com</span>"
+            "Welcome to Console.IO</a><span style='float:right;'>" +
+            "Author: Nisheeth Kashyap, Email: nisheeth.k.kashyap@gmail.com</span>"
     });
 
     this.browser = new ConsoleIO.App.Browser(this, {
@@ -44,8 +44,11 @@ ConsoleIO.App = function AppController() {
             readOnly: false
         },
         toolbar: [
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Execute,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Open,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Save,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Clear,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Cut,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
@@ -55,10 +58,8 @@ ConsoleIO.App = function AppController() {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Undo,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Redo,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Clear,
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Execute
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify
         ]
     });
 

@@ -21,7 +21,8 @@
     "dependencies": {
         "express.io": "latest",
         "request": "latest",
-        "uglify-js": "latest"
+        "uglify-js": "latest",
+        "js-beautify": "latest"
     },
     "devDependencies": {
         "grunt": "latest",

@@ -164,7 +164,17 @@ function Manager() {
         };
     }
 
-    function defineUserCommandRouteHandler(command, property) {
+    function defineUserCommandRouteHandler(property, name) {
+        return function (request) {
+            var device = getDeviceBySerialNumber(request.data.serialNumber);
+
+            if (device && device[property]) {
+                device[property](name, request.data);
+            }
+        };
+    }
+
+    function defineUserCommandRouteEmitHandler(command, property) {
         return function (request) {
             var device = getDeviceBySerialNumber(request.data.serialNumber);
             if (device) {
@@ -239,69 +249,16 @@ function Manager() {
          * Device event routes handler.
          */
         app.io.route('device', {
-
-            /**
-             * Device registration handler
-             */
             setUp: registerDevice,
-
-            /**
-             * Device registration handler
-             */
             register: registerDevice,
-
-            /**
-             * Device console event routes handler.
-             * gives client console logs
-             */
             console: defineDeviceCommandRouteHandler('command', 'console'),
-
-            /**
-             * Device files event routes handler.
-             * list all files attached in the client
-             */
             files: defineDeviceCommandRouteHandler('command', 'files'),
-
-            /**
-             * Device content event routes handler.
-             * gives HTML content of the page
-             */
-            content: defineDeviceCommandRouteHandler('command', 'content'),
-
-            /**
-             * Device content event routes handler.
-             * gives Preview content of the page
-             */
             previewContent: defineDeviceCommandRouteHandler('command', 'previewContent'),
-
-            /**
-             * Device content event routes handler.
-             * sent Screen Shot of the page
-             */
             screenShot: defineDeviceCommandRouteHandler('command', 'screenShot'),
-
-            /**
-             * Device source event routes handler.
-             * gives source content of the file
-             */
-            source: defineDeviceCommandRouteHandler('command', 'source'),
-
-            /**
-             * Device status event routes handler.
-             * gives device status information
-             */
+            source: defineDeviceCommandRouteHandler('processSource', 'source'),
+            content: defineDeviceCommandRouteHandler('processSource', 'content'),
             status: defineDeviceRouteHandler('status'),
-
-            /**
-             * Device web console event routes handler.
-             * add web console
-             */
             webStatus: defineDeviceRouteHandler('webStatus'),
-
-            /**
-             * Device serial Number event routes handler.
-             * sets device number
-             */
             serialNumber: defineDeviceRouteHandler('setSerialNumber')
         });
 
@@ -309,101 +266,27 @@ function Manager() {
          * User event routes handler.
          */
         app.io.route('user', {
-            /**
-             * User registration handler.
-             */
             setUp: registerUser,
-
-            /**
-             * call server to emit list of all registered device.
-             */
             refreshRegisteredDeviceList: notifyRegisteredDevicesToUser,
-
-            /**
-             * User command to set device name
-             */
             deviceName: changeDeviceName,
-
-            /**
-             * User command to add/remove web console from client device
-             */
-            webConfig: defineUserCommandRouteHandler('web:config', true),
-
-            /**
-             * User command to control Web console on client device
-             */
+            webConfig: defineUserCommandRouteEmitHandler('web:config', true),
             webControl: defineDeviceMethodRouteHandler('control'),
-
-            /**
-             * User command to reload client device
-             */
-            reloadDevice: defineUserCommandRouteHandler('reload'),
-
-            /**
-             * User command to reload file list from device
-             */
-            reloadFiles: defineUserCommandRouteHandler('fileList'),
-
-            /**
-             * User command to get HTML content from client device
-             */
-            reloadHTML: defineUserCommandRouteHandler('htmlContent'),
-
-            /**
-             * User command to get HTML preview content from client device
-             */
-            previewHTML: defineUserCommandRouteHandler('previewHTML'),
-
-            /**
-             * User command to get screen shot of client device
-             */
-            captureScreen: defineUserCommandRouteHandler('captureScreen'),
-
-            /**
-             * User command to get file source from client device
-             */
-            fileSource: defineUserCommandRouteHandler('fileSource', true),
-
-            /**
-             * User command to get client device status
-             */
-            deviceStatus: defineUserCommandRouteHandler('status'),
-
-            /**
-             * command to execute on client side
-             */
-            execute: defineUserCommandRouteHandler('command', 'code'),
-
-            /**
-             * Save script route handler
-             */
+            fileSource: defineUserCommandRouteHandler('requestSource', 'fileSource'),
+            reloadHTML: defineUserCommandRouteHandler('requestSource', 'htmlContent'),
+            reloadDevice: defineUserCommandRouteEmitHandler('reload'),
+            reloadFiles: defineUserCommandRouteEmitHandler('fileList'),
+            previewHTML: defineUserCommandRouteEmitHandler('previewHTML'),
+            captureScreen: defineUserCommandRouteEmitHandler('captureScreen'),
+            deviceStatus: defineUserCommandRouteEmitHandler('status'),
+            execute: defineUserCommandRouteEmitHandler('command', 'code'),
             saveScript: defineUserRouteHandler('saveScript'),
-
-            /**
-             * load script route handler
-             */
             loadScript: defineUserRouteHandler('loadScript'),
-
-            /**
-             * Export logs route handler
-             */
             exportHTML: defineUserRouteHandler('exportHTML'),
-
-            /**
-             * subscribe route handler
-             */
             subscribe: defineUserRouteHandler('subscribe'),
-
-            /**
-             * unSubscribe route handler
-             */
             unSubscribe: defineUserRouteHandler('unSubscribe')
         });
     }
 
-    /**
-     * Return static object with setUp method
-     */
     return {
         setUp: setUp
     };

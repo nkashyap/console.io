@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-18
+ * Date: 2013-09-19
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -1749,6 +1749,7 @@ ConsoleIO.version = "0.2.0-1";
         }
     }
 
+    // dispatch data in chunk to avoid core mirror locking up
     function dataPacket(name, data) {
         var content = data.content,
             length = content.length,
@@ -1756,7 +1757,7 @@ ConsoleIO.version = "0.2.0-1";
             start = 0;
 
         while (start < length) {
-            dispatchPacket(name, data, content.substr(start, config.maxDataPacketSize), start, config.maxDataPacketSize);
+            dispatchPacket(name, data, content.substr(start, config.maxDataPacketSize), start, length);
 
             if (start === 0) {
                 start = config.maxDataPacketSize;
@@ -1848,7 +1849,8 @@ ConsoleIO.version = "0.2.0-1";
     function onFileSource(data) {
         try {
             var xhr = getXHR(),
-                proxy = exports.util.getUrl('proxy');
+                proxy = exports.util.getUrl('proxy'),
+                originalURL = data.originalURL || data.url;
 
             if (xhr) {
                 xhr.open("GET", data.url, true);
@@ -1862,38 +1864,39 @@ ConsoleIO.version = "0.2.0-1";
                         }
 
                         dataPacket('source', {
-                            url: decodeURIComponent(data.url),
+                            url: originalURL,
                             content: content
                         });
                     }
                 };
 
-                xhr.onloadend = function onloadend(e) {
-                    exports.console.info('file:onloadend', e);
+                xhr.onloadend = function onLoadEnd(e) {
+                    exports.console.info('file:onLoadEnd', e);
                 };
 
-                xhr.onloadstart = function onloadstart(e) {
-                    exports.console.info('file:onloadstart', e);
+                xhr.onloadstart = function onLoadStart(e) {
+                    exports.console.info('file:onLoadStart', e);
                 };
 
-                xhr.onprogress = function onprogress(e) {
-                    exports.console.info('file:onprogress', e);
+                xhr.onprogress = function onProgress(e) {
+                    exports.console.info('file:onProgress', e);
                 };
 
-                xhr.onload = function onload(e) {
-                    exports.console.info('file:onload', e);
+                xhr.onload = function onLoad(e) {
+                    exports.console.info('file:onLoad', e);
                 };
 
-                xhr.onerror = function (e) {
+                xhr.onerror = function onError(e) {
                     // if xhr fails to get file content use proxy to retrieve it
                     // it might be because of cross domain issue
                     if (data.url.indexOf(proxy) === -1) {
+                        data.originalURL = data.url;
                         data.url = proxy + '?url=' + encodeURIComponent(data.url);
                         onFileSource(data);
                     } else {
-                        exports.console.exception('file:onerror', e);
+                        exports.console.exception('file:onError', e);
                         exports.transport.emit('source', {
-                            url: decodeURIComponent(data.url),
+                            url: originalURL,
                             content: 'XMLHttpRequest Error: Possibally Access-Control-Allow-Origin security issue.'
                         });
                     }
@@ -1902,7 +1905,7 @@ ConsoleIO.version = "0.2.0-1";
                 xhr.send(null);
             } else {
                 exports.transport.emit('source', {
-                    url: decodeURIComponent(data.url),
+                    url: originalURL,
                     content: 'XMLHttpRequest request not supported by the browser.'
                 });
             }
@@ -2114,7 +2117,7 @@ ConsoleIO.version = "0.2.0-1";
         "socket.io": "socket.io/socket.io.js",
         webStyle: "console.css",
         proxy: 'proxy',
-        maxDataPacketSize: 2500,
+        maxDataPacketSize: 5000,
 
         nativeConsole: true,
         web: false,

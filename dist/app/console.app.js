@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-18
+ * Date: 2013-09-19
 */
 
 /**
@@ -455,7 +455,7 @@ ConsoleIO.Model.DHTMLX = {
 
         SearchText: { id: 'searchText', type: 'input', value: '', width: 100, tooltip: 'Search Text' },
         Search: { id: 'search', type: 'button', imgEnabled: 'search.gif', imgDisabled: 'search_dis.gif', tooltip: 'Search' },
-        Execute: { id: 'execute', type: 'button', text: 'Execute', imgEnabled: 'execute.png', imgDisabled: 'execute_dis.png', tooltip: 'Execute Script' },
+        Execute: { id: 'execute', type: 'button', text: 'Execute', imgEnabled: 'execute.png', imgDisabled: 'execute_dis.png', tooltip: 'Execute (Ctrl+Enter)' },
 
         Clear: { id: 'clear', type: 'button', text: 'Clear', imgEnabled: 'clear.gif', tooltip: 'Clear' },
         Refresh: { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' },
@@ -480,6 +480,7 @@ ConsoleIO.Model.DHTMLX = {
         Web: { id: 'web', type: 'twoState', text: 'Web Console', imgEnabled: 'console.gif', tooltip: 'Web Console', pressed: false },
         PlayPause: { id: 'playPause', type: 'twoState', text: 'Pause', imgEnabled: 'pause.png', tooltip: 'Pause logs', pressed: false },
         WordWrap: { id: 'wordwrap', type: 'twoState', text: 'Word-Wrap', imgEnabled: 'word_wrap.gif', tooltip: 'Word Wrap', pressed: false },
+        Beautify: { id: 'beautify', type: 'twoState', text: 'Beautify', imgEnabled: 'beautify.png', tooltip: 'Beautify', pressed: false },
 
         FilterLabel: { id: 'filterLabel', type: 'text', text: 'Filters:', tooltip: 'Filter Console Logs' },
         Info: { id: 'filter-info', type: 'twoState', text: 'Info', imgEnabled: 'info.gif', tooltip: 'Info', pressed: false },
@@ -718,7 +719,7 @@ ConsoleIO.View.Device.Console.prototype.render = function render(target) {
 ConsoleIO.View.Device.Console.prototype.destroy = function destroy() {
     this.clear();
     this.container.parentNode.removeChild(this.container);
-    this.target.removeTab(this.id, true);
+    this.target.removeTab(this.id);
 };
 
 
@@ -909,13 +910,13 @@ ConsoleIO.View.Device.Explorer.prototype.render = function render(target) {
 
     this.tree.attachEvent("onDblClick", function (itemId) {
         if (!scope.tree.hasChildren(itemId)) {
-            this.viewFile(itemId);
+            this.onDblClick(itemId);
         }
     }, this.ctrl);
 
     this.tree.attachEvent("onOpenEnd", function (itemId, state) {
         if (scope.tree.hasChildren(itemId)) {
-            this.openNode(itemId, state);
+            this.onOpenEnd(itemId, state);
         }
     }, this.ctrl);
 };
@@ -1016,7 +1017,7 @@ ConsoleIO.View.Device.Preview.prototype.destroy = function destroy() {
     document.body.removeChild(this.previewFrame);
     document.body.removeChild(this.image);
     this.dhxWins.unload();
-    this.target.removeTab(this.id, true);
+    this.target.removeTab(this.id);
 };
 
 
@@ -1076,6 +1077,12 @@ ConsoleIO.View.Device.Preview.prototype.setTabActive = function setTabActive() {
     this.target.setTabActive(this.id);
 };
 
+ConsoleIO.View.Device.Preview.prototype.setItemState = function setItemState(id, state) {
+    if (this.toolbar) {
+        this.toolbar.setItemState(id, state);
+    }
+};
+
 /**
  * Created with IntelliJ IDEA.
  * User: nisheeth
@@ -1118,7 +1125,7 @@ ConsoleIO.View.Device.Source.prototype.render = function render(target) {
 };
 
 ConsoleIO.View.Device.Source.prototype.destroy = function destroy() {
-    this.target.removeTab(this.id, true);
+    this.target.removeTab(this.id);
 };
 
 
@@ -1135,6 +1142,12 @@ ConsoleIO.View.Device.Source.prototype.setTitle = function setTitle(contextId, t
     if (this.layout) {
         this.layout.cells(contextId).setText(title);
         this.layout.setCollapsedText(contextId, title);
+    }
+};
+
+ConsoleIO.View.Device.Source.prototype.setItemState = function setItemState(id, state) {
+    if (this.toolbar) {
+        this.toolbar.setItemState(id, state);
     }
 };
 
@@ -1186,7 +1199,7 @@ ConsoleIO.View.Device.Status.prototype.render = function render(target) {
 };
 
 ConsoleIO.View.Device.Status.prototype.destroy = function destroy() {
-    this.target.removeTab(this.id, true);
+    this.target.removeTab(this.id);
 };
 
 
@@ -1509,8 +1522,8 @@ ConsoleIO.App = function AppController() {
         target: document.body,
         type: "4U",
         status: "<a style='float:left;' target='_blank' href='http://nkashyap.github.io/console.io/'>" +
-                "Welcome to Console.IO</a><span style='float:right;'>" +
-                "Author: Nisheeth Kashyap, Email: nisheeth.k.kashyap@gmail.com</span>"
+            "Welcome to Console.IO</a><span style='float:right;'>" +
+            "Author: Nisheeth Kashyap, Email: nisheeth.k.kashyap@gmail.com</span>"
     });
 
     this.browser = new ConsoleIO.App.Browser(this, {
@@ -1532,8 +1545,11 @@ ConsoleIO.App = function AppController() {
             readOnly: false
         },
         toolbar: [
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Execute,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Open,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Save,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Clear,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Cut,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
@@ -1543,10 +1559,8 @@ ConsoleIO.App = function AppController() {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Undo,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Redo,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Clear,
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Execute
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify
         ]
     });
 
@@ -1615,6 +1629,8 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.parent = parent;
     this.model = model;
     this.activeTab = ConsoleIO.Settings.defaultTab;
+    this.beautify = this.model.web.config.beautify || ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify.pressed;
+    this.wordWrap = ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.pressed;
 
     this.console = new ConsoleIO.App.Device.Console(this, this.model);
     this.source = new ConsoleIO.App.Device.Source(this, this.model);
@@ -1634,6 +1650,14 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
     var panel = this[this.activeTab];
     if (panel) {
         panel.setTabActive();
+    }
+
+    if (this.beautify) {
+        this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify.id, this.beautify);
+    }
+
+    if (this.wordWrap) {
+        this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.id, this.wordWrap);
     }
 };
 
@@ -1659,6 +1683,12 @@ ConsoleIO.App.Device.prototype.activate = function activate(state) {
     } else if (this.activeTab) {
         this[this.activeTab].activate(state);
     }
+};
+
+
+ConsoleIO.App.Device.prototype.setItemState = function setItemState(id, state) {
+    this.source.setItemState(id, state);
+    this.preview.setItemState(id, state);
 };
 
 
@@ -1691,12 +1721,19 @@ ConsoleIO.App.Device.prototype.onButtonClick = function onButtonClick(tab, btnId
             tab.refresh();
             handled = true;
             break;
+        case 'beautify':
+            this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify.id, this.beautify = state);
+            handled = true;
+            tab.refresh();
+            break;
 
         //common on Source and Preview Tabs
         case 'wordwrap':
+            this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.id, this.wordWrap = state);
             tab.editor.setOption('lineWrapping', state);
             handled = true;
             break;
+
         case 'selectAll':
             tab.editor.selectAll();
             handled = true;
@@ -2114,6 +2151,13 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
                         content: this.view.getHTML()
                     });
                     break;
+                default:
+                    this.parent.parent.parent.server.update({
+                        status: 'Unhandled event',
+                        btnId: btnId,
+                        state: state
+                    });
+                    break;
             }
         }
     }
@@ -2224,26 +2268,6 @@ ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
     });
 };
 
-ConsoleIO.App.Device.Explorer.prototype.openNode = function openNode(itemId, state) {
-    if (!this.nodes.processing) {
-        var index = this.nodes.opened.indexOf(itemId);
-
-        if (state === 1 && index === -1) {
-            this.nodes.opened.push(itemId);
-        } else if (index > -1) {
-            this.nodes.opened.splice(index, 1);
-        }
-    }
-};
-
-ConsoleIO.App.Device.Explorer.prototype.viewFile = function viewFile(fileId) {
-    ConsoleIO.Service.Socket.emit('fileSource', {
-        serialNumber: this.model.serialNumber,
-        url: (fileId.indexOf("http") === -1 ? '/' : '') + fileId.replace(/[|]/igm, "/")
-    });
-};
-
-
 ConsoleIO.App.Device.Explorer.prototype.getParentId = function getParentId(list, item) {
     var index = list.indexOf(item);
     if (index > 0) {
@@ -2259,6 +2283,24 @@ ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(b
     }
 };
 
+ConsoleIO.App.Device.Explorer.prototype.onDblClick = function onDblClick(btnId) {
+    ConsoleIO.Service.Socket.emit('fileSource', {
+        serialNumber: this.model.serialNumber,
+        url: (btnId.indexOf("http") === -1 ? '/' : '') + btnId.replace(/[|]/igm, "/")
+    });
+};
+
+ConsoleIO.App.Device.Explorer.prototype.onOpenEnd = function onOpenEnd(itemId, state) {
+    if (!this.nodes.processing) {
+        var index = this.nodes.opened.indexOf(itemId);
+
+        if (state === 1 && index === -1) {
+            this.nodes.opened.push(itemId);
+        } else if (index > -1) {
+            this.nodes.opened.splice(index, 1);
+        }
+    }
+};
 
 
 /**
@@ -2284,6 +2326,8 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
@@ -2315,6 +2359,7 @@ ConsoleIO.App.Device.Preview.prototype.destroy = function destroy() {
 
 ConsoleIO.App.Device.Preview.prototype.activate = function activate(state) {
     if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
+        this.editor.setOption('lineWrapping', this.parent.wordWrap);
         this.refresh();
     }
 };
@@ -2335,13 +2380,18 @@ ConsoleIO.App.Device.Preview.prototype.screenShot = function screenShot(data) {
 
 ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
     ConsoleIO.Service.Socket.emit('reloadHTML', {
-        serialNumber: this.model.serialNumber
+        serialNumber: this.model.serialNumber,
+        beautify: this.parent.beautify
     });
 };
 
 
 ConsoleIO.App.Device.Preview.prototype.setTabActive = function setTabActive() {
     this.view.setTabActive();
+};
+
+ConsoleIO.App.Device.Preview.prototype.setItemState = function setItemState(id, state) {
+    this.view.setItemState(id, state);
 };
 
 
@@ -2364,6 +2414,13 @@ ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(bt
                     scope.view.toggleButton('screenShot', true);
                 }, 10000);
                 break;
+            default:
+                this.parent.parent.parent.server.update({
+                    status: 'Unhandled event',
+                    btnId: btnId,
+                    state: state
+                });
+                break;
         }
     }
 };
@@ -2383,6 +2440,7 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
     this.parent = parent;
     this.model = model;
     this.url = null;
+
     this.context = {
         explorer: "a",
         source: "b"
@@ -2396,10 +2454,13 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy
         ]
     });
+
     this.explorer = new ConsoleIO.App.Device.Explorer(this, {
         name: this.model.name,
         serialNumber: this.model.serialNumber,
@@ -2410,6 +2471,7 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh
         ]
     });
+
     this.editor = new ConsoleIO.App.Editor(this, {
         codeMirror: {
             mode: 'javascript'
@@ -2438,13 +2500,10 @@ ConsoleIO.App.Device.Source.prototype.destroy = function destroy() {
 
 ConsoleIO.App.Device.Source.prototype.activate = function activate(state) {
     if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
+        this.editor.setOption('lineWrapping', this.parent.wordWrap);
         this.refresh();
         this.explorer.refresh();
     }
-};
-
-ConsoleIO.App.Device.Source.prototype.setTitle = function setTitle(contextId, title) {
-    this.view.setTitle(this.context[contextId], title);
 };
 
 ConsoleIO.App.Device.Source.prototype.add = function add(data) {
@@ -2457,7 +2516,8 @@ ConsoleIO.App.Device.Source.prototype.refresh = function refresh() {
     if (this.url) {
         ConsoleIO.Service.Socket.emit('fileSource', {
             serialNumber: this.model.serialNumber,
-            url: this.url
+            url: this.url,
+            beautify: this.parent.beautify
         });
     }
 };
@@ -2467,10 +2527,22 @@ ConsoleIO.App.Device.Source.prototype.setTabActive = function setTabActive() {
     this.view.setTabActive();
 };
 
+ConsoleIO.App.Device.Source.prototype.setItemState = function setItemState(id, state) {
+    this.view.setItemState(id, state);
+};
+
+ConsoleIO.App.Device.Source.prototype.setTitle = function setTitle(contextId, title) {
+    this.view.setTitle(this.context[contextId], title);
+};
+
 
 ConsoleIO.App.Device.Source.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
-        console.log('onButtonClick', btnId);
+        this.parent.parent.parent.server.update({
+            status: 'Unhandled event',
+            btnId: btnId,
+            state: state
+        });
     }
 };
 
@@ -2602,6 +2674,13 @@ ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btn
                         enabled: this.model.web.enabled
                     });
                 }
+                break;
+            default:
+                this.parent.parent.parent.server.update({
+                    status: 'Unhandled event',
+                    btnId: btnId,
+                    state: state
+                });
                 break;
         }
     }

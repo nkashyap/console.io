@@ -13,6 +13,7 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
     this.parent = parent;
     this.model = model;
     this.url = null;
+
     this.context = {
         explorer: "a",
         source: "b"
@@ -26,10 +27,13 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy
         ]
     });
+
     this.explorer = new ConsoleIO.App.Device.Explorer(this, {
         name: this.model.name,
         serialNumber: this.model.serialNumber,
@@ -40,6 +44,7 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh
         ]
     });
+
     this.editor = new ConsoleIO.App.Editor(this, {
         codeMirror: {
             mode: 'javascript'
@@ -68,13 +73,10 @@ ConsoleIO.App.Device.Source.prototype.destroy = function destroy() {
 
 ConsoleIO.App.Device.Source.prototype.activate = function activate(state) {
     if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
+        this.editor.setOption('lineWrapping', this.parent.wordWrap);
         this.refresh();
         this.explorer.refresh();
     }
-};
-
-ConsoleIO.App.Device.Source.prototype.setTitle = function setTitle(contextId, title) {
-    this.view.setTitle(this.context[contextId], title);
 };
 
 ConsoleIO.App.Device.Source.prototype.add = function add(data) {
@@ -87,7 +89,8 @@ ConsoleIO.App.Device.Source.prototype.refresh = function refresh() {
     if (this.url) {
         ConsoleIO.Service.Socket.emit('fileSource', {
             serialNumber: this.model.serialNumber,
-            url: this.url
+            url: this.url,
+            beautify: this.parent.beautify
         });
     }
 };
@@ -97,9 +100,21 @@ ConsoleIO.App.Device.Source.prototype.setTabActive = function setTabActive() {
     this.view.setTabActive();
 };
 
+ConsoleIO.App.Device.Source.prototype.setItemState = function setItemState(id, state) {
+    this.view.setItemState(id, state);
+};
+
+ConsoleIO.App.Device.Source.prototype.setTitle = function setTitle(contextId, title) {
+    this.view.setTitle(this.context[contextId], title);
+};
+
 
 ConsoleIO.App.Device.Source.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
-        console.log('onButtonClick', btnId);
+        this.parent.parent.parent.server.update({
+            status: 'Unhandled event',
+            btnId: btnId,
+            state: state
+        });
     }
 };

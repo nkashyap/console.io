@@ -373,7 +373,7 @@ Device.prototype.status = function status(data) {
  * broadcast & store device web console status event
  *
  * @public
- * @method status
+ * @method webStatus
  * @param {object} data response parameter object
  */
 Device.prototype.webStatus = function webStatus(data) {
@@ -385,12 +385,84 @@ Device.prototype.webStatus = function webStatus(data) {
  * broadcast & store device web console control event
  *
  * @public
- * @method status
+ * @method control
  * @param {object} data response parameter object
  */
 Device.prototype.control = function control(data) {
     this.web.config = data;
     this.emit('web:control', data);
+};
+
+Device.prototype.requestSource = function requestSource(name, data) {
+    if (data.hasOwnProperty('beautify')) {
+        this.web.config.beautify = data.beautify;
+    }
+
+    this.emit(name, data);
+};
+
+Device.prototype.processSource = function processSource(name, data) {
+    /** update dataReceived timestamp **/
+    this.timeStamp.dataReceived = (new Date()).toLocaleTimeString();
+
+    if (this.web.config.beautify) {
+        var type;
+        if (data.url) {
+            if (data.url.indexOf('.css') > -1) {
+                type = 'css';
+            } else if (data.url.indexOf('.js') > -1) {
+                type = 'js';
+            }
+        }
+
+        // data packets
+        if (data.hasOwnProperty('start') && data.hasOwnProperty('length')) {
+            this.content = (this.content || '') + data.content;
+
+            if (data.start === 0) {
+                this.maxLength = this.content.length;
+            }
+
+            if (this.content.length === data.length) {
+                var start = 0,
+                    content = utils.getContent(this.content, type),
+                    length = content.length;
+
+                // dispatch data in chunk to avoid core mirror locking up
+                while (start < length) {
+                    this.dispatchPacket(name, data, content.substr(start, this.maxLength), start, length);
+
+                    if (start === 0) {
+                        start = this.maxLength;
+                    } else {
+                        start += this.maxLength;
+                    }
+                }
+
+                delete this.content;
+                delete this.maxLength;
+                return true;
+            }
+        } else {
+            data.content = utils.getContent(data.content, type);
+        }
+    }
+
+    this.broadcast(name + ':' + this.serialNumber, data);
+};
+
+Device.prototype.dispatchPacket = function dispatchPacket(name, params, content, start, length) {
+    var fn = (function (scope, name, params, content, start, length) {
+        return function () {
+            var data = scope.manager.extend({}, params);
+            data.content = content;
+            data.start = start;
+            data.length = length;
+            scope.broadcast(name + ':' + scope.serialNumber, data);
+        };
+    }(this, name, params, content, start, length));
+
+    setTimeout(fn, 100);
 };
 
 /**

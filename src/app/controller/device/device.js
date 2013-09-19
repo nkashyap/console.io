@@ -13,6 +13,8 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.parent = parent;
     this.model = model;
     this.activeTab = ConsoleIO.Settings.defaultTab;
+    this.beautify = this.model.web.config.beautify || ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify.pressed;
+    this.wordWrap = ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.pressed;
 
     this.console = new ConsoleIO.App.Device.Console(this, this.model);
     this.source = new ConsoleIO.App.Device.Source(this, this.model);
@@ -32,6 +34,14 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
     var panel = this[this.activeTab];
     if (panel) {
         panel.setTabActive();
+    }
+
+    if (this.beautify) {
+        this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify.id, this.beautify);
+    }
+
+    if (this.wordWrap) {
+        this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.id, this.wordWrap);
     }
 };
 
@@ -57,6 +67,12 @@ ConsoleIO.App.Device.prototype.activate = function activate(state) {
     } else if (this.activeTab) {
         this[this.activeTab].activate(state);
     }
+};
+
+
+ConsoleIO.App.Device.prototype.setItemState = function setItemState(id, state) {
+    this.source.setItemState(id, state);
+    this.preview.setItemState(id, state);
 };
 
 
@@ -89,12 +105,19 @@ ConsoleIO.App.Device.prototype.onButtonClick = function onButtonClick(tab, btnId
             tab.refresh();
             handled = true;
             break;
+        case 'beautify':
+            this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify.id, this.beautify = state);
+            handled = true;
+            tab.refresh();
+            break;
 
         //common on Source and Preview Tabs
         case 'wordwrap':
+            this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.id, this.wordWrap = state);
             tab.editor.setOption('lineWrapping', state);
             handled = true;
             break;
+
         case 'selectAll':
             tab.editor.selectAll();
             handled = true;

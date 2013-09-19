@@ -219,6 +219,13 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
                         content: this.view.getHTML()
                     });
                     break;
+                default:
+                    this.parent.parent.parent.server.update({
+                        status: 'Unhandled event',
+                        btnId: btnId,
+                        state: state
+                    });
+                    break;
             }
         }
     }

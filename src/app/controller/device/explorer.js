@@ -103,26 +103,6 @@ ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
     });
 };
 
-ConsoleIO.App.Device.Explorer.prototype.openNode = function openNode(itemId, state) {
-    if (!this.nodes.processing) {
-        var index = this.nodes.opened.indexOf(itemId);
-
-        if (state === 1 && index === -1) {
-            this.nodes.opened.push(itemId);
-        } else if (index > -1) {
-            this.nodes.opened.splice(index, 1);
-        }
-    }
-};
-
-ConsoleIO.App.Device.Explorer.prototype.viewFile = function viewFile(fileId) {
-    ConsoleIO.Service.Socket.emit('fileSource', {
-        serialNumber: this.model.serialNumber,
-        url: (fileId.indexOf("http") === -1 ? '/' : '') + fileId.replace(/[|]/igm, "/")
-    });
-};
-
-
 ConsoleIO.App.Device.Explorer.prototype.getParentId = function getParentId(list, item) {
     var index = list.indexOf(item);
     if (index > 0) {
@@ -138,3 +118,21 @@ ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(b
     }
 };
 
+ConsoleIO.App.Device.Explorer.prototype.onDblClick = function onDblClick(btnId) {
+    ConsoleIO.Service.Socket.emit('fileSource', {
+        serialNumber: this.model.serialNumber,
+        url: (btnId.indexOf("http") === -1 ? '/' : '') + btnId.replace(/[|]/igm, "/")
+    });
+};
+
+ConsoleIO.App.Device.Explorer.prototype.onOpenEnd = function onOpenEnd(itemId, state) {
+    if (!this.nodes.processing) {
+        var index = this.nodes.opened.indexOf(itemId);
+
+        if (state === 1 && index === -1) {
+            this.nodes.opened.push(itemId);
+        } else if (index > -1) {
+            this.nodes.opened.splice(index, 1);
+        }
+    }
+};

@@ -46,7 +46,7 @@ ConsoleIO.View.Device.Status.prototype.render = function render(target) {
 };
 
 ConsoleIO.View.Device.Status.prototype.destroy = function destroy() {
-    this.target.removeTab(this.id, true);
+    this.target.removeTab(this.id);
 };
 
 

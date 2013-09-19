@@ -41,13 +41,13 @@ ConsoleIO.View.Device.Explorer.prototype.render = function render(target) {
 
     this.tree.attachEvent("onDblClick", function (itemId) {
         if (!scope.tree.hasChildren(itemId)) {
-            this.viewFile(itemId);
+            this.onDblClick(itemId);
         }
     }, this.ctrl);
 
     this.tree.attachEvent("onOpenEnd", function (itemId, state) {
         if (scope.tree.hasChildren(itemId)) {
-            this.openNode(itemId, state);
+            this.onOpenEnd(itemId, state);
         }
     }, this.ctrl);
 };
