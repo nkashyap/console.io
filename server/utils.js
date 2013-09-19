@@ -116,6 +116,37 @@ var Utils = {
 
         console.log('Content beautify as ' + type);
         return content;
+    },
+
+
+    readdir: function readdir(path, successCallback, errorCallback, scope) {
+        fs.readdir(path, function callback(err, files) {
+            if (err) {
+                errorCallback.call(scope, err);
+            } else {
+                successCallback.call(scope, files);
+            }
+        });
+    },
+
+    readFile: function readFile(path, name, successCallback, errorCallback, scope) {
+        fs.readFile(path + name, 'utf8', function callback(err, content) {
+            if (err) {
+                errorCallback.call(scope, err);
+            } else {
+                successCallback.call(scope, content);
+            }
+        });
+    },
+
+    writeFile: function writeFile(path, name, content, successCallback, errorCallback, scope) {
+        fs.writeFile(path + name, content, function callback(err) {
+            if (err) {
+                errorCallback.call(scope, err);
+            } else {
+                successCallback.call(scope);
+            }
+        });
     }
 };
 

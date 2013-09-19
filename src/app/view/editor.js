@@ -50,7 +50,7 @@ ConsoleIO.View.Editor.prototype.destroy = function destroy() {
 };
 
 
-ConsoleIO.View.Editor.prototype.listScripts = function listScripts(data) {
+ConsoleIO.View.Editor.prototype.fileList = function fileList(data) {
     var scope = this;
     this.toolbar.forEachListOption('open', function (id) {
         scope.toolbar.removeListOption('open', id);

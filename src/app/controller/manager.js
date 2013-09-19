@@ -22,7 +22,7 @@ ConsoleIO.App.Manager = function ManagerController(parent, model) {
 
     ConsoleIO.Service.Socket.on('user:subscribed', this.add, this);
     ConsoleIO.Service.Socket.on('user:unSubscribed', this.remove, this);
-    ConsoleIO.Service.Socket.on('user:exportReady', this.exportReady, this);
+    ConsoleIO.Service.Socket.on('user:download', this.download, this);
 };
 
 
@@ -89,7 +89,7 @@ ConsoleIO.App.Manager.prototype.removeAll = function removeAll() {
     this.activeTab = null;
 };
 
-ConsoleIO.App.Manager.prototype.exportReady = function exportReady(data) {
+ConsoleIO.App.Manager.prototype.download = function download(data) {
     if (!this.exportFrame) {
         this.exportFrame = ConsoleIO.Service.DHTMLXHelper.createElement({
             tag: 'iframe',

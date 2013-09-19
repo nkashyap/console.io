@@ -213,7 +213,7 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
                     this.notify();
                     break;
                 case 'export':
-                    ConsoleIO.Service.Socket.emit('exportHTML', {
+                    ConsoleIO.Service.Socket.emit('exportLog', {
                         serialNumber: this.model.serialNumber,
                         name: this.model.name,
                         content: this.view.getHTML()

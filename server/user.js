@@ -5,7 +5,7 @@
  * Time: 17:21
  * To change this template use File | Settings | File Templates.
  */
-var fs = require('fs');
+var utils = require('./utils');
 
 function User(application, request, manager) {
     this.application = application;
@@ -82,7 +82,8 @@ User.prototype.online = function online(request) {
         guid: this.guid,
         subscribed: this.isOnline
     });
-    this.listScripts();
+
+    this.fileList();
 };
 
 User.prototype.offline = function offline(name) {
@@ -99,91 +100,112 @@ User.prototype.offline = function offline(name) {
     });
 };
 
-User.prototype.exportHTML = function exportHTML(data) {
-    var scope = this,
-        cssFile = './app/resources/console.css',
-        htmlFile = [
-            "userdata/export/", data.name.replace(/[|]/ig, '-'), '-', data.serialNumber, '-', (new Date()).getTime(),
-            '.html'
-        ].join("");
+User.prototype.exportLog = function exportLog(data) {
+    var file = [
+        "userdata/export/",
+        data.name.replace(/[|]/ig, '-'),
+        '-',
+        data.serialNumber,
+        '-',
+        (new Date()).getTime(),
+        '.html'
+    ].join("");
 
-    fs.readFile(cssFile, null, function (err, cssData) {
-        if (err) {
-            scope.emit('error', {
-                message: 'Error reading CSS file: ' + cssFile
-            });
+    function error(e) {
+        this.emit('error', {
+            message: e.message
+        });
+    }
 
-        } else {
+    utils.readFile(
+        './dist/client/',
+        'console.css',
+        function success(cssContent) {
             var content = [
-                '<html><head><title>', data.name, '</title><style>', cssData, '</style></head><body>', data.content,
+                '<html><head><title>',
+                data.name,
+                '</title><style>',
+                cssContent,
+                '</style></head><body>',
+                data.content,
                 '</body></html>'
             ].join("");
 
-            fs.writeFile("./" + htmlFile, content, function (err) {
-                if (err) {
-                    scope.emit('error', {
-                        message: 'Error saving HTML file: ' + htmlFile
-                    });
-                } else {
-                    scope.emit('exportReady', {
-                        file: htmlFile
-                    });
-                }
-            });
-        }
-    });
+            utils.writeFile("./", file, content, function success() {
+                this.emit('download', {
+                    file: file
+                });
+            }, error, this);
+        },
+        error,
+        this);
 };
 
-User.prototype.listScripts = function listScripts() {
-    var scope = this;
-    fs.readdir('./userdata/scripts', function callback(err, files) {
-        if (err) {
-            scope.emit('error', {
-                message: 'Error reading scripts: ./userdata/scripts'
-            });
-        } else {
-            scope.emit('listScripts', files);
-        }
-    });
+User.prototype.beautify = function beautify(data) {
+    if (data.state) {
+        data.content = utils.getContent(data.content, 'js');
+        this.emit('fileContent', data);
+    } else {
+        this.readFile(data);
+    }
 };
 
-User.prototype.loadScript = function loadScript(data) {
-    var scope = this,
-        file = './userdata/scripts/' + (data.name.indexOf('.js') > 0 ? data.name : data.name + '.js');
-
-    function callback(err, content) {
-        if (err) {
-            scope.emit('error', {
-                message: 'Error reading JS file: ' + file
+User.prototype.fileList = function fileList() {
+    utils.readdir(
+        './userdata/scripts/',
+        function success(files) {
+            this.emit('fileList', files);
+        },
+        function error(e) {
+            this.emit('error', {
+                message: e.message
             });
-        } else {
-            scope.emit('scriptContent', {
+        },
+        this);
+};
+
+User.prototype.readFile = function readFile(data) {
+    if (data.name.indexOf('.js') === -1) {
+        data.name += '.js';
+    }
+
+    utils.readFile(
+        './userdata/scripts/',
+        data.name,
+        function success(content) {
+            this.emit('fileContent', {
                 name: data.name,
                 content: content
             });
-        }
-    }
-
-    fs.readFile(file, 'utf8', callback);
+        },
+        function error(e) {
+            this.emit('error', {
+                message: e.message
+            });
+        },
+        this);
 };
 
-User.prototype.saveScript = function saveScript(data) {
-    var scope = this,
-        file = './userdata/scripts/' + (data.name.indexOf('.js') > 0 ? data.name : data.name + '.js');
-
-    function callback(err) {
-        if (err) {
-            scope.emit('error', {
-                message: 'Error writing JS file: ' + file
-            });
-        } else {
-            scope.emit('scriptSaved', {
-                name: data.name
-            });
-        }
+User.prototype.writeFile = function writeFile(data) {
+    if (data.name.indexOf('.js') === -1) {
+        data.name += '.js';
     }
 
-    fs.writeFile(file, data.content, callback);
+    utils.writeFile(
+        './userdata/scripts/',
+        data.name,
+        data.content,
+        function success() {
+            this.emit('fileSaved', {
+                name: data.name
+            });
+        },
+        function error(e) {
+            this.emit('error', {
+                message: e.message
+            });
+        },
+        this);
 };
 
 User.prototype.emit = function emit(name, data) {

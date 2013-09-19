@@ -83,8 +83,8 @@ ConsoleIO.App.Editor.prototype.foldCode = function foldCode(where) {
     this.editor.foldCode(where, this.model.codeMirror.mode === 'javascript' ? CodeMirror.braceRangeFinder : CodeMirror.tagRangeFinder);
 };
 
-ConsoleIO.App.Editor.prototype.listScripts = function listScripts(data) {
-    this.view.listScripts(data);
+ConsoleIO.App.Editor.prototype.fileList = function fileList(data) {
+    this.view.fileList(data);
 };
 
 ConsoleIO.App.Editor.prototype.addScript = function addScript(data) {
@@ -178,7 +178,7 @@ ConsoleIO.App.Editor.prototype.close = function close() {
 
 ConsoleIO.App.Editor.prototype.save = function save(saveAs) {
     var fileName = null,
-        cmd = this.editor.getValue();
+        content = this.editor.getValue();
 
     if (this.fileName) {
         fileName = saveAs ? prompt("Save file as:", "") : this.fileName;
@@ -187,8 +187,8 @@ ConsoleIO.App.Editor.prototype.save = function save(saveAs) {
     }
 
     if (fileName !== null) {
-        ConsoleIO.Service.Socket.emit('saveScript', {
-            content: cmd,
+        ConsoleIO.Service.Socket.emit('writeFile', {
+            content: content,
             name: fileName
         });
     }
@@ -238,13 +238,20 @@ ConsoleIO.App.Editor.prototype.getDoc = function getDoc() {
 
 ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (btnId.indexOf('script-') === 0) {
-        ConsoleIO.Service.Socket.emit('loadScript', {
+        ConsoleIO.Service.Socket.emit('readFile', {
             name: btnId.split("-")[1]
         });
         return;
     }
 
     switch (btnId) {
+        case 'beautify':
+            ConsoleIO.Service.Socket.emit('beautify', {
+                state: state,
+                name: this.fileName || '',
+                content: this.editor.getValue()
+            });
+            break;
         case 'cut':
             this.cut();
             break;

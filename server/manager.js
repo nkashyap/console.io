@@ -269,8 +269,10 @@ function Manager() {
             setUp: registerUser,
             refreshRegisteredDeviceList: notifyRegisteredDevicesToUser,
             deviceName: changeDeviceName,
+
             webConfig: defineUserCommandRouteEmitHandler('web:config', true),
             webControl: defineDeviceMethodRouteHandler('control'),
+
             fileSource: defineUserCommandRouteHandler('requestSource', 'fileSource'),
             reloadHTML: defineUserCommandRouteHandler('requestSource', 'htmlContent'),
             reloadDevice: defineUserCommandRouteEmitHandler('reload'),
@@ -279,9 +281,12 @@ function Manager() {
             captureScreen: defineUserCommandRouteEmitHandler('captureScreen'),
             deviceStatus: defineUserCommandRouteEmitHandler('status'),
             execute: defineUserCommandRouteEmitHandler('command', 'code'),
-            saveScript: defineUserRouteHandler('saveScript'),
-            loadScript: defineUserRouteHandler('loadScript'),
-            exportHTML: defineUserRouteHandler('exportHTML'),
+
+            beautify: defineUserRouteHandler('beautify'),
+            writeFile: defineUserRouteHandler('writeFile'),
+            readFile: defineUserRouteHandler('readFile'),
+
+            exportLog: defineUserRouteHandler('exportLog'),
             subscribe: defineUserRouteHandler('subscribe'),
             unSubscribe: defineUserRouteHandler('unSubscribe')
         });

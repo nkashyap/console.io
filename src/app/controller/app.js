@@ -75,9 +75,9 @@ ConsoleIO.App = function AppController() {
         contextId: 'manager'
     });
 
-    ConsoleIO.Service.Socket.on('user:listScripts', this.listScripts, this);
-    ConsoleIO.Service.Socket.on('user:scriptContent', this.loadScript, this);
-    ConsoleIO.Service.Socket.on('user:scriptSaved', this.scriptSaved, this);
+    ConsoleIO.Service.Socket.on('user:fileList', this.fileList, this);
+    ConsoleIO.Service.Socket.on('user:fileContent', this.fileContent, this);
+    ConsoleIO.Service.Socket.on('user:fileSaved', this.fileSaved, this);
 };
 
 
@@ -90,16 +90,16 @@ ConsoleIO.App.prototype.render = function render() {
 };
 
 
-ConsoleIO.App.prototype.listScripts = function listScripts(files) {
-    this.editor.listScripts(files);
+ConsoleIO.App.prototype.fileList = function fileList(files) {
+    this.editor.fileList(files);
 };
 
-ConsoleIO.App.prototype.scriptSaved = function scriptSaved(file) {
+ConsoleIO.App.prototype.fileSaved = function fileSaved(file) {
     this.editor.fileName = file.name;
     this.editor.addScript(file);
 };
 
-ConsoleIO.App.prototype.loadScript = function loadScript(data) {
+ConsoleIO.App.prototype.fileContent = function fileContent(data) {
     this.editor.add(data);
 };
 

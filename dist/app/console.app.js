@@ -1339,7 +1339,7 @@ ConsoleIO.View.Editor.prototype.destroy = function destroy() {
 };
 
 
-ConsoleIO.View.Editor.prototype.listScripts = function listScripts(data) {
+ConsoleIO.View.Editor.prototype.fileList = function fileList(data) {
     var scope = this;
     this.toolbar.forEachListOption('open', function (id) {
         scope.toolbar.removeListOption('open', id);
@@ -1576,9 +1576,9 @@ ConsoleIO.App = function AppController() {
         contextId: 'manager'
     });
 
-    ConsoleIO.Service.Socket.on('user:listScripts', this.listScripts, this);
-    ConsoleIO.Service.Socket.on('user:scriptContent', this.loadScript, this);
-    ConsoleIO.Service.Socket.on('user:scriptSaved', this.scriptSaved, this);
+    ConsoleIO.Service.Socket.on('user:fileList', this.fileList, this);
+    ConsoleIO.Service.Socket.on('user:fileContent', this.fileContent, this);
+    ConsoleIO.Service.Socket.on('user:fileSaved', this.fileSaved, this);
 };
 
 
@@ -1591,16 +1591,16 @@ ConsoleIO.App.prototype.render = function render() {
 };
 
 
-ConsoleIO.App.prototype.listScripts = function listScripts(files) {
-    this.editor.listScripts(files);
+ConsoleIO.App.prototype.fileList = function fileList(files) {
+    this.editor.fileList(files);
 };
 
-ConsoleIO.App.prototype.scriptSaved = function scriptSaved(file) {
+ConsoleIO.App.prototype.fileSaved = function fileSaved(file) {
     this.editor.fileName = file.name;
     this.editor.addScript(file);
 };
 
-ConsoleIO.App.prototype.loadScript = function loadScript(data) {
+ConsoleIO.App.prototype.fileContent = function fileContent(data) {
     this.editor.add(data);
 };
 
@@ -2145,7 +2145,7 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
                     this.notify();
                     break;
                 case 'export':
-                    ConsoleIO.Service.Socket.emit('exportHTML', {
+                    ConsoleIO.Service.Socket.emit('exportLog', {
                         serialNumber: this.model.serialNumber,
                         name: this.model.name,
                         content: this.view.getHTML()
@@ -2771,8 +2771,8 @@ ConsoleIO.App.Editor.prototype.foldCode = function foldCode(where) {
     this.editor.foldCode(where, this.model.codeMirror.mode === 'javascript' ? CodeMirror.braceRangeFinder : CodeMirror.tagRangeFinder);
 };
 
-ConsoleIO.App.Editor.prototype.listScripts = function listScripts(data) {
-    this.view.listScripts(data);
+ConsoleIO.App.Editor.prototype.fileList = function fileList(data) {
+    this.view.fileList(data);
 };
 
 ConsoleIO.App.Editor.prototype.addScript = function addScript(data) {
@@ -2866,7 +2866,7 @@ ConsoleIO.App.Editor.prototype.close = function close() {
 
 ConsoleIO.App.Editor.prototype.save = function save(saveAs) {
     var fileName = null,
-        cmd = this.editor.getValue();
+        content = this.editor.getValue();
 
     if (this.fileName) {
         fileName = saveAs ? prompt("Save file as:", "") : this.fileName;
@@ -2875,8 +2875,8 @@ ConsoleIO.App.Editor.prototype.save = function save(saveAs) {
     }
 
     if (fileName !== null) {
-        ConsoleIO.Service.Socket.emit('saveScript', {
-            content: cmd,
+        ConsoleIO.Service.Socket.emit('writeFile', {
+            content: content,
             name: fileName
         });
     }
@@ -2926,13 +2926,20 @@ ConsoleIO.App.Editor.prototype.getDoc = function getDoc() {
 
 ConsoleIO.App.Editor.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (btnId.indexOf('script-') === 0) {
-        ConsoleIO.Service.Socket.emit('loadScript', {
+        ConsoleIO.Service.Socket.emit('readFile', {
             name: btnId.split("-")[1]
         });
         return;
     }
 
     switch (btnId) {
+        case 'beautify':
+            ConsoleIO.Service.Socket.emit('beautify', {
+                state: state,
+                name: this.fileName || '',
+                content: this.editor.getValue()
+            });
+            break;
         case 'cut':
             this.cut();
             break;
@@ -2993,7 +3000,7 @@ ConsoleIO.App.Manager = function ManagerController(parent, model) {
 
     ConsoleIO.Service.Socket.on('user:subscribed', this.add, this);
     ConsoleIO.Service.Socket.on('user:unSubscribed', this.remove, this);
-    ConsoleIO.Service.Socket.on('user:exportReady', this.exportReady, this);
+    ConsoleIO.Service.Socket.on('user:download', this.download, this);
 };
 
 
@@ -3060,7 +3067,7 @@ ConsoleIO.App.Manager.prototype.removeAll = function removeAll() {
     this.activeTab = null;
 };
 
-ConsoleIO.App.Manager.prototype.exportReady = function exportReady(data) {
+ConsoleIO.App.Manager.prototype.download = function download(data) {
     if (!this.exportFrame) {
         this.exportFrame = ConsoleIO.Service.DHTMLXHelper.createElement({
             tag: 'iframe',
