@@ -150,15 +150,15 @@ NOTE: It can also capture iframe logs. To do that just include console.io.js scr
 
 Visit http://<console.io server>/ for ConsoleIO interface (Tested on Chrome Browsers)
 
-![Console.IO](https://raw.github.com/nkashyap/console.io/master/resources/images/console.io.png)
+![Console.IO](https://raw.github.com/nkashyap/console.io/master/resources/images/console.io.PNG)
 
-![Status tab](https://raw.github.com/nkashyap/console.io/master/resources/images/status-tab.png)
+![Status tab](https://raw.github.com/nkashyap/console.io/master/resources/images/status-tab.PNG)
 
-![Source tab](https://raw.github.com/nkashyap/console.io/master/resources/images/source-tab.png)
+![Source tab](https://raw.github.com/nkashyap/console.io/master/resources/images/source-tab.PNG)
 
-![Preview tab](https://raw.github.com/nkashyap/console.io/master/resources/images/preview-tab.png)
+![Preview tab](https://raw.github.com/nkashyap/console.io/master/resources/images/preview-tab.PNG)
 
-![Console tab](https://raw.github.com/nkashyap/console.io/master/resources/images/console-tab.png)
+![Console tab](https://raw.github.com/nkashyap/console.io/master/resources/images/console-tab.PNG)
 
 
 NOTE:
