@@ -150,15 +150,15 @@ NOTE: It can also capture iframe logs. To do that just include console.io.js scr
 
 Visit http://<console.io server>/ for ConsoleIO interface (Tested on Chrome Browsers)
 
-![Console.IO](https://raw.github.com/nkashyap/console.io/master/resources/images/console.io.PNG)
+![Console.IO](https://raw.github.com/nkashyap/console.io/master/resources/images/console.io.png)
 
-![Status tab](https://raw.github.com/nkashyap/console.io/master/resources/images/status-tab.PNG)
+![Status tab](https://raw.github.com/nkashyap/console.io/master/resources/images/status-tab.png)
 
-![Source tab](https://raw.github.com/nkashyap/console.io/master/resources/images/source-tab.PNG)
+![Source tab](https://raw.github.com/nkashyap/console.io/master/resources/images/source-tab.png)
 
-![Preview tab](https://raw.github.com/nkashyap/console.io/master/resources/images/preview-tab.PNG)
+![Preview tab](https://raw.github.com/nkashyap/console.io/master/resources/images/preview-tab.png)
 
-![Console tab](https://raw.github.com/nkashyap/console.io/master/resources/images/console-tab.PNG)
+![Console tab](https://raw.github.com/nkashyap/console.io/master/resources/images/console-tab.png)
 
 
 NOTE:
@@ -302,7 +302,7 @@ Console.IO can be hosted inside IIS. It allows to bypass SSL self-signed certifi
 
 NOTE: Only IIS8 supports websockets therefore Console.IO is configured to used xhr-polling by default
 
-![IIS NODE](https://raw.github.com/nkashyap/console.io/master/iis.png).
+![IIS NODE](https://raw.github.com/nkashyap/console.io/master/resources/images/iis.png).
 
 #### USAGE
 ##### Include Script directly
