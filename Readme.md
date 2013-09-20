@@ -1,6 +1,6 @@
 # Console.IO
 
-[![Travis build status](https://secure.travis-ci.org/nkashyap/console.io.png)](https://travis-ci.org/nkashyap/console.io)
+[![Build Status](https://travis-ci.org/nkashyap/console.io.png?branch=master)](https://travis-ci.org/nkashyap/console.io)
 [![Nodejitsu Deploy Status](https://webhooks.nodejitsu.com/nkashyap/console.io.png)](https://webops.nodejitsu.com#nodejitsu/webhooks)
 
 Console.IO is a NodeJS project. It provides Remote Web Console for websites and web applications.
