@@ -57,10 +57,12 @@ It uses express.io (express &amp; socket.io) to provide user real time experienc
 <ul>
 <li>Toshiba TV (2011, 2012, 2013)</li>
 <li>LG NetCast TV (2011, 2012, 2013)</li>
-<li>Philips NetTV (2011, 2012)</li>
+<li>Philips NetTV (2011, 2012, 2013)</li>
 <li>Samsung TV (2010, 2011, 2012, 2013)</li>
-<li>Panasonic TV (2013)</li>
+<li>Panasonic TV (2012, 2013)</li>
 <li>Technika Avtrex STB</li>
+<li>Sony (BDP-S4100)</li>
+<li>Hopper Dish (Hopper)</li>
 <li>Firefox, Safari, Opera, Chrome, Maple, PhantomJS and IE</li>
 <li>iPhone, iPod, iPad, Android browser, windows 8 phone etc</li>
 </ul><h3>
@@ -69,13 +71,13 @@ It uses express.io (express &amp; socket.io) to provide user real time experienc
 <h4>
 <a name="npm" class="anchor" href="#npm"><span class="octicon octicon-link"></span></a>NPM</h4>
 
-<div class="highlight"><pre>npm install -g xconsole.io
+<div class="highlight highlight-bash"><pre>npm install -g xconsole.io
 </pre></div>
 
 <h4>
 <a name="source-installbat-for-windows-users" class="anchor" href="#source-installbat-for-windows-users"><span class="octicon octicon-link"></span></a>Source (install.bat for windows users)</h4>
 
-<div class="highlight"><pre>npm install
+<div class="highlight highlight-bash"><pre>npm install
 </pre></div>
 
 <h3>
@@ -84,13 +86,13 @@ It uses express.io (express &amp; socket.io) to provide user real time experienc
 <h4>
 <a name="npm-1" class="anchor" href="#npm-1"><span class="octicon octicon-link"></span></a>NPM</h4>
 
-<div class="highlight"><pre>consoleio
+<div class="highlight highlight-bash"><pre>consoleio
 </pre></div>
 
 <h4>
 <a name="source-startbat-for-window-users" class="anchor" href="#source-startbat-for-window-users"><span class="octicon octicon-link"></span></a>Source (start.bat for window users)</h4>
 
-<div class="highlight"><pre>node ./server/main.js
+<div class="highlight highlight-bash"><pre>node ./server/main.js
 </pre></div>
 
 <h3>
@@ -99,13 +101,13 @@ It uses express.io (express &amp; socket.io) to provide user real time experienc
 <h4>
 <a name="include-script-directly" class="anchor" href="#include-script-directly"><span class="octicon octicon-link"></span></a>Include Script directly</h4>
 
-<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"http://&lt;console.io server&gt;/console.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<div class="highlight highlight-html"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"http://&lt;console.io server&gt;/console.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 </pre></div>
 
 <h4>
 <a name="via-requirejs" class="anchor" href="#via-requirejs"><span class="octicon octicon-link"></span></a>Via RequireJS</h4>
 
-<div class="highlight"><pre>    //requirejs bootstrap file
+<div class="highlight highlight-html"><pre>    //requirejs bootstrap file
 
     requirejs.config({
         baseUrl: './',
@@ -129,7 +131,7 @@ It uses express.io (express &amp; socket.io) to provide user real time experienc
 
 <p>Create a config object on ConsoleIO but note that it only works when script is included directly not via RequireJS.</p>
 
-<div class="highlight"><pre>window.ConsoleIO = window.ConsoleIO || {};
+<div class="highlight highlight-html"><pre>window.ConsoleIO = window.ConsoleIO || {};
 
 window.ConsoleIO.config = {
     url: "<span class="nt">&lt;console</span><span class="err">.</span><span class="na">io</span> <span class="na">server</span><span class="nt">&gt;</span>",
@@ -137,7 +139,6 @@ window.ConsoleIO.config = {
 
     // optionals
     secure: false,
-    minify: true,
 
     nativeConsole: true,
     web: false,  // true to display web console
@@ -163,20 +164,19 @@ window.ConsoleIO.config = {
 Any query string parameters in the location bar will overwrite file query strings parameters.
 Note that it only works when script is included directly not via RequireJS.</p>
 
-<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"http://&lt;console.io server&gt;/console.io.js?url=&lt;console.io server&gt;"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<div class="highlight highlight-html"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"http://&lt;console.io server&gt;/console.io.js?url=&lt;console.io server&gt;"</span><span class="nt">&gt;&lt;/script&gt;</span>
 </pre></div>
 
 <h4>
 <a name="configurations-when-loaded-via-requirejs" class="anchor" href="#configurations-when-loaded-via-requirejs"><span class="octicon octicon-link"></span></a>Configurations when loaded via RequireJS</h4>
 
-<div class="highlight"><pre>define(['console.io'], function (consoleio) {
+<div class="highlight highlight-html"><pre>define(['console.io'], function (consoleio) {
     consoleio.configure({
         url: "<span class="nt">&lt;console</span><span class="err">.</span><span class="na">io</span> <span class="na">server</span><span class="nt">&gt;</span>",
         base: "",
 
         // optionals
         secure: false,
-        minify: true,
 
         nativeConsole: true,
         web: false,
@@ -200,7 +200,15 @@ Note that it only works when script is included directly not via RequireJS.</p>
 
 <p>Visit http:/// for ConsoleIO interface (Tested on Chrome Browsers)</p>
 
-<p><img src="https://raw.github.com/nkashyap/console.io/master/console.io.png" alt="Screen shot"></p>
+<p><img src="https://raw.github.com/nkashyap/console.io/master/resources/images/console.io.png" alt="Console.IO"></p>
+
+<p><img src="https://raw.github.com/nkashyap/console.io/master/resources/images/status-tab.png" alt="Status tab"></p>
+
+<p><img src="https://raw.github.com/nkashyap/console.io/master/resources/images/source-tab.png" alt="Source tab"></p>
+
+<p><img src="https://raw.github.com/nkashyap/console.io/master/resources/images/preview-tab.png" alt="Preview tab"></p>
+
+<p><img src="https://raw.github.com/nkashyap/console.io/master/resources/images/console-tab.png" alt="Console tab"></p>
 
 <p>NOTE:</p>
 
@@ -235,7 +243,7 @@ Note that it only works when script is included directly not via RequireJS.</p>
 <li>Shift-Ctrl-R / Shift-Cmd-Option-F: Replace all</li>
 </ul><p>NOTE: All multilines code should be wrapped within self executable function. E.G</p>
 
-<div class="highlight"><pre>(function doSomeThing(){
+<div class="highlight highlight-html"><pre>(function doSomeThing(){
  .......
 }())
 </pre></div>
@@ -321,7 +329,7 @@ If you have install using npm -g then you will find it in C:\Users[USERNAME]\App
 
 <p>You can change default (8082) port number</p>
 
-<div class="highlight"><pre>express: {
+<div class="highlight highlight-html"><pre>express: {
     production: {
         ...
         { 'port-number': 8082 },
@@ -337,7 +345,7 @@ If you have install using npm -g then you will find it in C:\Users[USERNAME]\App
 <p>Change following in server side config file to enable server to run over SSL and use "https" instead of "http" to inject files on client.
 To generate your own SSL Certificate please check this <a href="http://forum.synology.com/wiki/index.php/How_to_generate_custom_SSL_certificates">How to generate custom SSL certificates</a>.</p>
 
-<div class="highlight"><pre>var config = {
+<div class="highlight highlight-html"><pre>var config = {
     .....
     https: {
         enable: true, // change true/false to enable and disable SSL
@@ -351,7 +359,7 @@ To generate your own SSL Certificate please check this <a href="http://forum.syn
 
 <p>And change console.io config as follows</p>
 
-<div class="highlight"><pre>{
+<div class="highlight highlight-html"><pre>{
     ....
     secure: true,
     .....
@@ -384,13 +392,13 @@ To generate your own SSL Certificate please check this <a href="http://forum.syn
 <h5>
 <a name="include-script-directly-1" class="anchor" href="#include-script-directly-1"><span class="octicon octicon-link"></span></a>Include Script directly</h5>
 
-<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"/console.io/console.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<div class="highlight highlight-html"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"/console.io/console.io.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 </pre></div>
 
 <h5>
 <a name="via-requirejs-1" class="anchor" href="#via-requirejs-1"><span class="octicon octicon-link"></span></a>Via RequireJS</h5>
 
-<div class="highlight"><pre>    //requirejs bootstrap file
+<div class="highlight highlight-html"><pre>    //requirejs bootstrap file
 
     requirejs.config({
         baseUrl: './',
@@ -411,7 +419,7 @@ To generate your own SSL Certificate please check this <a href="http://forum.syn
 
 <p>Example to setup AngularJS global $http error handler</p>
 
-<div class="highlight"><pre>angular.module('app', ['ngResource',])
+<div class="highlight highlight-html"><pre>angular.module('app', ['ngResource',])
     .config(function ($httpProvider)
     {
         $httpProvider.responseInterceptors.push(function globalErrorHandling($q) {
@@ -455,6 +463,8 @@ To generate your own SSL Certificate please check this <a href="http://forum.syn
 <li><a href="http://www.openssl.org/">OpenSSL</a></li>
 <li><a href="http://html2canvas.hertzen.com/">Html2Canvas</a></li>
 <li><a href="http://gruntjs.com/">Grunt</a></li>
+<li><a href="https://github.com/mishoo/UglifyJS/">uglify-js</a></li>
+<li><a href="https://github.com/einars/js-beautify/">js-beautify</a></li>
 </ul>
       </section>
 
