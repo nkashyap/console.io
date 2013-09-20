@@ -150,7 +150,16 @@ NOTE: It can also capture iframe logs. To do that just include console.io.js scr
 
 Visit http://<console.io server>/ for ConsoleIO interface (Tested on Chrome Browsers)
 
-![Screen shot](https://raw.github.com/nkashyap/console.io/master/console.io.png)
+![Console.IO](https://raw.github.com/nkashyap/console.io/master/resources/images/console.io.png)
+
+![Status tab](https://raw.github.com/nkashyap/console.io/master/resources/images/status-tab.png)
+
+![Source tab](https://raw.github.com/nkashyap/console.io/master/resources/images/source-tab.png)
+
+![Preview tab](https://raw.github.com/nkashyap/console.io/master/resources/images/preview-tab.png)
+
+![Console tab](https://raw.github.com/nkashyap/console.io/master/resources/images/console-tab.png)
+
 
 NOTE:
 * ![Online icons](https://raw.github.com/nkashyap/console.io/master/resources/icons/online.png) Device is registered and connected.
@@ -363,3 +372,5 @@ angular.module('app', ['ngResource',])
  * [OpenSSL] (http://www.openssl.org/)
  * [Html2Canvas] (http://html2canvas.hertzen.com/)
  * [Grunt] (http://gruntjs.com/)
+ * [uglify-js] (https://github.com/mishoo/UglifyJS/)
+ * [js-beautify] (https://github.com/einars/js-beautify/)
