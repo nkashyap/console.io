@@ -20,6 +20,10 @@ ConsoleIO.App.Browser = function BrowserController(parent, model) {
         offline: [],
         subscribed: []
     };
+    this.nodes = {
+        processing: false,
+        closed: []
+    };
 
     this.view = new ConsoleIO.View.Browser(this, this.model);
 
@@ -32,42 +36,51 @@ ConsoleIO.App.Browser = function BrowserController(parent, model) {
     ConsoleIO.Service.Socket.on('device:offline', this.offline, this);
 };
 
+
+ConsoleIO.App.Browser.prototype.render = function render(target) {
+    this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
+    this.view.render(target);
+};
+
+
 ConsoleIO.App.Browser.prototype.online = function online(data) {
-    var index = this.store.offline.indexOf(data.guid);
+    var index = this.store.offline.indexOf(data.serialNumber);
     if (index > -1) {
         this.store.offline.splice(index, 1);
     }
 
-    if (this.isSubscribed(data.guid)) {
+    if (this.isSubscribed(data.serialNumber)) {
         this.subscribed(data);
     } else {
-        this.view.setIcon(data.guid, ConsoleIO.Constant.ICONS.ONLINE);
+        this.view.setIcon(data.serialNumber, ConsoleIO.Constant.ICONS.ONLINE);
     }
 };
 
 ConsoleIO.App.Browser.prototype.offline = function offline(data) {
-    if (this.store.offline.indexOf(data.guid) === -1) {
-        this.store.offline.push(data.guid);
+    if (this.store.offline.indexOf(data.serialNumber) === -1) {
+        this.store.offline.push(data.serialNumber);
     }
-    this.view.setIcon(data.guid, ConsoleIO.Constant.ICONS.OFFLINE);
+    this.view.setIcon(data.serialNumber, ConsoleIO.Constant.ICONS.OFFLINE);
 };
 
-ConsoleIO.App.Browser.prototype.isSubscribed = function isSubscribed(guid) {
-    return this.store.subscribed.indexOf(guid) > -1;
+ConsoleIO.App.Browser.prototype.subscribe = function subscribe(serialNumber) {
+    if (!this.isSubscribed(serialNumber)) {
+        ConsoleIO.Service.Socket.emit('subscribe', serialNumber);
+    }
 };
 
 ConsoleIO.App.Browser.prototype.subscribed = function subscribed(data) {
-    if (!this.isSubscribed(data.guid)) {
-        this.store.subscribed.push(data.guid);
+    if (!this.isSubscribed(data.serialNumber)) {
+        this.store.subscribed.push(data.serialNumber);
     }
-    this.view.setIcon(data.guid, ConsoleIO.Constant.ICONS.SUBSCRIBE);
+    this.view.setIcon(data.serialNumber, ConsoleIO.Constant.ICONS.SUBSCRIBE);
 };
 
 ConsoleIO.App.Browser.prototype.unSubscribed = function unSubscribed(data) {
-    var index = this.store.subscribed.indexOf(data.guid);
+    var index = this.store.subscribed.indexOf(data.serialNumber);
     if (index > -1) {
         this.store.subscribed.splice(index, 1);
-        if (this.store.offline.indexOf(data.guid) === -1) {
+        if (this.store.offline.indexOf(data.serialNumber) === -1) {
             this.online(data);
         } else {
             this.offline(data);
@@ -100,7 +113,19 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
         this.view.add(version, data.version, browser, ConsoleIO.Constant.ICONS.VERSION);
     }
 
-    this.view.addOrUpdate(data.guid, data.name.indexOf('|') > -1 ? data.browser : data.name, version);
+    this.view.addOrUpdate(data.serialNumber, data.name.indexOf('|') > -1 ? data.browser : data.name, version);
+
+    this.nodes.processing = true;
+    ConsoleIO.forEach([
+    ].concat(this.store.platform, this.store.manufacture, this.store.browser, this.store.version), function (id) {
+        if (this.nodes.closed.indexOf(id) > -1) {
+            this.view.closeItem(id);
+        }
+    }, this);
+
+    ConsoleIO.async(function () {
+        this.nodes.processing = false;
+    }, this, 100);
 
     //set correct icon
     if (data.subscribed && data.online) {
@@ -112,12 +137,19 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
     }
 };
 
-ConsoleIO.App.Browser.prototype.render = function render(target) {
-    this.parent.setTitle(this.model.contextId || this.model.guid, this.model.title);
-    this.view.render(target);
+ConsoleIO.App.Browser.prototype.openNode = function openNode(itemId, state) {
+    if (!this.nodes.processing) {
+        var index = this.nodes.closed.indexOf(itemId);
+
+        if (state === -1 && index === -1) {
+            this.nodes.closed.push(itemId);
+        } else if (index > -1) {
+            this.nodes.closed.splice(index, 1);
+        }
+    }
 };
 
-ConsoleIO.App.Browser.prototype.refresh = function refresh() {
+ConsoleIO.App.Browser.prototype.clear = function clear() {
     ConsoleIO.forEach(this.store.platform, function (platform) {
         this.deleteItem(platform);
     }, this.view);
@@ -130,18 +162,21 @@ ConsoleIO.App.Browser.prototype.refresh = function refresh() {
         offline: [],
         subscribed: []
     };
+};
 
+ConsoleIO.App.Browser.prototype.refresh = function refresh() {
+    this.clear();
     ConsoleIO.Service.Socket.emit('refreshRegisteredDeviceList');
 };
+
+
+ConsoleIO.App.Browser.prototype.isSubscribed = function isSubscribed(serialNumber) {
+    return this.store.subscribed.indexOf(serialNumber) > -1;
+};
+
 
 ConsoleIO.App.Browser.prototype.onButtonClick = function onButtonClick(btnId) {
     if (btnId === 'refresh') {
         this.refresh();
-    }
-};
-
-ConsoleIO.App.Browser.prototype.subscribe = function subscribe(guid) {
-    if (!this.isSubscribed(guid)) {
-        ConsoleIO.Service.Socket.emit('subscribe', guid);
     }
 };

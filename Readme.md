@@ -14,10 +14,12 @@ It works pretty much on all modern browsers, mobile devices, Smart TVs, etc
 Tested on: 
 * Toshiba TV (2011, 2012, 2013)
 * LG NetCast TV (2011, 2012, 2013)
-* Philips NetTV (2011, 2012)
+* Philips NetTV (2011, 2012, 2013)
 * Samsung TV (2010, 2011, 2012, 2013)
-* Panasonic TV (2013)
+* Panasonic TV (2012, 2013)
 * Technika Avtrex STB
+* Sony (BDP-S4100)
+* Hopper Dish (Hopper)
 * Firefox, Safari, Opera, Chrome, Maple, PhantomJS and IE
 * iPhone, iPod, iPad, Android browser, windows 8 phone etc
 
@@ -88,7 +90,6 @@ window.ConsoleIO.config = {
 
     // optionals
     secure: false,
-    minify: true,
 
     nativeConsole: true,
     web: false,  // true to display web console
@@ -126,7 +127,6 @@ define(['console.io'], function (consoleio) {
 
         // optionals
         secure: false,
-        minify: true,
 
         nativeConsole: true,
         web: false,
@@ -150,7 +150,16 @@ NOTE: It can also capture iframe logs. To do that just include console.io.js scr
 
 Visit http://<console.io server>/ for ConsoleIO interface (Tested on Chrome Browsers)
 
-![Screen shot](https://raw.github.com/nkashyap/console.io/master/console.io.png)
+![Console.IO](https://raw.github.com/nkashyap/console.io/master/resources/images/console.io.png)
+
+![Status tab](https://raw.github.com/nkashyap/console.io/master/resources/images/status-tab.png)
+
+![Source tab](https://raw.github.com/nkashyap/console.io/master/resources/images/source-tab.png)
+
+![Preview tab](https://raw.github.com/nkashyap/console.io/master/resources/images/preview-tab.png)
+
+![Console tab](https://raw.github.com/nkashyap/console.io/master/resources/images/console-tab.png)
+
 
 NOTE:
 * ![Online icons](https://raw.github.com/nkashyap/console.io/master/resources/icons/online.png) Device is registered and connected.
@@ -363,3 +372,5 @@ angular.module('app', ['ngResource',])
  * [OpenSSL] (http://www.openssl.org/)
  * [Html2Canvas] (http://html2canvas.hertzen.com/)
  * [Grunt] (http://gruntjs.com/)
+ * [uglify-js] (https://github.com/mishoo/UglifyJS/)
+ * [js-beautify] (https://github.com/einars/js-beautify/)

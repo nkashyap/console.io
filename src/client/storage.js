@@ -24,30 +24,20 @@
             key = cookie[0];
             value = cookie[1];
             memoryStore[key] = value;
-
-            if (global.localStorage) {
-                if (!global.localStorage.getItem(key)) {
-                    global.localStorage.setItem(key, value);
-                }
-            }
         }
 
-        // override cookie with localstorage value
-        if (global.localStorage) {
-            var guid = global.localStorage.getItem('guid'),
-                deviceName = global.localStorage.getItem('deviceName');
-
-            if (guid && !memoryStore.guid) {
-                storage.addItem('guid', guid, 365, true);
+        exports.util.forEachProperty(memoryStore, function (value, property) {
+            if (property === 'serialNumber') {
+                exports.serialNumber = value;
             }
 
-            if (deviceName && !memoryStore.deviceName) {
-                storage.addItem('deviceName', deviceName, 365, true);
+            if (property === 'deviceName') {
+                exports.name = value;
             }
-        }
+        });
     });
 
-    storage.addItem = function addItem(name, value, days, skipLocalStorage) {
+    storage.addItem = function addItem(name, value, days) {
         if (!value || value === 'undefined') {
             return;
         }
@@ -61,25 +51,14 @@
 
         document.cookie = name + "=" + value + expires + "; path=/";
         memoryStore[name] = value;
-
-        if (!skipLocalStorage && global.localStorage) {
-            global.localStorage.setItem(name, value);
-        }
     };
 
     storage.removeItem = function removeItem(name) {
-        storage.addItem(name, '', -1, true);
+        storage.addItem(name, '', -1);
         delete memoryStore[name];
-
-        if (global.localStorage) {
-            global.localStorage.removeItem(name);
-        }
     };
 
     storage.getItem = function getItem(name) {
-        if (global.localStorage) {
-            return global.localStorage.getItem(name) || memoryStore[name];
-        }
         return memoryStore[name];
     };
 

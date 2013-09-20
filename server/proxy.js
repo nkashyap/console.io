@@ -8,7 +8,8 @@
 
 function Proxy() {
     var url = require('url'),
-        request = require('request');
+        request = require('request'),
+        timeout = 60 * 1000;
 
     function get(req, res) {
         // Set caching
@@ -28,48 +29,58 @@ function Proxy() {
 
         // Get the params
         var query = url.parse(req.url, true).query,
-            imageUrl = query.url || null,
-            callback = query.callback || null;
+            uri = query.url || null,
+            callback = query.callback || null,
+            opt = {};
 
-        console.log('Proxy', imageUrl);
+        console.log('proxy request:', uri);
 
         // check for param existance, error if not
-        if (!imageUrl || !callback) {
-            console.log('Missing arguments');
-            res.writeHead(400); // 400 = Bad Request
+        if (!uri) {
+            console.log('URL missing!!');
+            // bad request
+            res.writeHead(400);
             res.end();
             return false;
         }
 
-        // request the image url
-        request({
-            url: imageUrl,
-            method: 'GET',
-            encoding: 'base64',
-            timeout: 60 * 1000
-        }, function (err, imageRes, imageData) {
-            var responseData, imageContentType;
-
-            if (!err && imageRes && imageRes.statusCode === 200) {
-                res.setHeader('Content-Type', 'application/javascript');
-                imageContentType = imageRes.headers['content-type'];
-                responseData = 'data:' + imageContentType + ';base64,' + imageData;
-                res.write(callback + '(' + JSON.stringify(responseData) + ')');
-                res.end();
-
-                console.log('Sent image:', imageUrl);
-                return true;
+        function proxyCallback(err, proxyRes, proxyData) {
+            proxyRes = proxyRes || {};
+            if (!err && proxyRes.statusCode === 200) {
+                //html2canvas requests
+                if (callback) {
+                    res.setHeader('Content-Type', 'application/javascript');
+                    var responseData = 'data:' + proxyRes.headers['content-type'] + ';base64,' + proxyData;
+                    res.write(callback + '(' + JSON.stringify(responseData) + ')');
+                } else {
+                    res.setHeader('Content-Type', proxyRes.headers['content-type']);
+                    res.write(proxyData);
+                }
+                console.log('sent:', uri);
+            } else {
+                // bad request
+                res.writeHead(proxyRes.statusCode || 400);
+                if (callback) {
+                    res.write(callback + '(' + JSON.stringify('error:Application error') + ')');
+                }
+                console.log('failed:', uri);
             }
-            else {
-                console.log('Failed image:', imageUrl);
 
-                res.writeHead(imageRes && imageRes.statusCode || 400); // bad request
-                responseData = JSON.stringify('error:Application error');
-                res.write(callback + '(' + responseData + ')');
-                res.end();
-                return false;
-            }
-        });
+            res.end();
+        }
+
+        // set request options
+        opt.url = uri;
+        opt.method = 'GET';
+        opt.timeout = timeout;
+
+        //html2canvas requests
+        if (callback) {
+            opt.encoding = 'base64';
+        }
+
+        // make a request
+        request(opt, proxyCallback);
     }
 
     return {

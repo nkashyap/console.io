@@ -16,12 +16,7 @@ ConsoleIO.Settings = {
     pageSize: {
         active: 50,
         list: [50, 100, 250, 500]
-    }
-//    web: {
-//        remoteControl: false,
-//        docked: false,
-//        position: 'bottom',
-//        height: '300px',
-//        width: '99%'
-//    }
+    },
+    defaultTab: 'console',
+    defaultAccordion: 'device'
 };

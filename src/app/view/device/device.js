@@ -13,21 +13,19 @@ ConsoleIO.View.Device = function DeviceView(ctrl, model) {
     this.ctrl = ctrl;
     this.model = model;
     this.target = null;
-    this.layout = null;
+    this.tabs = null;
 };
+
 
 ConsoleIO.View.Device.prototype.render = function render(target) {
     this.target = target;
-    this.layout = this.target.attachLayout("2U");
+    this.tabs = this.target.attachTabbar();
+    this.tabs.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tab'));
+    this.tabs.attachEvent("onTabClick", function (tabId) {
+        this.onTabClick(tabId.split('-')[0].toLowerCase());
+    }, this.ctrl);
 };
 
-ConsoleIO.View.Device.prototype.getContextById = function getContextById(contextId) {
-    return this.layout ? this.layout.cells(contextId) : null;
-};
-
-ConsoleIO.View.Device.prototype.setTitle = function setTitle(contextId, title) {
-    if (this.layout) {
-        this.layout.cells(contextId).setText(title);
-        this.layout.setCollapsedText(contextId, title);
-    }
+ConsoleIO.View.Device.prototype.destroy = function destroy() {
+    this.tabs.clearAll();
 };

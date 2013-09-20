@@ -114,7 +114,6 @@ var detectDevice = {
      * @return {Object} data store object with device detection regex
      */
     getStore: function getStore(config) {
-
         // Maple browser
         config.userAgent = config.userAgent.replace(/%20/img, " ");
         config.appVersion = config.appVersion.replace(/%20/img, " ");

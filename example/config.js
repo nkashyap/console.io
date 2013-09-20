@@ -21,7 +21,7 @@ define([], function () {
 //            minify: true,
 //
 //            nativeConsole: true,
-//            web: false,
+            web: true
 //            webOnly: false,
 //
 //            // Web console config

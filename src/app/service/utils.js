@@ -96,12 +96,14 @@ if (typeof window.ConsoleIO === "undefined") {
                     url = url.split('?');
                     options.URL = url[0];
                     url = url[1];
-                }
 
-                this.forEach(url.split('&'), function (param) {
-                    param = param.split('=');
-                    this[param[0]] = param[1];
-                }, options);
+                    this.forEach(url.split('&'), function (param) {
+                        param = param.split('=');
+                        this[param[0]] = param[1];
+                    }, options);
+                } else {
+                    options.URL = url;
+                }
             }
 
             return options;
@@ -110,7 +112,7 @@ if (typeof window.ConsoleIO === "undefined") {
         cookieToJSON: function cookieToJSON(cookies) {
             var options = {};
 
-            this.forEach(cookies.split('; '), function (cookie) {
+            this.forEach(unescape(cookies).split('; '), function (cookie) {
                 cookie = cookie.split('=');
                 this[cookie[0]] = cookie[1];
             }, options);
@@ -125,12 +127,57 @@ if (typeof window.ConsoleIO === "undefined") {
             }
         },
 
+        toArray: function toArray(data) {
+            return Array.prototype.slice.call(data);
+        },
+
+        isArray: Array.isArray || function (obj) {
+            return Object.prototype.toString.call(obj) === '[object Array]';
+        },
+
         extend: function extend(target, source) {
             this.forEachProperty(source, function (value, property) {
                 target[property] = value;
             });
 
             return target;
+        },
+
+        async: function async(fn, scope, timeout) {
+            return setTimeout(function () {
+                fn.call(scope);
+            }, timeout);
+        },
+
+        addCSSRule: function addCSSRule(selector, rules, index) {
+            var sheet = ConsoleIO.styleSheet;
+            try {
+                if (sheet.insertRule) {
+                    sheet.insertRule(selector + "{" + rules + "}", index);
+                }
+                else if (sheet.addRule) {
+                    sheet.addRule(selector, rules, index);
+                }
+            } catch (e) {
+            }
+        },
+
+        deleteCSSRule: function deleteCSSRule(selector) {
+            var sheet = ConsoleIO.styleSheet,
+                rules = sheet.cssRules || sheet.rules;
+
+            this.forEach(this.toArray(rules), function (rule, index) {
+                if (rule.selectorText) {
+                    // firefox switch double colon into single colon
+                    if (rule.selectorText.replace('::', ':') === selector.replace('::', ':')) {
+                        if (sheet.deleteRule) {
+                            sheet.deleteRule(index);
+                        } else if (sheet.removeRule) {
+                            sheet.removeRule(index);
+                        }
+                    }
+                }
+            });
         }
     };
 }

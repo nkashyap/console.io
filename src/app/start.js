@@ -25,13 +25,39 @@ ConsoleIO.ready(function () {
             var cmd = cm.getValue();
             if (cmd) {
                 ConsoleIO.Service.Socket.emit('execute', {
-                    guid: ConsoleIO.myApp.getActiveDeviceGuid(),
+                    serialNumber: ConsoleIO.myApp.getActiveDeviceSerialNumber(),
                     code: cmd
                 });
             }
         };
 
     }(CodeMirror, ConsoleIO));
+
+
+    var i, cookie, key, value,
+        cookies = document.cookie.split('; '),
+        length = cookies.length;
+
+    for (i = 0; i < length; i++) {
+        cookie = cookies[i].split('=');
+        key = cookie[0];
+        value = cookie[1];
+        ConsoleIO.Service.Storage.Store[key] = value;
+    }
+
+    ConsoleIO.styleSheet = (function styleSheet() {
+        var element = document.createElement("style");
+        element.type = 'text/css';
+        element.id = 'console.io.style';
+
+        // WebKit hack :(
+        element.appendChild(document.createTextNode(""));
+
+        // Add the <style> element to the page
+        document.getElementsByTagName('head')[0].appendChild(element);
+
+        return element.sheet || element.styleSheet;
+    }());
 
     ConsoleIO.Service.Socket.connect();
     ConsoleIO.myApp = new ConsoleIO.App();

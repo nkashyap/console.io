@@ -19,31 +19,55 @@ function main() {
         fs = require('fs'),
         manager = require('./manager');
 
-
     function Workers() {
         var app,
             base = '/',
             opts = {};
 
-        if (config.https.enable) {
-            if (config.https.pfx) {
-                opts.pfx = fs.readFileSync(config.https.pfx);
+        function getApp(config) {
+            var expressApp;
+            if (!config.https.enable) {
+                expressApp = express().http().io();
             } else {
-                opts.key = fs.readFileSync(config.https.key);
-                opts.cert = fs.readFileSync(config.https.certificate);
-                // This is necessary only if the client uses the self-signed certificate.
-                if (config.https.ca) {
-                    opts.ca = fs.readFileSync(config.https.ca);
+                if (config.https.pfx) {
+                    opts.pfx = fs.readFileSync(config.https.pfx);
+                } else {
+                    opts.key = fs.readFileSync(config.https.key);
+                    opts.cert = fs.readFileSync(config.https.certificate);
+                    // This is necessary only if the client uses the self-signed certificate.
+                    if (config.https.ca) {
+                        opts.ca = fs.readFileSync(config.https.ca);
+                    }
                 }
+
+                if (opts.requestCert) {
+                    opts.requestCert = config.https.requestCert;
+                }
+
+                expressApp = express().https(opts).io();
             }
 
-            if (opts.requestCert) {
-                opts.requestCert = config.https.requestCert;
+            return expressApp;
+        }
+
+        function getURL(url, base) {
+            url = url.replace(base, '/');
+
+            if (process.env.NODE_ENV === 'production') {
+                url = url.replace('.js', '.min.js');
+                url = url.replace('.css', '.min.css');
             }
 
-            app = express().https(opts).io();
-        } else {
-            app = express().http().io();
+            if (url.indexOf('?') > -1) {
+                url = url.split('?')[0];
+            }
+
+            return url;
+        }
+
+        //if node env is not defined then set it to 'production'
+        if (!process.env.NODE_ENV) {
+            process.env.NODE_ENV = 'production';
         }
 
         // If this node.js application is hosted in IIS, assume it is hosted
@@ -51,10 +75,19 @@ function main() {
             base = '/console.io/';
             config.io.development.set.push({ 'transports': ['htmlfile', 'xhr-polling', 'jsonp-polling']});
             config.io.production.set.push({ 'transports': ['htmlfile', 'xhr-polling', 'jsonp-polling']});
+
+            // IISNODE set long connection timeout
+            var Transport = require('../node_modules/express.io/node_modules/socket.io/lib/transport');
+            Transport.prototype.setCloseTimeout = function () {
+                this.log.debug('set close timeout for client', this.id);
+            };
         }
 
         config.io.development.set.push({ 'resource': base + 'socket.io' });
         config.io.production.set.push({ 'resource': base + 'socket.io' });
+
+        //get expressjs app
+        app = getApp(config);
 
         // configuration
         configure(app, 'development', config.express);
@@ -62,6 +95,10 @@ function main() {
         configure(app.io, 'development', config.io);
         configure(app.io, 'production', config.io);
 
+        //if env port no is not define then use one defined in config
+        if (!process.env.PORT) {
+            process.env.PORT = app.get('port-number');
+        }
 
         // Setup your sessions, just like normal.
         app.use(base, express.cookieParser());
@@ -75,22 +112,21 @@ function main() {
         });
 
         // add request logger
+        //if (process.env.NODE_ENV === 'development') {
         //app.use(base, express.logger());
+        //}
 
         //console app resources routes
         app.use(base + 'resources', express.static('resources'));
 
         //console client routes
         function client(req, res) {
-            res.sendfile('./dist/client' + req.originalUrl.replace(base, '/'));
+            res.sendfile('./dist/client' + getURL(req.originalUrl, base));
         }
 
         app.use(base + 'console.io.js', client);
-        app.use(base + 'console.io.min.js', client);
         app.use(base + 'console.css', client);
-        app.use(base + 'console.min.css', client);
         app.use(base + 'plugins/html2canvas.js', client);
-        app.use(base + 'plugins/html2canvas.min.js', client);
 
         //userdata app routes
         app.use(base + 'userdata/export', function download(req, res) {
@@ -104,140 +140,17 @@ function main() {
 
         //console app routes
         app.use(base, function app(req, res) {
-            res.sendfile('./dist/app' + req.originalUrl.replace(base, '/'));
+            res.sendfile('./dist/app' + getURL(req.originalUrl, base));
         });
 
         // initialize connection manager
         manager.setUp(app);
 
         // listen to port
-        app.listen(process.env.PORT || app.get('port-number'));
-
-        //set GUID cookie handler
-        (function setUpCookieHandler(express, app) {
-            var originalHandleRequest = express.io.Manager.prototype.handleRequest,
-                cookieMapping = [];
-
-            function getGUIDFromSID(sid) {
-                var guid;
-                cookieMapping.every(function (item) {
-                    guid = item.guid;
-                    return item.sid != sid;
-                });
-
-                return guid;
-            }
-
-            function update(newGUID, oldGUID) {
-
-                var sid, indexOf = -1;
-
-                cookieMapping.every(function (item, index) {
-                    if (item.guid == oldGUID) {
-                        indexOf = index;
-                        sid = item.sid;
-                        return false;
-                    }
-
-                    return true;
-                });
-
-                console.log(sid, indexOf, newGUID, oldGUID);
-
-                if (indexOf > -1) {
-                    cookieMapping.splice(indexOf, 1);
-                }
-
-                if (sid) {
-                    cookieMapping.every(function (item) {
-                        if (item.guid == newGUID) {
-                            item.sid = sid;
-                            return false;
-                        }
-                        return true;
-                    });
-                }
-            }
-
-            function getCookie(cookies, name) {
-                var value;
-
-                if (cookies) {
-                    cookies.every(function (cookie) {
-                        if ((cookie.substr(0, cookie.indexOf("="))).replace(/^\s+|\s+$/g, "") === name) {
-                            value = unescape(cookie.substr(cookie.indexOf("=") + 1));
-                            return false;
-                        }
-                        return true;
-                    });
-                }
-
-                return value;
-            }
-
-            function setGUIDCookie(document, requestHeaders) {
-                var guidCookie,
-                    expiryDate = new Date(),
-                    guid = escape(((new Date().getTime()) + "-" + Math.random()).replace(".", ""));
-
-                expiryDate.setDate(expiryDate.getDate() + 365);
-                guidCookie = "guid=" + guid + "; expires=" + expiryDate.toUTCString() + ";";
-
-                if (config.domain) {
-                    guidCookie += "domain=" + config.domain + "; path=/";
-                } else {
-                    guidCookie += "path=/";
-                }
-
-                if (document.setHeader) {
-                    document.setHeader("Set-Cookie", [guidCookie]);
-                } else if (document.headers) {
-                    document.headers.cookie = guidCookie;
-                }
-
-                if (requestHeaders && requestHeaders.cookie) {
-                    cookieMapping.push({
-                        guid: guid,
-                        sid: getCookie(requestHeaders.cookie.split(";"), 'connect.sid')
-                    });
-                }
-            }
-
-            function getGUIDCookie(requestHeaders) {
-                if (requestHeaders) {
-                    var guid, sid;
-
-                    if (requestHeaders.cookies) {
-                        guid = requestHeaders.cookies.guid;
-                        sid = requestHeaders.cookies['connect.sid'];
-                    } else if (requestHeaders.cookie) {
-                        var cookies = requestHeaders.cookie.split(";");
-                        guid = getCookie(cookies, 'guid');
-                        sid = getCookie(cookies, 'connect.sid');
-                    }
-
-                    if (!guid && sid) {
-                        guid = getGUIDFromSID(sid);
-                    }
-
-                    return guid;
-                }
-            }
-
-            express.io.Manager.prototype.handleRequest = function handleRequest(request, response) {
-                if (!getGUIDCookie(request.headers)) {
-                    setGUIDCookie(response, request.headers);
-                }
-                originalHandleRequest.call(app.io, request, response);
-            };
-
-            app.getGUIDCookie = getGUIDCookie;
-            app.update = update;
-
-        }(express, app));
+        app.listen(process.env.PORT);
 
         //display remote ui url information
-        console.log(app.get('title') + ' is run at ' + (config.https.enable ? 'https' : 'http') + '://localhost:' + (process.env.PORT || app.get('port-number')));
+        console.log(app.get('title') + ' is run at ' + (config.https.enable ? 'https' : 'http') + '://localhost:' + process.env.PORT);
     }
 
     Workers();

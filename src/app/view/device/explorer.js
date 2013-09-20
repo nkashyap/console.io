@@ -17,6 +17,7 @@ ConsoleIO.View.Device.Explorer = function ExplorerView(ctrl, model) {
     this.toolbar = null;
 };
 
+
 ConsoleIO.View.Device.Explorer.prototype.render = function render(target) {
     var scope = this;
     this.target = target;
@@ -40,10 +41,21 @@ ConsoleIO.View.Device.Explorer.prototype.render = function render(target) {
 
     this.tree.attachEvent("onDblClick", function (itemId) {
         if (!scope.tree.hasChildren(itemId)) {
-            this.viewFile(itemId);
+            this.onDblClick(itemId);
+        }
+    }, this.ctrl);
+
+    this.tree.attachEvent("onOpenEnd", function (itemId, state) {
+        if (scope.tree.hasChildren(itemId)) {
+            this.onOpenEnd(itemId, state);
         }
     }, this.ctrl);
 };
+
+ConsoleIO.View.Device.Explorer.prototype.destroy = function destroy() {
+    this.tree.destructor();
+};
+
 
 ConsoleIO.View.Device.Explorer.prototype.add = function add(id, name, parentId, icon) {
     if (icon) {
@@ -53,10 +65,19 @@ ConsoleIO.View.Device.Explorer.prototype.add = function add(id, name, parentId, 
     }
 };
 
-ConsoleIO.View.Device.Explorer.prototype.setIcon = function setIcon(id, icon) {
-    this.tree.setItemImage(id, icon);
-};
-
 ConsoleIO.View.Device.Explorer.prototype.deleteItem = function deleteItem(id) {
     this.tree.deleteItem(id);
+};
+
+ConsoleIO.View.Device.Explorer.prototype.closeItem = function closeItem(id, closeAll) {
+    if (!closeAll) {
+        this.tree.closeItem(id);
+    } else {
+        this.tree.closeAllItems(id);
+    }
+};
+
+
+ConsoleIO.View.Device.Explorer.prototype.setIcon = function setIcon(id, icon) {
+    this.tree.setItemImage(id, icon);
 };

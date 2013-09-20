@@ -17,6 +17,7 @@ ConsoleIO.View.Manager = function ManagerView(ctrl, model) {
     this.tabs = null;
 };
 
+
 ConsoleIO.View.Manager.prototype.render = function render(target) {
     this.target = target;
     this.tabs = this.target.attachTabbar();
@@ -31,6 +32,7 @@ ConsoleIO.View.Manager.prototype.render = function render(target) {
         this.onTabClick(tabId);
     }, this.ctrl);
 };
+
 
 ConsoleIO.View.Manager.prototype.add = function add(id, name, isActive) {
     this.tabs.addTab(id, name);
@@ -47,10 +49,12 @@ ConsoleIO.View.Manager.prototype.remove = function remove(id) {
     this.tabs.removeTab(id);
 };
 
-ConsoleIO.View.Manager.prototype.getContextById = function getContextById(contextId) {
-    return this.tabs ? this.tabs.cells(contextId) : null;
-};
 
 ConsoleIO.View.Manager.prototype.setActive = function setActive(id) {
     this.tabs.setTabActive(id);
+};
+
+
+ConsoleIO.View.Manager.prototype.getContextById = function getContextById(contextId) {
+    return this.tabs ? this.tabs.cells(contextId) : null;
 };

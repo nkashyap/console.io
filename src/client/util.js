@@ -177,7 +177,7 @@
         node.async = true;
 
         //IEMobile readyState "loaded" instead of "complete"
-        if (node.readyState === "complete" || node.readyState === "loaded") {
+        if (!global.opera && (node.readyState === "complete" || node.readyState === "loaded")) {
             setTimeout(function () {
                 callback(url);
             }, 1);
@@ -190,7 +190,7 @@
 
             } else if (node.attachEvent) {
                 //IEMobile readyState "loaded" instead of "complete"
-                if (node.readyState === "complete" || node.readyState === "loaded") {
+                if (!global.opera && (node.readyState === "complete" || node.readyState === "loaded")) {
                     node.detachEvent('onreadystatechange', onScriptLoad);
                     callback(url);
                 }
@@ -299,11 +299,14 @@
     };
 
     util.addCSSRule = function addCSSRule(sheet, selector, rules, index) {
-        if (sheet.insertRule) {
-            sheet.insertRule(selector + "{" + rules + "}", index);
-        }
-        else {
-            sheet.addRule(selector, rules, index);
+        try {
+            if (sheet.insertRule) {
+                sheet.insertRule(selector + "{" + rules + "}", index);
+            }
+            else if (sheet.addRule) {
+                sheet.addRule(selector, rules, index);
+            }
+        } catch (e) {
         }
     };
 
@@ -311,11 +314,14 @@
         var rules = sheet.cssRules || sheet.rules;
 
         util.forEach(util.toArray(rules), function (rule, index) {
-            if (rule.selectorText && rule.selectorText === selector) {
-                if (sheet.deleteRule) {
-                    sheet.deleteRule(index);
-                } else {
-                    sheet.removeRule(index);
+            if (rule.selectorText) {
+                // firefox switch double colon into single colon
+                if (rule.selectorText.replace('::', ':') === selector.replace('::', ':')) {
+                    if (sheet.deleteRule) {
+                        sheet.deleteRule(index);
+                    } else if (sheet.removeRule) {
+                        sheet.removeRule(index);
+                    }
                 }
             }
         });
@@ -349,7 +355,7 @@
         return styleNode.join("; ");
     };
 
-    util.getUrl = function getUrl(name, uncompressed) {
+    util.getUrl = function getUrl(name) {
         var config = exports.getConfig(),
             url = config.url,
             last = url.length - 1,
@@ -357,11 +363,6 @@
 
         if (url.charAt(last) === '/') {
             url = url.substr(0, last);
-        }
-
-        if (config.minify && !uncompressed) {
-            fileUrl = fileUrl.replace('.css', '.min.css');
-            fileUrl = fileUrl.replace('.js', '.min.js');
         }
 
         url += (config.base.length > 0 ? '/' + config.base : '/') + fileUrl;
@@ -377,8 +378,8 @@
                 "background-color: " + bgColor + "; border: 1px solid rgb(0, 0, 0); " +
                 "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
 
-        util.deleteCSSRule(exports.styleSheet, "." + className + "::after");
-        util.addCSSRule(exports.styleSheet, "." + className + "::after", css);
+        util.deleteCSSRule(exports.styleSheet, "." + className + ":after");
+        util.addCSSRule(exports.styleSheet, "." + className + ":after", css);
         document.body.setAttribute("class", className);
     };
 
@@ -394,8 +395,8 @@
         return typeof define === "function" && define.amd;
     };
 
-    util.getObjectType = function getObjectType(data) {
-        return Object.prototype.toString.apply(data);
+    util.getType = function getType(data) {
+        return Object.prototype.toString.apply(data).replace('[object ', '').replace(']', '');
     };
 
     util.getFunctionName = function getFunctionName(data) {
