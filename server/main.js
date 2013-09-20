@@ -16,6 +16,7 @@ function main() {
         config = require('./config'),
         configure = require('./configure'),
         proxy = require('./proxy'),
+        profiler = require('./profiler'),
         fs = require('fs'),
         manager = require('./manager');
 
@@ -136,6 +137,11 @@ function main() {
         //proxy setup
         app.use(base + 'proxy', function proxyHandler(req, res) {
             proxy.get(req, res);
+        });
+
+        //profiler setup
+        app.use(base + 'profiler', function proxyHandler(req, res) {
+            profiler.get(req, res);
         });
 
         //console app routes
