@@ -15,17 +15,12 @@
         url: '',
         base: '',
         secure: false,
-        minify: true,
 
         html2canvas: "plugins/html2canvas.js",
-        //"console.io": "console.io.js",
         "socket.io": "socket.io/socket.io.js",
         webStyle: "console.css",
         proxy: 'proxy',
-
-        forceReconnect: true,
-        forceReconnectInterval: 5000,
-        forceReconnectMaxTry: 10,
+        maxDataPacketSize: 5000,
 
         nativeConsole: true,
         web: false,
@@ -37,22 +32,6 @@
         height: '300px',
         width: '99%'
     };
-
-    function debug(msg) {
-        var log = document.getElementById('log'), li;
-
-        if (!log && document.body) {
-            log = document.createElement('ul');
-            log.setAttribute('id', 'log');
-            document.body.insertBefore(log, exports.util.getFirstElement(document.body));
-        }
-
-        if (log) {
-            li = document.createElement('li');
-            li.innerHTML = msg;
-            log.insertBefore(li, exports.util.getFirstElement(log));
-        }
-    }
 
     function getSettings() {
         var config = exports.config || exports.util.queryParams();
@@ -78,10 +57,6 @@
         }
     }
 
-
-    exports.guid = '';
-    exports.name = '';
-
     exports.configure = function configure(cfg) {
         exports.util.extend(defaultConfig, cfg);
 
@@ -89,10 +64,16 @@
             //Request console.io.js file to get connect.sid cookie from the server
             //Socket.io use connection cookie
             if (!exports.util.isIFrameChild()) {
+
+                if (global.io) {
+                    setUp();
+                    return false;
+                }
+
                 if (exports.util.foundRequireJS()) {
                     global.require(["socket.io"], setUp);
                 } else {
-                    exports.util.require(exports.util.getUrl("socket.io", true), setUp);
+                    exports.util.require(exports.util.getUrl("socket.io"), setUp);
                 }
             }
         } else {
@@ -113,10 +94,35 @@
         element.appendChild(document.createTextNode(""));
 
         // Add the <style> element to the page
-        document.head.appendChild(element);
+        document.getElementsByTagName('head')[0].appendChild(element);
 
-        return element.sheet;
+        return element.sheet || element.styleSheet;
     }());
+
+    exports.debug = function debug(msg) {
+        var log = document.getElementById('log'), li;
+
+        if (!log && document.body) {
+            log = document.createElement('ul');
+            log.setAttribute('id', 'log');
+            log.style.position = 'absolute';
+            log.style.background = 'rgb(48, 46, 46)';
+            log.style.height = '200px';
+            log.style.width = '800px';
+            log.style.top = '20px';
+            log.style.left = '50px';
+            log.style.margin = '10px';
+            log.style.paddingTop = '10px';
+            log.style.zIndex = 6000;
+            document.body.insertBefore(log, exports.util.getFirstElement(document.body));
+        }
+
+        if (log) {
+            li = document.createElement('li');
+            li.innerHTML = msg;
+            log.insertBefore(li, exports.util.getFirstElement(log));
+        }
+    };
 
     // Cover uncaught exceptions
     // Returning true will surpress the default browser handler,
@@ -138,7 +144,7 @@
         } else if (exports.util.isIFrameChild()) {
             exports.console.exception(error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo);
         } else {
-            debug([error, filePath, lineNo].join("; "));
+            exports.debug([error, filePath, lineNo].join("; "));
         }
 
         return result;
@@ -160,11 +166,6 @@
      * set it to undefined to force other libraries to use addEventListener instead
      */
     if (global.navigator.userAgent.search(/Maple/i) > -1) {
-        /**
-         * override samsung maple logging
-         */
-        global.alert = global.console.info;
-
         if (typeof HTMLElement.prototype.addEventListener === 'function' &&
             typeof HTMLElement.prototype.attachEvent === 'function') {
             HTMLElement.prototype.attachEvent = undefined;

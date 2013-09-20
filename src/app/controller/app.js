@@ -13,13 +13,16 @@ ConsoleIO.App = function AppController() {
     this.context = {
         browser: "a",
         editor: "b",
-        manager: "c"
+        server: "c",
+        manager: "d"
     };
 
     this.view = new ConsoleIO.View.App(this, {
         target: document.body,
-        type: "3U",
-        status: "<a style='float:left;' target='_blank' href='http://nkashyap.github.io/console.io/'>Welcome to Console.IO</a><span style='float:right;'>Author: Nisheeth Kashyap, Email: nisheeth.k.kashyap@gmail.com</span>"
+        type: "4U",
+        status: "<a style='float:left;' target='_blank' href='http://nkashyap.github.io/console.io/'>" +
+            "Welcome to Console.IO</a><span style='float:right;'>" +
+            "Author: Nisheeth Kashyap, Email: nisheeth.k.kashyap@gmail.com</span>"
     });
 
     this.browser = new ConsoleIO.App.Browser(this, {
@@ -41,8 +44,11 @@ ConsoleIO.App = function AppController() {
             readOnly: false
         },
         toolbar: [
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Execute,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Open,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Save,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Clear,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Cut,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
@@ -52,11 +58,16 @@ ConsoleIO.App = function AppController() {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Undo,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Redo,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Clear,
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Execute
+            ConsoleIO.extend(ConsoleIO.extend({}, ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify), { type: 'button' })
         ]
+    });
+
+    this.server = new ConsoleIO.App.Server(this, {
+        title: 'Server',
+        contextId: 'server',
+        width: 200,
+        height: 250
     });
 
     this.manager = new ConsoleIO.App.Manager(this, {
@@ -64,50 +75,47 @@ ConsoleIO.App = function AppController() {
         contextId: 'manager'
     });
 
-    ConsoleIO.Service.Socket.on('connect', this.onConnect, this);
-    ConsoleIO.Service.Socket.on('disconnect', this.onDisconnect, this);
-    ConsoleIO.Service.Socket.on('user:error', this.notify, this);
-    ConsoleIO.Service.Socket.on('user:listScripts', this.listScripts, this);
-    ConsoleIO.Service.Socket.on('user:scriptContent', this.add, this);
-    ConsoleIO.Service.Socket.on('user:scriptSaved', this.scriptSaved, this);
+    ConsoleIO.Service.Socket.on('user:fileList', this.fileList, this);
+    ConsoleIO.Service.Socket.on('user:fileContent', this.fileContent, this);
+    ConsoleIO.Service.Socket.on('user:fileSaved', this.fileSaved, this);
+    ConsoleIO.Service.Socket.on('user:contentBeautified', this.contentBeautified, this);
 };
+
 
 ConsoleIO.App.prototype.render = function render() {
     this.view.render();
     this.browser.render(this.view.getContextById(this.context.browser));
     this.editor.render(this.view.getContextById(this.context.editor));
+    this.server.render(this.view.getContextById(this.context.server));
     this.manager.render(this.view.getContextById(this.context.manager));
 };
+
+
+ConsoleIO.App.prototype.fileList = function fileList(files) {
+    this.editor.fileList(files);
+};
+
+ConsoleIO.App.prototype.fileSaved = function fileSaved(file) {
+    this.editor.fileName = file.name;
+    this.editor.addScript(file);
+};
+
+ConsoleIO.App.prototype.fileContent = function fileContent(data) {
+    this.editor.fileCanBeSaved = false;
+    this.editor.setValue(data);
+};
+
+ConsoleIO.App.prototype.contentBeautified = function contentBeautified(data) {
+    this.editor.fileCanBeSaved = true;
+    this.editor.setValue(data);
+};
+
 
 ConsoleIO.App.prototype.setTitle = function setTitle(name, title) {
     this.view.setTitle(this.context[name], title);
 };
 
-ConsoleIO.App.prototype.listScripts = function listScripts(files) {
-    this.editor.listScripts(files);
-};
 
-ConsoleIO.App.prototype.scriptSaved = function scriptSaved(file) {
-    this.editor.fileName = file.name;
-    this.editor.addScript(file);
-};
-
-ConsoleIO.App.prototype.add = function add(data) {
-    this.editor.add(data);
-};
-
-ConsoleIO.App.prototype.onConnect = function onConnect() {
-    this.view.online();
-};
-
-ConsoleIO.App.prototype.onDisconnect = function onDisconnect() {
-    this.view.offline();
-};
-
-ConsoleIO.App.prototype.notify = function notify() {
-    this.view.notify(arguments);
-};
-
-ConsoleIO.App.prototype.getActiveDeviceGuid = function getActiveDeviceGuid() {
-    return this.manager.getActiveDeviceGuid();
+ConsoleIO.App.prototype.getActiveDeviceSerialNumber = function getActiveDeviceSerialNumber() {
+    return this.manager.getActiveDeviceSerialNumber();
 };

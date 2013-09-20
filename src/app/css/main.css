@@ -71,57 +71,11 @@ html, body {
     color: #999;
 }
 
-.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont],
 .dhx_tabcontent_zone > div[tab_id^=Console] > div[ida=dhxMainCont],
-.dhx_tabcontent_zone > div[tab_id^=Preview] > div[ida=dhxMainCont],
-.dhx_tabcontent_zone > div[tab_id^=Source] > div[ida=dhxMainCont] {
+.dhx_tabcontent_zone > div[tab_id^=Preview] > div[ida=dhxMainCont] {
     overflow: auto !important;
 }
 
-/* Status Tab*/
-.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .label {
-    border: 1px solid #a6dbff;
-    margin: 10px;
-    font-family: Tahoma;
-    font-size: 11px;
-    display: table;
-    width: 97%;
-}
-
-.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .title {
-    font-weight: bold;
-    text-transform: uppercase;
-    padding: 5px;
-    background: #a6dbff;
-    display: table-caption;
-}
-
-.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .property {
-    display: table-row;
-}
-
-.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .property:nth-child(even) {
-    background: #FFF;
-}
-
-.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .property:nth-child(odd) {
-    background: #e8f2ff;
-}
-
-.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .name {
-    display: table-cell;
-    font-weight: bold;
-    padding: 5px;
-    width: 20%;
-}
-
-.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .value {
-    display: table-cell;
-    padding: 5px;
-    width: 80%;
-}
-
-.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .value .valueList,
-.dhx_tabcontent_zone > div[tab_id^=Status] > div[ida=dhxMainCont] .value .valueText {
-    word-break: break-all;
+.dhx_acc_item_label {
+    text-transform: capitalize;
 }

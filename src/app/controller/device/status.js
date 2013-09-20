@@ -12,11 +12,12 @@ ConsoleIO.namespace("ConsoleIO.App.Device.Status");
 ConsoleIO.App.Device.Status = function StatusController(parent, model) {
     this.parent = parent;
     this.model = model;
+    this.activeAccordion = ConsoleIO.Settings.defaultAccordion;
 
     ConsoleIO.Model.DHTMLX.ToolBarItem.DeviceNameText.value = this.model.name;
     this.view = new ConsoleIO.View.Device.Status(this, {
         name: "Status",
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
@@ -28,14 +29,22 @@ ConsoleIO.App.Device.Status = function StatusController(parent, model) {
         ]
     });
 
-    ConsoleIO.Service.Socket.on('device:status:' + this.model.guid, this.add, this);
-    ConsoleIO.Service.Socket.on('device:web:status:' + this.model.guid, this.web, this);
+    ConsoleIO.Service.Socket.on('device:status:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.on('device:web:status:' + this.model.serialNumber, this.web, this);
 };
+
 
 ConsoleIO.App.Device.Status.prototype.render = function render(target) {
     this.view.render(target);
     this.view.setItemState('web', this.model.web.enabled);
 };
+
+ConsoleIO.App.Device.Status.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:status:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.off('device:web:status:' + this.model.serialNumber, this.web, this);
+    this.view = this.view.destroy();
+};
+
 
 ConsoleIO.App.Device.Status.prototype.web = function web(data) {
     this.model.web.enabled = data.enabled;
@@ -50,33 +59,50 @@ ConsoleIO.App.Device.Status.prototype.activate = function activate(state) {
 
 ConsoleIO.App.Device.Status.prototype.add = function add(data) {
     this.view.clear();
-    ConsoleIO.forEachProperty(data, function (value, property) {
-        this.view.addLabel(property);
-        ConsoleIO.forEachProperty(value, function (config, name) {
-            switch (name.toLowerCase()) {
-                case 'more':
-                    config = config.join(", ");
-                    if (!config) {
-                        return;
-                    }
-                    break;
-                case 'search':
-                case 'href':
-                    config = ConsoleIO.queryParams(config);
-                    break;
-                case 'cookie':
-                    config = ConsoleIO.cookieToJSON(config);
-                    break;
-            }
 
-            this.view.add(name, typeof config === 'string' ? config.replace(/"/igm, "") : config, property);
+    ConsoleIO.forEach(data.info, function (item) {
+
+        ConsoleIO.forEachProperty(item, function (value, property) {
+
+            this.view.addLabel(property);
+
+            ConsoleIO.forEachProperty(value, function (config, name) {
+                switch (name.toLowerCase()) {
+                    case 'search':
+                    case 'href':
+                        config = ConsoleIO.queryParams(config);
+                        break;
+                    case 'cookie':
+                        config = ConsoleIO.cookieToJSON(config);
+                        break;
+                }
+
+                this.view.add(name, typeof config === 'string' ? config.replace(/"/igm, "") : config, property);
+
+            }, this);
+
         }, this);
+
     }, this);
+
+    this.view.open(this.activeAccordion);
 };
 
 ConsoleIO.App.Device.Status.prototype.refresh = function refresh() {
-    ConsoleIO.Service.Socket.emit('deviceStatus', { guid: this.model.guid });
+    ConsoleIO.Service.Socket.emit('deviceStatus', {
+        serialNumber: this.model.serialNumber
+    });
 };
+
+
+ConsoleIO.App.Device.Status.prototype.setTabActive = function setTabActive() {
+    this.view.setTabActive();
+};
+
+ConsoleIO.App.Device.Status.prototype.setActive = function setActive(id) {
+    this.activeAccordion = id;
+};
+
 
 ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
@@ -85,7 +111,7 @@ ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btn
                 var name = this.view.getValue('deviceNameText');
                 if (!!name) {
                     ConsoleIO.Service.Socket.emit('deviceName', {
-                        guid: this.model.guid,
+                        serialNumber: this.model.serialNumber,
                         name: name
                     });
                     this.model.name = name;
@@ -96,10 +122,17 @@ ConsoleIO.App.Device.Status.prototype.onButtonClick = function onButtonClick(btn
                 if (this.model.web.enabled !== state) {
                     this.model.web.enabled = state;
                     ConsoleIO.Service.Socket.emit('webConfig', {
-                        guid: this.model.guid,
+                        serialNumber: this.model.serialNumber,
                         enabled: this.model.web.enabled
                     });
                 }
+                break;
+            default:
+                this.parent.parent.parent.server.update({
+                    status: 'Unhandled event',
+                    btnId: btnId,
+                    state: state
+                });
                 break;
         }
     }

@@ -55,6 +55,13 @@
             this.isEnabled = true;
             this.view.render(document.body);
             exports.console.on('console', exports.web.logger);
+
+            if (global.addEventListener) {
+                global.addEventListener("message", exports.web.onMessage, false);
+            } else if (global.detachEvent) {
+                global.detachEvent('onmessage', exports.web.onMessage);
+            }
+
             exports.transport.emit('webStatus', { enabled: true });
         }
     };
@@ -63,6 +70,13 @@
         if (this.isEnabled) {
             this.isEnabled = false;
             exports.console.removeListener('console', exports.web.logger);
+
+            if (global.removeEventListener) {
+                global.removeEventListener("message", exports.web.onMessage, false);
+            } else if (global.attachEvent) {
+                global.attachEvent('onmessage', exports.web.onMessage);
+            }
+
             exports.transport.emit('webStatus', { enabled: false });
             this.view.destroy();
         }
@@ -292,6 +306,8 @@
     View.prototype.getElementData = function getElementData(data) {
         var tag = 'code',
             css = data.type,
+            origin = data.origin,
+            originClass,
             stackMessage,
             message = this.stripBrackets(data.message);
 
@@ -325,9 +341,20 @@
             tag = 'pre';
         }
 
+        if (origin) {
+            origin = data.origin.replace(/(\/|:|\.)/igm, '');
+            originClass = "content: 'iframe:" + data.origin + "'; position: absolute; top: 0px; right: 0px; padding: 2px 8px; " +
+                "font-size: 12px; color: lightgrey !important; " +
+                "background-color: black; " +
+                "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
+
+            exports.util.deleteCSSRule(exports.styleSheet, '.' + origin + ":before");
+            exports.util.addCSSRule(exports.styleSheet, '.' + origin + ":before", originClass);
+        }
+
         return {
             tag: tag,
-            className: 'console type-' + css,
+            className: 'console type-' + css + (origin ? ' ' + origin : ''),
             message: (message || '.')
         };
     };
@@ -401,6 +428,20 @@
         }
     };
 
+    web.onMessage = function onMessage(event) {
+        if (exports.web.console) {
+            var data = event.data;
+            if (data.event === 'console') {
+                exports.web.console.add({
+                    type: data.type,
+                    message: unescape(data.message),
+                    stack: data.stack,
+                    origin: event.origin
+                });
+            }
+        }
+    };
+
     web.setUp = function setUp() {
         if (!web.console) {
             web.console = new Controller();
@@ -428,7 +469,9 @@
             web.console.setControl(data);
         }
 
-        var info = [exports.name, exports.guid, exports.transport.isConnected() ? 'online' : 'offline'];
+        var info = [
+            exports.name || '', exports.serialNumber || '', exports.transport.isConnected() ? 'online' : 'offline'
+        ];
 
         if (data.paused) {
             info.push('paused');

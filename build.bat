@@ -1,1 +1,1 @@
-grunt default > debug-log.txt
+grunt default > build-log.txt

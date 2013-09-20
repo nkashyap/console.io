@@ -1,6 +1,6 @@
 {
     "name": "xconsole.io",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "project": "console.io",
     "subdomain": "console.io",
     "description": "Javascript Remote Web Console",
@@ -20,7 +20,9 @@
     ],
     "dependencies": {
         "express.io": "latest",
-        "request": "latest"
+        "request": "latest",
+        "uglify-js": "latest",
+        "js-beautify": "latest"
     },
     "devDependencies": {
         "grunt": "latest",

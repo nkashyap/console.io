@@ -21,6 +21,7 @@ ConsoleIO.View.Editor = function EditorView(ctrl, model) {
     this.createElements();
 };
 
+
 ConsoleIO.View.Editor.prototype.render = function render(target) {
     this.target = target;
     this.target.attachObject(this.container);
@@ -40,7 +41,16 @@ ConsoleIO.View.Editor.prototype.render = function render(target) {
     }
 };
 
-ConsoleIO.View.Editor.prototype.listScripts = function listScripts(data) {
+ConsoleIO.View.Editor.prototype.destroy = function destroy() {
+    this.container.removeChild(this.textArea);
+    this.container.parentNode.removeChild(this.container);
+    if (this.toolbar) {
+        this.toolbar.unload();
+    }
+};
+
+
+ConsoleIO.View.Editor.prototype.fileList = function fileList(data) {
     var scope = this;
     this.toolbar.forEachListOption('open', function (id) {
         scope.toolbar.removeListOption('open', id);
@@ -79,5 +89,12 @@ ConsoleIO.View.Editor.prototype.toggleButton = function toggleButton(id, state) 
         } else {
             this.toolbar.disableItem(id);
         }
+    }
+};
+
+
+ConsoleIO.View.Editor.prototype.setItemText = function setItemText(id, text) {
+    if (this.toolbar) {
+        this.toolbar.setItemText(id, text);
     }
 };

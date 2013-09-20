@@ -16,6 +16,7 @@ ConsoleIO.View.App = function AppView(ctrl, model) {
     this.statusBar = null;
 };
 
+
 ConsoleIO.View.App.prototype.render = function render() {
     this.layout = new dhtmlXLayoutObject(this.model.target, this.model.type, ConsoleIO.Constant.THEMES.get('layout'));
 
@@ -29,29 +30,7 @@ ConsoleIO.View.App.prototype.render = function render() {
 
     this.statusBar = this.layout.attachStatusBar();
 
-    this.offline();
-};
-
-ConsoleIO.View.App.prototype.getContextById = function getContextById(contextId) {
-    return this.layout ? this.layout.cells(contextId) : null;
-};
-
-ConsoleIO.View.App.prototype.online = function online() {
-    var icon = '<img src="' + ConsoleIO.Settings.iconPath + 'online.png" class="status">';
-    this.statusBar.setText(icon + this.model.status);
-};
-
-ConsoleIO.View.App.prototype.offline = function offline() {
-    var icon = '<img src="' + ConsoleIO.Settings.iconPath + 'offline.png" class="status">';
-    this.statusBar.setText(icon + this.model.status);
-};
-
-ConsoleIO.View.App.prototype.notify = function notify(data) {
-    console.log(data);
-};
-
-ConsoleIO.View.App.prototype.getContextById = function getContextById(contextId) {
-    return this.layout ? this.layout.cells(contextId) : null;
+    this.statusBar.setText(this.model.status);
 };
 
 
@@ -60,4 +39,9 @@ ConsoleIO.View.App.prototype.setTitle = function setTitle(contextId, title) {
         this.layout.cells(contextId).setText(title);
         this.layout.setCollapsedText(contextId, title);
     }
+};
+
+
+ConsoleIO.View.App.prototype.getContextById = function getContextById(contextId) {
+    return this.layout ? this.layout.cells(contextId) : null;
 };

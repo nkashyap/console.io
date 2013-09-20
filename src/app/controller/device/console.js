@@ -41,7 +41,7 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
 
     this.view = new ConsoleIO.View.Device.Console(this, {
         name: "Console",
-        guid: this.model.guid,
+        serialNumber: this.model.serialNumber,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
             ConsoleIO.Model.DHTMLX.ToolBarItem.PlayPause,
@@ -62,8 +62,9 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
         ]
     });
 
-    ConsoleIO.Service.Socket.on('device:console:' + this.model.guid, this.add, this);
+    ConsoleIO.Service.Socket.on('device:console:' + this.model.serialNumber, this.add, this);
 };
+
 
 ConsoleIO.App.Device.Console.prototype.render = function render(target) {
     this.view.render(target);
@@ -79,25 +80,15 @@ ConsoleIO.App.Device.Console.prototype.render = function render(target) {
     }, this);
 };
 
+ConsoleIO.App.Device.Console.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:console:' + this.model.serialNumber, this.add, this);
+    this.view = this.view.destroy();
+};
+
+
 ConsoleIO.App.Device.Console.prototype.activate = function activate(state) {
     this.active = state;
     this.addBatch();
-};
-
-ConsoleIO.App.Device.Console.prototype.getData = function getData(store) {
-    var count = 0, dataStore = [];
-    if (store.length > 0) {
-        ConsoleIO.every([].concat(store).reverse(), function (item) {
-            if (this.isFiltered(item) && this.isSearchFiltered(item)) {
-                dataStore.push(item);
-                count++;
-            }
-
-            return ConsoleIO.Settings.pageSize.active > count;
-        }, this);
-    }
-
-    return dataStore;
 };
 
 ConsoleIO.App.Device.Console.prototype.add = function add(data) {
@@ -135,6 +126,18 @@ ConsoleIO.App.Device.Console.prototype.applySearch = function applySearch(value)
     this.view.addBatch(this.getData(this.store.added));
 };
 
+ConsoleIO.App.Device.Console.prototype.notify = function notify(clearAll) {
+    ConsoleIO.Service.Socket.emit('webControl', {
+        serialNumber: this.model.serialNumber,
+        pageSize: ConsoleIO.Settings.pageSize.active,
+        filters: this.filters,
+        search: this.view.getValue('searchText'),
+        paused: this.paused,
+        clear: !!clearAll
+    });
+};
+
+
 ConsoleIO.App.Device.Console.prototype.isSearchFiltered = function isSearchFiltered(data) {
     return this.searchRegex ? data.message.search(this.searchRegex) > -1 : true;
 };
@@ -142,6 +145,29 @@ ConsoleIO.App.Device.Console.prototype.isSearchFiltered = function isSearchFilte
 ConsoleIO.App.Device.Console.prototype.isFiltered = function isFiltered(data) {
     return this.filters.length === 0 || (this.filters.length > 0 && this.filters.indexOf(data.type) > -1);
 };
+
+
+ConsoleIO.App.Device.Console.prototype.setTabActive = function setTabActive() {
+    this.view.setTabActive();
+};
+
+
+ConsoleIO.App.Device.Console.prototype.getData = function getData(store) {
+    var count = 0, dataStore = [];
+    if (store.length > 0) {
+        ConsoleIO.every([].concat(store).reverse(), function (item) {
+            if (this.isFiltered(item) && this.isSearchFiltered(item)) {
+                dataStore.push(item);
+                count++;
+            }
+
+            return ConsoleIO.Settings.pageSize.active > count;
+        }, this);
+    }
+
+    return dataStore;
+};
+
 
 ConsoleIO.App.Device.Console.prototype.onPageSizeChanged = function onPageSizeChanged(btnId) {
     ConsoleIO.Settings.pageSize.active = btnId.split("-")[1];
@@ -187,24 +213,20 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
                     this.notify();
                     break;
                 case 'export':
-                    ConsoleIO.Service.Socket.emit('exportHTML', {
-                        guid: this.model.guid,
+                    ConsoleIO.Service.Socket.emit('exportLog', {
+                        serialNumber: this.model.serialNumber,
                         name: this.model.name,
                         content: this.view.getHTML()
+                    });
+                    break;
+                default:
+                    this.parent.parent.parent.server.update({
+                        status: 'Unhandled event',
+                        btnId: btnId,
+                        state: state
                     });
                     break;
             }
         }
     }
-};
-
-ConsoleIO.App.Device.Console.prototype.notify = function notify(clearAll) {
-    ConsoleIO.Service.Socket.emit('webControl', {
-        guid: this.model.guid,
-        pageSize: ConsoleIO.Settings.pageSize.active,
-        filters: this.filters,
-        search: this.view.getValue('searchText'),
-        paused: this.paused,
-        clear: !!clearAll
-    });
 };

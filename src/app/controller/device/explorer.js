@@ -16,25 +16,27 @@ ConsoleIO.App.Device.Explorer = function ExplorerController(parent, model) {
         folder: [],
         files: []
     };
+    this.nodes = {
+        processing: false,
+        opened: []
+    };
 
     this.view = new ConsoleIO.View.Device.Explorer(this, this.model);
-    ConsoleIO.Service.Socket.on('device:files:' + this.model.guid, this.add, this);
-
-    this.refresh();
+    ConsoleIO.Service.Socket.on('device:files:' + this.model.serialNumber, this.add, this);
 };
 
+
 ConsoleIO.App.Device.Explorer.prototype.render = function render(target) {
-    this.parent.setTitle(this.model.contextId || this.model.guid, this.model.title);
+    this.parent.setTitle(this.model.contextId || this.model.serialNumber, this.model.title);
     this.view.render(target);
 };
 
-ConsoleIO.App.Device.Explorer.prototype.getParentId = function getParentId(list, item) {
-    var index = list.indexOf(item);
-    if (index > 0) {
-        return (list.slice(0, index)).join('|');
-    }
-    return 0;
+ConsoleIO.App.Device.Explorer.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:files:' + this.model.serialNumber, this.add, this);
+    this.clear();
+    this.view = this.view.destroy();
 };
+
 
 ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
     ConsoleIO.forEach(data.files, function (file) {
@@ -65,9 +67,20 @@ ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
         }, this);
 
     }, this);
+
+    this.nodes.processing = true;
+    ConsoleIO.forEach(this.store.folder, function (id) {
+        if (this.nodes.opened.indexOf(id) === -1) {
+            this.view.closeItem(id);
+        }
+    }, this);
+
+    ConsoleIO.async(function () {
+        this.nodes.processing = false;
+    }, this, 100);
 };
 
-ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
+ConsoleIO.App.Device.Explorer.prototype.clear = function clear() {
     ConsoleIO.forEach(this.store.folder, function (folder) {
         this.deleteItem(folder);
     }, this.view);
@@ -80,9 +93,24 @@ ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
         folder: [],
         files: []
     };
-
-    ConsoleIO.Service.Socket.emit('reloadFiles', { guid: this.model.guid });
 };
+
+ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
+    this.clear();
+
+    ConsoleIO.Service.Socket.emit('reloadFiles', {
+        serialNumber: this.model.serialNumber
+    });
+};
+
+ConsoleIO.App.Device.Explorer.prototype.getParentId = function getParentId(list, item) {
+    var index = list.indexOf(item);
+    if (index > 0) {
+        return (list.slice(0, index)).join('|');
+    }
+    return 0;
+};
+
 
 ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(btnId) {
     if (btnId === 'refresh') {
@@ -90,9 +118,21 @@ ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(b
     }
 };
 
-ConsoleIO.App.Device.Explorer.prototype.viewFile = function viewFile(fileId) {
+ConsoleIO.App.Device.Explorer.prototype.onDblClick = function onDblClick(btnId) {
     ConsoleIO.Service.Socket.emit('fileSource', {
-        guid: this.model.guid,
-        url: (fileId.indexOf("http") === -1 ? '/' : '') + fileId.replace(/[|]/igm, "/")
+        serialNumber: this.model.serialNumber,
+        url: (btnId.indexOf("http") === -1 ? '/' : '') + btnId.replace(/[|]/igm, "/")
     });
+};
+
+ConsoleIO.App.Device.Explorer.prototype.onOpenEnd = function onOpenEnd(itemId, state) {
+    if (!this.nodes.processing) {
+        var index = this.nodes.opened.indexOf(itemId);
+
+        if (state === 1 && index === -1) {
+            this.nodes.opened.push(itemId);
+        } else if (index > -1) {
+            this.nodes.opened.splice(index, 1);
+        }
+    }
 };

@@ -30,7 +30,7 @@
 
 var config = {
 
-    domain: null, //'.bbdev1.com',
+    domain: null,
 
     /** express configurations **/
     express: {
@@ -71,8 +71,9 @@ var config = {
         production: {
             enable: [
                 'browser client minification',
-                'browser client etag',
-                'browser client gzip'
+                'browser client etag'
+                // sometime socket.io crash
+                //'browser client gzip'
             ],
             disable: [],
             set: [

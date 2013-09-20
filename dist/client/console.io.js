@@ -1,15 +1,15 @@
 /**
  * Name: console.io
- * Version: 0.2.0
+ * Version: 0.2.0-1
  * Description: Javascript Remote Web Console
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-04
+ * Date: 2013-09-19
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
-ConsoleIO.version = "0.2.0";
+ConsoleIO.version = "0.2.0-1";
 
 (function(){
 
@@ -192,7 +192,7 @@ ConsoleIO.version = "0.2.0";
         node.async = true;
 
         //IEMobile readyState "loaded" instead of "complete"
-        if (node.readyState === "complete" || node.readyState === "loaded") {
+        if (!global.opera && (node.readyState === "complete" || node.readyState === "loaded")) {
             setTimeout(function () {
                 callback(url);
             }, 1);
@@ -205,7 +205,7 @@ ConsoleIO.version = "0.2.0";
 
             } else if (node.attachEvent) {
                 //IEMobile readyState "loaded" instead of "complete"
-                if (node.readyState === "complete" || node.readyState === "loaded") {
+                if (!global.opera && (node.readyState === "complete" || node.readyState === "loaded")) {
                     node.detachEvent('onreadystatechange', onScriptLoad);
                     callback(url);
                 }
@@ -314,11 +314,14 @@ ConsoleIO.version = "0.2.0";
     };
 
     util.addCSSRule = function addCSSRule(sheet, selector, rules, index) {
-        if (sheet.insertRule) {
-            sheet.insertRule(selector + "{" + rules + "}", index);
-        }
-        else {
-            sheet.addRule(selector, rules, index);
+        try {
+            if (sheet.insertRule) {
+                sheet.insertRule(selector + "{" + rules + "}", index);
+            }
+            else if (sheet.addRule) {
+                sheet.addRule(selector, rules, index);
+            }
+        } catch (e) {
         }
     };
 
@@ -326,11 +329,14 @@ ConsoleIO.version = "0.2.0";
         var rules = sheet.cssRules || sheet.rules;
 
         util.forEach(util.toArray(rules), function (rule, index) {
-            if (rule.selectorText && rule.selectorText === selector) {
-                if (sheet.deleteRule) {
-                    sheet.deleteRule(index);
-                } else {
-                    sheet.removeRule(index);
+            if (rule.selectorText) {
+                // firefox switch double colon into single colon
+                if (rule.selectorText.replace('::', ':') === selector.replace('::', ':')) {
+                    if (sheet.deleteRule) {
+                        sheet.deleteRule(index);
+                    } else if (sheet.removeRule) {
+                        sheet.removeRule(index);
+                    }
                 }
             }
         });
@@ -364,7 +370,7 @@ ConsoleIO.version = "0.2.0";
         return styleNode.join("; ");
     };
 
-    util.getUrl = function getUrl(name, uncompressed) {
+    util.getUrl = function getUrl(name) {
         var config = exports.getConfig(),
             url = config.url,
             last = url.length - 1,
@@ -372,11 +378,6 @@ ConsoleIO.version = "0.2.0";
 
         if (url.charAt(last) === '/') {
             url = url.substr(0, last);
-        }
-
-        if (config.minify && !uncompressed) {
-            fileUrl = fileUrl.replace('.css', '.min.css');
-            fileUrl = fileUrl.replace('.js', '.min.js');
         }
 
         url += (config.base.length > 0 ? '/' + config.base : '/') + fileUrl;
@@ -392,8 +393,8 @@ ConsoleIO.version = "0.2.0";
                 "background-color: " + bgColor + "; border: 1px solid rgb(0, 0, 0); " +
                 "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
 
-        util.deleteCSSRule(exports.styleSheet, "." + className + "::after");
-        util.addCSSRule(exports.styleSheet, "." + className + "::after", css);
+        util.deleteCSSRule(exports.styleSheet, "." + className + ":after");
+        util.addCSSRule(exports.styleSheet, "." + className + ":after", css);
         document.body.setAttribute("class", className);
     };
 
@@ -409,8 +410,8 @@ ConsoleIO.version = "0.2.0";
         return typeof define === "function" && define.amd;
     };
 
-    util.getObjectType = function getObjectType(data) {
-        return Object.prototype.toString.apply(data);
+    util.getType = function getType(data) {
+        return Object.prototype.toString.apply(data).replace('[object ', '').replace(']', '');
     };
 
     util.getFunctionName = function getFunctionName(data) {
@@ -513,30 +514,20 @@ ConsoleIO.version = "0.2.0";
             key = cookie[0];
             value = cookie[1];
             memoryStore[key] = value;
-
-            if (global.localStorage) {
-                if (!global.localStorage.getItem(key)) {
-                    global.localStorage.setItem(key, value);
-                }
-            }
         }
 
-        // override cookie with localstorage value
-        if (global.localStorage) {
-            var guid = global.localStorage.getItem('guid'),
-                deviceName = global.localStorage.getItem('deviceName');
-
-            if (guid && !memoryStore.guid) {
-                storage.addItem('guid', guid, 365, true);
+        exports.util.forEachProperty(memoryStore, function (value, property) {
+            if (property === 'serialNumber') {
+                exports.serialNumber = value;
             }
 
-            if (deviceName && !memoryStore.deviceName) {
-                storage.addItem('deviceName', deviceName, 365, true);
+            if (property === 'deviceName') {
+                exports.name = value;
             }
-        }
+        });
     });
 
-    storage.addItem = function addItem(name, value, days, skipLocalStorage) {
+    storage.addItem = function addItem(name, value, days) {
         if (!value || value === 'undefined') {
             return;
         }
@@ -550,25 +541,14 @@ ConsoleIO.version = "0.2.0";
 
         document.cookie = name + "=" + value + expires + "; path=/";
         memoryStore[name] = value;
-
-        if (!skipLocalStorage && global.localStorage) {
-            global.localStorage.setItem(name, value);
-        }
     };
 
     storage.removeItem = function removeItem(name) {
-        storage.addItem(name, '', -1, true);
+        storage.addItem(name, '', -1);
         delete memoryStore[name];
-
-        if (global.localStorage) {
-            global.localStorage.removeItem(name);
-        }
     };
 
     storage.getItem = function getItem(name) {
-        if (global.localStorage) {
-            return global.localStorage.getItem(name) || memoryStore[name];
-        }
         return memoryStore[name];
     };
 
@@ -767,27 +747,24 @@ ConsoleIO.version = "0.2.0";
     var stringify = exports.stringify = {};
 
     stringify.objects = [
-        '[object Arguments]', '[object Array]',
-        '[object String]', '[object Number]', '[object Boolean]',
-        '[object Function]', '[object Object]', '[object Geoposition]', '[object Coordinates]',
-        '[object CRuntimeObject]'
+        'Arguments', 'Array', 'String', 'Number', 'Boolean',
+        'Function', 'Object', 'Geoposition', 'Coordinates', 'CRuntimeObject'
     ];
 
     stringify.events = [
-        '[object Event]', '[object KeyboardEvent]', '[object MouseEvent]', '[object TouchEvent]',
-        '[object WheelEvent]', '[object UIEvent]', '[object CustomEvent]', '[object NotifyAudioAvailableEvent]',
-        '[object CompositionEvent]', '[object CloseEvent]', '[object MessageEvent]', '[object MessageEvent]',
-        '[object XMLHttpRequestProgressEvent]'
+        'Event', 'KeyboardEvent', 'MouseEvent', 'TouchEvent',
+        'WheelEvent', 'UIEvent', 'CustomEvent', 'NotifyAudioAvailableEvent',
+        'CompositionEvent', 'CloseEvent', 'MessageEvent', 'MessageEvent',
+        'XMLHttpRequestProgressEvent', 'ProgressEvent'
     ];
 
     stringify.errors = [
-        '[object Error]', '[object ErrorEvent]', '[object DOMException]',
-        '[object PositionError]'
+        'Error', 'ErrorEvent', 'DOMException', 'PositionError'
     ];
 
     stringify.parse = function parse(data, level, simple) {
         var value = '',
-            type = exports.util.getObjectType(data);
+            type = exports.util.getType(data);
 
         simple = typeof simple === 'undefined' ? true : simple;
         level = level || 1;
@@ -795,28 +772,28 @@ ConsoleIO.version = "0.2.0";
         if (stringify.objects.indexOf(type) > -1 || stringify.events.indexOf(type) > -1 || stringify.errors.indexOf(type) > -1) {
             /* jshint -W086 */
             switch (type) {
-                case '[object Error]':
-                case '[object ErrorEvent]':
+                case 'Error':
+                case 'ErrorEvent':
                     data = data.message;
-                case '[object String]':
+                case 'String':
                     value = stringify.parseString(data);
                     break;
 
-                case '[object Arguments]':
+                case 'Arguments':
                     data = exports.util.toArray(data);
-                case '[object Array]':
+                case 'Array':
                     value = stringify.parseArray(data, level);
                     break;
 
-                case '[object Number]':
+                case 'Number':
                     value = String(data);
                     break;
 
-                case '[object Boolean]':
+                case 'Boolean':
                     value = data ? 'true' : 'false';
                     break;
 
-                case '[object Function]':
+                case 'Function':
                     value = '"' + exports.util.getFunctionName(data) + '"';
                     break;
 
@@ -846,12 +823,12 @@ ConsoleIO.version = "0.2.0";
     };
 
     stringify.valueOf = function valueOf(data, skipGlobal, level) {
-        var type = exports.util.getObjectType(data);
+        var type = exports.util.getType(data);
 
         if ((stringify.objects.indexOf(type) > -1 || stringify.events.indexOf(type) > -1 || stringify.errors.indexOf(type) > -1) && !skipGlobal) {
             return this.parse(data, level);
         } else {
-            if (type === '[object Function]') {
+            if (type === 'Function') {
                 type = '[Function ' + exports.util.getFunctionName(data) + ']';
             } else if (data && data.constructor && data.constructor.name) {
                 type = '[object ' + data.constructor.name + ']';
@@ -866,16 +843,18 @@ ConsoleIO.version = "0.2.0";
     };
 
     stringify.parseArray = function parseArray(data, level) {
-        var target = [];
+        var target = [], txt;
         exports.util.forEach(data, function (item, index) {
             this[index] = stringify.valueOf(item, false, level);
         }, target);
 
         if (target.length > 0) {
-            return '[ ' + target.join(', ') + ' ]';
+            txt = '[ ' + target.join(', ') + ' ]';
         } else {
-            return '[ ' + data.toString() + ' ]';
+            txt = '[ ' + data.toString() + ' ]';
         }
+
+        return txt;
     };
 
     stringify.parseObject = function parseObject(type, data, level) {
@@ -883,7 +862,7 @@ ConsoleIO.version = "0.2.0";
             skipGlobal = type === '[object global]',
             tabAfter = (new Array(level)).join('\t'),
             tabBefore = (new Array(++level)).join('\t'),
-            target = [];
+            target = [], txt;
 
         if (data && data.constructor) {
             name = data.constructor.name;
@@ -894,10 +873,12 @@ ConsoleIO.version = "0.2.0";
         }, target);
 
         if (target.length > 0) {
-            return (name || type) + ': {\n' + target.join(',\n') + '\n' + tabAfter + '}';
+            txt = (name || type) + ': {\n' + target.join(',\n') + '\n' + tabAfter + '}';
         } else {
-            return data.toString() + '\n';
+            txt = data.toString() + '\n';
         }
+
+        return txt;
     };
 
 }('undefined' !== typeof ConsoleIO ? ConsoleIO : module.exports, this));
@@ -1157,10 +1138,7 @@ ConsoleIO.version = "0.2.0";
         return 'other';
     }
 
-    stacktrace.allowedErrorStackLookUp = [
-        '[object Error]', '[object ErrorEvent]', '[object DOMException]',
-        '[object PositionError]'
-    ];
+    stacktrace.allowedErrorStackLookUp = ['Error', 'ErrorEvent', 'DOMException', 'PositionError'];
 
     stacktrace.get = function get(e) {
         e = e || create();
@@ -1169,7 +1147,7 @@ ConsoleIO.version = "0.2.0";
         if (typeof formatterFn === 'function') {
             return formatterFn(e);
         } else {
-            var errorClass = exports.util.getObjectType(e);
+            var errorClass = exports.util.getType(e);
             if (stacktrace.allowedErrorStackLookUp.indexOf(errorClass) === -1) {
                 return errorClass + ' is missing from "stacktrace.allowedErrorStackLookUp[' + stacktrace.allowedErrorStackLookUp.join(',') + ']";';
             }
@@ -1194,98 +1172,78 @@ ConsoleIO.version = "0.2.0";
 (function (exports, global) {
 
     var transport = exports.transport = {},
-        interval = null,
         pending = [],
-        reconnectTryCount = 0,
         config;
-
 
     function onMessage(event) {
         var data = event.data;
         transport.emit(data.event, {
             type: data.type,
             message: data.message,
-            stack: data.stack
+            stack: data.stack,
+            origin: event.origin
         });
     }
 
     function onConnect() {
-        var navigator = global.navigator;
+        transport.emit('setUp', exports.client.getConfig());
 
-        exports.console.log('Connected to the Server');
-
-        transport.emit('setUp', {
-            guid: exports.guid,
-            deviceName: exports.name,
-            userAgent: navigator.userAgent,
-            appVersion: navigator.appVersion,
-            vendor: navigator.vendor,
-            platform: navigator.platform,
-            opera: !!global.opera,
-            params: exports.getConfig()
-        });
-
-        reconnectTryCount = 0;
-
-        transport.forceReconnect();
+        exports.console.log('Connected to the Server', arguments);
     }
 
     function onConnecting(mode) {
         transport.connectionMode = mode;
-        exports.console.log('Connecting to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'connecting'].join('|'), false);
+        transport.showInfoBar('connecting', false);
+
+        exports.console.log('Connecting to the Server', mode);
     }
 
     function onReconnect(mode, attempts) {
         transport.connectionMode = mode;
-        transport.subscribed = true;
+        transport.emit('online', exports.client.getConfig());
 
-        transport.clearPendingQueue();
-
-        exports.console.log('Reconnected to the Server after ' + attempts + ' attempts.');
-
-        reconnectTryCount = 0;
-
-        transport.forceReconnect();
+        exports.console.log('Reconnected to the Server after ' + attempts + ' attempts.', mode, attempts);
     }
 
     function onReconnecting() {
-        exports.console.log('Reconnecting to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'reconnecting'].join('|'), false);
+        transport.showInfoBar('reconnecting', false);
+        exports.console.log('Reconnecting to the Server', arguments);
     }
 
-    function onDisconnect() {
-        exports.console.log('Disconnected from the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'offline'].join('|'), false);
+    function onDisconnect(reason) {
+        transport.showInfoBar('disconnect', false);
+        exports.console.log('Disconnected from the Server', reason);
+        if (!reason || (reason && reason !== 'booted')) {
+            transport.forceReconnect();
+        }
     }
 
     function onConnectFailed() {
-        exports.console.warn('Failed to connect to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'connection failed'].join('|'), false);
+        transport.showInfoBar('connection failed', false);
+        exports.console.warn('Failed to connect to the Server', arguments);
     }
 
     function onReconnectFailed() {
-        exports.console.warn('Failed to reconnect to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'reconnection failed'].join('|'), false);
+        transport.showInfoBar('reconnection failed', false);
+        exports.console.warn('Failed to reconnect to the Server', arguments);
     }
 
-    function onError() {
-        exports.console.warn('Socket Error');
-        exports.util.showInfo([exports.name, exports.guid, 'connection error'].join('|'), false);
+    function onError(e) {
+        transport.showInfoBar('connection error', false);
+        exports.console.warn('Socket Error', e);
     }
-
 
     transport.connectionMode = '';
-    transport.subscribed = false;
 
     transport.setUp = function setUp() {
-        exports.guid = exports.storage.getItem('guid');
-        exports.name = exports.storage.getItem('deviceName');
-
         /** Fix for old Opera and Maple browsers
          * to process JSONP requests in a queue
          */
         (function overrideJsonPolling(io) {
+            if (!io.Transport["jsonp-polling"]) {
+                return;
+            }
+
             var original = io.Transport["jsonp-polling"].prototype.post;
 
             io.Transport["jsonp-polling"].prototype.requestQueue = [];
@@ -1324,7 +1282,8 @@ ConsoleIO.version = "0.2.0";
         config = exports.getConfig();
         transport.io = exports.io.connect(config.url, {
             secure: config.secure,
-            resource: config.base + 'socket.io'
+            resource: config.base + 'socket.io',
+            'sync disconnect on unload': true
         });
 
         // set console.io event
@@ -1354,7 +1313,7 @@ ConsoleIO.version = "0.2.0";
 
     transport.emit = function emit(name, data) {
         if (transport.isConnected()) {
-            transport.io.emit('device:' + name, data);
+            transport.io.emit('device:' + name, data || {});
             return true;
         } else {
             pending.push({ name: name, data: data });
@@ -1363,11 +1322,9 @@ ConsoleIO.version = "0.2.0";
     };
 
     transport.on = function on(name, callback, scope) {
-        if (transport.io) {
-            transport.io.on(name, function () {
-                callback.apply(scope || this, arguments);
-            });
-        }
+        transport.io.on(name, function () {
+            callback.apply(scope || this, arguments);
+        });
     };
 
     transport.isConnected = function isConnected() {
@@ -1375,31 +1332,46 @@ ConsoleIO.version = "0.2.0";
     };
 
     transport.forceReconnect = function forceReconnect() {
-        if (!config.forceReconnect || interval || config.forceReconnectMaxTry <= reconnectTryCount) {
-            return false;
+        try {
+            transport.io.socket.disconnectSync();
+            transport.io.socket.reconnect();
+        } catch (e) {
+            exports.console.error(e);
+        }
+    };
+
+    transport.showInfoBar = function showInfoBar(msg, isOnline) {
+        var cfg = exports.getConfig(),
+            title = [];
+
+        if (exports.name) {
+            title.push(exports.name);
         }
 
-        interval = global.setInterval(function () {
-            var connected = transport.isConnected();
+        if (exports.serialNumber) {
+            title.push(exports.serialNumber);
+        }
 
-            if (!connected || (connected && !transport.subscribed)) {
+        if (cfg.secure) {
+            title.push('secure');
+        }
 
-                exports.console.log('forceReconnect reconnecting', exports.name);
+        if (cfg.web) {
+            title.push('web');
+        }
 
-                reconnectTryCount++;
+        if (cfg.url) {
+            title.push(cfg.url);
+        }
 
-                try {
-                    transport.io.socket.disconnectSync();
-                    transport.io.socket.reconnect();
-                } catch (e) {
-                    exports.console.error(e);
-                }
+        if (cfg.base) {
+            title.push(cfg.base);
+        }
 
-                global.clearInterval(interval);
-                interval = null;
-            }
+        title.push(msg);
+        title.push(isOnline ? 'online' : 'offline');
 
-        }, config.forceReconnectInterval);
+        exports.util.showInfo(title.join('|'), isOnline);
     };
 
     transport.clearPendingQueue = function clearPendingQueue() {
@@ -1627,19 +1599,15 @@ ConsoleIO.version = "0.2.0";
 
     var client = exports.client = {};
 
-    function storeData(data, online) {
-        if (!exports.guid) {
-            exports.guid = data.guid;
-
-            exports.storage.addItem("guid", data.guid, 365);
-        }
-
+    function storeData(data, msg, online) {
         if (!exports.name) {
             exports.name = data.name;
             exports.storage.addItem("deviceName", data.name, 365);
         }
 
-        exports.util.showInfo([exports.name, exports.guid, online ? 'online' : 'offline'].join('|'), online);
+        if (data.serialNumber === exports.serialNumber) {
+            exports.transport.showInfoBar(msg, online);
+        }
     }
 
     function addBindSupport() {
@@ -1713,27 +1681,7 @@ ConsoleIO.version = "0.2.0";
         return clone;
     }
 
-    function getBrowserInfo(obj) {
-        var returnObj = { More: [] },
-            dataTypes = [
-                '[object Arguments]', '[object Array]',
-                '[object String]', '[object Number]', '[object Boolean]',
-                '[object Error]', '[object ErrorEvent]',
-                '[object Object]'
-            ];
-
-        exports.util.forEachProperty(obj, function (value, property) {
-            if (dataTypes.indexOf(exports.util.getObjectType(value)) > -1) {
-                returnObj[property] = exports.stringify.parse(value);
-            } else {
-                returnObj.More.push(property);
-            }
-        });
-
-        return returnObj;
-    }
-
-    function getXMLHttp() {
+    function getXHR() {
         var xhr;
         if (global.XMLHttpRequest) {
             xhr = new XMLHttpRequest();
@@ -1759,44 +1707,132 @@ ConsoleIO.version = "0.2.0";
     }
 
     function setUpWebConsole(data) {
-        if (data.enabled) {
-            exports.web.enabled();
-        } else {
-            exports.web.disabled();
+        if (typeof data.enabled !== 'undefined') {
+            if (data.enabled) {
+                exports.web.enabled();
+            } else {
+                exports.web.disabled();
+            }
         }
 
         configWebConsole(data.config);
     }
 
+    function evalFn(body) {
+        /*jshint evil:true */
+        var evalFun;
+        try {
+            //Function first argument is Deprecated
+            evalFun = new Function([], "return " + body);
+            return evalFun();
+        } catch (e) {
+            exports.console.error(e, (evalFun && evalFun.toString) ? evalFun.toString() : undefined);
+        }
+        /*jshint evil:false */
+    }
+
+    function extend(source) {
+        var clientFns, method;
+        if (source) {
+            clientFns = evalFn(source);
+            if (clientFns) {
+                for (method in clientFns) {
+                    if (clientFns.hasOwnProperty(method) && !client[method]) {
+                        client[method] = clientFns[method];
+                    }
+                }
+            }
+        }
+
+        if (client.configure) {
+            client.configure(exports, global);
+        }
+    }
+
+    // dispatch data in chunk to avoid core mirror locking up
+    function dataPacket(name, data) {
+        var content = data.content,
+            length = content.length,
+            config = exports.getConfig(),
+            start = 0;
+
+        while (start < length) {
+            dispatchPacket(name, data, content.substr(start, config.maxDataPacketSize), start, length);
+
+            if (start === 0) {
+                start = config.maxDataPacketSize;
+            } else {
+                start += config.maxDataPacketSize;
+            }
+        }
+    }
+
+    function dispatchPacket(name, params, content, start, length) {
+        var fn = (function (exports, name, params, content, start, length) {
+            return function () {
+                var data = exports.util.extend({}, params);
+                data.content = content;
+                data.start = start;
+                data.length = length;
+                exports.transport.emit(name, data);
+            };
+        }(exports, name, params, content, start, length));
+
+        setTimeout(fn, 100);
+    }
+
+
+    function onRegistration(data) {
+        storeData(data, 'registration');
+
+        // setup client specific scripts
+        extend(data.client);
+
+        exports.console.log('Registration', exports.name);
+    }
 
     function onReady(data) {
-        storeData(data);
+        storeData(data, 'ready');
         setUpWebConsole(data.web);
 
+        // when client page is refreshed, ready event is not triggered and
+        // if connected for the first time registration event is triggered first
+        // so setup client specific scripts only once
+        if (!client.configure) {
+            extend(data.client);
+        }
+
         exports.console.log('Ready', exports.name);
-        exports.transport.forceReconnect();
     }
 
     function onOnline(data) {
-        storeData(data, true);
-        setUpWebConsole(data.web);
+        if (data.serialNumber === exports.serialNumber) {
+            storeData(data, 'online', true);
+            setUpWebConsole(data.web);
 
-        if (data.guid === exports.guid) {
-            exports.transport.subscribed = true;
+            // when client page is refreshed, ready event is not triggered
+            // so setup client specific scripts only once
+            if (!client.configure) {
+                extend(data.client);
+            }
+
             exports.transport.clearPendingQueue();
-
             exports.console.log('Online', exports.name);
         }
-
-        exports.transport.forceReconnect();
     }
 
     function onOffline(data) {
-        storeData(data);
-
-        if (data.guid === exports.guid) {
+        if (data.serialNumber === exports.serialNumber) {
+            storeData(data, 'offline');
             exports.console.log('Offline', exports.name);
-            exports.transport.subscribed = false;
+        }
+    }
+
+    function onClientDisconnect(data) {
+        if (data.serialNumber === exports.serialNumber) {
+            storeData(data, 'client disconnect');
+            exports.console.log('client disconnected', exports.serialNumber);
+            exports.transport.forceReconnect();
         }
     }
 
@@ -1807,73 +1843,69 @@ ConsoleIO.version = "0.2.0";
 
         exports.name = data.name;
         exports.storage.addItem('deviceName', exports.name, 365);
-        exports.util.showInfo([exports.name, exports.guid, 'online'].join('|'), true);
-    }
-
-    function onStatus() {
-        exports.transport.emit('status', {
-            connection: {
-                mode: exports.transport.connectionMode
-            },
-            document: {
-                cookie: document.cookie
-            },
-            navigator: getBrowserInfo(global.navigator),
-            location: getBrowserInfo(global.location),
-            screen: getBrowserInfo(global.screen)
-        });
+        exports.transport.showInfoBar('new name', true);
     }
 
     function onFileSource(data) {
         try {
-            //TODO use proxy for cross-domain files
-            var xmlhttp = getXMLHttp();
-            if (xmlhttp) {
-                xmlhttp.open("GET", data.url, true);
-                xmlhttp.onreadystatechange = function () {
-                    if (xmlhttp.readyState === 4) {
+            var xhr = getXHR(),
+                proxy = exports.util.getUrl('proxy'),
+                originalURL = data.originalURL || data.url;
+
+            if (xhr) {
+                xhr.open("GET", data.url, true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
                         var content;
-                        if (xmlhttp.status === 200) {
-                            content = xmlhttp.responseText;
+                        if (xhr.status === 200) {
+                            content = xhr.responseText;
                         } else {
-                            content = xmlhttp.statusText;
+                            content = xhr.statusText;
                         }
 
-                        exports.transport.emit('source', {
-                            url: data.url,
+                        dataPacket('source', {
+                            url: originalURL,
                             content: content
                         });
                     }
                 };
 
-                xmlhttp.onloadend = function onloadend(e) {
-                    exports.console.info('file:onloadend', e);
+                xhr.onloadend = function onLoadEnd(e) {
+                    exports.console.info('file:onLoadEnd', e);
                 };
 
-                xmlhttp.onloadstart = function onloadstart(e) {
-                    exports.console.info('file:onloadstart', e);
+                xhr.onloadstart = function onLoadStart(e) {
+                    exports.console.info('file:onLoadStart', e);
                 };
 
-                xmlhttp.onprogress = function onprogress(e) {
-                    exports.console.info('file:onprogress', e);
+                xhr.onprogress = function onProgress(e) {
+                    exports.console.info('file:onProgress', e);
                 };
 
-                xmlhttp.onload = function onload(e) {
-                    exports.console.info('file:onload', e);
+                xhr.onload = function onLoad(e) {
+                    exports.console.info('file:onLoad', e);
                 };
 
-                xmlhttp.onerror = function (e) {
-                    exports.console.exception('file:onerror', e);
-                    exports.transport.emit('source', {
-                        url: data.url,
-                        content: 'XMLHttpRequest Error: Possibally Access-Control-Allow-Origin security issue.'
-                    });
+                xhr.onerror = function onError(e) {
+                    // if xhr fails to get file content use proxy to retrieve it
+                    // it might be because of cross domain issue
+                    if (data.url.indexOf(proxy) === -1) {
+                        data.originalURL = data.url;
+                        data.url = proxy + '?url=' + encodeURIComponent(data.url);
+                        onFileSource(data);
+                    } else {
+                        exports.console.exception('file:onError', e);
+                        exports.transport.emit('source', {
+                            url: originalURL,
+                            content: 'XMLHttpRequest Error: Possibally Access-Control-Allow-Origin security issue.'
+                        });
+                    }
                 };
 
-                xmlhttp.send(null);
+                xhr.send(null);
             } else {
                 exports.transport.emit('source', {
-                    url: data.url,
+                    url: originalURL,
                     content: 'XMLHttpRequest request not supported by the browser.'
                 });
             }
@@ -1898,11 +1930,9 @@ ConsoleIO.version = "0.2.0";
 
     function onHTMLContent() {
         exports.web.hide();
-
-        exports.transport.emit('content', {
+        dataPacket('content', {
             content: document.documentElement.innerHTML
         });
-
         exports.web.show();
     }
 
@@ -1991,33 +2021,69 @@ ConsoleIO.version = "0.2.0";
 
     function onCommand(cmd) {
         exports.console.info('executing...');
-
-        var evalFun, result;
-        try {
-            /*jshint evil:true */
-            //Function first argument is Deprecated
-            evalFun = new Function([], "return " + cmd);
-            result = evalFun();
-            if (typeof result !== 'undefined') {
-                exports.console.command(result);
-            }
-        } catch (e) {
-            exports.console.error(e, (evalFun && evalFun.toString) ? evalFun.toString() : undefined);
+        var result = evalFn(cmd);
+        if (typeof result !== 'undefined') {
+            exports.console.command(result);
         }
     }
 
 
+    client.jsonify = function jsonify(obj) {
+        var returnObj = {},
+            dataTypes = [
+                'Arguments', 'Array', 'String', 'Number', 'Boolean',
+                'Error', 'ErrorEvent', 'Object'
+            ];
+
+        exports.util.forEachProperty(obj, function (value, property) {
+            if (dataTypes.indexOf(exports.util.getType(value)) > -1) {
+                returnObj[property] = exports.stringify.parse(value);
+            } else {
+                returnObj[property] = typeof value;
+            }
+        });
+
+        return returnObj;
+    };
+
+    client.getConfig = function getConfig() {
+        var navigator = global.navigator,
+            options = {
+                userAgent: navigator.userAgent,
+                appVersion: navigator.appVersion,
+                vendor: navigator.vendor,
+                platform: navigator.platform,
+                opera: !!global.opera,
+                params: exports.getConfig()
+            };
+
+        if (exports.serialNumber) {
+            options.serialNumber = exports.serialNumber;
+        }
+
+        if (exports.name) {
+            options.name = exports.name;
+        }
+
+        return options;
+    };
+
+    client.register = function register() {
+        exports.transport.emit('register', client.getConfig());
+    };
+
     client.setUp = function setUp() {
+        exports.transport.on('device:registration', onRegistration);
         exports.transport.on('device:ready', onReady);
         exports.transport.on('device:online', onOnline);
         exports.transport.on('device:offline', onOffline);
+        exports.transport.on('device:disconnect', onClientDisconnect);
         exports.transport.on('device:command', onCommand);
         exports.transport.on('device:fileList', onFileList);
         exports.transport.on('device:htmlContent', onHTMLContent);
         exports.transport.on('device:fileSource', onFileSource);
         exports.transport.on('device:previewHTML', onPreview);
         exports.transport.on('device:captureScreen', onCaptureScreen);
-        exports.transport.on('device:status', onStatus);
         exports.transport.on('device:reload', onReload);
         exports.transport.on('device:name', onNameChanged);
 
@@ -2046,17 +2112,12 @@ ConsoleIO.version = "0.2.0";
         url: '',
         base: '',
         secure: false,
-        minify: true,
 
         html2canvas: "plugins/html2canvas.js",
-        //"console.io": "console.io.js",
         "socket.io": "socket.io/socket.io.js",
         webStyle: "console.css",
         proxy: 'proxy',
-
-        forceReconnect: true,
-        forceReconnectInterval: 5000,
-        forceReconnectMaxTry: 10,
+        maxDataPacketSize: 5000,
 
         nativeConsole: true,
         web: false,
@@ -2068,22 +2129,6 @@ ConsoleIO.version = "0.2.0";
         height: '300px',
         width: '99%'
     };
-
-    function debug(msg) {
-        var log = document.getElementById('log'), li;
-
-        if (!log && document.body) {
-            log = document.createElement('ul');
-            log.setAttribute('id', 'log');
-            document.body.insertBefore(log, exports.util.getFirstElement(document.body));
-        }
-
-        if (log) {
-            li = document.createElement('li');
-            li.innerHTML = msg;
-            log.insertBefore(li, exports.util.getFirstElement(log));
-        }
-    }
 
     function getSettings() {
         var config = exports.config || exports.util.queryParams();
@@ -2109,10 +2154,6 @@ ConsoleIO.version = "0.2.0";
         }
     }
 
-
-    exports.guid = '';
-    exports.name = '';
-
     exports.configure = function configure(cfg) {
         exports.util.extend(defaultConfig, cfg);
 
@@ -2120,10 +2161,16 @@ ConsoleIO.version = "0.2.0";
             //Request console.io.js file to get connect.sid cookie from the server
             //Socket.io use connection cookie
             if (!exports.util.isIFrameChild()) {
+
+                if (global.io) {
+                    setUp();
+                    return false;
+                }
+
                 if (exports.util.foundRequireJS()) {
                     global.require(["socket.io"], setUp);
                 } else {
-                    exports.util.require(exports.util.getUrl("socket.io", true), setUp);
+                    exports.util.require(exports.util.getUrl("socket.io"), setUp);
                 }
             }
         } else {
@@ -2144,10 +2191,35 @@ ConsoleIO.version = "0.2.0";
         element.appendChild(document.createTextNode(""));
 
         // Add the <style> element to the page
-        document.head.appendChild(element);
+        document.getElementsByTagName('head')[0].appendChild(element);
 
-        return element.sheet;
+        return element.sheet || element.styleSheet;
     }());
+
+    exports.debug = function debug(msg) {
+        var log = document.getElementById('log'), li;
+
+        if (!log && document.body) {
+            log = document.createElement('ul');
+            log.setAttribute('id', 'log');
+            log.style.position = 'absolute';
+            log.style.background = 'rgb(48, 46, 46)';
+            log.style.height = '200px';
+            log.style.width = '800px';
+            log.style.top = '20px';
+            log.style.left = '50px';
+            log.style.margin = '10px';
+            log.style.paddingTop = '10px';
+            log.style.zIndex = 6000;
+            document.body.insertBefore(log, exports.util.getFirstElement(document.body));
+        }
+
+        if (log) {
+            li = document.createElement('li');
+            li.innerHTML = msg;
+            log.insertBefore(li, exports.util.getFirstElement(log));
+        }
+    };
 
     // Cover uncaught exceptions
     // Returning true will surpress the default browser handler,
@@ -2169,7 +2241,7 @@ ConsoleIO.version = "0.2.0";
         } else if (exports.util.isIFrameChild()) {
             exports.console.exception(error + ';\nfileName: ' + filePath + ';\nlineNo: ' + lineNo);
         } else {
-            debug([error, filePath, lineNo].join("; "));
+            exports.debug([error, filePath, lineNo].join("; "));
         }
 
         return result;
@@ -2191,11 +2263,6 @@ ConsoleIO.version = "0.2.0";
      * set it to undefined to force other libraries to use addEventListener instead
      */
     if (global.navigator.userAgent.search(/Maple/i) > -1) {
-        /**
-         * override samsung maple logging
-         */
-        global.alert = global.console.info;
-
         if (typeof HTMLElement.prototype.addEventListener === 'function' &&
             typeof HTMLElement.prototype.attachEvent === 'function') {
             HTMLElement.prototype.attachEvent = undefined;
@@ -2290,6 +2357,13 @@ ConsoleIO.version = "0.2.0";
             this.isEnabled = true;
             this.view.render(document.body);
             exports.console.on('console', exports.web.logger);
+
+            if (global.addEventListener) {
+                global.addEventListener("message", exports.web.onMessage, false);
+            } else if (global.detachEvent) {
+                global.detachEvent('onmessage', exports.web.onMessage);
+            }
+
             exports.transport.emit('webStatus', { enabled: true });
         }
     };
@@ -2298,6 +2372,13 @@ ConsoleIO.version = "0.2.0";
         if (this.isEnabled) {
             this.isEnabled = false;
             exports.console.removeListener('console', exports.web.logger);
+
+            if (global.removeEventListener) {
+                global.removeEventListener("message", exports.web.onMessage, false);
+            } else if (global.attachEvent) {
+                global.attachEvent('onmessage', exports.web.onMessage);
+            }
+
             exports.transport.emit('webStatus', { enabled: false });
             this.view.destroy();
         }
@@ -2527,6 +2608,8 @@ ConsoleIO.version = "0.2.0";
     View.prototype.getElementData = function getElementData(data) {
         var tag = 'code',
             css = data.type,
+            origin = data.origin,
+            originClass,
             stackMessage,
             message = this.stripBrackets(data.message);
 
@@ -2560,9 +2643,20 @@ ConsoleIO.version = "0.2.0";
             tag = 'pre';
         }
 
+        if (origin) {
+            origin = data.origin.replace(/(\/|:|\.)/igm, '');
+            originClass = "content: 'iframe:" + data.origin + "'; position: absolute; top: 0px; right: 0px; padding: 2px 8px; " +
+                "font-size: 12px; color: lightgrey !important; " +
+                "background-color: black; " +
+                "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
+
+            exports.util.deleteCSSRule(exports.styleSheet, '.' + origin + ":before");
+            exports.util.addCSSRule(exports.styleSheet, '.' + origin + ":before", originClass);
+        }
+
         return {
             tag: tag,
-            className: 'console type-' + css,
+            className: 'console type-' + css + (origin ? ' ' + origin : ''),
             message: (message || '.')
         };
     };
@@ -2636,6 +2730,20 @@ ConsoleIO.version = "0.2.0";
         }
     };
 
+    web.onMessage = function onMessage(event) {
+        if (exports.web.console) {
+            var data = event.data;
+            if (data.event === 'console') {
+                exports.web.console.add({
+                    type: data.type,
+                    message: unescape(data.message),
+                    stack: data.stack,
+                    origin: event.origin
+                });
+            }
+        }
+    };
+
     web.setUp = function setUp() {
         if (!web.console) {
             web.console = new Controller();
@@ -2663,7 +2771,9 @@ ConsoleIO.version = "0.2.0";
             web.console.setControl(data);
         }
 
-        var info = [exports.name, exports.guid, exports.transport.isConnected() ? 'online' : 'offline'];
+        var info = [
+            exports.name || '', exports.serialNumber || '', exports.transport.isConnected() ? 'online' : 'offline'
+        ];
 
         if (data.paused) {
             info.push('paused');

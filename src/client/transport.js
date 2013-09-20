@@ -12,98 +12,78 @@
 (function (exports, global) {
 
     var transport = exports.transport = {},
-        interval = null,
         pending = [],
-        reconnectTryCount = 0,
         config;
-
 
     function onMessage(event) {
         var data = event.data;
         transport.emit(data.event, {
             type: data.type,
             message: data.message,
-            stack: data.stack
+            stack: data.stack,
+            origin: event.origin
         });
     }
 
     function onConnect() {
-        var navigator = global.navigator;
+        transport.emit('setUp', exports.client.getConfig());
 
-        exports.console.log('Connected to the Server');
-
-        transport.emit('setUp', {
-            guid: exports.guid,
-            deviceName: exports.name,
-            userAgent: navigator.userAgent,
-            appVersion: navigator.appVersion,
-            vendor: navigator.vendor,
-            platform: navigator.platform,
-            opera: !!global.opera,
-            params: exports.getConfig()
-        });
-
-        reconnectTryCount = 0;
-
-        transport.forceReconnect();
+        exports.console.log('Connected to the Server', arguments);
     }
 
     function onConnecting(mode) {
         transport.connectionMode = mode;
-        exports.console.log('Connecting to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'connecting'].join('|'), false);
+        transport.showInfoBar('connecting', false);
+
+        exports.console.log('Connecting to the Server', mode);
     }
 
     function onReconnect(mode, attempts) {
         transport.connectionMode = mode;
-        transport.subscribed = true;
+        transport.emit('online', exports.client.getConfig());
 
-        transport.clearPendingQueue();
-
-        exports.console.log('Reconnected to the Server after ' + attempts + ' attempts.');
-
-        reconnectTryCount = 0;
-
-        transport.forceReconnect();
+        exports.console.log('Reconnected to the Server after ' + attempts + ' attempts.', mode, attempts);
     }
 
     function onReconnecting() {
-        exports.console.log('Reconnecting to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'reconnecting'].join('|'), false);
+        transport.showInfoBar('reconnecting', false);
+        exports.console.log('Reconnecting to the Server', arguments);
     }
 
-    function onDisconnect() {
-        exports.console.log('Disconnected from the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'offline'].join('|'), false);
+    function onDisconnect(reason) {
+        transport.showInfoBar('disconnect', false);
+        exports.console.log('Disconnected from the Server', reason);
+        if (!reason || (reason && reason !== 'booted')) {
+            transport.forceReconnect();
+        }
     }
 
     function onConnectFailed() {
-        exports.console.warn('Failed to connect to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'connection failed'].join('|'), false);
+        transport.showInfoBar('connection failed', false);
+        exports.console.warn('Failed to connect to the Server', arguments);
     }
 
     function onReconnectFailed() {
-        exports.console.warn('Failed to reconnect to the Server');
-        exports.util.showInfo([exports.name, exports.guid, 'reconnection failed'].join('|'), false);
+        transport.showInfoBar('reconnection failed', false);
+        exports.console.warn('Failed to reconnect to the Server', arguments);
     }
 
-    function onError() {
-        exports.console.warn('Socket Error');
-        exports.util.showInfo([exports.name, exports.guid, 'connection error'].join('|'), false);
+    function onError(e) {
+        transport.showInfoBar('connection error', false);
+        exports.console.warn('Socket Error', e);
     }
-
 
     transport.connectionMode = '';
-    transport.subscribed = false;
 
     transport.setUp = function setUp() {
-        exports.guid = exports.storage.getItem('guid');
-        exports.name = exports.storage.getItem('deviceName');
-
         /** Fix for old Opera and Maple browsers
          * to process JSONP requests in a queue
          */
         (function overrideJsonPolling(io) {
+            if (!io.Transport["jsonp-polling"]) {
+                return;
+            }
+
             var original = io.Transport["jsonp-polling"].prototype.post;
 
             io.Transport["jsonp-polling"].prototype.requestQueue = [];
@@ -142,7 +122,8 @@
         config = exports.getConfig();
         transport.io = exports.io.connect(config.url, {
             secure: config.secure,
-            resource: config.base + 'socket.io'
+            resource: config.base + 'socket.io',
+            'sync disconnect on unload': true
         });
 
         // set console.io event
@@ -172,7 +153,7 @@
 
     transport.emit = function emit(name, data) {
         if (transport.isConnected()) {
-            transport.io.emit('device:' + name, data);
+            transport.io.emit('device:' + name, data || {});
             return true;
         } else {
             pending.push({ name: name, data: data });
@@ -181,11 +162,9 @@
     };
 
     transport.on = function on(name, callback, scope) {
-        if (transport.io) {
-            transport.io.on(name, function () {
-                callback.apply(scope || this, arguments);
-            });
-        }
+        transport.io.on(name, function () {
+            callback.apply(scope || this, arguments);
+        });
     };
 
     transport.isConnected = function isConnected() {
@@ -193,31 +172,46 @@
     };
 
     transport.forceReconnect = function forceReconnect() {
-        if (!config.forceReconnect || interval || config.forceReconnectMaxTry <= reconnectTryCount) {
-            return false;
+        try {
+            transport.io.socket.disconnectSync();
+            transport.io.socket.reconnect();
+        } catch (e) {
+            exports.console.error(e);
+        }
+    };
+
+    transport.showInfoBar = function showInfoBar(msg, isOnline) {
+        var cfg = exports.getConfig(),
+            title = [];
+
+        if (exports.name) {
+            title.push(exports.name);
         }
 
-        interval = global.setInterval(function () {
-            var connected = transport.isConnected();
+        if (exports.serialNumber) {
+            title.push(exports.serialNumber);
+        }
 
-            if (!connected || (connected && !transport.subscribed)) {
+        if (cfg.secure) {
+            title.push('secure');
+        }
 
-                exports.console.log('forceReconnect reconnecting', exports.name);
+        if (cfg.web) {
+            title.push('web');
+        }
 
-                reconnectTryCount++;
+        if (cfg.url) {
+            title.push(cfg.url);
+        }
 
-                try {
-                    transport.io.socket.disconnectSync();
-                    transport.io.socket.reconnect();
-                } catch (e) {
-                    exports.console.error(e);
-                }
+        if (cfg.base) {
+            title.push(cfg.base);
+        }
 
-                global.clearInterval(interval);
-                interval = null;
-            }
+        title.push(msg);
+        title.push(isOnline ? 'online' : 'offline');
 
-        }, config.forceReconnectInterval);
+        exports.util.showInfo(title.join('|'), isOnline);
     };
 
     transport.clearPendingQueue = function clearPendingQueue() {
