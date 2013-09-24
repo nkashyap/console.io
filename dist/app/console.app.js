@@ -1084,6 +1084,147 @@ ConsoleIO.View.Device.Preview.prototype.setItemState = function setItemState(id,
 };
 
 /**
+ * Created with JetBrains WebStorm.
+ * User: nisheeth
+ * Date: 24/09/13
+ * Time: 13:14
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ */
+
+ConsoleIO.namespace("ConsoleIO.View.Device.Profile");
+
+ConsoleIO.View.Device.Profile = function ProfileView(ctrl, model) {
+    this.ctrl = ctrl;
+    this.model = model;
+    this.target = null;
+
+    this.toolbar = null;
+    this.layout = null;
+
+//    this.list = null;
+//    this.tree = null;
+//    this.grid = null;
+
+    this.id = [this.model.name, this.model.serialNumber].join("-");
+};
+
+
+ConsoleIO.View.Device.Profile.prototype.render = function render(target) {
+    this.target = target;
+    this.target.addTab(this.id, this.model.name);
+    this.tab = this.target.cells(this.id);
+
+    this.toolbar = this.tab.attachToolbar();
+    this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
+    this.toolbar.attachEvent("onClick", function (itemId) {
+        this.onButtonClick(itemId);
+    }, this.ctrl);
+    this.toolbar.attachEvent("onStateChange", function (itemId, state) {
+        this.onButtonClick(itemId, state);
+    }, this.ctrl);
+
+    ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
+
+    this.layout = this.tab.attachLayout('3W');
+    this.layout.setEffect("resize", true);
+
+    this.listCell = this.layout.cells(this.model.list.context);
+    this.listCell.setText(this.model.list.title);
+    this.listCell.setWidth(this.model.list.width);
+
+    this.list = this.listCell.attachTree();
+    this.list.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tree'));
+    this.list.setIconPath(ConsoleIO.Settings.iconPath);
+    this.list.enableHighlighting(true);
+    this.list.enableTreeImages(true);
+    this.list.enableTreeLines(true);
+    this.list.enableIEImageFix(true);
+    this.list.attachEvent("onClick", function (itemId) {
+        this.onListClick(itemId);
+    }, this.ctrl);
+
+
+    this.treeCell = this.layout.cells(this.model.tree.context);
+    this.treeCell.setText(this.model.tree.title);
+    this.treeCell.setWidth(this.model.tree.width);
+
+    this.tree = this.treeCell.attachTree();
+    this.tree.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tree'));
+    this.tree.setIconPath(ConsoleIO.Settings.iconPath);
+    this.tree.enableHighlighting(true);
+    this.tree.enableTreeImages(true);
+    this.tree.enableTreeLines(true);
+    this.tree.enableIEImageFix(true);
+    this.tree.attachEvent("onOpenStart", function (itemId, state) {
+        this.onTreeOpenStart(itemId);
+        return true;
+    }, this.ctrl);
+
+
+    this.gridCell = this.layout.cells(this.model.grid.context);
+    this.gridCell.setText(this.model.grid.title);
+
+    this.grid = this.gridCell.attachGrid();
+    this.grid.setIconsPath(ConsoleIO.Settings.iconPath);
+    this.grid.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('grid'));
+    this.grid.setHeader("Function,Url,Self,Total,Count,line");
+    this.grid.setInitWidthsP("25,35,10,10,10,10,10");
+    this.grid.setColAlign("left,left,right,right,right,right");
+    this.grid.setColTypes("ro,ro,ro,ro,ro,ro");
+    this.grid.setColSorting("str,str,int,int,int,int");
+    this.grid.setSkin(ConsoleIO.Constant.THEMES.get('win'));
+    this.grid.init();
+};
+
+ConsoleIO.View.Device.Profile.prototype.destroy = function destroy() {
+    this.target.removeTab(this.id);
+    //this.grid.destructor();
+    //this.tree.destructor();
+    //this.list.destructor();
+};
+
+
+ConsoleIO.View.Device.Profile.prototype.clear = function clear() {
+
+};
+
+ConsoleIO.View.Device.Profile.prototype.addToList = function addToList(id, title, icon) {
+    this.list.insertNewItem(0, id, title, 0, icon, icon, icon);
+};
+
+ConsoleIO.View.Device.Profile.prototype.addTreeItem = function addTreeItem(parent, id, name, icon) {
+    this.tree.insertNewItem(parent, id, name, 0, icon, icon, icon);
+};
+
+ConsoleIO.View.Device.Profile.prototype.addGridItem = function addGridItem(node, nodeid) {
+    this.grid.addRow(nodeid, [
+        node.functionName || node.id, node.url, node.selfTime, node.totalTime, node.numberOfCalls, node.lineNumber
+    ]);
+};
+
+ConsoleIO.View.Device.Profile.prototype.closeItem = function closeItem(id, closeAll) {
+    if (!closeAll) {
+        this.tree.closeItem(id);
+    } else {
+        this.tree.closeAllItems(id);
+    }
+};
+
+ConsoleIO.View.Device.Profile.prototype.resetTree = function resetTree() {
+    this.tree.deleteItem(0);
+};
+
+ConsoleIO.View.Device.Profile.prototype.resetGrid = function resetGrid() {
+    this.grid.clearAll();
+};
+
+
+ConsoleIO.View.Device.Profile.prototype.setTabActive = function setTabActive() {
+    this.target.setTabActive(this.id);
+};
+
+/**
  * Created with IntelliJ IDEA.
  * User: nisheeth
  * Date: 27/08/13
@@ -1640,9 +1781,11 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.wordWrap = ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.pressed;
 
     this.console = new ConsoleIO.App.Device.Console(this, this.model);
+    this.profile = new ConsoleIO.App.Device.Profile(this, this.model);
     this.source = new ConsoleIO.App.Device.Source(this, this.model);
     this.preview = new ConsoleIO.App.Device.Preview(this, this.model);
     this.status = new ConsoleIO.App.Device.Status(this, this.model);
+
     this.view = new ConsoleIO.View.Device(this, this.model);
 };
 
@@ -1652,6 +1795,7 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
     this.status.render(this.view.tabs);
     this.source.render(this.view.tabs);
     this.preview.render(this.view.tabs);
+    this.profile.render(this.view.tabs);
     this.console.render(this.view.tabs);
 
     var panel = this[this.activeTab];
@@ -1670,6 +1814,7 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
 
 ConsoleIO.App.Device.prototype.destroy = function destroy() {
     this.console = this.console.destroy();
+    this.profile = this.profile.destroy();
     this.source = this.source.destroy();
     this.preview = this.preview.destroy();
     this.status = this.status.destroy();
@@ -1686,6 +1831,7 @@ ConsoleIO.App.Device.prototype.activate = function activate(state) {
         this.status.activate(state);
         this.source.activate(state);
         this.preview.activate(state);
+        this.profile.activate(state);
         this.console.activate(state);
     } else if (this.activeTab) {
         this[this.activeTab].activate(state);
@@ -2429,6 +2575,126 @@ ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(bt
                 });
                 break;
         }
+    }
+};
+
+/**
+ * Created with JetBrains WebStorm.
+ * User: nisheeth
+ * Date: 24/09/13
+ * Time: 12:56
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ */
+
+ConsoleIO.namespace("ConsoleIO.App.Device.Profile");
+
+ConsoleIO.App.Device.Profile = function ProfileController(parent, model) {
+    this.parent = parent;
+    this.model = model;
+    this.profiles = {};
+    this.activeProfile = null;
+    this.view = new ConsoleIO.View.Device.Profile(this, {
+        name: "Profile",
+        serialNumber: this.model.serialNumber,
+        toolbar: [
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload
+        ],
+        list: {
+            context: 'a',
+            title: 'Profiles',
+            width: 200
+        },
+        tree: {
+            context: 'b',
+            title: 'Tree',
+            width: 300
+        },
+        grid: {
+            context: 'c',
+            title: 'Summary'
+        }
+    });
+
+    ConsoleIO.Service.Socket.on('device:profile:' + this.model.serialNumber, this.addProfile, this);
+};
+
+
+ConsoleIO.App.Device.Profile.prototype.render = function render(target) {
+    this.view.render(target);
+};
+
+ConsoleIO.App.Device.Profile.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:profile:' + this.model.serialNumber, this.profile, this);
+    this.view = this.view.destroy();
+};
+
+ConsoleIO.App.Device.Profile.prototype.addProfile = function addProfile(profile) {
+    console.log(profile);
+    this.profiles[profile.uid] = profile;
+    this.view.addToList(profile.uid, profile.title, ConsoleIO.Constant.ICONS.PROFILE);
+};
+
+ConsoleIO.App.Device.Profile.prototype.addTreeNodes = function addTreeNodes(node, parent) {
+    var icon = ConsoleIO.Constant.ICONS.FUNCTIONS,
+        id = [node.id, parent].join('-');
+
+    this.view.addTreeItem(parent, id, node.functionName || node.id, icon);
+
+    if (node.children.length > 0) {
+        ConsoleIO.forEach(node.children, function (child) {
+            this.addTreeNodes(child, id);
+        }, this);
+    }
+};
+
+ConsoleIO.App.Device.Profile.prototype.addGridRows = function addGridRows(node, openedNodeId, parent) {
+    var nodeId = [node.id, parent].join('-');
+    this.view.addGridItem(node, nodeId);
+
+    if (openedNodeId === nodeId) {
+        return false;
+    }
+
+    if (node.children.length > 0) {
+        ConsoleIO.forEach(node.children, function (child) {
+            this.addGridRows(child, openedNodeId, nodeId);
+        }, this);
+    }
+};
+
+ConsoleIO.App.Device.Profile.prototype.activate = function activate(state) {
+
+};
+
+ConsoleIO.App.Device.Profile.prototype.setTabActive = function setTabActive() {
+    this.view.setTabActive();
+};
+
+
+ConsoleIO.App.Device.Profile.prototype.onTreeOpenStart = function onTreeOpenStart(id) {
+    this.view.resetGrid();
+
+    ConsoleIO.async(function () {
+        this.addGridRows(this.profiles[this.activeProfile].head, id, 0);
+    }, this, 10);
+};
+
+ConsoleIO.App.Device.Profile.prototype.onListClick = function onListClick(id) {
+    this.view.resetTree();
+    this.view.resetGrid();
+
+    ConsoleIO.async(function () {
+        var node = this.profiles[id].head;
+        this.activeProfile = id;
+        this.addTreeNodes(node, 0);
+        this.view.closeItem(0, true);
+    }, this, 10);
+};
+
+ConsoleIO.App.Device.Profile.prototype.onButtonClick = function onButtonClick(btnId, state) {
+    if (!this.parent.onButtonClick(this, btnId, state)) {
+
     }
 };
 
@@ -3400,7 +3666,10 @@ ConsoleIO.Constant.ICONS = {
     WEB: 'web.png',
     FILE: '',
     UNKNOWN: 'unknown.png',
-    FOLDEROPEN: '../../' + ConsoleIO.Constant.IMAGE_URL.get('tree') + '/folderOpen.gif'
+    FOLDEROPEN: '../../' + ConsoleIO.Constant.IMAGE_URL.get('tree') + '/folderOpen.gif',
+
+    PROFILE: 'profiles.png',
+    FUNCTIONS: 'functions.png'
 };
 
 /**

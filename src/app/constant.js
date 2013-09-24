@@ -98,5 +98,8 @@ ConsoleIO.Constant.ICONS = {
     WEB: 'web.png',
     FILE: '',
     UNKNOWN: 'unknown.png',
-    FOLDEROPEN: '../../' + ConsoleIO.Constant.IMAGE_URL.get('tree') + '/folderOpen.gif'
+    FOLDEROPEN: '../../' + ConsoleIO.Constant.IMAGE_URL.get('tree') + '/folderOpen.gif',
+
+    PROFILE: 'profiles.png',
+    FUNCTIONS: 'functions.png'
 };

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html ng-app>
+<head>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Profiler Test</title>
+    <script type="text/javascript" src="http://www-thedictator.bbdev1.com:8082/console.io.js"></script>
+    <!--<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script>-->
+    <!--<script type="text/javascript" src="http://www-thedictator.bbdev1.com:8888/console/demo.js"></script>-->
+    <script type="text/javascript" src="http://www-thedictator.bbdev1.com:8082/profiler?url=https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script>
+    <script type="text/javascript" src="http://www-thedictator.bbdev1.com:8082/profiler?url=http://www-thedictator.bbdev1.com:8888/console/demo.js"></script>
+    <style type="text/css">
+        .done-true {
+            text-decoration: line-through;
+            color: grey;
+        }
+    </style>
+</head>
+<body>
+<h2>Todo</h2>
+<div ng-controller="TodoCtrl">
+    <span>{{remaining()}} of {{todos.length}} remaining</span>
+    [ <a href="" ng-click="archive()">archive</a> ]
+    <ul class="unstyled">
+        <li ng-repeat="todo in todos">
+            <input type="checkbox" ng-model="todo.done">
+            <span class="done-{{todo.done}}">{{todo.text}}</span>
+        </li>
+    </ul>
+    <form ng-submit="addTodo()">
+        <input type="text" ng-model="todoText"  size="30"
+               placeholder="add new todo here">
+        <input class="btn-primary" type="submit" value="add">
+    </form>
+</div>
+</body>
+</html>

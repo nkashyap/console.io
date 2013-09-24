@@ -1520,7 +1520,7 @@ ConsoleIO.version = "0.2.1a";
         delete this.depth;
 
         this.head.finish();
-        exports.console._native.dir(this);
+        exports.transport.emit('profile', this);
     };
 
     ScriptProfile.prototype.getActiveNode = function getActiveNode() {

@@ -17,9 +17,11 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.wordWrap = ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.pressed;
 
     this.console = new ConsoleIO.App.Device.Console(this, this.model);
+    this.profile = new ConsoleIO.App.Device.Profile(this, this.model);
     this.source = new ConsoleIO.App.Device.Source(this, this.model);
     this.preview = new ConsoleIO.App.Device.Preview(this, this.model);
     this.status = new ConsoleIO.App.Device.Status(this, this.model);
+
     this.view = new ConsoleIO.View.Device(this, this.model);
 };
 
@@ -29,6 +31,7 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
     this.status.render(this.view.tabs);
     this.source.render(this.view.tabs);
     this.preview.render(this.view.tabs);
+    this.profile.render(this.view.tabs);
     this.console.render(this.view.tabs);
 
     var panel = this[this.activeTab];
@@ -47,6 +50,7 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
 
 ConsoleIO.App.Device.prototype.destroy = function destroy() {
     this.console = this.console.destroy();
+    this.profile = this.profile.destroy();
     this.source = this.source.destroy();
     this.preview = this.preview.destroy();
     this.status = this.status.destroy();
@@ -63,6 +67,7 @@ ConsoleIO.App.Device.prototype.activate = function activate(state) {
         this.status.activate(state);
         this.source.activate(state);
         this.preview.activate(state);
+        this.profile.activate(state);
         this.console.activate(state);
     } else if (this.activeTab) {
         this[this.activeTab].activate(state);

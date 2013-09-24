@@ -255,6 +255,7 @@ function Manager() {
             files: defineDeviceCommandRouteHandler('command', 'files'),
             previewContent: defineDeviceCommandRouteHandler('command', 'previewContent'),
             screenShot: defineDeviceCommandRouteHandler('command', 'screenShot'),
+            profile: defineDeviceCommandRouteHandler('command', 'profile'),
             source: defineDeviceCommandRouteHandler('processSource', 'source'),
             content: defineDeviceCommandRouteHandler('processSource', 'content'),
             status: defineDeviceRouteHandler('status'),

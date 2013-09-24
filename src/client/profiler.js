@@ -108,7 +108,7 @@
         delete this.depth;
 
         this.head.finish();
-        exports.console._native.dir(this);
+        exports.transport.emit('profile', this);
     };
 
     ScriptProfile.prototype.getActiveNode = function getActiveNode() {
