@@ -42,7 +42,6 @@
         });
     }
 
-    //console.profiles = [];
     console._native = nativeConsole;
 
     console.assert = function assert(x) {

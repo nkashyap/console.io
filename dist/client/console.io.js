@@ -1639,8 +1639,6 @@ ConsoleIO.version = "0.2.1a";
         e: profiler.end
     };
 
-    profiler.start('boot');
-
 }('undefined' !== typeof ConsoleIO ? ConsoleIO : module.exports, this));
 
 /**
@@ -1687,7 +1685,6 @@ ConsoleIO.version = "0.2.1a";
         });
     }
 
-    //console.profiles = [];
     console._native = nativeConsole;
 
     console.assert = function assert(x) {

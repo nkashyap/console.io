@@ -121,125 +121,121 @@ function Profiler() {
     }
 
     function parse(uri, content) {
-        var originalAST, updatedAST;
-
         try {
-            originalAST = esprima.parse(content, {
+            return appendFns(esprima.parse(content, {
                 loc: true,
                 comment: true,
                 raw: true
-            });
-
+            }), uri);
         } catch (e) {
             console.error(e, uri);
-        } finally {
-            try {
-                if (originalAST) {
-                    updatedAST = estraverse.replace(originalAST, {
-                        enter: function (node, parent) {
-                            if (node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration') {
-                                var copyNode = clone(node),
-                                    id = getUniqueId(),
-                                    startAST = clone(templateAST),
-                                    endAST = clone(templateAST),
-                                    startParams = startAST.expression["arguments"] = [],
-                                    endParams = endAST.expression["arguments"] = [],
-                                    param1 = { "type": "Literal", "value": id, "raw": "'" + id + "'" },
-                                    param2 = { "type": "Literal", "value": "anonymous", "raw": "'anonymous'" },
-                                    param3 = { "type": "Literal", "value": uri, "raw": "'" + uri + "'" },
-                                    param4 = { "type": "Literal", "value": 0, "raw": '0' },
-                                    body, lastNode, name = [];
+        }
+    }
 
-                                startAST.expression.callee.property.name = 'b';
-                                endAST.expression.callee.property.name = 'e';
+    function appendFns(ast, uri) {
+        try {
+            return parseAST(estraverse.replace(ast, {
+                enter: function (node, parent) {
+                    if (node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration') {
+                        var copyNode = clone(node),
+                            id = getUniqueId(),
+                            startAST = clone(templateAST),
+                            endAST = clone(templateAST),
+                            startParams = startAST.expression["arguments"] = [],
+                            endParams = endAST.expression["arguments"] = [],
+                            param1 = { "type": "Literal", "value": id, "raw": "'" + id + "'" },
+                            param2 = { "type": "Literal", "value": "anonymous", "raw": "'anonymous'" },
+                            param3 = { "type": "Literal", "value": uri, "raw": "'" + uri + "'" },
+                            param4 = { "type": "Literal", "value": 0, "raw": '0' },
+                            body, lastNode, name = [];
 
-                                switch (parent.type) {
-                                    case 'VariableDeclarator':
-                                        if (parent.id && parent.id.name) {
-                                            name.push(parent.id.name);
-                                        }
-                                        break;
-                                    case 'AssignmentExpression':
-                                    case 'LogicalExpression':
-                                    case 'MemberExpression':
-                                        if(parent.left){
-                                            if (parent.left.object && parent.left.object.name) {
-                                                name.push(parent.left.object.name);
-                                            }
-                                            if (parent.left.property && parent.left.property.name) {
-                                                name.push(parent.left.property.name);
-                                            }
-                                        }
-                                        break;
-                                    case 'Property':
-                                        if (parent.key.name) {
-                                            name.push(parent.key.name);
-                                        }
-                                        break;
+                        startAST.expression.callee.property.name = 'b';
+                        endAST.expression.callee.property.name = 'e';
+
+                        switch (parent.type) {
+                            case 'VariableDeclarator':
+                                if (parent.id && parent.id.name) {
+                                    name.push(parent.id.name);
+                                }
+                                break;
+                            case 'AssignmentExpression':
+                            case 'LogicalExpression':
+                            case 'MemberExpression':
+                                if(parent.left){
+                                    if (parent.left.object && parent.left.object.name) {
+                                        name.push(parent.left.object.name);
+                                    }
+                                    if (parent.left.property && parent.left.property.name) {
+                                        name.push(parent.left.property.name);
+                                    }
+                                }
+                                break;
+                            case 'Property':
+                                if (parent.key.name) {
+                                    name.push(parent.key.name);
+                                }
+                                break;
 //                                    case 'BlockStatement':
 //                                        break;
 //                                    case 'CallExpression':
 //                                        break;
 //                                    case 'ReturnStatement':
 //                                        break;
-                                    default:
-                                    //console.log(parent.type, node.id);
-                                }
-
-                                if (node.id) {
-                                    if (node.id.name) {
-                                        if (name.indexOf(node.id.name) === -1) {
-                                            name.push(node.id.name);
-                                        }
-                                    }
-                                }
-
-                                var loc = node.loc || node.id.loc;
-                                if (loc) {
-                                    param4 = {
-                                        "type": "Literal",
-                                        "value": loc.start.line,
-                                        "raw": loc.start.line };
-                                }
-
-                                if (name.length > 0) {
-                                    param2.value = name.join('.');
-                                    param2.raw = "'" + name.join('.') + "'";
-                                }
-
-                                startParams.push(param1, param2, param3, param4);
-                                endParams.push(param1);
-
-                                body = [startAST].concat(copyNode.body.body, [endAST]);
-                                lastNode = copyNode.body.body.pop();
-                                if (lastNode) {
-                                    if (lastNode.type === 'ReturnStatement') {
-                                        body = [startAST].concat(copyNode.body.body, [endAST, lastNode]);
-                                    }
-                                }
-
-                                copyNode.pid = id;
-                                copyNode.body.body = body;
-                                return copyNode;
-                            }
-                        },
-                        leave: function (node, parent) {
+                            default:
+                            //console.log(parent.type, node.id);
                         }
-                    });
-                }
-            } catch (e) {
-                console.error(e, uri);
-            } finally {
-                try {
-                    if (updatedAST) {
-                        return escodegen.generate(updatedAST, {
-                            comment: true
-                        });
+
+                        if (node.id) {
+                            if (node.id.name) {
+                                if (name.indexOf(node.id.name) === -1) {
+                                    name.push(node.id.name);
+                                }
+                            }
+                        }
+
+                        var loc = node.loc || node.id.loc;
+                        if (loc) {
+                            param4 = {
+                                "type": "Literal",
+                                "value": loc.start.line,
+                                "raw": loc.start.line };
+                        }
+
+                        if (name.length > 0) {
+                            param2.value = name.join('.');
+                            param2.raw = "'" + name.join('.') + "'";
+                        }
+
+                        startParams.push(param1, param2, param3, param4);
+                        endParams.push(param1);
+
+                        body = [startAST].concat(copyNode.body.body, [endAST]);
+                        lastNode = copyNode.body.body.pop();
+                        if (lastNode) {
+                            if (lastNode.type === 'ReturnStatement') {
+                                body = [startAST].concat(copyNode.body.body, [endAST, lastNode]);
+                            }
+                        }
+
+                        copyNode.pid = id;
+                        copyNode.body.body = body;
+                        return copyNode;
                     }
-                } catch (e) {
-                    console.error(e, uri);
-                }
-            }
+                },
+                leave: function (node, parent) {}
+            }), uri);
+        } catch (e) {
+            console.error(e, uri);
+        }
+    }
+
+    function parseAST(ast, uri) {
+        try {
+            return escodegen.generate(ast, {
+                comment: true
+            });
+        } catch (e) {
+            console.error(e, uri);
         }
     }
 
