@@ -5,6 +5,8 @@
  * Time: 10:19
  * Email: nisheeth.k.kashyap@gmail.com
  * Repositories: https://github.com/nkashyap
+ *
+ * Profiler proxy
  */
 
 function Profiler() {
@@ -13,9 +15,11 @@ function Profiler() {
         escodegen = require("escodegen"),
         url = require('url'),
         request = require('request'),
-        timeout = 60 * 1000;
+        timeout = 60 * 1000,
+        templateAST,
+        getUniqueId;
 
-    var templateAST = {
+    templateAST = {
         "type": "ExpressionStatement",
         "expression": {
             "type": "CallExpression",
@@ -24,11 +28,11 @@ function Profiler() {
                 "computed": false,
                 "object": {
                     "type": "Identifier",
-                    "name": "console"
+                    "name": "__p__"
                 },
                 "property": {
                     "type": "Identifier",
-                    "name": "profilerStart"
+                    "name": ""
                 }
             },
             "arguments": [
@@ -43,12 +47,25 @@ function Profiler() {
                     "raw": "'anonymous'"
                 },
                 {
-                    "type": "Identifier",
-                    "name": "arguments"
+                    "type": "Literal",
+                    "value": "",
+                    "raw": "''"
+                },
+                {
+                    "type": "Literal",
+                    "value": "0",
+                    "raw": "'0'"
                 }
             ]
         }
     };
+
+    getUniqueId = (function () {
+        var i = 1000;
+        return function () {
+            return i++;
+        };
+    }());
 
     function clone(item) {
         if (!item) {
@@ -103,116 +120,138 @@ function Profiler() {
         return result;
     }
 
-    var getUniqueId = (function getUniqueId() {
-        var i = 0;
-        return function getUniqueId() {
-            return ['c', ++i].join(':');
-        };
-    }());
+    function parse(uri, content) {
+        var originalAST, updatedAST;
 
-    function parse(content) {
-        var originalAST = esprima.parse(content, {});
+        try {
+            originalAST = esprima.parse(content, {
+                loc: true,
+                comment: true,
+                raw: true
+            });
 
-        var updatedAST = estraverse.replace(originalAST, {
-            enter: function (node, parent) {
+        } catch (e) {
+            console.error(e, uri);
+        } finally {
+            try {
+                if (originalAST) {
+                    updatedAST = estraverse.replace(originalAST, {
+                        enter: function (node, parent) {
+                            if (node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration') {
+                                var copyNode = clone(node),
+                                    id = getUniqueId(),
+                                    startAST = clone(templateAST),
+                                    endAST = clone(templateAST),
+                                    startParams = startAST.expression["arguments"] = [],
+                                    endParams = endAST.expression["arguments"] = [],
+                                    param1 = { "type": "Literal", "value": id, "raw": "'" + id + "'" },
+                                    param2 = { "type": "Literal", "value": "anonymous", "raw": "'anonymous'" },
+                                    param3 = { "type": "Literal", "value": uri, "raw": "'" + uri + "'" },
+                                    param4 = { "type": "Literal", "value": 0, "raw": '0' },
+                                    body, lastNode, name = [];
 
-                if (node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration') {
-                    var copyNode = clone(node),
-                        id = getUniqueId(),
-                        startAST = clone(templateAST),
-                        endAST = clone(templateAST),
-                        startParams = startAST.expression["arguments"] = [],
-                        endParams = endAST.expression["arguments"] = [],
-                        param1 = { "type": "Literal", "value": id, "raw": "'" + id + "'" },
-                        param2 = { "type": "Literal", "value": "anonymous", "raw": "'anonymous'" },
-                        param3 = { "type": "Identifier", "name": "arguments" },
-                        body, lastNode, name = [];
+                                startAST.expression.callee.property.name = 'b';
+                                endAST.expression.callee.property.name = 'e';
 
-                    startAST.expression.callee.property.name = 'profilerStart';
-                    endAST.expression.callee.property.name = 'profilerEnd';
+                                switch (parent.type) {
+                                    case 'VariableDeclarator':
+                                        if (parent.id && parent.id.name) {
+                                            name.push(parent.id.name);
+                                        }
+                                        break;
+                                    case 'AssignmentExpression':
+                                    case 'LogicalExpression':
+                                    case 'MemberExpression':
+                                        if(parent.left){
+                                            if (parent.left.object && parent.left.object.name) {
+                                                name.push(parent.left.object.name);
+                                            }
+                                            if (parent.left.property && parent.left.property.name) {
+                                                name.push(parent.left.property.name);
+                                            }
+                                        }
+                                        break;
+                                    case 'Property':
+                                        if (parent.key.name) {
+                                            name.push(parent.key.name);
+                                        }
+                                        break;
+//                                    case 'BlockStatement':
+//                                        break;
+//                                    case 'CallExpression':
+//                                        break;
+//                                    case 'ReturnStatement':
+//                                        break;
+                                    default:
+                                    //console.log(parent.type, node.id);
+                                }
 
-                    switch(parent.type){
-                        case 'VariableDeclarator':
-                            if(parent.id.name){
-                                name.push(parent.id.name);
-                            }
-                            break;
-                        case 'AssignmentExpression':
-                            if(parent.left.object.name){
-                                name.push(parent.left.object.name);
-                            }
-                            if(parent.left.property.name){
-                                name.push(parent.left.property.name);
-                            }
-                            break;
-                        case 'LogicalExpression':
-                            if(parent.left.object.name){
-                                name.push(parent.left.object.name);
-                            }
-                            if(parent.left.property.name){
-                                name.push(parent.left.property.name);
-                            }
-                            break;
-                        case 'Property':
-                            if(parent.key.name){
-                                name.push(parent.key.name);
-                            }
-                            break;
-//                        case 'BlockStatement':
-//                            break;
-//                        case 'CallExpression':
-//                            break;
-//                        case 'ReturnStatement':
-//                            break;
-                        default:
-                            //console.log(parent.type, node.id);
-                    }
+                                if (node.id) {
+                                    if (node.id.name) {
+                                        if (name.indexOf(node.id.name) === -1) {
+                                            name.push(node.id.name);
+                                        }
+                                    }
+                                }
 
-                    if (node.id && node.id.name) {
-                        if(name.indexOf(node.id.name) === -1){
-                            name.push(node.id.name);
+                                var loc = node.loc || node.id.loc;
+                                if (loc) {
+                                    param4 = {
+                                        "type": "Literal",
+                                        "value": loc.start.line,
+                                        "raw": loc.start.line };
+                                }
+
+                                if (name.length > 0) {
+                                    param2.value = name.join('.');
+                                    param2.raw = "'" + name.join('.') + "'";
+                                }
+
+                                startParams.push(param1, param2, param3, param4);
+                                endParams.push(param1);
+
+                                body = [startAST].concat(copyNode.body.body, [endAST]);
+                                lastNode = copyNode.body.body.pop();
+                                if (lastNode) {
+                                    if (lastNode.type === 'ReturnStatement') {
+                                        body = [startAST].concat(copyNode.body.body, [endAST, lastNode]);
+                                    }
+                                }
+
+                                copyNode.pid = id;
+                                copyNode.body.body = body;
+                                return copyNode;
+                            }
+                        },
+                        leave: function (node, parent) {
                         }
-                    }
-
-                    if(name.length > 0){
-                        param2.value = name.join('.');
-                        param2.raw = "'" + name.join('.') + "'";
-                    }
-
-                    startParams.push(param1, param2, param3);
-                    endParams.push(param1, param2, param3);
-
-                    body = [startAST].concat(copyNode.body.body, [endAST]);
-                    lastNode = copyNode.body.body.pop();
-                    if(lastNode){
-                        if (lastNode.type === 'ReturnStatement') {
-                            body = [startAST].concat(copyNode.body.body, [endAST, lastNode]);
-                        }
-                    }
-
-                    copyNode.pid = id;
-                    copyNode.body.body = body;
-                    return copyNode;
+                    });
                 }
-            },
-            leave: function (node, parent) {}
-        });
-
-        return escodegen.generate(updatedAST);
+            } catch (e) {
+                console.error(e, uri);
+            } finally {
+                try {
+                    if (updatedAST) {
+                        return escodegen.generate(updatedAST, {
+                            comment: true
+                        });
+                    }
+                } catch (e) {
+                    console.error(e, uri);
+                }
+            }
+        }
     }
 
     function get(req, res) {
-        // Get the params
         var query = url.parse(req.url, true).query,
             uri = query.url || null,
             opt = {};
 
         console.log('profiler request:', uri);
 
-        // check for param existance, error if not
         if (!uri) {
             console.log('URL missing!!');
-            // bad request
             res.writeHead(400);
             res.end();
             return false;
@@ -222,24 +261,23 @@ function Profiler() {
             proxyRes = proxyRes || {};
             if (!err && proxyRes.statusCode === 200) {
                 res.setHeader('Content-Type', proxyRes.headers['content-type']);
-                res.write(parse(proxyData));
 
-                //console.log('sent:', uri);
+                if (uri.indexOf('.css') > -1 || uri.indexOf('.html') > -1) {
+                    res.write(proxyData);
+                } else {
+                    res.write(parse(uri, proxyData));
+                }
             } else {
-                // bad request
                 res.writeHead(proxyRes.statusCode || 400);
-                //console.log('failed:', uri);
             }
 
             res.end();
         }
 
-        // set request options
         opt.url = uri;
         opt.method = 'GET';
         opt.timeout = timeout;
 
-        // make a request
         request(opt, proxyCallback);
     }
 

@@ -42,6 +42,7 @@ module.exports = function (grunt) {
                     'src/client/formatter.js',
                     'src/client/stacktrace.js',
                     'src/client/transport.js',
+                    'src/client/profiler.js',
                     'src/client/console.js',
                     'src/client/client.js',
                     'src/client/config.js',

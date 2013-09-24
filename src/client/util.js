@@ -438,6 +438,27 @@
         }
     }());
 
+    util.filter = (function () {
+        if (Array.prototype.filter) {
+            return function (array, callback, scope) {
+                return (array || []).filter(callback, scope);
+            };
+        } else {
+            return function (array, callback, scope) {
+                array = array || [];
+                var i = 0, length = array.length, newArray = [];
+                if (length) {
+                    do {
+                        if (callback.call(scope || array, array[i], i, array)) {
+                            newArray.push(array[i]);
+                        }
+                    } while (++i < length);
+                }
+                return newArray;
+            };
+        }
+    }());
+
     util.forEach = (function () {
         if (Array.prototype.forEach) {
             return function (array, callback, scope) {

@@ -42,7 +42,8 @@
         });
     }
 
-    console.profiles = [];
+    //console.profiles = [];
+    console._native = nativeConsole;
 
     console.assert = function assert(x) {
         if (!x) {
@@ -160,11 +161,14 @@
     };
 
     console.profile = function profile(title) {
-        send("profile", arguments);
+        send("profile", arguments, 'Profile "' + exports.profiler.start(title) + '" started.');
     };
 
     console.profileEnd = function profileEnd(title) {
-        send("profileEnd", arguments);
+        title = exports.profiler.finish(title);
+        if (title) {
+            send("profileEnd", arguments, 'Profile "' + title + '" finished.');
+        }
     };
 
     console.error = function error(e) {
