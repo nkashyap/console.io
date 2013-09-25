@@ -16,10 +16,39 @@ function Profiler() {
         url = require('url'),
         request = require('request'),
         timeout = 60 * 1000,
-        templateAST,
+        beginAST,
+        finishAST,
         getUniqueId;
 
-    templateAST = {
+    beginAST = {
+        "type": "VariableDeclaration",
+        "kind": "var",
+        "declarations": [{
+            "type": "VariableDeclarator",
+            "id": {
+                "type": "Identifier",
+                "name": "__v"
+            },
+            "init": {
+                "type": "CallExpression",
+                "callee": {
+                    "type": "MemberExpression",
+                    "computed": false,
+                    "object": {
+                        "type": "Identifier",
+                        "name": "__p__"
+                    },
+                    "property": {
+                        "type": "Identifier",
+                        "name": "b"
+                    }
+                },
+                "arguments": []
+            }
+         }]
+    };
+
+    finishAST = {
         "type": "ExpressionStatement",
         "expression": {
             "type": "CallExpression",
@@ -32,31 +61,10 @@ function Profiler() {
                 },
                 "property": {
                     "type": "Identifier",
-                    "name": ""
+                    "name": "e"
                 }
             },
-            "arguments": [
-                {
-                    "type": "Literal",
-                    "value": "0",
-                    "raw": "'0'"
-                },
-                {
-                    "type": "Literal",
-                    "value": "anonymous",
-                    "raw": "'anonymous'"
-                },
-                {
-                    "type": "Literal",
-                    "value": "",
-                    "raw": "''"
-                },
-                {
-                    "type": "Literal",
-                    "value": "0",
-                    "raw": "'0'"
-                }
-            ]
+            "arguments": []
         }
     };
 
@@ -139,18 +147,18 @@ function Profiler() {
                     if (node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration') {
                         var copyNode = clone(node),
                             id = getUniqueId(),
-                            startAST = clone(templateAST),
-                            endAST = clone(templateAST),
-                            startParams = startAST.expression["arguments"] = [],
-                            endParams = endAST.expression["arguments"] = [],
+                            startAST = clone(beginAST),
+                            endAST = clone(finishAST),
+                            startParams = startAST.declarations[0].init['arguments'] = [],
+                            endParams = endAST.expression['arguments'] = [],
                             param1 = { "type": "Literal", "value": id, "raw": "'" + id + "'" },
                             param2 = { "type": "Literal", "value": "anonymous", "raw": "'anonymous'" },
                             param3 = { "type": "Literal", "value": uri, "raw": "'" + uri + "'" },
                             param4 = { "type": "Literal", "value": 0, "raw": '0' },
+                            param5 = { "type": "Identifier", "name": "__v" + id },
                             body, lastNode, name = [];
 
-                        startAST.expression.callee.property.name = 'b';
-                        endAST.expression.callee.property.name = 'e';
+                        startAST.declarations[0].id.name = "__v" + id;
 
                         switch (parent.type) {
                             case 'VariableDeclarator':
@@ -175,15 +183,29 @@ function Profiler() {
                                     name.push(parent.key.name);
                                 }
                                 break;
-//                                    case 'BlockStatement':
-//                                        break;
-//                                    case 'CallExpression':
-//                                        break;
-//                                    case 'ReturnStatement':
-//                                        break;
+                            case 'CallExpression':
+                                break;
+                            case 'BlockStatement':
+                                break;
+                            case 'CallExpression':
+                                break;
+                            case 'ReturnStatement':
+                                break;
                             default:
-                            //console.log(parent.type, node.id);
+                                break;
                         }
+
+                        copyNode.body.body.forEach(function(exp){
+                            switch (exp.type) {
+                                case 'ExpressionStatement':
+                                    if(exp.expression.callee && exp.expression.callee.name &&
+                                        (exp.expression.callee.name === 'setTimeout' || exp.expression.callee.name === 'setInterval')){
+                                        exp.expression.parentId = id;
+                                    }
+                                    break;
+                                default:
+                            }
+                        });
 
                         if (node.id) {
                             if (node.id.name) {
@@ -193,21 +215,23 @@ function Profiler() {
                             }
                         }
 
-                        var loc = node.loc || node.id.loc;
-                        if (loc) {
-                            param4 = {
-                                "type": "Literal",
-                                "value": loc.start.line,
-                                "raw": loc.start.line };
-                        }
-
                         if (name.length > 0) {
                             param2.value = name.join('.');
                             param2.raw = "'" + name.join('.') + "'";
                         }
 
-                        startParams.push(param1, param2, param3, param4);
-                        endParams.push(param1);
+                        var loc = node.loc || node.id.loc;
+                        if (loc) {
+                            param4.value = param4.raw = loc.start.line;
+                        }
+
+                        if(parent.parentId){
+                            startParams.push(param1, param2, param3, param4, { "type": "Identifier", "name": "__v" + parent.parentId });
+                            endParams.push(param1, param5);
+                        }else{
+                            startParams.push(param1, param2, param3, param4);
+                            endParams.push(param1, param5);
+                        }
 
                         body = [startAST].concat(copyNode.body.body, [endAST]);
                         lastNode = copyNode.body.body.pop();
@@ -217,7 +241,6 @@ function Profiler() {
                             }
                         }
 
-                        copyNode.pid = id;
                         copyNode.body.body = body;
                         return copyNode;
                     }

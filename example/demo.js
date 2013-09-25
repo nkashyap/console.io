@@ -14,6 +14,10 @@ function TodoCtrl($scope) {
         angular.forEach($scope.todos, function (todo) {
             count += todo.done ? 0 : 1;
         });
+//
+//        setTimeout(function timeout(){
+//            count = 0;
+//        }, 10);
         return count;
     };
 

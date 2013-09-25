@@ -1477,7 +1477,7 @@ ConsoleIO.version = "0.2.1a";
         }
     };
 
-    ScriptProfileNode.prototype.getNodeById = function getNodeById(callId) {
+    ScriptProfileNode.prototype.getNodeByCallerId = function getNodeByCallerId(callId) {
         var node;
         exports.util.every(this.children, function (child) {
             if (child.callUID === callId) {
@@ -1491,22 +1491,49 @@ ConsoleIO.version = "0.2.1a";
         return node;
     };
 
+    ScriptProfileNode.prototype.getNodeById = function getNodeById(id) {
+        var node;
+        exports.util.every(this.children, function (child) {
+            if (child.id === id) {
+                node = child;
+                return false;
+            }
+
+            return true;
+        });
+
+        if (!node) {
+            exports.util.every(this.children, function (child) {
+                node = child.getNodeById(id);
+                if (node) {
+                    return false;
+                }
+
+                return true;
+            });
+        }
+
+        return node;
+    };
+
     ScriptProfileNode.prototype.getActiveNode = function getActiveNode() {
         var length = this.children.length;
         return (length > 0) ? this.children[length - 1] : null;
     };
 
     ScriptProfileNode.prototype.begin = function begin(callId, name, file, line, time) {
-        var node = this.getNodeById(callId);
+        var node = this.getNodeByCallerId(callId);
         if (node) {
             ++node.numberOfCalls;
         } else {
-            this.children.push(new ScriptProfileNode(callId, name, file, line, time));
+            node = new ScriptProfileNode(callId, name, file, line, time);
+            this.children.push(node);
         }
+        return node.id;
     };
 
     ScriptProfileNode.prototype.end = function end(callId, time) {
-        var node = this.getNodeById(callId);
+        var node = this.getNodeByCallerId(callId);
         if (node) {
             node.totalTime = time - node.startTime;
         }
@@ -1543,17 +1570,21 @@ ConsoleIO.version = "0.2.1a";
         return node || this.head;
     };
 
-    ScriptProfile.prototype.begin = function begin(callId, name, file, line) {
+    ScriptProfile.prototype.begin = function begin(callId, name, file, line, parentIds) {
         this.depth++;
         var beginTime = Date.now(),
-            node = this.getActiveNode();
+            parentId = parentIds ? parentIds[this.uid] : null,
+            node = parentId ? this.head.getNodeById(parentId) : this.getActiveNode();
 
-        node.begin(callId, name, file, line, beginTime);
+        return node.begin(callId, name, file, line, beginTime);
     };
 
-    ScriptProfile.prototype.end = function end(callId) {
-        var endTime = Date.now();
-        this.getActiveNode().end(callId, endTime);
+    ScriptProfile.prototype.end = function end(callId, parentIds) {
+        var endTime = Date.now(),
+            parentId = parentIds ? parentIds[this.uid] : null,
+            node = parentId ? this.head.getNodeById(parentId) : this.getActiveNode();
+
+        node.end(callId, endTime);
         this.depth--;
     };
 
@@ -1594,18 +1625,20 @@ ConsoleIO.version = "0.2.1a";
     profiler.enabled = false;
     profiler.store = [];
 
-    profiler.begin = function begin(callId, name, file, line) {
+    profiler.begin = function begin(callId, name, file, line, parentIds) {
         if (profiler.enabled) {
+            var ids = {};
             exports.util.forEach(getActiveProfiles(), function (profile) {
-                profile.begin(callId, name, file, line);
+                ids[profile.uid] = profile.begin(callId, name, file, line, parentIds);
             });
+            return ids;
         }
     };
 
-    profiler.end = function end(callId) {
+    profiler.end = function end(callId, parentIds) {
         if (profiler.enabled) {
             exports.util.forEach(getActiveProfiles(), function (profile) {
-                profile.end(callId);
+                profile.end(callId, parentIds);
             });
         }
     };
