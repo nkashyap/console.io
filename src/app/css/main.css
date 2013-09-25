@@ -79,3 +79,7 @@ html, body {
 .dhx_acc_item_label {
     text-transform: capitalize;
 }
+
+.standartTreeRow, .standartTreeImage {
+    height: 20px;
+}

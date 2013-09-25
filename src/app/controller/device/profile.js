@@ -14,6 +14,7 @@ ConsoleIO.App.Device.Profile = function ProfileController(parent, model) {
     this.model = model;
     this.profiles = {};
     this.activeProfile = null;
+    this.openNodes = [];
     this.view = new ConsoleIO.View.Device.Profile(this, {
         name: "Profile",
         serialNumber: this.model.serialNumber,
@@ -23,12 +24,12 @@ ConsoleIO.App.Device.Profile = function ProfileController(parent, model) {
         list: {
             context: 'a',
             title: 'Profiles',
-            width: 200
+            width: 120
         },
         tree: {
             context: 'b',
             title: 'Tree',
-            width: 300
+            width: 350
         },
         grid: {
             context: 'c',
@@ -56,29 +57,31 @@ ConsoleIO.App.Device.Profile.prototype.addProfile = function addProfile(profile)
 };
 
 ConsoleIO.App.Device.Profile.prototype.addTreeNodes = function addTreeNodes(node, parent) {
-    var icon = ConsoleIO.Constant.ICONS.FUNCTIONS,
-        id = [node.id, parent].join('-');
-
-    this.view.addTreeItem(parent, id, node.functionName || node.id, icon);
+    this.view.addTreeItem(parent, node.id, node.functionName || node.id, ConsoleIO.Constant.ICONS.FUNCTIONS);
 
     if (node.children.length > 0) {
         ConsoleIO.forEach(node.children, function (child) {
-            this.addTreeNodes(child, id);
+            this.addTreeNodes(child, node.id);
         }, this);
     }
 };
 
-ConsoleIO.App.Device.Profile.prototype.addGridRows = function addGridRows(node, openedNodeId, parent) {
-    var nodeId = [node.id, parent].join('-');
-    this.view.addGridItem(node, nodeId);
+ConsoleIO.App.Device.Profile.prototype.addGridRows = function addGridRows(node, items) {
+    var index = items.indexOf(node.id);
 
-    if (openedNodeId === nodeId) {
-        return false;
+    this.view.addGridItem(node);
+
+    if (index > -1) {
+        items.splice(index, 1);
     }
 
     if (node.children.length > 0) {
         ConsoleIO.forEach(node.children, function (child) {
-            this.addGridRows(child, openedNodeId, nodeId);
+            if (items.indexOf(child.id) > -1) {
+                this.addGridRows(child, items);
+            } else {
+                this.view.addGridItem(child);
+            }
         }, this);
     }
 };
@@ -92,11 +95,18 @@ ConsoleIO.App.Device.Profile.prototype.setTabActive = function setTabActive() {
 };
 
 
-ConsoleIO.App.Device.Profile.prototype.onTreeOpenStart = function onTreeOpenStart(id) {
+ConsoleIO.App.Device.Profile.prototype.onTreeOpenEnd = function onTreeOpenEnd(id, state) {
+    var index = this.openNodes.indexOf(id);
     this.view.resetGrid();
 
+    if (state === 1 && index === -1) {
+        this.openNodes.push(id);
+    } else if (state === -1 && index > -1) {
+        this.openNodes.splice(index, 1);
+    }
+
     ConsoleIO.async(function () {
-        this.addGridRows(this.profiles[this.activeProfile].head, id, 0);
+        this.addGridRows(this.profiles[this.activeProfile].head, [].concat(this.openNodes));
     }, this, 10);
 };
 

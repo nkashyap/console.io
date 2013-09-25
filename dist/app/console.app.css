@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-24
+ * Date: 2013-09-25
 */
 
 code {
@@ -410,6 +410,10 @@ html, body {
 
 .dhx_acc_item_label {
     text-transform: capitalize;
+}
+
+.standartTreeRow, .standartTreeImage {
+    height: 20px;
 }
 
 ::-webkit-scrollbar {

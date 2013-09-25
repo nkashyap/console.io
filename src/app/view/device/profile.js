@@ -64,6 +64,15 @@ ConsoleIO.View.Device.Profile.prototype.render = function render(target) {
     this.treeCell.setText(this.model.tree.title);
     this.treeCell.setWidth(this.model.tree.width);
 
+    this.treeToolbar = this.treeCell.attachToolbar();
+    this.treeToolbar.setIconsPath(ConsoleIO.Settings.iconPath);
+//    this.treeToolbar.attachEvent("onClick", function (itemId) {
+//        this.onButtonClick(itemId);
+//    }, this.ctrl);
+//    this.treeToolbar.attachEvent("onStateChange", function (itemId, state) {
+//        this.onButtonClick(itemId, state);
+//    }, this.ctrl);
+
     this.tree = this.treeCell.attachTree();
     this.tree.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tree'));
     this.tree.setIconPath(ConsoleIO.Settings.iconPath);
@@ -71,8 +80,8 @@ ConsoleIO.View.Device.Profile.prototype.render = function render(target) {
     this.tree.enableTreeImages(true);
     this.tree.enableTreeLines(true);
     this.tree.enableIEImageFix(true);
-    this.tree.attachEvent("onOpenStart", function (itemId, state) {
-        this.onTreeOpenStart(itemId);
+    this.tree.attachEvent("onOpenEnd", function (itemId, state) {
+        this.onTreeOpenEnd(itemId, state);
         return true;
     }, this.ctrl);
 
@@ -112,8 +121,8 @@ ConsoleIO.View.Device.Profile.prototype.addTreeItem = function addTreeItem(paren
     this.tree.insertNewItem(parent, id, name, 0, icon, icon, icon);
 };
 
-ConsoleIO.View.Device.Profile.prototype.addGridItem = function addGridItem(node, nodeid) {
-    this.grid.addRow(nodeid, [
+ConsoleIO.View.Device.Profile.prototype.addGridItem = function addGridItem(node) {
+    this.grid.addRow(node.id, [
         node.functionName || node.id, node.url, node.selfTime, node.totalTime, node.numberOfCalls, node.lineNumber
     ]);
 };
