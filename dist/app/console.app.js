@@ -2754,7 +2754,7 @@ ConsoleIO.App.Device.Profile.prototype.addTreeNodes = function addTreeNodes(node
 ConsoleIO.App.Device.Profile.prototype.addGridRows = function addGridRows(node, items) {
     var index = items.indexOf(node.id);
 
-    this.view.addGridItem(node);
+    this.view.addGridItem(this.toDate(node));
 
     if (index > -1) {
         items.splice(index, 1);
@@ -2765,22 +2765,30 @@ ConsoleIO.App.Device.Profile.prototype.addGridRows = function addGridRows(node, 
             if (items.indexOf(child.id) > -1) {
                 this.addGridRows(child, items);
             } else {
-                var data = {
-                    id: child.id,
-                    functionName: child.functionName || child.id,
-                    selfTime: child.selfTime,
-                    totalTime: child.totalTime,
-                    numberOfCalls: child.numberOfCalls
-                };
-
-                if (child.url) {
-                    data.url = "<a target='_blank' href='" + child.url + "' >" + child.url.substring(child.url.lastIndexOf('/') + 1) + ":" + child.lineNumber + "</a>";
-                }
-
-                this.view.addGridItem(data);
+                this.view.addGridItem(this.toDate(child));
             }
         }, this);
     }
+};
+
+ConsoleIO.App.Device.Profile.prototype.toDate = function toDate(node) {
+    var data = {
+        id: node.id,
+        functionName: node.functionName || node.id,
+        selfTime: this.parseTime(node.selfTime),
+        totalTime: this.parseTime(node.totalTime),
+        numberOfCalls: node.numberOfCalls
+    };
+
+    if (node.url) {
+        data.url = "<a target='_blank' href='" + node.url + "' >" + node.url.substring(node.url.lastIndexOf('/') + 1) + ":" + node.lineNumber + "</a>";
+    }
+
+    return data;
+};
+
+ConsoleIO.App.Device.Profile.prototype.parseTime = function parseTime(time) {
+    return (time / 1000) + ' ms';
 };
 
 ConsoleIO.App.Device.Profile.prototype.activate = function activate(state) {
