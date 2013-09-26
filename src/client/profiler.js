@@ -11,7 +11,9 @@
 
 (function (exports, global) {
 
-    var profiler = exports.profiler = {};
+    var profiler = exports.profiler = {
+        enabled: false
+    };
 
     var getProfileId = (function () {
         var i = 0;
@@ -209,10 +211,7 @@
         return lastProfile;
     }
 
-
-    profiler.enabled = false;
     profiler.store = [];
-
     profiler.begin = function begin(callId, name, file, line, parentIds) {
         if (profiler.enabled) {
             var ids = {};

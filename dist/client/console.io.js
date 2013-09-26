@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-25
+ * Date: 2013-09-26
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -1423,7 +1423,9 @@ ConsoleIO.version = "0.2.1a";
 
 (function (exports, global) {
 
-    var profiler = exports.profiler = {};
+    var profiler = exports.profiler = {
+        enabled: false
+    };
 
     var getProfileId = (function () {
         var i = 0;
@@ -1621,10 +1623,7 @@ ConsoleIO.version = "0.2.1a";
         return lastProfile;
     }
 
-
-    profiler.enabled = false;
     profiler.store = [];
-
     profiler.begin = function begin(callId, name, file, line, parentIds) {
         if (profiler.enabled) {
             var ids = {};

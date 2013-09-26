@@ -140,6 +140,62 @@ function Profiler() {
         }
     }
 
+    function getFunctionName(parent){
+        var name = [];
+        switch (parent.type) {
+            case 'VariableDeclarator':
+            case 'FunctionExpression':
+                if (parent.id) {
+                    name = name.concat(getFunctionName(parent.id));
+                }
+                break;
+            case 'AssignmentExpression':
+            case 'LogicalExpression':
+            case 'MemberExpression':
+                if(parent.left){
+                    if(parent.left.object && parent.left.property){
+                        name = name.concat(getFunctionName(parent.left.object));
+                        name = name.concat(getFunctionName(parent.left.property));
+                    }else{
+                        name = name.concat(getFunctionName(parent.left));
+                    }
+
+                } else if(parent.object && parent.property){
+                    name = name.concat(getFunctionName(parent.object));
+                    name = name.concat(getFunctionName(parent.property));
+                }
+                break;
+            case 'Property':
+                if (parent.key) {
+                    name = name.concat(getFunctionName(parent.key));
+                }
+                break;
+            case 'CallExpression':
+                if (parent.callee) {
+                    name = name.concat(getFunctionName(parent.callee));
+                }
+                break;
+            case 'Identifier':
+                if(parent.name){
+                    name.push(parent.name);
+                }
+                break;
+            case 'BlockStatement':
+            case 'ReturnStatement':
+            case 'ArrayExpression':
+            case 'ConditionalExpression':
+            case 'Program':
+            case 'Literal':
+            case 'ThisExpression':
+                break;
+            default:
+                console.log(parent.type);
+                break;
+        }
+
+        return name;
+    }
+
     function appendFns(ast, uri) {
         try {
             return parseAST(estraverse.replace(ast, {
@@ -156,44 +212,9 @@ function Profiler() {
                             param3 = { "type": "Literal", "value": uri, "raw": "'" + uri + "'" },
                             param4 = { "type": "Literal", "value": 0, "raw": '0' },
                             param5 = { "type": "Identifier", "name": "__v" + id },
-                            body, lastNode, name = [];
+                            body, lastNode, name = getFunctionName(parent);
 
                         startAST.declarations[0].id.name = "__v" + id;
-
-                        switch (parent.type) {
-                            case 'VariableDeclarator':
-                                if (parent.id && parent.id.name) {
-                                    name.push(parent.id.name);
-                                }
-                                break;
-                            case 'AssignmentExpression':
-                            case 'LogicalExpression':
-                            case 'MemberExpression':
-                                if(parent.left){
-                                    if (parent.left.object && parent.left.object.name) {
-                                        name.push(parent.left.object.name);
-                                    }
-                                    if (parent.left.property && parent.left.property.name) {
-                                        name.push(parent.left.property.name);
-                                    }
-                                }
-                                break;
-                            case 'Property':
-                                if (parent.key.name) {
-                                    name.push(parent.key.name);
-                                }
-                                break;
-                            case 'CallExpression':
-                                break;
-                            case 'BlockStatement':
-                                break;
-                            case 'CallExpression':
-                                break;
-                            case 'ReturnStatement':
-                                break;
-                            default:
-                                break;
-                        }
 
                         copyNode.body.body.forEach(function(exp){
                             switch (exp.type) {
