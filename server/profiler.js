@@ -18,6 +18,7 @@ function Profiler() {
         timeout = 60 * 1000,
         beginAST,
         finishAST,
+        dateAST,
         getUniqueId;
 
     beginAST = {
@@ -66,6 +67,23 @@ function Profiler() {
             },
             "arguments": []
         }
+    };
+
+    dateAST = {
+        "type": "CallExpression",
+        "callee": {
+            "type": "MemberExpression",
+            "computed": false,
+            "object": {
+                "type": "Identifier",
+                "name": "Date"
+            },
+            "property": {
+                "type": "Identifier",
+                "name": "now"
+            }
+        },
+        "arguments": []
     };
 
     getUniqueId = (function () {
@@ -247,11 +265,12 @@ function Profiler() {
                         }
 
                         if(parent.parentId){
-                            startParams.push(param1, param2, param3, param4, { "type": "Identifier", "name": "__v" + parent.parentId });
-                            endParams.push(param1, param5);
+                            //startParams.push(param1, param2, param3, param4, dateAST, { "type": "Identifier", "name": "__v" + parent.parentId });
+                            startParams.push(param1, param2, param3, param4, dateAST, { "type": "Literal", "value": true, raw: "true" });
+                            endParams.push(param1, param5, dateAST);
                         }else{
-                            startParams.push(param1, param2, param3, param4);
-                            endParams.push(param1, param5);
+                            startParams.push(param1, param2, param3, param4, dateAST);
+                            endParams.push(param1, param5, dateAST);
                         }
 
                         body = [startAST].concat(copyNode.body.body, [endAST]);

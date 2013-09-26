@@ -122,13 +122,8 @@ ConsoleIO.View.Device.Profile.prototype.addTreeItem = function addTreeItem(paren
 };
 
 ConsoleIO.View.Device.Profile.prototype.addGridItem = function addGridItem(node) {
-    var url;
-    if (node.url) {
-        url = "<a target='_blank' href='" + node.url + "' >" + node.url.substring(node.url.lastIndexOf('/') + 1) + ":" + node.lineNumber + "</a>";
-    }
-
     this.grid.addRow(node.id, [
-        node.selfTime, node.totalTime, node.numberOfCalls, node.functionName || node.id, url
+        node.selfTime, node.totalTime, node.numberOfCalls, node.functionName, node.url
     ]);
 };
 

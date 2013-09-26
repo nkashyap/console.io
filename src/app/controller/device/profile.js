@@ -104,7 +104,19 @@ ConsoleIO.App.Device.Profile.prototype.addGridRows = function addGridRows(node, 
             if (items.indexOf(child.id) > -1) {
                 this.addGridRows(child, items);
             } else {
-                this.view.addGridItem(child);
+                var data = {
+                    id: child.id,
+                    functionName: child.functionName || child.id,
+                    selfTime: child.selfTime,
+                    totalTime: child.totalTime,
+                    numberOfCalls: child.numberOfCalls
+                };
+
+                if (child.url) {
+                    data.url = "<a target='_blank' href='" + child.url + "' >" + child.url.substring(child.url.lastIndexOf('/') + 1) + ":" + child.lineNumber + "</a>";
+                }
+
+                this.view.addGridItem(data);
             }
         }, this);
     }

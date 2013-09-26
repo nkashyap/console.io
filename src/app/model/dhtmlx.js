@@ -50,10 +50,11 @@ ConsoleIO.Model.DHTMLX = {
 
 
         Profiler: { id: 'profiler', type: 'twoState', text: 'Start Profiling', imgEnabled: 'rec.png', imgDisabled: 'rec_dis.png', tooltip: 'Start CPU Profiling', pressed: false },
-        ProfileView: { id: 'displaySelector', type: 'select', text: 'Tree (Top Down)', width: 110, hidden: true, disabled: true, opts: [
-            ['heavy', 'obj', 'Heavy (Bottom Up)'],
-            ['tree', 'obj', 'Tree (Top Down)']
-        ] },
+        ProfileView: { id: 'displaySelector', type: 'select', text: 'Tree (Top Down)', width: 110, hidden: true, disabled: true, opts:
+            [
+                ['heavy', 'obj', 'Heavy (Bottom Up)'],
+                ['tree', 'obj', 'Tree (Top Down)']
+            ] },
         TimeOrPercent: { id: 'timePercent', type: 'twoState', imgEnabled: 'percent.png', imgDisabled: 'percent.png', tooltip: 'Show total and self time in percentage', hidden: true, disabled: true, pressed: false },
         FocusFn: { id: 'focusFn', type: 'button', imgEnabled: 'zoom.png', imgDisabled: 'zoom_dis.png', tooltip: 'Focus selected function', hidden: true, disabled: true },
         RestoreFn: { id: 'restoreFn', type: 'button', imgEnabled: 'undo.gif', imgDisabled: 'undo_dis.gif', tooltip: 'Restore all functions', hidden: true, disabled: true },

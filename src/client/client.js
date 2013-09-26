@@ -435,9 +435,9 @@
 
     function onProfiler(data) {
         if (data.state) {
-            exports.profiler.start();
+            exports.console.profile();
         } else {
-            exports.profiler.finish();
+            exports.console.profileEnd();
         }
     }
 

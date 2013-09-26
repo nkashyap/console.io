@@ -160,19 +160,20 @@
         return node || this.head;
     };
 
-    ScriptProfile.prototype.begin = function begin(callId, name, file, line, parentIds) {
+    ScriptProfile.prototype.begin = function begin(callId, name, file, line, beginTime, reset) {
+        if (reset) {
+            this.depth = 0;
+        }
+
         this.depth++;
-        var beginTime = Date.now(),
-            parentId = parentIds ? parentIds[this.uid] : null,
-            node = parentId ? this.head.getNodeById(parentId) : this.getActiveNode();
+        var node = this.getActiveNode();
 
         return node.begin(callId, name, file, line, beginTime);
     };
 
-    ScriptProfile.prototype.end = function end(callId, parentIds) {
-        var endTime = Date.now(),
-            parentId = parentIds ? parentIds[this.uid] : null,
-            node = parentId ? this.head.getNodeById(parentId) : this.getActiveNode();
+    ScriptProfile.prototype.end = function end(callId, beginIds, endTime) {
+        var beginId = beginIds ? beginIds[this.uid] : null,
+            node = beginId ? this.head.getNodeById(beginId) : this.getActiveNode();
 
         node.end(callId, endTime);
         this.depth--;
@@ -212,20 +213,20 @@
     }
 
     profiler.store = [];
-    profiler.begin = function begin(callId, name, file, line, parentIds) {
+    profiler.begin = function begin(callId, name, file, line, beginTime, reset) {
         if (profiler.enabled) {
             var ids = {};
             exports.util.forEach(getActiveProfiles(), function (profile) {
-                ids[profile.uid] = profile.begin(callId, name, file, line, parentIds);
+                ids[profile.uid] = profile.begin(callId, name, file, line, beginTime, reset);
             });
             return ids;
         }
     };
 
-    profiler.end = function end(callId, parentIds) {
+    profiler.end = function end(callId, beginIds, endTime) {
         if (profiler.enabled) {
             exports.util.forEach(getActiveProfiles(), function (profile) {
-                profile.end(callId, parentIds);
+                profile.end(callId, beginIds, endTime);
             });
         }
     };

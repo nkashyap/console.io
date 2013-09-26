@@ -493,10 +493,11 @@ ConsoleIO.Model.DHTMLX = {
 
 
         Profiler: { id: 'profiler', type: 'twoState', text: 'Start Profiling', imgEnabled: 'rec.png', imgDisabled: 'rec_dis.png', tooltip: 'Start CPU Profiling', pressed: false },
-        ProfileView: { id: 'displaySelector', type: 'select', text: 'Tree (Top Down)', width: 110, hidden: true, disabled: true, opts: [
-            ['heavy', 'obj', 'Heavy (Bottom Up)'],
-            ['tree', 'obj', 'Tree (Top Down)']
-        ] },
+        ProfileView: { id: 'displaySelector', type: 'select', text: 'Tree (Top Down)', width: 110, hidden: true, disabled: true, opts:
+            [
+                ['heavy', 'obj', 'Heavy (Bottom Up)'],
+                ['tree', 'obj', 'Tree (Top Down)']
+            ] },
         TimeOrPercent: { id: 'timePercent', type: 'twoState', imgEnabled: 'percent.png', imgDisabled: 'percent.png', tooltip: 'Show total and self time in percentage', hidden: true, disabled: true, pressed: false },
         FocusFn: { id: 'focusFn', type: 'button', imgEnabled: 'zoom.png', imgDisabled: 'zoom_dis.png', tooltip: 'Focus selected function', hidden: true, disabled: true },
         RestoreFn: { id: 'restoreFn', type: 'button', imgEnabled: 'undo.gif', imgDisabled: 'undo_dis.gif', tooltip: 'Restore all functions', hidden: true, disabled: true },
@@ -1237,13 +1238,8 @@ ConsoleIO.View.Device.Profile.prototype.addTreeItem = function addTreeItem(paren
 };
 
 ConsoleIO.View.Device.Profile.prototype.addGridItem = function addGridItem(node) {
-    var url;
-    if (node.url) {
-        url = "<a target='_blank' href='" + node.url + "' >" + node.url.substring(node.url.lastIndexOf('/') + 1) + ":" + node.lineNumber + "</a>";
-    }
-
     this.grid.addRow(node.id, [
-        node.selfTime, node.totalTime, node.numberOfCalls, node.functionName || node.id, url
+        node.selfTime, node.totalTime, node.numberOfCalls, node.functionName, node.url
     ]);
 };
 
@@ -2769,7 +2765,19 @@ ConsoleIO.App.Device.Profile.prototype.addGridRows = function addGridRows(node, 
             if (items.indexOf(child.id) > -1) {
                 this.addGridRows(child, items);
             } else {
-                this.view.addGridItem(child);
+                var data = {
+                    id: child.id,
+                    functionName: child.functionName || child.id,
+                    selfTime: child.selfTime,
+                    totalTime: child.totalTime,
+                    numberOfCalls: child.numberOfCalls
+                };
+
+                if (child.url) {
+                    data.url = "<a target='_blank' href='" + child.url + "' >" + child.url.substring(child.url.lastIndexOf('/') + 1) + ":" + child.lineNumber + "</a>";
+                }
+
+                this.view.addGridItem(data);
             }
         }, this);
     }
