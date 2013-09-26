@@ -136,7 +136,7 @@ ConsoleIO.View.Device.Profile.prototype.closeItem = function closeItem(id, close
 };
 
 ConsoleIO.View.Device.Profile.prototype.resetTree = function resetTree() {
-    this.tree.deleteItem(0);
+    this.tree.deleteItem(this.tree.getItemIdByIndex(0, 0));
 };
 
 ConsoleIO.View.Device.Profile.prototype.resetGrid = function resetGrid() {

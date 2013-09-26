@@ -14,10 +14,6 @@ function TodoCtrl($scope) {
         angular.forEach($scope.todos, function (todo) {
             count += todo.done ? 0 : 1;
         });
-//
-//        setTimeout(function timeout(){
-//            count = 0;
-//        }, 10);
         return count;
     };
 
@@ -28,4 +24,12 @@ function TodoCtrl($scope) {
             if (!todo.done) $scope.todos.push(todo);
         });
     };
+
+    var i = 0;
+    setInterval(function timeout() {
+        $scope.$apply(function () {
+            $scope.todos.push({text: 'setInterval add ' + (++i), done: false});
+        });
+    }, 5000);
+
 }
