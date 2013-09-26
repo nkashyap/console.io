@@ -265,7 +265,6 @@ function Profiler() {
                         }
 
                         if(parent.parentId){
-                            //startParams.push(param1, param2, param3, param4, dateAST, { "type": "Identifier", "name": "__v" + parent.parentId });
                             startParams.push(param1, param2, param3, param4, dateAST, { "type": "Literal", "value": true, raw: "true" });
                             endParams.push(param1, param5, dateAST);
                         }else{

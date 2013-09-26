@@ -2421,6 +2421,7 @@ ConsoleIO.version = "0.2.1a";
         html2canvas: "plugins/html2canvas.js",
         "socket.io": "socket.io/socket.io.js",
         webStyle: "console.css",
+        profiler: "profiler",
         proxy: 'proxy',
         maxDataPacketSize: 5000,
 
@@ -2553,10 +2554,29 @@ ConsoleIO.version = "0.2.1a";
     };
 
     // Setup RequireJS global error handler
-    if (exports.util.foundRequireJS()) {
-        global.requirejs.onError = function (error) {
-            exports.console.error(error, error.requireModules, error.originalError);
-        };
+    function requireJSSetUp() {
+        if (exports.util.foundRequireJS()) {
+            var requirejsLoad = global.requirejs.load;
+            global.requirejs.load = function (context, moduleName, url) {
+                if (url.indexOf('.js') > -1) {
+                    if (url.indexOf('http:') === -1 && url.indexOf('https:') === -1) {
+                        if (url.indexOf('/') === 0) {
+                            url = [location.origin, url].join('/');
+                        } else {
+                            url = [location.origin, location.pathname, url].join('/');
+                        }
+                    }
+
+                    requirejsLoad.call(global.requirejs, context, moduleName, exports.util.getUrl('profiler') + '?url=' + url);
+                } else {
+                    requirejsLoad.call(global.requirejs, context, moduleName, url);
+                }
+            };
+
+            global.requirejs.onError = function (error) {
+                exports.console.error(error, error.requireModules, error.originalError);
+            };
+        }
     }
 
 
@@ -2599,7 +2619,12 @@ ConsoleIO.version = "0.2.1a";
     //Initialize console.io is RequireJS is not found
     if (!exports.util.foundRequireJS()) {
         exports.util.ready(function () {
+            requireJSSetUp();
             exports.configure(getSettings());
+        });
+    } else {
+        exports.util.ready(function () {
+            requireJSSetUp();
         });
     }
 
