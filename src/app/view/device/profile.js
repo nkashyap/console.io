@@ -14,12 +14,16 @@ ConsoleIO.View.Device.Profile = function ProfileView(ctrl, model) {
     this.model = model;
     this.target = null;
 
+    this.tab = null;
     this.toolbar = null;
     this.layout = null;
-
-//    this.list = null;
-//    this.tree = null;
-//    this.grid = null;
+    this.listCell = null;
+    this.list = null;
+    this.treeCell = null;
+    this.treeToolbar = null;
+    this.tree = null;
+    this.gridCell = null;
+    this.grid = null;
 
     this.id = [this.model.name, this.model.serialNumber].join("-");
 };
@@ -66,12 +70,13 @@ ConsoleIO.View.Device.Profile.prototype.render = function render(target) {
 
     this.treeToolbar = this.treeCell.attachToolbar();
     this.treeToolbar.setIconsPath(ConsoleIO.Settings.iconPath);
-//    this.treeToolbar.attachEvent("onClick", function (itemId) {
-//        this.onButtonClick(itemId);
-//    }, this.ctrl);
-//    this.treeToolbar.attachEvent("onStateChange", function (itemId, state) {
-//        this.onButtonClick(itemId, state);
-//    }, this.ctrl);
+    this.treeToolbar.attachEvent("onClick", function (itemId) {
+        this.onButtonClick(itemId);
+    }, this.ctrl);
+    this.treeToolbar.attachEvent("onStateChange", function (itemId, state) {
+        this.onButtonClick(itemId, state);
+    }, this.ctrl);
+    ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.tree.toolbar, this.treeToolbar);
 
     this.tree = this.treeCell.attachTree();
     this.tree.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tree'));
@@ -92,11 +97,11 @@ ConsoleIO.View.Device.Profile.prototype.render = function render(target) {
     this.grid = this.gridCell.attachGrid();
     this.grid.setIconsPath(ConsoleIO.Settings.iconPath);
     this.grid.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('grid'));
-    this.grid.setHeader("Function,Url,Self,Total,Count,line");
-    this.grid.setInitWidthsP("25,35,10,10,10,10,10");
-    this.grid.setColAlign("left,left,right,right,right,right");
-    this.grid.setColTypes("ro,ro,ro,ro,ro,ro");
-    this.grid.setColSorting("str,str,int,int,int,int");
+    this.grid.setHeader("Self,Total,Count,Function,Url");
+    this.grid.setInitWidthsP("10,10,10,50,20");
+    this.grid.setColAlign("right,right,right,left,right");
+    this.grid.setColTypes("ro,ro,ro,ro,ro");
+    this.grid.setColSorting("int,int,int,str,str");
     this.grid.setSkin(ConsoleIO.Constant.THEMES.get('win'));
     this.grid.init();
 };
@@ -108,11 +113,6 @@ ConsoleIO.View.Device.Profile.prototype.destroy = function destroy() {
     //this.list.destructor();
 };
 
-
-ConsoleIO.View.Device.Profile.prototype.clear = function clear() {
-
-};
-
 ConsoleIO.View.Device.Profile.prototype.addToList = function addToList(id, title, icon) {
     this.list.insertNewItem(0, id, title, 0, icon, icon, icon);
 };
@@ -122,8 +122,13 @@ ConsoleIO.View.Device.Profile.prototype.addTreeItem = function addTreeItem(paren
 };
 
 ConsoleIO.View.Device.Profile.prototype.addGridItem = function addGridItem(node) {
+    var url;
+    if (node.url) {
+        url = "<a target='_blank' href='" + node.url + "' >" + node.url.substring(node.url.lastIndexOf('/') + 1) + ":" + node.lineNumber + "</a>";
+    }
+
     this.grid.addRow(node.id, [
-        node.functionName || node.id, node.url, node.selfTime, node.totalTime, node.numberOfCalls, node.lineNumber
+        node.selfTime, node.totalTime, node.numberOfCalls, node.functionName || node.id, url
     ]);
 };
 
@@ -133,6 +138,10 @@ ConsoleIO.View.Device.Profile.prototype.closeItem = function closeItem(id, close
     } else {
         this.tree.closeAllItems(id);
     }
+};
+
+ConsoleIO.View.Device.Profile.prototype.deleteListItem = function deleteListItem(id) {
+    this.list.deleteItem(id);
 };
 
 ConsoleIO.View.Device.Profile.prototype.resetTree = function resetTree() {
@@ -146,4 +155,35 @@ ConsoleIO.View.Device.Profile.prototype.resetGrid = function resetGrid() {
 
 ConsoleIO.View.Device.Profile.prototype.setTabActive = function setTabActive() {
     this.target.setTabActive(this.id);
+};
+
+ConsoleIO.View.Device.Profile.prototype.setTitle = function setTitle(title) {
+    this.treeCell.setText([this.model.tree.title, title || ''].join(': '));
+};
+
+ConsoleIO.View.Device.Profile.prototype.setItemText = function setItemText(name, text) {
+    if (this.toolbar) {
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.toolbar.setItemText(item.id, text || item.text);
+        }
+    }
+};
+
+ConsoleIO.View.Device.Profile.prototype.showItem = function showItem(name) {
+    if (this.treeToolbar) {
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.treeToolbar.showItem(item.id);
+        }
+    }
+};
+
+ConsoleIO.View.Device.Profile.prototype.hideItem = function hideItem(name) {
+    if (this.treeToolbar) {
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.treeToolbar.hideItem(item.id);
+        }
+    }
 };

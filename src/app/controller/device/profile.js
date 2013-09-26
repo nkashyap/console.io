@@ -19,7 +19,10 @@ ConsoleIO.App.Device.Profile = function ProfileController(parent, model) {
         name: "Profile",
         serialNumber: this.model.serialNumber,
         toolbar: [
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Profiler,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Clear
         ],
         list: {
             context: 'a',
@@ -28,8 +31,16 @@ ConsoleIO.App.Device.Profile = function ProfileController(parent, model) {
         },
         tree: {
             context: 'b',
-            title: 'Tree',
-            width: 350
+            title: 'Active Profile',
+            width: 350,
+            toolbar: [
+                ConsoleIO.Model.DHTMLX.ToolBarItem.ProfileView,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.TimeOrPercent,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.FocusFn,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.RestoreFn,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.ExcludeFn
+            ]
         },
         grid: {
             context: 'c',
@@ -50,8 +61,21 @@ ConsoleIO.App.Device.Profile.prototype.destroy = function destroy() {
     this.view = this.view.destroy();
 };
 
+ConsoleIO.App.Device.Profile.prototype.clear = function clear() {
+    ConsoleIO.forEach(ConsoleIO.keys(this.profiles), function (id) {
+        this.view.deleteListItem(id);
+    }, this);
+
+    this.view.resetTree();
+    this.view.resetGrid();
+    this.view.setTitle();
+
+    this.profiles = {};
+    this.openNodes = [];
+    this.activeProfile = null;
+};
+
 ConsoleIO.App.Device.Profile.prototype.addProfile = function addProfile(profile) {
-    console.log(profile);
     this.profiles[profile.uid] = profile;
     this.view.addToList(profile.uid, profile.title, ConsoleIO.Constant.ICONS.PROFILE);
 };
@@ -114,16 +138,39 @@ ConsoleIO.App.Device.Profile.prototype.onListClick = function onListClick(id) {
     this.view.resetTree();
     this.view.resetGrid();
 
+    this.activeProfile = id;
+    this.openNodes = [];
+
+    var activeProfile = this.profiles[id];
+    this.view.setTitle(activeProfile.title);
+
     ConsoleIO.async(function () {
-        var node = this.profiles[id].head;
-        this.activeProfile = id;
-        this.addTreeNodes(node, 0);
+        this.addTreeNodes(activeProfile.head, 0);
         this.view.closeItem(0, true);
     }, this, 10);
 };
 
 ConsoleIO.App.Device.Profile.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
+        switch (btnId) {
+            case 'profiler':
+                ConsoleIO.Service.Socket.emit('profiler', {
+                    serialNumber: this.model.serialNumber,
+                    state: state
+                });
 
+                if (state) {
+                    this.view.setItemText("Profiler", 'Stop Profiling');
+                } else {
+                    this.view.setItemText("Profiler");
+                }
+                break;
+            case 'clear':
+                this.clear();
+                break;
+            default:
+                console.log(btnId, state);
+                break;
+        }
     }
 };

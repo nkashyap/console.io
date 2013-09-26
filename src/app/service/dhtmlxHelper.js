@@ -50,6 +50,10 @@ ConsoleIO.Service.DHTMLXHelper = {
                 this.disableItem(item.id);
             }
 
+            if (item.hidden) {
+                this.hideItem(item.id);
+            }
+
             if (item.width) {
                 this.setWidth(item.id, item.width);
             }

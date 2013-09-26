@@ -40,11 +40,11 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
     }
 
     if (this.beautify) {
-        this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify.id, this.beautify);
+        this.setItemState("Beautify", this.beautify);
     }
 
     if (this.wordWrap) {
-        this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.id, this.wordWrap);
+        this.setItemState("WordWrap", this.wordWrap);
     }
 };
 
@@ -111,14 +111,14 @@ ConsoleIO.App.Device.prototype.onButtonClick = function onButtonClick(tab, btnId
             handled = true;
             break;
         case 'beautify':
-            this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify.id, this.beautify = state);
+            this.setItemState("Beautify", this.beautify = state);
             handled = true;
             tab.refresh();
             break;
 
         //common on Source and Preview Tabs
         case 'wordwrap':
-            this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.id, this.wordWrap = state);
+            this.setItemState("WordWrap", this.wordWrap = state);
             tab.editor.setOption('lineWrapping', state);
             handled = true;
             break;

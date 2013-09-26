@@ -433,6 +433,14 @@
         }
     }
 
+    function onProfiler(data) {
+        if (data.state) {
+            exports.profiler.start();
+        } else {
+            exports.profiler.finish();
+        }
+    }
+
     function onCommand(cmd) {
         exports.console.info('executing...');
         var result = evalFn(cmd);
@@ -500,6 +508,7 @@
         exports.transport.on('device:captureScreen', onCaptureScreen);
         exports.transport.on('device:reload', onReload);
         exports.transport.on('device:name', onNameChanged);
+        exports.transport.on('device:profiler', onProfiler);
 
         exports.transport.on('device:web:control', configWebConsole);
         exports.transport.on('device:web:config', setUpWebConsole);

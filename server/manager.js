@@ -276,6 +276,7 @@ function Manager() {
 
             fileSource: defineUserCommandRouteHandler('requestSource', 'fileSource'),
             reloadHTML: defineUserCommandRouteHandler('requestSource', 'htmlContent'),
+            profiler: defineUserCommandRouteEmitHandler('profiler', true),
             reloadDevice: defineUserCommandRouteEmitHandler('reload'),
             reloadFiles: defineUserCommandRouteEmitHandler('fileList'),
             previewHTML: defineUserCommandRouteEmitHandler('previewHTML'),

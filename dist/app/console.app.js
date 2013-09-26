@@ -145,6 +145,16 @@ if (typeof window.ConsoleIO === "undefined") {
             return Object.prototype.toString.call(obj) === '[object Array]';
         },
 
+        keys: Object.keys || function (obj) {
+            var prop, keys = [], hasOwnProperty = Object.prototype.hasOwnProperty;
+            for (prop in obj) {
+                if (hasOwnProperty.call(obj, prop)) {
+                    keys.push(prop);
+                }
+            }
+            return keys;
+        },
+
         extend: function extend(target, source) {
             this.forEachProperty(source, function (value, property) {
                 target[property] = value;
@@ -375,6 +385,10 @@ ConsoleIO.Service.DHTMLXHelper = {
                 this.disableItem(item.id);
             }
 
+            if (item.hidden) {
+                this.hideItem(item.id);
+            }
+
             if (item.width) {
                 this.setWidth(item.id, item.width);
             }
@@ -477,10 +491,23 @@ ConsoleIO.Model.DHTMLX = {
         Copy: { id: 'copy', type: 'button', text: 'Copy', imgEnabled: 'copy.gif', imgDisabled: 'copy_dis.gif', tooltip: 'Copy' },
         Paste: { id: 'paste', type: 'button', text: 'Paste', imgEnabled: 'paste.gif', imgDisabled: 'paste_dis.gif', tooltip: 'Paste' },
 
+
+        Profiler: { id: 'profiler', type: 'twoState', text: 'Start Profiling', imgEnabled: 'rec.png', imgDisabled: 'rec_dis.png', tooltip: 'Start CPU Profiling', pressed: false },
+        ProfileView: { id: 'displaySelector', type: 'select', text: 'Tree (Top Down)', width: 110, hidden: true, disabled: true, opts: [
+            ['heavy', 'obj', 'Heavy (Bottom Up)'],
+            ['tree', 'obj', 'Tree (Top Down)']
+        ] },
+        TimeOrPercent: { id: 'timePercent', type: 'twoState', imgEnabled: 'percent.png', imgDisabled: 'percent.png', tooltip: 'Show total and self time in percentage', hidden: true, disabled: true, pressed: false },
+        FocusFn: { id: 'focusFn', type: 'button', imgEnabled: 'zoom.png', imgDisabled: 'zoom_dis.png', tooltip: 'Focus selected function', hidden: true, disabled: true },
+        RestoreFn: { id: 'restoreFn', type: 'button', imgEnabled: 'undo.gif', imgDisabled: 'undo_dis.gif', tooltip: 'Restore all functions', hidden: true, disabled: true },
+        ExcludeFn: { id: 'excludeFn', type: 'button', imgEnabled: 'clear.gif', imgDisabled: 'clear_dis.gif', tooltip: 'Exclude selected function', hidden: true, disabled: true },
+
+
         Web: { id: 'web', type: 'twoState', text: 'Web Console', imgEnabled: 'console.gif', tooltip: 'Web Console', pressed: false },
         PlayPause: { id: 'playPause', type: 'twoState', text: 'Pause', imgEnabled: 'pause.png', tooltip: 'Pause logs', pressed: false },
         WordWrap: { id: 'wordwrap', type: 'twoState', text: 'Word-Wrap', imgEnabled: 'word_wrap.gif', tooltip: 'Word Wrap', pressed: false },
         Beautify: { id: 'beautify', type: 'twoState', text: 'Beautify', imgEnabled: 'beautify.png', tooltip: 'Beautify', pressed: false },
+
 
         FilterLabel: { id: 'filterLabel', type: 'text', text: 'Filters:', tooltip: 'Filter Console Logs' },
         Info: { id: 'filter-info', type: 'twoState', text: 'Info', imgEnabled: 'info.gif', tooltip: 'Info', pressed: false },
@@ -1077,9 +1104,12 @@ ConsoleIO.View.Device.Preview.prototype.setTabActive = function setTabActive() {
     this.target.setTabActive(this.id);
 };
 
-ConsoleIO.View.Device.Preview.prototype.setItemState = function setItemState(id, state) {
+ConsoleIO.View.Device.Preview.prototype.setItemState = function setItemState(name, state) {
     if (this.toolbar) {
-        this.toolbar.setItemState(id, state);
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.toolbar.setItemState(item.id, state);
+        }
     }
 };
 
@@ -1099,12 +1129,16 @@ ConsoleIO.View.Device.Profile = function ProfileView(ctrl, model) {
     this.model = model;
     this.target = null;
 
+    this.tab = null;
     this.toolbar = null;
     this.layout = null;
-
-//    this.list = null;
-//    this.tree = null;
-//    this.grid = null;
+    this.listCell = null;
+    this.list = null;
+    this.treeCell = null;
+    this.treeToolbar = null;
+    this.tree = null;
+    this.gridCell = null;
+    this.grid = null;
 
     this.id = [this.model.name, this.model.serialNumber].join("-");
 };
@@ -1151,12 +1185,13 @@ ConsoleIO.View.Device.Profile.prototype.render = function render(target) {
 
     this.treeToolbar = this.treeCell.attachToolbar();
     this.treeToolbar.setIconsPath(ConsoleIO.Settings.iconPath);
-//    this.treeToolbar.attachEvent("onClick", function (itemId) {
-//        this.onButtonClick(itemId);
-//    }, this.ctrl);
-//    this.treeToolbar.attachEvent("onStateChange", function (itemId, state) {
-//        this.onButtonClick(itemId, state);
-//    }, this.ctrl);
+    this.treeToolbar.attachEvent("onClick", function (itemId) {
+        this.onButtonClick(itemId);
+    }, this.ctrl);
+    this.treeToolbar.attachEvent("onStateChange", function (itemId, state) {
+        this.onButtonClick(itemId, state);
+    }, this.ctrl);
+    ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.tree.toolbar, this.treeToolbar);
 
     this.tree = this.treeCell.attachTree();
     this.tree.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tree'));
@@ -1177,11 +1212,11 @@ ConsoleIO.View.Device.Profile.prototype.render = function render(target) {
     this.grid = this.gridCell.attachGrid();
     this.grid.setIconsPath(ConsoleIO.Settings.iconPath);
     this.grid.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('grid'));
-    this.grid.setHeader("Function,Url,Self,Total,Count,line");
-    this.grid.setInitWidthsP("25,35,10,10,10,10,10");
-    this.grid.setColAlign("left,left,right,right,right,right");
-    this.grid.setColTypes("ro,ro,ro,ro,ro,ro");
-    this.grid.setColSorting("str,str,int,int,int,int");
+    this.grid.setHeader("Self,Total,Count,Function,Url");
+    this.grid.setInitWidthsP("10,10,10,50,20");
+    this.grid.setColAlign("right,right,right,left,right");
+    this.grid.setColTypes("ro,ro,ro,ro,ro");
+    this.grid.setColSorting("int,int,int,str,str");
     this.grid.setSkin(ConsoleIO.Constant.THEMES.get('win'));
     this.grid.init();
 };
@@ -1193,11 +1228,6 @@ ConsoleIO.View.Device.Profile.prototype.destroy = function destroy() {
     //this.list.destructor();
 };
 
-
-ConsoleIO.View.Device.Profile.prototype.clear = function clear() {
-
-};
-
 ConsoleIO.View.Device.Profile.prototype.addToList = function addToList(id, title, icon) {
     this.list.insertNewItem(0, id, title, 0, icon, icon, icon);
 };
@@ -1207,8 +1237,13 @@ ConsoleIO.View.Device.Profile.prototype.addTreeItem = function addTreeItem(paren
 };
 
 ConsoleIO.View.Device.Profile.prototype.addGridItem = function addGridItem(node) {
+    var url;
+    if (node.url) {
+        url = "<a target='_blank' href='" + node.url + "' >" + node.url.substring(node.url.lastIndexOf('/') + 1) + ":" + node.lineNumber + "</a>";
+    }
+
     this.grid.addRow(node.id, [
-        node.functionName || node.id, node.url, node.selfTime, node.totalTime, node.numberOfCalls, node.lineNumber
+        node.selfTime, node.totalTime, node.numberOfCalls, node.functionName || node.id, url
     ]);
 };
 
@@ -1218,6 +1253,10 @@ ConsoleIO.View.Device.Profile.prototype.closeItem = function closeItem(id, close
     } else {
         this.tree.closeAllItems(id);
     }
+};
+
+ConsoleIO.View.Device.Profile.prototype.deleteListItem = function deleteListItem(id) {
+    this.list.deleteItem(id);
 };
 
 ConsoleIO.View.Device.Profile.prototype.resetTree = function resetTree() {
@@ -1231,6 +1270,37 @@ ConsoleIO.View.Device.Profile.prototype.resetGrid = function resetGrid() {
 
 ConsoleIO.View.Device.Profile.prototype.setTabActive = function setTabActive() {
     this.target.setTabActive(this.id);
+};
+
+ConsoleIO.View.Device.Profile.prototype.setTitle = function setTitle(title) {
+    this.treeCell.setText([this.model.tree.title, title || ''].join(': '));
+};
+
+ConsoleIO.View.Device.Profile.prototype.setItemText = function setItemText(name, text) {
+    if (this.toolbar) {
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.toolbar.setItemText(item.id, text || item.text);
+        }
+    }
+};
+
+ConsoleIO.View.Device.Profile.prototype.showItem = function showItem(name) {
+    if (this.treeToolbar) {
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.treeToolbar.showItem(item.id);
+        }
+    }
+};
+
+ConsoleIO.View.Device.Profile.prototype.hideItem = function hideItem(name) {
+    if (this.treeToolbar) {
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.treeToolbar.hideItem(item.id);
+        }
+    }
 };
 
 /**
@@ -1295,9 +1365,12 @@ ConsoleIO.View.Device.Source.prototype.setTitle = function setTitle(contextId, t
     }
 };
 
-ConsoleIO.View.Device.Source.prototype.setItemState = function setItemState(id, state) {
+ConsoleIO.View.Device.Source.prototype.setItemState = function setItemState(name, state) {
     if (this.toolbar) {
-        this.toolbar.setItemState(id, state);
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.toolbar.setItemState(item.id, state);
+        }
     }
 };
 
@@ -1532,9 +1605,12 @@ ConsoleIO.View.Editor.prototype.toggleButton = function toggleButton(id, state) 
 };
 
 
-ConsoleIO.View.Editor.prototype.setItemText = function setItemText(id, text) {
+ConsoleIO.View.Editor.prototype.setItemText = function setItemText(name, text) {
     if (this.toolbar) {
-        this.toolbar.setItemText(id, text);
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.toolbar.setItemText(item.id, text || item.text);
+        }
     }
 };
 
@@ -1813,11 +1889,11 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
     }
 
     if (this.beautify) {
-        this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify.id, this.beautify);
+        this.setItemState("Beautify", this.beautify);
     }
 
     if (this.wordWrap) {
-        this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.id, this.wordWrap);
+        this.setItemState("WordWrap", this.wordWrap);
     }
 };
 
@@ -1884,14 +1960,14 @@ ConsoleIO.App.Device.prototype.onButtonClick = function onButtonClick(tab, btnId
             handled = true;
             break;
         case 'beautify':
-            this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify.id, this.beautify = state);
+            this.setItemState("Beautify", this.beautify = state);
             handled = true;
             tab.refresh();
             break;
 
         //common on Source and Preview Tabs
         case 'wordwrap':
-            this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.id, this.wordWrap = state);
+            this.setItemState("WordWrap", this.wordWrap = state);
             tab.editor.setOption('lineWrapping', state);
             handled = true;
             break;
@@ -2608,7 +2684,10 @@ ConsoleIO.App.Device.Profile = function ProfileController(parent, model) {
         name: "Profile",
         serialNumber: this.model.serialNumber,
         toolbar: [
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Profiler,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Clear
         ],
         list: {
             context: 'a',
@@ -2617,8 +2696,16 @@ ConsoleIO.App.Device.Profile = function ProfileController(parent, model) {
         },
         tree: {
             context: 'b',
-            title: 'Tree',
-            width: 350
+            title: 'Active Profile',
+            width: 350,
+            toolbar: [
+                ConsoleIO.Model.DHTMLX.ToolBarItem.ProfileView,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.TimeOrPercent,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.FocusFn,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.RestoreFn,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.ExcludeFn
+            ]
         },
         grid: {
             context: 'c',
@@ -2639,8 +2726,21 @@ ConsoleIO.App.Device.Profile.prototype.destroy = function destroy() {
     this.view = this.view.destroy();
 };
 
+ConsoleIO.App.Device.Profile.prototype.clear = function clear() {
+    ConsoleIO.forEach(ConsoleIO.keys(this.profiles), function (id) {
+        this.view.deleteListItem(id);
+    }, this);
+
+    this.view.resetTree();
+    this.view.resetGrid();
+    this.view.setTitle();
+
+    this.profiles = {};
+    this.openNodes = [];
+    this.activeProfile = null;
+};
+
 ConsoleIO.App.Device.Profile.prototype.addProfile = function addProfile(profile) {
-    console.log(profile);
     this.profiles[profile.uid] = profile;
     this.view.addToList(profile.uid, profile.title, ConsoleIO.Constant.ICONS.PROFILE);
 };
@@ -2703,17 +2803,40 @@ ConsoleIO.App.Device.Profile.prototype.onListClick = function onListClick(id) {
     this.view.resetTree();
     this.view.resetGrid();
 
+    this.activeProfile = id;
+    this.openNodes = [];
+
+    var activeProfile = this.profiles[id];
+    this.view.setTitle(activeProfile.title);
+
     ConsoleIO.async(function () {
-        var node = this.profiles[id].head;
-        this.activeProfile = id;
-        this.addTreeNodes(node, 0);
+        this.addTreeNodes(activeProfile.head, 0);
         this.view.closeItem(0, true);
     }, this, 10);
 };
 
 ConsoleIO.App.Device.Profile.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
+        switch (btnId) {
+            case 'profiler':
+                ConsoleIO.Service.Socket.emit('profiler', {
+                    serialNumber: this.model.serialNumber,
+                    state: state
+                });
 
+                if (state) {
+                    this.view.setItemText("Profiler", 'Stop Profiling');
+                } else {
+                    this.view.setItemText("Profiler");
+                }
+                break;
+            case 'clear':
+                this.clear();
+                break;
+            default:
+                console.log(btnId, state);
+                break;
+        }
     }
 };
 
@@ -3131,7 +3254,7 @@ ConsoleIO.App.Editor.prototype.close = function close() {
     this.getDoc().clearHistory();
     this.updateButtonState();
     this.setTitle();
-    this.view.setItemText(ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.id, ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.text);
+    this.view.setItemText("Clear");
 };
 
 ConsoleIO.App.Editor.prototype.save = function save(saveAs) {
@@ -3181,7 +3304,7 @@ ConsoleIO.App.Editor.prototype.setValue = function setValue(data) {
     if (data.name) {
         this.fileName = data.name;
         this.setTitle(this.fileName);
-        this.view.setItemText(ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.id, 'Close');
+        this.view.setItemText("Clear", 'Close');
     }
 
     var content = data.content.replace(/%20/img, " "),

@@ -124,8 +124,11 @@ ConsoleIO.View.Device.Preview.prototype.setTabActive = function setTabActive() {
     this.target.setTabActive(this.id);
 };
 
-ConsoleIO.View.Device.Preview.prototype.setItemState = function setItemState(id, state) {
+ConsoleIO.View.Device.Preview.prototype.setItemState = function setItemState(name, state) {
     if (this.toolbar) {
-        this.toolbar.setItemState(id, state);
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.toolbar.setItemState(item.id, state);
+        }
     }
 };

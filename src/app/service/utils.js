@@ -135,6 +135,16 @@ if (typeof window.ConsoleIO === "undefined") {
             return Object.prototype.toString.call(obj) === '[object Array]';
         },
 
+        keys: Object.keys || function (obj) {
+            var prop, keys = [], hasOwnProperty = Object.prototype.hasOwnProperty;
+            for (prop in obj) {
+                if (hasOwnProperty.call(obj, prop)) {
+                    keys.push(prop);
+                }
+            }
+            return keys;
+        },
+
         extend: function extend(target, source) {
             this.forEachProperty(source, function (value, property) {
                 target[property] = value;

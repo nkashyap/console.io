@@ -151,7 +151,7 @@ ConsoleIO.App.Editor.prototype.close = function close() {
     this.getDoc().clearHistory();
     this.updateButtonState();
     this.setTitle();
-    this.view.setItemText(ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.id, ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.text);
+    this.view.setItemText("Clear");
 };
 
 ConsoleIO.App.Editor.prototype.save = function save(saveAs) {
@@ -201,7 +201,7 @@ ConsoleIO.App.Editor.prototype.setValue = function setValue(data) {
     if (data.name) {
         this.fileName = data.name;
         this.setTitle(this.fileName);
-        this.view.setItemText(ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.id, 'Close');
+        this.view.setItemText("Clear", 'Close');
     }
 
     var content = data.content.replace(/%20/img, " "),

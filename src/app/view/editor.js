@@ -93,8 +93,11 @@ ConsoleIO.View.Editor.prototype.toggleButton = function toggleButton(id, state) 
 };
 
 
-ConsoleIO.View.Editor.prototype.setItemText = function setItemText(id, text) {
+ConsoleIO.View.Editor.prototype.setItemText = function setItemText(name, text) {
     if (this.toolbar) {
-        this.toolbar.setItemText(id, text);
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.toolbar.setItemText(item.id, text || item.text);
+        }
     }
 };
