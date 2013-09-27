@@ -263,7 +263,12 @@
         profiler.store = [];
     };
 
+    profiler.load = function load(index) {
+
+    };
+
     global.__p__ = {
+        l: profiler.load,
         b: profiler.begin,
         e: profiler.end
     };

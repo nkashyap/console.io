@@ -16,75 +16,200 @@ function Profiler() {
         url = require('url'),
         request = require('request'),
         timeout = 60 * 1000,
-        beginAST,
-        finishAST,
-        dateAST,
         getUniqueId;
 
-    beginAST = {
+    var VariableDeclaration = {
         "type": "VariableDeclaration",
         "kind": "var",
-        "declarations": [{
-            "type": "VariableDeclarator",
-            "id": {
-                "type": "Identifier",
-                "name": "__v"
-            },
-            "init": {
-                "type": "CallExpression",
-                "callee": {
-                    "type": "MemberExpression",
-                    "computed": false,
-                    "object": {
-                        "type": "Identifier",
-                        "name": "__p__"
-                    },
-                    "property": {
-                        "type": "Identifier",
-                        "name": "b"
-                    }
-                },
-                "arguments": []
-            }
-         }]
+        "declarations": []
     };
 
-    finishAST = {
-        "type": "ExpressionStatement",
-        "expression": {
-            "type": "CallExpression",
-            "callee": {
-                "type": "MemberExpression",
-                "computed": false,
-                "object": {
-                    "type": "Identifier",
-                    "name": "__p__"
-                },
-                "property": {
-                    "type": "Identifier",
-                    "name": "e"
-                }
-            },
-            "arguments": []
-        }
+    var VariableDeclarator = {
+        "type": "VariableDeclarator",
+        "id": {},
+        "init": {}
     };
 
-    dateAST = {
+    var Identifier = {
+        "type": "Identifier",
+        "name": ""
+    };
+
+    var Literal = {
+        "type": "Literal",
+        "value": "",
+        "raw": "''"
+    };
+
+    var Property = {
+        "type": "Property",
+        "key": {},
+        "value": {},
+        "kind": "init"
+    };
+
+    var ObjectExpression = {
+        "type": "ObjectExpression",
+        "properties": []
+    };
+
+    var CallExpression = {
         "type": "CallExpression",
-        "callee": {
-            "type": "MemberExpression",
-            "computed": false,
-            "object": {
-                "type": "Identifier",
-                "name": "Date"
-            },
-            "property": {
-                "type": "Identifier",
-                "name": "now"
-            }
-        },
+        "callee": {},
         "arguments": []
     };
+
+    var ArrayExpression = {
+        "type": "ArrayExpression",
+        "elements": []
+    };
+
+    var MemberExpression = {
+        "type": "MemberExpression",
+        "computed": false,
+        "object": {},
+        "property": {}
+    };
+
+    var ExpressionStatement = {
+        "type": "ExpressionStatement",
+        "expression": {}
+    };
+
+
+    function buildDateAST() {
+        var callExp = clone(CallExpression),
+            memberExp = clone(MemberExpression),
+            objectIdentifier = clone(Identifier),
+            propertyIdentifier = clone(Identifier);
+
+        objectIdentifier.name = "Date";
+        propertyIdentifier.name = "now";
+
+        memberExp.object = objectIdentifier;
+        memberExp.property = propertyIdentifier;
+
+        callExp.callee = memberExp;
+
+        return callExp;
+    }
+
+    function buildBeginAST(id, reset) {
+        var expression = clone(ExpressionStatement),
+            callExp = clone(CallExpression),
+            memberExp = clone(MemberExpression),
+            objectIdentifier = clone(Identifier),
+            propertyIdentifier = clone(Identifier),
+            idLiteral = clone(Literal),
+            resetLiteral = clone(Literal);
+
+        idLiteral.value = idLiteral.raw = id;
+        resetLiteral.value = true;
+        resetLiteral.raw = "true";
+
+        objectIdentifier.name = "__p__";
+        propertyIdentifier.name = "b";
+
+        memberExp.object = objectIdentifier;
+        memberExp.property = propertyIdentifier;
+
+        callExp.callee = memberExp;
+        callExp["arguments"] = [];
+        callExp["arguments"].push(idLiteral);
+        callExp["arguments"].push(buildDateAST());
+
+        if (reset) {
+            callExp["arguments"].push(resetLiteral);
+        }
+
+        expression.expression = callExp;
+
+        return expression;
+    }
+
+    function buildEndAST(id) {
+        var expression = clone(ExpressionStatement),
+            callExp = clone(CallExpression),
+            memberExp = clone(MemberExpression),
+            objectIdentifier = clone(Identifier),
+            propertyIdentifier = clone(Identifier),
+            idLiteral = clone(Literal);
+
+        idLiteral.value = idLiteral.raw = id;
+
+        objectIdentifier.name = "__p__";
+        propertyIdentifier.name = "e";
+
+        memberExp.object = objectIdentifier;
+        memberExp.property = propertyIdentifier;
+
+        callExp.callee = memberExp;
+        callExp["arguments"] = [idLiteral, buildDateAST()];
+
+        expression.expression = callExp;
+
+        return expression;
+    }
+
+    function buildUrlAST(uri) {
+        var urlLiteral = clone(Literal);
+        urlLiteral.value = uri;
+        urlLiteral.raw = "'" + uri + "'";
+        return urlLiteral;
+    }
+
+    function buildValueAST(name, line) {
+        var arrarExp = clone(ArrayExpression),
+            nameLiteral = clone(Literal),
+            lineLiteral = clone(Literal);
+
+        nameLiteral.value = name;
+        nameLiteral.raw = "'" + name + "'";
+        lineLiteral.value = lineLiteral.raw = line;
+
+        arrarExp.elements.push(nameLiteral);
+        arrarExp.elements.push(lineLiteral);
+
+        return arrarExp;
+    }
+
+    function buildPropertyAST(id, name, line) {
+        var property = clone(Property),
+            keyLiteral = clone(Literal);
+
+        keyLiteral.value = keyLiteral.raw = id;
+
+        property.key = keyLiteral;
+        property.value = buildValueAST(name, line);
+
+        return property;
+    }
+
+    function buildArgumentObjectAST(exp, fileAST) {
+        var objectExp = clone(ObjectExpression);
+        exp.expression["arguments"] = [fileAST, objectExp];
+        return objectExp;
+    }
+
+    function buildLoadAST() {
+        var expression = clone(ExpressionStatement),
+            callExp = clone(CallExpression),
+            memberExp = clone(MemberExpression),
+            objectIdentifier = clone(Identifier),
+            propertyIdentifier = clone(Identifier);
+
+        objectIdentifier.name = "__p__";
+        propertyIdentifier.name = "l";
+
+        memberExp.object = objectIdentifier;
+        memberExp.property = propertyIdentifier;
+
+        callExp.callee = memberExp;
+        expression.expression = callExp;
+
+        return expression;
+    }
+
 
     getUniqueId = (function () {
         var i = 1000;
@@ -158,7 +283,7 @@ function Profiler() {
         }
     }
 
-    function getFunctionName(parent){
+    function getFunctionName(parent) {
         var name = [];
         switch (parent.type) {
             case 'VariableDeclarator':
@@ -170,15 +295,15 @@ function Profiler() {
             case 'AssignmentExpression':
             case 'LogicalExpression':
             case 'MemberExpression':
-                if(parent.left){
-                    if(parent.left.object && parent.left.property){
+                if (parent.left) {
+                    if (parent.left.object && parent.left.property) {
                         name = name.concat(getFunctionName(parent.left.object));
                         name = name.concat(getFunctionName(parent.left.property));
-                    }else{
+                    } else {
                         name = name.concat(getFunctionName(parent.left));
                     }
 
-                } else if(parent.object && parent.property){
+                } else if (parent.object && parent.property) {
                     name = name.concat(getFunctionName(parent.object));
                     name = name.concat(getFunctionName(parent.property));
                 }
@@ -194,7 +319,7 @@ function Profiler() {
                 }
                 break;
             case 'Identifier':
-                if(parent.name){
+                if (parent.name) {
                     name.push(parent.name);
                 }
                 break;
@@ -216,35 +341,18 @@ function Profiler() {
 
     function appendFns(ast, uri) {
         try {
+            var loadAST = buildLoadAST(),
+                argument = buildArgumentObjectAST(loadAST, buildUrlAST(uri));
+
             return parseAST(estraverse.replace(ast, {
                 enter: function (node, parent) {
                     if (node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration') {
                         var copyNode = clone(node),
                             id = getUniqueId(),
-                            startAST = clone(beginAST),
-                            endAST = clone(finishAST),
-                            startParams = startAST.declarations[0].init['arguments'] = [],
-                            endParams = endAST.expression['arguments'] = [],
-                            param1 = { "type": "Literal", "value": id, "raw": "'" + id + "'" },
-                            param2 = { "type": "Literal", "value": "anonymous", "raw": "'anonymous'" },
-                            param3 = { "type": "Literal", "value": uri, "raw": "'" + uri + "'" },
-                            param4 = { "type": "Literal", "value": 0, "raw": '0' },
-                            param5 = { "type": "Identifier", "name": "__v" + id },
-                            body, lastNode, name = getFunctionName(parent);
-
-                        startAST.declarations[0].id.name = "__v" + id;
-
-                        copyNode.body.body.forEach(function(exp){
-                            switch (exp.type) {
-                                case 'ExpressionStatement':
-                                    if(exp.expression.callee && exp.expression.callee.name &&
-                                        (exp.expression.callee.name === 'setTimeout' || exp.expression.callee.name === 'setInterval')){
-                                        exp.expression.parentId = id;
-                                    }
-                                    break;
-                                default:
-                            }
-                        });
+                            startAST, endAST, lineNo = 0, fullName = "anonymous",
+                            body,
+                            lastNode,
+                            name = getFunctionName(parent);
 
                         if (node.id) {
                             if (node.id.name) {
@@ -254,23 +362,29 @@ function Profiler() {
                             }
                         }
 
-                        if (name.length > 0) {
-                            param2.value = name.join('.');
-                            param2.raw = "'" + name.join('.') + "'";
+                        if(node.loc || node.id.loc){
+                            lineNo = (node.loc || node.id.loc).start.line;
                         }
 
-                        var loc = node.loc || node.id.loc;
-                        if (loc) {
-                            param4.value = param4.raw = loc.start.line;
+                        if(name.length > 0){
+                            fullName = name.join('.');
                         }
 
-                        if(parent.parentId){
-                            startParams.push(param1, param2, param3, param4, dateAST, { "type": "Literal", "value": true, raw: "true" });
-                            endParams.push(param1, param5, dateAST);
-                        }else{
-                            startParams.push(param1, param2, param3, param4, dateAST);
-                            endParams.push(param1, param5, dateAST);
-                        }
+                        copyNode.body.body.forEach(function (exp) {
+                            switch (exp.type) {
+                                case 'ExpressionStatement':
+                                    if (exp.expression.callee && exp.expression.callee.name &&
+                                        (exp.expression.callee.name === 'setTimeout' || exp.expression.callee.name === 'setInterval')) {
+                                        exp.expression.parentId = id;
+                                    }
+                                    break;
+                                default:
+                            }
+                        });
+
+                        startAST = buildBeginAST(id, !!parent.parentId);
+                        endAST = buildEndAST(id);
+                        argument.properties.push(buildPropertyAST(id, fullName, lineNo));
 
                         body = [startAST].concat(copyNode.body.body, [endAST]);
                         lastNode = copyNode.body.body.pop();
@@ -284,7 +398,11 @@ function Profiler() {
                         return copyNode;
                     }
                 },
-                leave: function (node, parent) {}
+                leave: function (node, parent) {
+                    if (node.type === 'Program') {
+                        node.body.push(loadAST);
+                    }
+                }
             }), uri);
         } catch (e) {
             console.error(e, uri);
@@ -294,7 +412,27 @@ function Profiler() {
     function parseAST(ast, uri) {
         try {
             return escodegen.generate(ast, {
-                comment: true
+                format: {
+                    indent: {
+                        style: '    ',
+                        base: 0
+                    },
+                    json: false,
+                    renumber: false,
+                    hexadecimal: false,
+                    quotes: 'single',
+                    escapeless: false,
+                    compact: false,
+                    parentheses: true,
+                    semicolons: true
+                },
+                parse: null,
+                comment: true,
+                //verbatim: undefined,
+                //sourceMap: undefined,
+                sourceMapRoot: null,
+                sourceMapWithCode: false,
+                directive: false
             });
         } catch (e) {
             console.error(e, uri);
