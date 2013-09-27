@@ -113,6 +113,14 @@ ConsoleIO.View.Device.Profile.prototype.destroy = function destroy() {
     //this.list.destructor();
 };
 
+ConsoleIO.View.Device.Profile.prototype.show = function show() {
+    this.target.showTab(this.id);
+};
+
+ConsoleIO.View.Device.Profile.prototype.hide = function hide() {
+    this.target.hideTab(this.id, true);
+};
+
 ConsoleIO.View.Device.Profile.prototype.addToList = function addToList(id, title, icon) {
     this.list.insertNewItem(0, id, title, 0, icon, icon, icon);
 };

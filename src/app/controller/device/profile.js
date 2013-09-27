@@ -49,16 +49,32 @@ ConsoleIO.App.Device.Profile = function ProfileController(parent, model) {
     });
 
     ConsoleIO.Service.Socket.on('device:profile:' + this.model.serialNumber, this.addProfile, this);
+    ConsoleIO.Service.Socket.on('device:online:' + this.model.serialNumber, this.syncConfig, this);
 };
 
 
 ConsoleIO.App.Device.Profile.prototype.render = function render(target) {
     this.view.render(target);
+    ConsoleIO.async(function () {
+        this.syncConfig(this.model);
+    }, this, 100);
 };
 
 ConsoleIO.App.Device.Profile.prototype.destroy = function destroy() {
-    ConsoleIO.Service.Socket.off('device:profile:' + this.model.serialNumber, this.profile, this);
+    ConsoleIO.Service.Socket.off('device:profile:' + this.model.serialNumber, this.addProfile, this);
+    ConsoleIO.Service.Socket.off('device:online:' + this.model.serialNumber, this.syncConfig, this);
     this.view = this.view.destroy();
+};
+
+ConsoleIO.App.Device.Profile.prototype.syncConfig = function syncConfig(data) {
+    if (data.serialNumber === this.model.serialNumber) {
+        this.model = data;
+        if (!data.web.config.profile || data.web.config.profile === 'false') {
+            this.view.hide();
+        } else {
+            this.view.show();
+        }
+    }
 };
 
 ConsoleIO.App.Device.Profile.prototype.clear = function clear() {

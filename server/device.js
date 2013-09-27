@@ -76,8 +76,11 @@ function Device(application, request, manager) {
      * @member {object} web
      */
     this.web = {
-        config: {}
+        config: {
+            profile: this.request.data.params.profile
+        }
     };
+
 
     /**
      * Various timestamps
@@ -236,6 +239,8 @@ Device.prototype.online = function online(request) {
      * this method register new request for future communication
      */
     this.request = request;
+    this.web.config.profile = this.request.data.params.profile;
+
     this.sid = this.request.cookies['connect.sid'];
 
     /** set online flag to true **/
@@ -259,9 +264,11 @@ Device.prototype.online = function online(request) {
      * @event Device#device:online
      * @type {object}
      */
-    this.manager.emit('device:online', this.manager.extend(this.getInfo(), {
+    var data = this.manager.extend(this.getInfo(), {
         client: this.client
-    }));
+    });
+    this.manager.emit('device:online', data);
+    this.broadcast('online:' + this.serialNumber, data);
 };
 
 /**
@@ -288,7 +295,9 @@ Device.prototype.offline = function offline(name) {
     if (typeof name === 'string') {
         this.emit(name, this.getInfo());
     } else {
-        this.manager.emit('device:offline', this.getInfo());
+        var data = this.getInfo();
+        this.manager.emit('device:offline', data);
+        this.broadcast('offline:' + this.serialNumber, data);
     }
 };
 

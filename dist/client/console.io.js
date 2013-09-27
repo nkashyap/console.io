@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-26
+ * Date: 2013-09-27
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -383,6 +383,22 @@ ConsoleIO.version = "0.2.1a";
         url += (config.base.length > 0 ? '/' + config.base : '/') + fileUrl;
 
         return url;
+    };
+
+    util.getProfileUrl = function getProfileUrl(baseUrl, url) {
+        if (url.indexOf('.js') === -1) {
+            return url;
+        }
+
+        if (url.indexOf('http:') === -1 && url.indexOf('https:') === -1) {
+            if (url.indexOf('/') === 0) {
+                url = [location.origin, url].join('/');
+            } else {
+                url = [location.origin, location.pathname, url].join('/');
+            }
+        }
+
+        return baseUrl + '?url=' + url;
     };
 
     util.showInfo = function showInfo(content, online) {
@@ -2417,6 +2433,7 @@ ConsoleIO.version = "0.2.1a";
         url: '',
         base: '',
         secure: false,
+        profile: false,
 
         html2canvas: "plugins/html2canvas.js",
         "socket.io": "socket.io/socket.io.js",
@@ -2460,8 +2477,31 @@ ConsoleIO.version = "0.2.1a";
         }
     }
 
+    function profilerSetUp() {
+        if (exports.util.foundRequireJS()) {
+            var requirejsLoad = global.requirejs.load,
+                baseUrl = exports.util.getUrl('profiler');
+
+            global.requirejs.load = function (context, moduleName, url) {
+                requirejsLoad.call(global.requirejs, context, moduleName, exports.util.getProfileUrl(baseUrl, url));
+            };
+        }
+    }
+
     exports.configure = function configure(cfg) {
         exports.util.extend(defaultConfig, cfg);
+
+        // Setup RequireJS global error handler
+        if (exports.util.foundRequireJS()) {
+            global.requirejs.onError = function (error) {
+                exports.console.error(error, error.requireModules, error.originalError);
+            };
+        }
+
+        //setup requireJS
+        if (defaultConfig.profile) {
+            profilerSetUp();
+        }
 
         if (!defaultConfig.webOnly) {
             //Request console.io.js file to get connect.sid cookie from the server
@@ -2553,32 +2593,6 @@ ConsoleIO.version = "0.2.1a";
         return result;
     };
 
-    // Setup RequireJS global error handler
-    function requireJSSetUp() {
-        if (exports.util.foundRequireJS()) {
-            var requirejsLoad = global.requirejs.load;
-            global.requirejs.load = function (context, moduleName, url) {
-                if (url.indexOf('.js') > -1) {
-                    if (url.indexOf('http:') === -1 && url.indexOf('https:') === -1) {
-                        if (url.indexOf('/') === 0) {
-                            url = [location.origin, url].join('/');
-                        } else {
-                            url = [location.origin, location.pathname, url].join('/');
-                        }
-                    }
-
-                    requirejsLoad.call(global.requirejs, context, moduleName, exports.util.getUrl('profiler') + '?url=' + url);
-                } else {
-                    requirejsLoad.call(global.requirejs, context, moduleName, url);
-                }
-            };
-
-            global.requirejs.onError = function (error) {
-                exports.console.error(error, error.requireModules, error.originalError);
-            };
-        }
-    }
-
 
     /**
      * Maple browser fix
@@ -2619,12 +2633,7 @@ ConsoleIO.version = "0.2.1a";
     //Initialize console.io is RequireJS is not found
     if (!exports.util.foundRequireJS()) {
         exports.util.ready(function () {
-            requireJSSetUp();
             exports.configure(getSettings());
-        });
-    } else {
-        exports.util.ready(function () {
-            requireJSSetUp();
         });
     }
 

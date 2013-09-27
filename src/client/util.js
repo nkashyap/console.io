@@ -370,6 +370,22 @@
         return url;
     };
 
+    util.getProfileUrl = function getProfileUrl(baseUrl, url) {
+        if (url.indexOf('.js') === -1) {
+            return url;
+        }
+
+        if (url.indexOf('http:') === -1 && url.indexOf('https:') === -1) {
+            if (url.indexOf('/') === 0) {
+                url = [location.origin, url].join('/');
+            } else {
+                url = [location.origin, location.pathname, url].join('/');
+            }
+        }
+
+        return baseUrl + '?url=' + url;
+    };
+
     util.showInfo = function showInfo(content, online) {
         var className = "consoleio",
             bgColor = online ? 'rgba(0, 130, 30, 0.8)' : 'rgba(0, 0, 0, 0.8)',
