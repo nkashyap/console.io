@@ -17,6 +17,7 @@
         secure: false,
         profile: false,
 
+        profileWorker: "plugins/profileWorker.js",
         html2canvas: "plugins/html2canvas.js",
         "socket.io": "socket.io/socket.io.js",
         webStyle: "console.css",
@@ -68,6 +69,8 @@
                 requirejsLoad.call(global.requirejs, context, moduleName, exports.util.getProfileUrl(baseUrl, url));
             };
         }
+
+        exports.profiler.setUp();
     }
 
     exports.configure = function configure(cfg) {

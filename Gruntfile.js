@@ -121,6 +121,14 @@ module.exports = function (grunt) {
                         cwd: 'src/client/plugins/',
                         flatten: true,
                         filter: 'isFile'
+                    },
+                    {
+                        src: ['profileWorker.js'],
+                        dest: 'dist/client/plugins/',
+                        expand: true,
+                        cwd: 'src/client/',
+                        flatten: true,
+                        filter: 'isFile'
                     }
                 ]
             },

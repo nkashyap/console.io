@@ -14,9 +14,7 @@ function Profiler() {
         estraverse = require("estraverse"),
         escodegen = require("escodegen"),
         url = require('url'),
-        request = require('request'),
-        timeout = 60 * 1000,
-        getUniqueId;
+        request = require('request');
 
     var VariableDeclaration = {
         "type": "VariableDeclaration",
@@ -107,8 +105,8 @@ function Profiler() {
         resetLiteral.value = true;
         resetLiteral.raw = "true";
 
-        objectIdentifier.name = "__p__";
-        propertyIdentifier.name = "b";
+        objectIdentifier.name = "window";
+        propertyIdentifier.name = "__pb";
 
         memberExp.object = objectIdentifier;
         memberExp.property = propertyIdentifier;
@@ -137,8 +135,8 @@ function Profiler() {
 
         idLiteral.value = idLiteral.raw = id;
 
-        objectIdentifier.name = "__p__";
-        propertyIdentifier.name = "e";
+        objectIdentifier.name = "window";
+        propertyIdentifier.name = "__pe";
 
         memberExp.object = objectIdentifier;
         memberExp.property = propertyIdentifier;
@@ -198,8 +196,8 @@ function Profiler() {
             objectIdentifier = clone(Identifier),
             propertyIdentifier = clone(Identifier);
 
-        objectIdentifier.name = "__p__";
-        propertyIdentifier.name = "l";
+        objectIdentifier.name = "window";
+        propertyIdentifier.name = "__pd";
 
         memberExp.object = objectIdentifier;
         memberExp.property = propertyIdentifier;
@@ -210,8 +208,7 @@ function Profiler() {
         return expression;
     }
 
-
-    getUniqueId = (function () {
+    var getUniqueId = (function () {
         var i = 1000;
         return function () {
             return i++;
@@ -472,7 +469,7 @@ function Profiler() {
 
         opt.url = uri;
         opt.method = 'GET';
-        opt.timeout = timeout;
+        opt.timeout = 60 * 1000;
 
         request(opt, proxyCallback);
     }
