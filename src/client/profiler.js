@@ -13,7 +13,7 @@
 
     var profiler = exports.profiler = {
         enabled: false,
-        store : []
+        store: []
     };
 
     var getProfileId = (function () {
@@ -23,30 +23,31 @@
         };
     }());
 
-    global.__pd = global.__pb = global.__pe = function noop(){};
+    global.__pd = global.__pb = global.__pe = function noop() {
+    };
 
-    profiler.setUp = function(){
-        if(global.Worker){
+    profiler.setUp = function () {
+        if (global.Worker) {
             setUpWebWorker();
-        }else{
+        } else {
             setUpAsync();
         }
     };
 
-    function setUpWebWorker(){
+    function setUpWebWorker() {
         var worker = profiler.worker = new Worker(exports.util.getUrl('profileWorker'));
 
-        function onMessage(event){
+        function onMessage(event) {
             exports.console._native.log(event.data);
 
-            switch(event.data.type){
+            switch (event.data.type) {
                 case 'report':
                     exports.transport.emit('profile', event.data.report);
                     break;
             }
         }
 
-        function onError(event){
+        function onError(event) {
             exports.console.error(event);
         }
 
@@ -119,8 +120,7 @@
     }
 
 
-
-    function setUpAsync(){
+    function setUpAsync() {
         var getUniqueId = (function () {
             var i = 0;
             return function () {
@@ -179,7 +179,7 @@
         };
 
         profiler.load = function load(file, data) {
-            exports.util.forEachProperty(data, function(item){
+            exports.util.forEachProperty(data, function (item) {
                 item.push(file);
             });
 
