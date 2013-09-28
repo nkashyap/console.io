@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-27
+ * Date: 2013-09-28
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -507,6 +507,26 @@ ConsoleIO.version = "0.2.1a";
             };
         }
     }());
+
+    util.noop = function noop() {
+    };
+
+    util.asyncForEach = function asyncForEach(array, callback, finishCallback, scope) {
+        array = [].concat(array || []);
+        util.asyncIteration(array, callback || util.noop, finishCallback || util.noop, scope);
+    };
+
+    util.asyncIteration = function asyncIteration(array, callback, finishCallback, scope) {
+        if (array.length > 0) {
+            setTimeout(function () {
+                callback.call(scope || array, array.shift(), function finish() {
+                    util.asyncIteration(array, callback, finishCallback, scope);
+                });
+            }, 4);
+        } else {
+            finishCallback.call(scope);
+        }
+    };
 
     util.forEachProperty = function forEachProperty(obj, callback, scope) {
         var prop;
@@ -1441,7 +1461,7 @@ ConsoleIO.version = "0.2.1a";
 
     var profiler = exports.profiler = {
         enabled: false,
-        store : []
+        store: []
     };
 
     var getProfileId = (function () {
@@ -1451,30 +1471,31 @@ ConsoleIO.version = "0.2.1a";
         };
     }());
 
-    global.__pd = global.__pb = global.__pe = function noop(){};
+    global.__pd = global.__pb = global.__pe = function noop() {
+    };
 
-    profiler.setUp = function(){
-        if(global.Worker){
+    profiler.setUp = function () {
+        if (global.Worker) {
             setUpWebWorker();
-        }else{
+        } else {
             setUpAsync();
         }
     };
 
-    function setUpWebWorker(){
+    function setUpWebWorker() {
         var worker = profiler.worker = new Worker(exports.util.getUrl('profileWorker'));
 
-        function onMessage(event){
+        function onMessage(event) {
             exports.console._native.log(event.data);
 
-            switch(event.data.type){
+            switch (event.data.type) {
                 case 'report':
                     exports.transport.emit('profile', event.data.report);
                     break;
             }
         }
 
-        function onError(event){
+        function onError(event) {
             exports.console.error(event);
         }
 
@@ -1547,8 +1568,7 @@ ConsoleIO.version = "0.2.1a";
     }
 
 
-
-    function setUpAsync(){
+    function setUpAsync() {
         var getUniqueId = (function () {
             var i = 0;
             return function () {
@@ -1607,7 +1627,7 @@ ConsoleIO.version = "0.2.1a";
         };
 
         profiler.load = function load(file, data) {
-            exports.util.forEachProperty(data, function(item){
+            exports.util.forEachProperty(data, function (item) {
                 item.push(file);
             });
 
@@ -1640,7 +1660,7 @@ ConsoleIO.version = "0.2.1a";
                 var min, max, endTime;
 
                 exports.util.forEach(this.children, function (child) {
-                    //child.finish();
+                    child.finish();
                     var endTime = child.totalTime + child.startTime;
                     min = Math.min(min || child.startTime, child.startTime);
                     max = Math.max(max || endTime, endTime);

@@ -8,7 +8,8 @@
  */
 
 var dataTable = {},
-    store = [];
+    store = [],
+    util = {};
 
 var getUniqueId = (function () {
     var i = 0;
@@ -17,7 +18,10 @@ var getUniqueId = (function () {
     };
 }());
 
-var every = (function () {
+util.noop = function noop() {
+};
+
+util.every = (function () {
     if (Array.prototype.every) {
         return function (array, callback, scope) {
             return (array || []).every(callback, scope);
@@ -38,7 +42,7 @@ var every = (function () {
     }
 }());
 
-var filter = (function () {
+util.filter = (function () {
     if (Array.prototype.filter) {
         return function (array, callback, scope) {
             return (array || []).filter(callback, scope);
@@ -59,7 +63,7 @@ var filter = (function () {
     }
 }());
 
-var forEach = (function () {
+util.forEach = (function () {
     if (Array.prototype.forEach) {
         return function (array, callback, scope) {
             (array || []).forEach(callback, scope);
@@ -77,21 +81,37 @@ var forEach = (function () {
     }
 }());
 
-function forEachProperty(obj, callback, scope) {
+util.forEachProperty = function forEachProperty(obj, callback, scope) {
     var prop;
     for (prop in obj) {
         callback.call(scope || obj, obj[prop], prop, obj);
     }
-}
+};
 
-function extend(target, source) {
-    forEachProperty(source, function (value, property) {
+util.extend = function extend(target, source) {
+    util.forEachProperty(source, function (value, property) {
         target[property] = value;
     });
 
     return target;
-}
+};
 
+util.asyncForEach = function asyncForEach(array, callback, finishCallback, scope) {
+    array = [].concat(array || []);
+    util.asyncIteration(array, callback || util.noop, finishCallback || util.noop, scope);
+};
+
+util.asyncIteration = function asyncIteration(array, callback, finishCallback, scope) {
+    if (array.length > 0) {
+        setTimeout(function () {
+            callback.call(scope || array, array.shift(), function finish() {
+                util.asyncIteration(array, callback, finishCallback, scope);
+            });
+        }, 4);
+    } else {
+        finishCallback.call(scope);
+    }
+};
 
 
 function ScriptProfileNode(callId, time) {
@@ -110,32 +130,37 @@ function ScriptProfileNode(callId, time) {
     this.children = [];
 }
 
-ScriptProfileNode.prototype.finish = function finish() {
+ScriptProfileNode.prototype.finish = function finish(callback) {
     if (this.children.length > 0) {
-        var min, max, endTime;
+        var min, max;
 
-        forEach(this.children, function (child) {
-            child.finish();
-            var endTime = child.totalTime + child.startTime;
-            min = Math.min(min || child.startTime, child.startTime);
-            max = Math.max(max || endTime, endTime);
-        });
-
-        endTime = (this.totalTime) ? this.totalTime + this.startTime : Date.now();
-
-        this.totalTime = Math.max(max, endTime) - Math.min(min, this.startTime);
-        this.selfTime = this.totalTime - (max - min);
+        util.asyncForEach(this.children,
+            function iterationFn(child, finishCallback) {
+                child.finish(function childFinishFn() {
+                    var endTime = child.totalTime + child.startTime;
+                    min = Math.min(min || child.startTime, child.startTime);
+                    max = Math.max(max || endTime, endTime);
+                    finishCallback();
+                });
+            },
+            function finishFn() {
+                var endTime = (this.totalTime) ? this.totalTime + this.startTime : Date.now();
+                this.totalTime = Math.max(max, endTime) - Math.min(min, this.startTime);
+                this.selfTime = this.totalTime - (max - min);
+                callback();
+            }, this);
     } else {
         if (!this.totalTime) {
             this.totalTime = Date.now() - this.startTime;
         }
         this.selfTime = this.totalTime;
+        callback();
     }
 };
 
 ScriptProfileNode.prototype.getNodeByCallerId = function getNodeByCallerId(callId) {
     var node;
-    every(this.children, function (child) {
+    util.every(this.children, function (child) {
         if (child.callUID === callId) {
             node = child;
             return false;
@@ -149,7 +174,7 @@ ScriptProfileNode.prototype.getNodeByCallerId = function getNodeByCallerId(callI
 
 ScriptProfileNode.prototype.getNodeById = function getNodeById(id) {
     var node;
-    every(this.children, function (child) {
+    util.every(this.children, function (child) {
         if (child.id === id) {
             node = child;
             return false;
@@ -159,7 +184,7 @@ ScriptProfileNode.prototype.getNodeById = function getNodeById(id) {
     });
 
     if (!node) {
-        every(this.children, function (child) {
+        util.every(this.children, function (child) {
             node = child.getNodeById(id);
             if (node) {
                 return false;
@@ -195,7 +220,6 @@ ScriptProfileNode.prototype.end = function end(callId, time) {
 };
 
 
-
 function ScriptProfile(title) {
     this.title = title;
     this.uid = store.length + 1;
@@ -206,11 +230,11 @@ function ScriptProfile(title) {
 
 }
 
-ScriptProfile.prototype.finish = function finish() {
+ScriptProfile.prototype.finish = function finish(callback) {
     delete this.active;
     delete this.depth;
 
-    this.head.finish();
+    this.head.finish(callback);
 };
 
 ScriptProfile.prototype.getActiveNode = function getActiveNode() {
@@ -244,14 +268,14 @@ ScriptProfile.prototype.end = function end(callId, endTime) {
 
 
 function getActiveProfiles() {
-    return filter(store, function (profile) {
+    return util.filter(store, function (profile) {
         return !!profile.active;
     });
 }
 
 function getProfileByTitle(title) {
     var lastProfile;
-    every(store, function (profile) {
+    util.every(store, function (profile) {
         if (!!profile.active && profile.title === title) {
             lastProfile = profile;
             return false;
@@ -262,67 +286,48 @@ function getProfileByTitle(title) {
     return lastProfile;
 }
 
-function begin(callId, time, reset) {
-    forEach(getActiveProfiles(), function (profile) {
-        profile.begin(callId, time, reset);
-    });
-}
 
-function end(callId, time) {
-    forEach(getActiveProfiles(), function (profile) {
-        profile.end(callId, time);
-    });
-}
-
-function start(title) {
-    store.push(new ScriptProfile(title));
-}
-
-function finish(title) {
-    var profile = getProfileByTitle(title);
-    if (profile) {
-        profile.finish();
-        postMessage({
-            type: 'report',
-            report: profile
-        });
-    }
-}
-
-function clear() {
-    store = [];
-}
-
-function load(file, data) {
-    forEachProperty(data, function(item){
-        item.push(file);
-    });
-
-    extend(dataTable, data);
-}
-
-
-onmessage = function onMessage(event){
+onmessage = function onMessage(event) {
     var data = event.data;
 
-    switch(data.type){
+    switch (data.type) {
         case 'begin':
-            begin(data.callId, data.time, data.reset);
+            util.forEach(getActiveProfiles(), function (profile) {
+                profile.begin(data.callId, data.time, data.reset);
+            });
             break;
+
         case 'end':
-            end(data.callId, data.time);
+            util.forEach(getActiveProfiles(), function (profile) {
+                profile.end(data.callId, data.time);
+            });
             break;
+
         case 'start':
-            start(data.title);
+            store.push(new ScriptProfile(data.title));
             break;
+
         case 'finish':
-            finish(data.title);
+            var profile = getProfileByTitle(data.title);
+            if (profile) {
+                profile.finish(function () {
+                    postMessage({
+                        type: 'report',
+                        report: profile
+                    });
+                });
+            }
             break;
+
         case 'load':
-            load(data.file, data.table);
+            util.forEachProperty(data.table, function (item) {
+                item.push(data.file);
+            });
+            util.extend(dataTable, data.table);
             break;
+
         case 'clear':
-            clear();
+            store = [];
             break;
     }
 };

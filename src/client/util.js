@@ -493,6 +493,26 @@
         }
     }());
 
+    util.noop = function noop() {
+    };
+
+    util.asyncForEach = function asyncForEach(array, callback, finishCallback, scope) {
+        array = [].concat(array || []);
+        util.asyncIteration(array, callback || util.noop, finishCallback || util.noop, scope);
+    };
+
+    util.asyncIteration = function asyncIteration(array, callback, finishCallback, scope) {
+        if (array.length > 0) {
+            setTimeout(function () {
+                callback.call(scope || array, array.shift(), function finish() {
+                    util.asyncIteration(array, callback, finishCallback, scope);
+                });
+            }, 4);
+        } else {
+            finishCallback.call(scope);
+        }
+    };
+
     util.forEachProperty = function forEachProperty(obj, callback, scope) {
         var prop;
         for (prop in obj) {

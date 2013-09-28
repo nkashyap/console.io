@@ -119,6 +119,7 @@ function main() {
 
         //console app resources routes
         app.use(base + 'resources', express.static('resources'));
+        app.use(base + 'example', express.static('example'));
 
         //console client routes
         function client(req, res) {
