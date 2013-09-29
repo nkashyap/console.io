@@ -57,7 +57,7 @@ ConsoleIO.App.Device.Profile.prototype.render = function render(target) {
     this.view.render(target);
     ConsoleIO.async(function () {
         this.syncConfig(this.model);
-    }, this, 100);
+    }, this);
 };
 
 ConsoleIO.App.Device.Profile.prototype.destroy = function destroy() {
@@ -167,7 +167,7 @@ ConsoleIO.App.Device.Profile.prototype.onTreeOpenEnd = function onTreeOpenEnd(id
 
     ConsoleIO.async(function () {
         this.addGridRows(this.profiles[this.activeProfile].head, [].concat(this.openNodes));
-    }, this, 10);
+    }, this);
 };
 
 ConsoleIO.App.Device.Profile.prototype.onListClick = function onListClick(id) {
@@ -183,7 +183,7 @@ ConsoleIO.App.Device.Profile.prototype.onListClick = function onListClick(id) {
     ConsoleIO.async(function () {
         this.addTreeNodes(activeProfile.head, 0);
         this.view.closeItem(0, true);
-    }, this, 10);
+    }, this);
 };
 
 ConsoleIO.App.Device.Profile.prototype.onButtonClick = function onButtonClick(btnId, state) {

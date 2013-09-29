@@ -153,10 +153,10 @@ if (typeof window.ConsoleIO === "undefined") {
             return target;
         },
 
-        async: function async(fn, scope, timeout) {
+        async: function async(fn, scope) {
             return setTimeout(function () {
                 fn.call(scope);
-            }, timeout);
+            }, 4);
         },
 
         addCSSRule: function addCSSRule(selector, rules, index) {

@@ -125,7 +125,7 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
 
     ConsoleIO.async(function () {
         this.nodes.processing = false;
-    }, this, 100);
+    }, this);
 
     //set correct icon
     if (data.subscribed && data.online) {

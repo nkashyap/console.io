@@ -5,21 +5,23 @@
  * Time: 15:59
  * Email: nisheeth.k.kashyap@gmail.com
  * Repositories: https://github.com/nkashyap
+ *
+ * profileWorker
  */
 
 var dataTable = {},
     store = [],
     util = {};
 
-var getUniqueId = (function () {
+util.noop = function noop() {
+};
+
+util.getUniqueId = (function () {
     var i = 0;
     return function () {
         return ++i;
     };
 }());
-
-util.noop = function noop() {
-};
 
 util.every = (function () {
     if (Array.prototype.every) {
@@ -116,7 +118,7 @@ util.asyncIteration = function asyncIteration(array, callback, finishCallback, s
 
 function ScriptProfileNode(callId, time) {
     var def = dataTable[callId] || ['root', 0, ''];
-    this.id = getUniqueId();
+    this.id = util.getUniqueId();
     this.functionName = def[0];
     this.lineNumber = def[1];
     this.url = def[2];
@@ -168,31 +170,6 @@ ScriptProfileNode.prototype.getNodeByCallerId = function getNodeByCallerId(callI
 
         return true;
     });
-
-    return node;
-};
-
-ScriptProfileNode.prototype.getNodeById = function getNodeById(id) {
-    var node;
-    util.every(this.children, function (child) {
-        if (child.id === id) {
-            node = child;
-            return false;
-        }
-
-        return true;
-    });
-
-    if (!node) {
-        util.every(this.children, function (child) {
-            node = child.getNodeById(id);
-            if (node) {
-                return false;
-            }
-
-            return true;
-        });
-    }
 
     return node;
 };
@@ -331,4 +308,3 @@ onmessage = function onMessage(event) {
             break;
     }
 };
-

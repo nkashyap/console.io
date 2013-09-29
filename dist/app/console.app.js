@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-28
+ * Date: 2013-09-29
 */
 
 /**
@@ -163,10 +163,10 @@ if (typeof window.ConsoleIO === "undefined") {
             return target;
         },
 
-        async: function async(fn, scope, timeout) {
+        async: function async(fn, scope) {
             return setTimeout(function () {
                 fn.call(scope);
-            }, timeout);
+            }, 4);
         },
 
         addCSSRule: function addCSSRule(selector, rules, index) {
@@ -2116,7 +2116,7 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
 
     ConsoleIO.async(function () {
         this.nodes.processing = false;
-    }, this, 100);
+    }, this);
 
     //set correct icon
     if (data.subscribed && data.online) {
@@ -2484,7 +2484,7 @@ ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
 
     ConsoleIO.async(function () {
         this.nodes.processing = false;
-    }, this, 100);
+    }, this);
 };
 
 ConsoleIO.App.Device.Explorer.prototype.clear = function clear() {
@@ -2726,7 +2726,7 @@ ConsoleIO.App.Device.Profile.prototype.render = function render(target) {
     this.view.render(target);
     ConsoleIO.async(function () {
         this.syncConfig(this.model);
-    }, this, 100);
+    }, this);
 };
 
 ConsoleIO.App.Device.Profile.prototype.destroy = function destroy() {
@@ -2836,7 +2836,7 @@ ConsoleIO.App.Device.Profile.prototype.onTreeOpenEnd = function onTreeOpenEnd(id
 
     ConsoleIO.async(function () {
         this.addGridRows(this.profiles[this.activeProfile].head, [].concat(this.openNodes));
-    }, this, 10);
+    }, this);
 };
 
 ConsoleIO.App.Device.Profile.prototype.onListClick = function onListClick(id) {
@@ -2852,7 +2852,7 @@ ConsoleIO.App.Device.Profile.prototype.onListClick = function onListClick(id) {
     ConsoleIO.async(function () {
         this.addTreeNodes(activeProfile.head, 0);
         this.view.closeItem(0, true);
-    }, this, 10);
+    }, this);
 };
 
 ConsoleIO.App.Device.Profile.prototype.onButtonClick = function onButtonClick(btnId, state) {

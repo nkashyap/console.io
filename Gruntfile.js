@@ -163,7 +163,8 @@ module.exports = function (grunt) {
             },
             'plugins': {
                 files: {
-                    'dist/client/plugins/html2canvas.min.js': ['src/client/plugins/html2canvas.js']
+                    'dist/client/plugins/html2canvas.min.js': ['src/client/plugins/html2canvas.js'],
+                    'dist/client/plugins/profileWorker.min.js': ['src/client/profileWorker.js']
                 }
             },
             'app': {

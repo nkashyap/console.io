@@ -520,6 +520,12 @@
         }
     };
 
+    util.async = function async(fn, scope) {
+        return setTimeout(function () {
+            fn.call(scope);
+        }, 4);
+    };
+
     util.extend = function extend(target, source) {
         util.forEachProperty(source, function (value, property) {
             target[property] = value;
