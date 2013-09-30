@@ -16,6 +16,13 @@ function Profiler() {
         url = require('url'),
         request = require('request');
 
+    var getUniqueId = (function () {
+        var i = 1000;
+        return function () {
+            return i++;
+        };
+    }());
+
     var VariableDeclaration = {
         "type": "VariableDeclaration",
         "kind": "var",
@@ -98,6 +105,7 @@ function Profiler() {
             memberExp = clone(MemberExpression),
             objectIdentifier = clone(Identifier),
             propertyIdentifier = clone(Identifier),
+            argIdentifier = clone(Identifier),
             idLiteral = clone(Literal),
             resetLiteral = clone(Literal);
 
@@ -111,9 +119,12 @@ function Profiler() {
         memberExp.object = objectIdentifier;
         memberExp.property = propertyIdentifier;
 
+        argIdentifier.name = "arguments";
+
         callExp.callee = memberExp;
         callExp["arguments"] = [];
         callExp["arguments"].push(idLiteral);
+        callExp["arguments"].push(argIdentifier);
         callExp["arguments"].push(buildDateAST());
 
         if (reset) {
@@ -207,13 +218,6 @@ function Profiler() {
 
         return expression;
     }
-
-    var getUniqueId = (function () {
-        var i = 1000;
-        return function () {
-            return i++;
-        };
-    }());
 
     function clone(item) {
         if (!item) {
@@ -393,6 +397,7 @@ function Profiler() {
 
                         copyNode.body.body = body;
                         return copyNode;
+
                     }
                 },
                 leave: function (node, parent) {

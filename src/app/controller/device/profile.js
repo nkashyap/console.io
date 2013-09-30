@@ -92,6 +92,9 @@ ConsoleIO.App.Device.Profile.prototype.clear = function clear() {
 };
 
 ConsoleIO.App.Device.Profile.prototype.addProfile = function addProfile(profile) {
+    if (this.profiles[profile.uid]) {
+        profile.uid = ConsoleIO.getUniqueId();
+    }
     this.profiles[profile.uid] = profile;
     this.view.addToList(profile.uid, profile.title, ConsoleIO.Constant.ICONS.PROFILE);
 };

@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-29
+ * Date: 2013-09-30
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -1496,7 +1496,15 @@ ConsoleIO.version = "0.2.1a";
         worker.addEventListener('message', onMessage, false);
         worker.addEventListener('error', onError, false);
 
-        profiler.begin = function begin(callId, time, reset) {
+        profiler.begin = function begin(callId, args, time, reset) {
+            if (!reset) {
+                var isEvent = exports.util.getType(args[0]).toLowerCase().indexOf('event') > -1;
+                if (isEvent && !args[0].__profiled) {
+                    reset = isEvent;
+                    args[0].__profiled = true;
+                }
+            }
+
             if (profiler.enabled) {
                 worker.postMessage({
                     type: 'begin',
@@ -1608,21 +1616,21 @@ ConsoleIO.version = "0.2.1a";
                             var endTime = child.totalTime + child.startTime;
                             min = Math.min(min || child.startTime, child.startTime);
                             max = Math.max(max || endTime, endTime);
-                            finishCallback();
+                            exports.util.async(finishCallback);
                         });
                     },
                     function finishFn() {
                         var endTime = (this.totalTime) ? this.totalTime + this.startTime : Date.now();
                         this.totalTime = Math.max(max, endTime) - Math.min(min, this.startTime);
                         this.selfTime = this.totalTime - (max - min);
-                        callback();
+                        exports.util.async(callback);
                     }, this);
             } else {
                 if (!this.totalTime) {
                     this.totalTime = Date.now() - this.startTime;
                 }
                 this.selfTime = this.totalTime;
-                callback();
+                exports.util.async(callback);
             }
         };
 
@@ -1666,11 +1674,10 @@ ConsoleIO.version = "0.2.1a";
         function ScriptProfile(title) {
             this.title = title || getProfileId();
             this.uid = profiler.store.length + 1;
-            this.head = new ScriptProfileNode(this.uid, "(root)", "", 0, Date.now());
+            this.head = new ScriptProfileNode(this.uid, Date.now());
 
             this.active = true;
             this.depth = 0;
-
         }
 
         ScriptProfile.prototype.finish = function finish(callback) {
@@ -1749,8 +1756,16 @@ ConsoleIO.version = "0.2.1a";
             return lastProfile;
         }
 
-        profiler.begin = function begin(callId, beginTime, reset) {
+        profiler.begin = function begin(callId, args, beginTime, reset) {
             if (profiler.enabled) {
+                if (!reset) {
+                    var isEvent = exports.util.getType(args[0]).toLowerCase().indexOf('event') > -1;
+                    if (isEvent && !args[0].__profiled) {
+                        reset = isEvent;
+                        args[0].__profiled = true;
+                    }
+                }
+
                 exports.util.forEach(getActiveProfiles(), function (profile) {
                     profile.begin(callId, beginTime, reset);
                 });
@@ -2688,6 +2703,7 @@ ConsoleIO.version = "0.2.1a";
             log.style.margin = '10px';
             log.style.paddingTop = '10px';
             log.style.zIndex = 6000;
+            log.style.color = 'white';
             document.body.insertBefore(log, exports.util.getFirstElement(document.body));
         }
 

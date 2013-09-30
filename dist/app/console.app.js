@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-29
+ * Date: 2013-09-30
 */
 
 /**
@@ -168,6 +168,13 @@ if (typeof window.ConsoleIO === "undefined") {
                 fn.call(scope);
             }, 4);
         },
+
+        getUniqueId: (function () {
+            var i = 100000;
+            return function () {
+                return ++i;
+            };
+        }()),
 
         addCSSRule: function addCSSRule(selector, rules, index) {
             var sheet = ConsoleIO.styleSheet;
@@ -2761,6 +2768,9 @@ ConsoleIO.App.Device.Profile.prototype.clear = function clear() {
 };
 
 ConsoleIO.App.Device.Profile.prototype.addProfile = function addProfile(profile) {
+    if (this.profiles[profile.uid]) {
+        profile.uid = ConsoleIO.getUniqueId();
+    }
     this.profiles[profile.uid] = profile;
     this.view.addToList(profile.uid, profile.title, ConsoleIO.Constant.ICONS.PROFILE);
 };

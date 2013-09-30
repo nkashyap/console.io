@@ -142,6 +142,7 @@
             log.style.margin = '10px';
             log.style.paddingTop = '10px';
             log.style.zIndex = 6000;
+            log.style.color = 'white';
             document.body.insertBefore(log, exports.util.getFirstElement(document.body));
         }
 

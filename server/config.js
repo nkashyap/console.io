@@ -77,12 +77,12 @@ var config = {
             ],
             disable: [],
             set: [
-                { 'transports': [
-                    'websocket',
-                    'htmlfile',
-                    'xhr-polling',
-                    'jsonp-polling'
-                ]},
+//                { 'transports': [
+//                    'websocket',
+//                    'htmlfile',
+//                    'xhr-polling',
+//                    'jsonp-polling'
+//                ]},
                 { 'log level': 1 }
             ]
         }

@@ -159,6 +159,13 @@ if (typeof window.ConsoleIO === "undefined") {
             }, 4);
         },
 
+        getUniqueId: (function () {
+            var i = 100000;
+            return function () {
+                return ++i;
+            };
+        }()),
+
         addCSSRule: function addCSSRule(selector, rules, index) {
             var sheet = ConsoleIO.styleSheet;
             try {

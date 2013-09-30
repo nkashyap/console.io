@@ -115,6 +115,11 @@ util.asyncIteration = function asyncIteration(array, callback, finishCallback, s
     }
 };
 
+util.async = function async(fn, scope) {
+    return setTimeout(function () {
+        fn.call(scope);
+    }, 4);
+};
 
 function ScriptProfileNode(callId, time) {
     var def = dataTable[callId] || ['root', 0, ''];
@@ -142,21 +147,21 @@ ScriptProfileNode.prototype.finish = function finish(callback) {
                     var endTime = child.totalTime + child.startTime;
                     min = Math.min(min || child.startTime, child.startTime);
                     max = Math.max(max || endTime, endTime);
-                    finishCallback();
+                    util.async(finishCallback);
                 });
             },
             function finishFn() {
                 var endTime = (this.totalTime) ? this.totalTime + this.startTime : Date.now();
                 this.totalTime = Math.max(max, endTime) - Math.min(min, this.startTime);
                 this.selfTime = this.totalTime - (max - min);
-                callback();
+                util.async(callback);
             }, this);
     } else {
         if (!this.totalTime) {
             this.totalTime = Date.now() - this.startTime;
         }
         this.selfTime = this.totalTime;
-        callback();
+        util.async(callback);
     }
 };
 
@@ -200,7 +205,7 @@ ScriptProfileNode.prototype.end = function end(callId, time) {
 function ScriptProfile(title) {
     this.title = title;
     this.uid = store.length + 1;
-    this.head = new ScriptProfileNode(this.uid, "(root)", "", 0, Date.now());
+    this.head = new ScriptProfileNode(this.uid, Date.now());
 
     this.active = true;
     this.depth = 0;
