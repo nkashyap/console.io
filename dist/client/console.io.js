@@ -1483,9 +1483,10 @@ ConsoleIO.version = "0.2.1a";
         var worker = profiler.worker = new global.Worker(exports.util.getUrl('profileWorker'));
 
         function onMessage(event) {
-            exports.console._native.log(event.data);
             if (event.data.type === 'report') {
                 exports.transport.emit('profile', event.data.report);
+            } else {
+                exports.console.log(event.data);
             }
         }
 
@@ -1583,6 +1584,7 @@ ConsoleIO.version = "0.2.1a";
 
     function setUpAsync() {
         var dataTable = {},
+            indexMap = {},
             getUniqueId = (function () {
                 var i = 0;
                 return function () {
@@ -1599,39 +1601,16 @@ ConsoleIO.version = "0.2.1a";
             this.callUID = callId;
             this.startTime = time;
 
-            //this.totalTime = 0;
-            //this.selfTime = 0;
+            this.totalTime = 0;
+            this.selfTime = 0;
             this.numberOfCalls = 1;
             this.visible = true;
             this.children = [];
         }
 
         ScriptProfileNode.prototype.finish = function finish(callback) {
-            if (this.children.length > 0) {
-                var min, max;
-
-                exports.util.asyncForEach(this.children,
-                    function iterationFn(child, finishCallback) {
-                        child.finish(function childFinishFn() {
-                            var endTime = child.totalTime + child.startTime;
-                            min = Math.min(min || child.startTime, child.startTime);
-                            max = Math.max(max || endTime, endTime);
-                            exports.util.async(finishCallback);
-                        });
-                    },
-                    function finishFn() {
-                        var endTime = (this.totalTime) ? this.totalTime + this.startTime : Date.now();
-                        this.totalTime = Math.max(max, endTime) - Math.min(min, this.startTime);
-                        this.selfTime = this.totalTime - (max - min);
-                        exports.util.async(callback);
-                    }, this);
-            } else {
-                if (!this.totalTime) {
-                    this.totalTime = Date.now() - this.startTime;
-                }
-                this.selfTime = this.totalTime;
-                exports.util.async(callback);
-            }
+            this.adjustTime(Date.now());
+            exports.util.async(callback);
         };
 
         ScriptProfileNode.prototype.getNodeByCallerId = function getNodeByCallerId(callId) {
@@ -1653,6 +1632,25 @@ ConsoleIO.version = "0.2.1a";
             return (length > 0) ? this.children[length - 1] : null;
         };
 
+        ScriptProfileNode.prototype.adjustTime = function adjustTime(time) {
+            this.totalTime = time - this.startTime;
+
+            if (this.children.length > 0) {
+                var childTotalTime = 0;
+                util.forEach(this.children, function iterationFn(child) {
+                    childTotalTime += child.totalTime;
+                }, this);
+
+                if (childTotalTime > this.totalTime) {
+                    this.totalTime = childTotalTime;
+                }
+
+                this.selfTime = Math.abs(this.totalTime - childTotalTime);
+            } else {
+                this.selfTime = this.totalTime;
+            }
+        };
+
         ScriptProfileNode.prototype.begin = function begin(callId, time) {
             var node = this.getNodeByCallerId(callId);
             if (node) {
@@ -1666,8 +1664,11 @@ ConsoleIO.version = "0.2.1a";
         ScriptProfileNode.prototype.end = function end(callId, time) {
             var node = this.getNodeByCallerId(callId);
             if (node) {
-                node.totalTime = time - node.startTime;
+                node.adjustTime(time);
+                return true;
             }
+
+            return false;
         };
 
 
@@ -1687,41 +1688,46 @@ ConsoleIO.version = "0.2.1a";
             this.head.finish(callback);
         };
 
-        ScriptProfile.prototype.getActiveNode = function getActiveNode() {
+        ScriptProfile.prototype.getActiveNode = function getActiveNode(depth) {
             var i = 0,
-                nextNode,
                 node = this.head;
 
-            while (this.depth > ++i && !!(nextNode = node.getActiveNode())) {
-                node = nextNode;
+            depth = typeof depth === 'undefined' ? this.depth : depth;
+
+            if (depth > 0) {
+                do {
+                    node = node.getActiveNode();
+                } while (depth > ++i);
             }
 
-            return node || this.head;
+            return node;
         };
 
         ScriptProfile.prototype.begin = function begin(callId, beginTime, reset) {
-            exports.util.async((function (callId, beginTime, reset) {
-                return function () {
-                    if (reset) {
-                        this.depth = 0;
-                    }
+            if (reset) {
+                this.depth = 0;
+            }
 
-                    this.depth++;
-                    var node = this.getActiveNode();
+            if (!indexMap[callId]) {
+                indexMap[callId] = [];
+            }
 
-                    node.begin(callId, beginTime);
-                };
-            }(callId, beginTime, reset)), this);
+            indexMap[callId].push(this.depth);
+
+            this.getActiveNode().begin(callId, beginTime);
+            this.depth++;
         };
 
         ScriptProfile.prototype.end = function end(callId, endTime) {
-            exports.util.async((function (callId, endTime) {
-                return function () {
-                    var node = this.getActiveNode();
-                    node.end(callId, endTime);
-                    this.depth--;
-                };
-            }(callId, endTime)), this);
+            this.depth--;
+            if (indexMap[callId]) {
+                var node = this.getActiveNode(indexMap[callId].pop());
+                if (!node.end(callId, endTime)) {
+                    exports.console.log(callId + ' failed to find node.');
+                }
+            } else {
+                exports.console.log(callId + ' depth index not mapped.');
+            }
         };
 
         function getActiveProfiles() {

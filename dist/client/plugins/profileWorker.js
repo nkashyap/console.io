@@ -11,7 +11,8 @@
 
 var dataTable = {},
     store = [],
-    util = {};
+    util = {},
+    indexMap = {};
 
 util.noop = function noop() {
 };
@@ -130,39 +131,16 @@ function ScriptProfileNode(callId, time) {
     this.callUID = callId;
     this.startTime = time;
 
-    //this.totalTime = 0;
-    //this.selfTime = 0;
+    this.totalTime = 0;
+    this.selfTime = 0;
     this.numberOfCalls = 1;
     this.visible = true;
     this.children = [];
 }
 
 ScriptProfileNode.prototype.finish = function finish(callback) {
-    if (this.children.length > 0) {
-        var min, max;
-
-        util.asyncForEach(this.children,
-            function iterationFn(child, finishCallback) {
-                child.finish(function childFinishFn() {
-                    var endTime = child.totalTime + child.startTime;
-                    min = Math.min(min || child.startTime, child.startTime);
-                    max = Math.max(max || endTime, endTime);
-                    util.async(finishCallback);
-                });
-            },
-            function finishFn() {
-                var endTime = (this.totalTime) ? this.totalTime + this.startTime : Date.now();
-                this.totalTime = Math.max(max, endTime) - Math.min(min, this.startTime);
-                this.selfTime = this.totalTime - (max - min);
-                util.async(callback);
-            }, this);
-    } else {
-        if (!this.totalTime) {
-            this.totalTime = Date.now() - this.startTime;
-        }
-        this.selfTime = this.totalTime;
-        util.async(callback);
-    }
+    this.adjustTime(Date.now());
+    util.async(callback);
 };
 
 ScriptProfileNode.prototype.getNodeByCallerId = function getNodeByCallerId(callId) {
@@ -184,6 +162,25 @@ ScriptProfileNode.prototype.getActiveNode = function getActiveNode() {
     return (length > 0) ? this.children[length - 1] : null;
 };
 
+ScriptProfileNode.prototype.adjustTime = function adjustTime(time) {
+    this.totalTime = time - this.startTime;
+
+    if (this.children.length > 0) {
+        var childTotalTime = 0;
+        util.forEach(this.children, function iterationFn(child) {
+            childTotalTime += child.totalTime;
+        }, this);
+
+        if (childTotalTime > this.totalTime) {
+            this.totalTime = childTotalTime;
+        }
+
+        this.selfTime = Math.abs(this.totalTime - childTotalTime);
+    } else {
+        this.selfTime = this.totalTime;
+    }
+};
+
 ScriptProfileNode.prototype.begin = function begin(callId, time) {
     var node = this.getNodeByCallerId(callId);
     if (node) {
@@ -197,8 +194,11 @@ ScriptProfileNode.prototype.begin = function begin(callId, time) {
 ScriptProfileNode.prototype.end = function end(callId, time) {
     var node = this.getNodeByCallerId(callId);
     if (node) {
-        node.totalTime = time - node.startTime;
+        node.adjustTime(time);
+        return true;
     }
+
+    return false;
 };
 
 
@@ -219,16 +219,24 @@ ScriptProfile.prototype.finish = function finish(callback) {
     this.head.finish(callback);
 };
 
-ScriptProfile.prototype.getActiveNode = function getActiveNode() {
+
+ScriptProfile.prototype.toJSON = function toJSON() {
+    this.head.finish(callback);
+};
+
+ScriptProfile.prototype.getActiveNode = function getActiveNode(depth) {
     var i = 0,
-        nextNode,
         node = this.head;
 
-    while (this.depth > ++i && !!(nextNode = node.getActiveNode())) {
-        node = nextNode;
+    depth = typeof depth === 'undefined' ? this.depth : depth;
+
+    if (depth > 0) {
+        do {
+            node = node.getActiveNode();
+        } while (depth > ++i);
     }
 
-    return node || this.head;
+    return node;
 };
 
 ScriptProfile.prototype.begin = function begin(callId, beginTime, reset) {
@@ -236,16 +244,26 @@ ScriptProfile.prototype.begin = function begin(callId, beginTime, reset) {
         this.depth = 0;
     }
 
-    this.depth++;
-    var node = this.getActiveNode();
+    if (!indexMap[callId]) {
+        indexMap[callId] = [];
+    }
 
-    node.begin(callId, beginTime);
+    indexMap[callId].push(this.depth);
+
+    this.getActiveNode().begin(callId, beginTime);
+    this.depth++;
 };
 
 ScriptProfile.prototype.end = function end(callId, endTime) {
-    var node = this.getActiveNode();
-    node.end(callId, endTime);
     this.depth--;
+    if (indexMap[callId]) {
+        var node = this.getActiveNode(indexMap[callId].pop());
+        if (!node.end(callId, endTime)) {
+            postMessage({ type: 'error', message: callId + ' failed to find node.' });
+        }
+    } else {
+        postMessage({ type: 'error', message: callId + ' depth index not mapped.' });
+    }
 };
 
 
