@@ -9,7 +9,15 @@
 (function client() {
     return {
         configure: function configure(exports, global) {
-            var files = ["$MANAGER_WIDGET/Common/webapi/1.0/webapis.js"];
+            var files = ["$MANAGER_WIDGET/Common/webapi/1.0/webapis.js"],
+                connectionWatch = {
+                    onconnect: function (type) {
+                        exports.console.info(type + " is connected successfully");
+                    },
+                    ondisconnect: function (type) {
+                        exports.console.info(type + " is disconnected");
+                    }
+                };
 
             //global.alert = exports.console.info;
 
@@ -24,6 +32,10 @@
                 exports.client.onStatus(exports, global);
             });
 
+            function errorCallback() {
+                exports.console.exception(arguments);
+            }
+
             function load() {
                 exports.console.log('webapis.js loaded', typeof global.webapis);
                 exports.client.api = global.webapis;
@@ -31,6 +43,16 @@
                 if (!exports.serialNumber) {
                     exports.serialNumber = exports.client.api.tv.info.getDeviceID();
                     exports.storage.addItem('serialNumber', exports.serialNumber, 365);
+                }
+
+                try {
+                    exports.client.api.network.getAvailableNetworks(function networkSuccess(networks) {
+                        exports.util.forEach(networks, function (network) {
+                            network.setWatchListener(connectionWatch, errorCallback);
+                        });
+                    }, errorCallback);
+                } catch (e) {
+                    exports.console.exception(e);
                 }
 
                 exports.client.register();
