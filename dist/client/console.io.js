@@ -1236,6 +1236,7 @@ ConsoleIO.version = "0.2.2";
 
     var transport = exports.transport = {},
         pending = [],
+        lazyListener = [],
         config;
 
     function onMessage(event) {
@@ -1372,6 +1373,11 @@ ConsoleIO.version = "0.2.2";
         transport.io.on('connect_failed', onConnectFailed);
         transport.io.on('reconnect_failed', onReconnectFailed);
         transport.io.on('error', onError);
+
+        exports.util.forEach(lazyListener, function (item) {
+            transport.on(item.name, item.callback, item.scope);
+        });
+        lazyListener = [];
     };
 
     transport.emit = function emit(name, data) {
@@ -1385,9 +1391,13 @@ ConsoleIO.version = "0.2.2";
     };
 
     transport.on = function on(name, callback, scope) {
-        transport.io.on(name, function () {
-            callback.apply(scope || this, arguments);
-        });
+        if (transport.io) {
+            transport.io.on(name, function () {
+                callback.apply(scope || this, arguments);
+            });
+        } else {
+            lazyListener.push({ name: name, callback: callback, scope: scope });
+        }
     };
 
     transport.isConnected = function isConnected() {
