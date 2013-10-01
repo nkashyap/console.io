@@ -1,15 +1,15 @@
 /**
  * Name: console.io
- * Version: 0.2.1a
+ * Version: 0.2.2
  * Description: Javascript Remote Web Console
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-30
+ * Date: 2013-10-01
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
-ConsoleIO.version = "0.2.1a";
+ConsoleIO.version = "0.2.2";
 
 (function(){
 
@@ -2583,6 +2583,7 @@ ConsoleIO.version = "0.2.1a";
         base: '',
         secure: false,
         profile: false,
+        excludes: [],
 
         profileWorker: "plugins/profileWorker.js",
         html2canvas: "plugins/html2canvas.js",
@@ -2614,6 +2615,10 @@ ConsoleIO.version = "0.2.1a";
             config.filters = typeof config.filters === 'string' ? config.filters.split(',') : config.filters;
         }
 
+        if (typeof config.excludes !== 'undefined') {
+            config.excludes = typeof config.excludes === 'string' ? config.excludes.split(',') : config.excludes;
+        }
+
         return config;
     }
 
@@ -2627,13 +2632,27 @@ ConsoleIO.version = "0.2.1a";
         }
     }
 
+    function isURLExcluded(url) {
+        var exclude = false;
+
+        exports.util.every(exports.getConfig().excludes, function (folder) {
+            if (url.indexOf(folder + '/') > -1) {
+                exclude = true;
+                return false;
+            }
+            return true;
+        });
+
+        return exclude;
+    }
+
     function profilerSetUp() {
         if (exports.util.foundRequireJS()) {
             var requirejsLoad = global.requirejs.load,
                 baseUrl = exports.util.getUrl('profiler');
 
             global.requirejs.load = function (context, moduleName, url) {
-                requirejsLoad.call(global.requirejs, context, moduleName, exports.util.getProfileUrl(baseUrl, url));
+                requirejsLoad.call(global.requirejs, context, moduleName, isURLExcluded(url) ? url : exports.util.getProfileUrl(baseUrl, url));
             };
         }
 

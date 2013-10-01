@@ -326,7 +326,8 @@ NOTE: Only IIS8 supports websockets therefore Console.IO is configured to used x
 
 ### PROFILER
 
-Profile tab will only appear in the application when profiler is enabled on client.
+Profile support is now added in Console.IO. Profile tab is only displayed when profiler is enabled and it can only enabled from client side.
+
 NOTE:it only works when files are loaded using RequireJS at the moment.
 
 #### Enabling profiler from client
@@ -334,7 +335,7 @@ NOTE:it only works when files are loaded using RequireJS at the moment.
 ##### Include Script directly
 
 ```html
-<script type="text/javascript" src="/console.io/console.io.js?profile=true"></script>
+<script type="text/javascript" src="/console.io/console.io.js?profile=true&excludes=folder1,folder2"></script>
 ```
 
 ##### Via RequireJS
@@ -343,7 +344,8 @@ NOTE:it only works when files are loaded using RequireJS at the moment.
     // usage
     define(['console.io'], function (consoleio) {
         consoleio.configure({
-            profile: true
+            profile: true,
+            excludes: ['folder1','folder2']
         });
     });
 ```

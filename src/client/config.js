@@ -16,6 +16,7 @@
         base: '',
         secure: false,
         profile: false,
+        excludes: [],
 
         profileWorker: "plugins/profileWorker.js",
         html2canvas: "plugins/html2canvas.js",
@@ -47,6 +48,10 @@
             config.filters = typeof config.filters === 'string' ? config.filters.split(',') : config.filters;
         }
 
+        if (typeof config.excludes !== 'undefined') {
+            config.excludes = typeof config.excludes === 'string' ? config.excludes.split(',') : config.excludes;
+        }
+
         return config;
     }
 
@@ -60,13 +65,27 @@
         }
     }
 
+    function isURLExcluded(url) {
+        var exclude = false;
+
+        exports.util.every(exports.getConfig().excludes, function (folder) {
+            if (url.indexOf(folder + '/') > -1) {
+                exclude = true;
+                return false;
+            }
+            return true;
+        });
+
+        return exclude;
+    }
+
     function profilerSetUp() {
         if (exports.util.foundRequireJS()) {
             var requirejsLoad = global.requirejs.load,
                 baseUrl = exports.util.getUrl('profiler');
 
             global.requirejs.load = function (context, moduleName, url) {
-                requirejsLoad.call(global.requirejs, context, moduleName, exports.util.getProfileUrl(baseUrl, url));
+                requirejsLoad.call(global.requirejs, context, moduleName, isURLExcluded(url) ? url : exports.util.getProfileUrl(baseUrl, url));
             };
         }
 
