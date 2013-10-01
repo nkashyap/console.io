@@ -334,7 +334,7 @@ NOTE:it only works when files are loaded using RequireJS at the moment.
 ##### Include Script directly
 
 ```html
-<script type="text/javascript" src="/console.io/console.io.js?profiler=true"></script>
+<script type="text/javascript" src="/console.io/console.io.js?profile=true"></script>
 ```
 
 ##### Via RequireJS
@@ -343,7 +343,7 @@ NOTE:it only works when files are loaded using RequireJS at the moment.
     // usage
     define(['console.io'], function (consoleio) {
         consoleio.configure({
-            profiler: true
+            profile: true
         });
     });
 ```
