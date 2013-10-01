@@ -74,14 +74,16 @@ function main() {
         // If this node.js application is hosted in IIS, assume it is hosted
         if (process.env.IISNODE_VERSION) {
             base = '/console.io/';
-            //config.io.development.set.push({ 'transports': ['htmlfile', 'xhr-polling', 'jsonp-polling']});
-            //config.io.production.set.push({ 'transports': ['htmlfile', 'xhr-polling', 'jsonp-polling']});
+            if (config.iisVersion < 8) {
+                config.io.development.set.push({ 'transports': ['htmlfile', 'xhr-polling', 'jsonp-polling']});
+                config.io.production.set.push({ 'transports': ['htmlfile', 'xhr-polling', 'jsonp-polling']});
 
-            // IISNODE set long connection timeout
-            //var Transport = require('../node_modules/express.io/node_modules/socket.io/lib/transport');
-            //Transport.prototype.setCloseTimeout = function () {
-            //    this.log.debug('set close timeout for client', this.id);
-            //};
+                //IISNODE set long connection timeout
+                var Transport = require('../node_modules/express.io/node_modules/socket.io/lib/transport');
+                Transport.prototype.setCloseTimeout = function () {
+                    this.log.debug('set close timeout for client', this.id);
+                };
+            }
         }
 
         config.io.development.set.push({ 'resource': base + 'socket.io' });
