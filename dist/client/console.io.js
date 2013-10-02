@@ -2575,8 +2575,8 @@ ConsoleIO.version = "0.2.2";
         if (!!global.localStorage && !!global.sessionStorage) {
             data.push({
                 storage: {
-                    Local: getStorage(global.localStorage),
-                    Session: getStorage(global.sessionStorage)
+                    localStorage: getStorage(global.localStorage),
+                    sessionStorage: getStorage(global.sessionStorage)
                 }
             });
         }
