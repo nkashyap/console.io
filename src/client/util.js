@@ -170,7 +170,8 @@
         }
 
         var node = document.createElement('script'),
-            head = document.getElementsByTagName('head')[0];
+            head = document.getElementsByTagName('head')[0],
+            config = exports.getConfig();
 
         node.type = 'text/javascript';
         node.charset = 'utf-8';
@@ -198,6 +199,12 @@
         }
 
         function onScriptError() {
+            if (config.web) {
+                exports.console.exception(url, arguments);
+            } else {
+                exports.debug('failed to load ' + url);
+            }
+
             node.removeEventListener('error', onScriptError, false);
         }
 

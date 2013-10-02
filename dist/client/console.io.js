@@ -213,6 +213,13 @@ ConsoleIO.version = "0.2.2";
         }
 
         function onScriptError() {
+            var config = exports.getConfig();
+            if (config.web) {
+                exports.console.exception(url, arguments);
+            } else {
+                exports.debug('failed to load ' + url);
+            }
+
             node.removeEventListener('error', onScriptError, false);
         }
 
