@@ -99,7 +99,7 @@ ConsoleIO.View.Device.Status.prototype.add = function add(name, value, label) {
         if (typeof value === 'object') {
             ConsoleIO.forEachProperty(value, function (val, itemName) {
                 id = this.getUniqueId(this.id, name);
-                grid.addRow(id, [name + ':' + itemName, val]);
+                grid.addRow(id, [name + '.' + itemName, val]);
                 grid.setCellTextStyle(id, 0, "font-weight:bold;");
             }, this);
         } else {

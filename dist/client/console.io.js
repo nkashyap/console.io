@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-10-01
+ * Date: 2013-10-02
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -2506,6 +2506,83 @@ ConsoleIO.version = "0.2.2";
         }
     }
 
+    function getStorage(storage) {
+        var key, i = 0,
+            data = {},
+            length = storage.length;
+
+        while (i < length) {
+            key = storage.key(i++);
+            if (key) {
+                data[key] = storage.getItem(key);
+            }
+        }
+
+        return data;
+    }
+
+    client.getMore = function getMore() {
+        var data = [
+            {
+                supports: {
+                    WebWorker: !!global.Worker,
+                    WebSocket: !!global.WebSocket,
+                    Storage: !!global.Storage,
+                    LocalStorage: !!global.localStorage,
+                    SessionStorage: !!global.sessionStorage,
+                    IDBFactory: !!global.IDBFactory,
+                    ApplicationCache: !!global.applicationCache,
+                    Console: !!exports.console._native,
+                    "Object": {
+                        create: !!Object.create,
+                        keys: !!Object.keys,
+                        getPrototypeOf: !!Object.getPrototypeOf,
+                        defineProperty: !!Object.defineProperty,
+                        defineProperties: !!Object.defineProperties,
+                        getOwnPropertyDescriptor: !!Object.getOwnPropertyDescriptor,
+                        preventExtensions: !!Object.preventExtensions,
+                        isExtensible: !!Object.isExtensible,
+                        seal: !!Object.seal,
+                        isSealed: !!Object.isSealed,
+                        freeze: !!Object.freeze,
+                        isFrozen: !!Object.isFrozen
+                    },
+                    "Array": {
+                        isArray: !!Array.isArray,
+                        'prototype.indexOf': !!Array.prototype.indexOf,
+                        'prototype.lastIndexOf': !!Array.prototype.lastIndexOf,
+                        'prototype.reduceRight': !!Array.prototype.reduceRight,
+                        'prototype.reduce': !!Array.prototype.reduce,
+                        'prototype.map': !!Array.prototype.map,
+                        'prototype.forEach': !!Array.prototype.forEach,
+                        'prototype.some': !!Array.prototype.some,
+                        'prototype.every': !!Array.prototype.every,
+                        'prototype.filter': !!Array.prototype.filter
+                    },
+                    "Function": {
+                        'prototype.bind': !!Function.prototype.bind
+                    },
+                    "Date": {
+                        'prototype.toJSON': !!Date.prototype.toJSON
+                    },
+                    "String": {
+                        'prototype.trim': !!String.prototype.trim
+                    }
+                }
+            }
+        ];
+
+        if (!!global.localStorage && !!global.sessionStorage) {
+            data.push({
+                storage: {
+                    Local: getStorage(global.localStorage),
+                    Session: getStorage(global.sessionStorage)
+                }
+            });
+        }
+
+        return data;
+    };
 
     client.jsonify = function jsonify(obj) {
         var returnObj = {},

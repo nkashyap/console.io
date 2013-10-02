@@ -31,7 +31,7 @@
             info.push({ location: exports.client.jsonify(global.location) });
             info.push({ screen: exports.client.jsonify(global.screen) });
 
-            exports.transport.emit('status', { info: info });
+            exports.transport.emit('status', { info: info.concat(exports.client.getMore()) });
         }
     };
 }());

@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-10-01
+ * Date: 2013-10-02
 */
 
 /**
@@ -1486,7 +1486,7 @@ ConsoleIO.View.Device.Status.prototype.add = function add(name, value, label) {
         if (typeof value === 'object') {
             ConsoleIO.forEachProperty(value, function (val, itemName) {
                 id = this.getUniqueId(this.id, name);
-                grid.addRow(id, [name + ':' + itemName, val]);
+                grid.addRow(id, [name + '.' + itemName, val]);
                 grid.setCellTextStyle(id, 0, "font-weight:bold;");
             }, this);
         } else {

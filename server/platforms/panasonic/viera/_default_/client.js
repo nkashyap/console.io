@@ -12,7 +12,7 @@
             exports.client.api = global.PanasonicDevice;
 
             if (!exports.serialNumber) {
-                exports.serialNumber = ((new Date().getTime()) + "-" + Math.random()).replace(".", "");
+                exports.serialNumber = exports.client.api.configuration.localSystem.networkInterfaces.item(0);
                 exports.storage.addItem('serialNumber', exports.serialNumber, 365);
             }
 
@@ -36,12 +36,12 @@
                 macAddress: network.macAddress
             }});
 
-            info.push({ document: { cookie: document.cookie }});
+            info.push({ document: { cookie: global.document.cookie }});
             info.push({ navigator: exports.client.jsonify(global.navigator) });
             info.push({ location: exports.client.jsonify(global.location) });
             info.push({ screen: exports.client.jsonify(global.screen) });
 
-            exports.transport.emit('status', { info: info });
+            exports.transport.emit('status', { info: info.concat(exports.client.getMore()) });
         }
     };
 }());
