@@ -510,6 +510,10 @@
                     },
                     "String": {
                         'prototype.trim': !!String.prototype.trim
+                    },
+                    "JSON": {
+                        'parse': !!JSON.parse,
+                        'stringify': !!JSON.stringify
                     }
                 }
             }
