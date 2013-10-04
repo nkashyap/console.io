@@ -40,6 +40,7 @@
     function getSettings() {
         var config = exports.config || exports.util.queryParams();
 
+        config.webOnly = config.webonly || config.webOnly;
         config.webOnly = config.webOnly === true || (config.webOnly || '').toLowerCase() === 'true';
         config.web = config.web === true || (config.web || '').toLowerCase() === 'true';
         config.secure = config.secure === true || (config.secure || '').toLowerCase() === 'true';
