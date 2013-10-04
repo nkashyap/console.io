@@ -31,7 +31,7 @@
 var config = {
 
     domain: null,
-    iisVersion: 8,
+    iisVersion: 7,
 
     /** express configurations **/
     express: {
