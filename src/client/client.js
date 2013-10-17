@@ -512,8 +512,8 @@
                         'prototype.trim': !!String.prototype.trim
                     },
                     "JSON": {
-                        'parse': !!JSON.parse,
-                        'stringify': !!JSON.stringify
+                        'parse': !!global.JSON && !!global.JSON.parse,
+                        'stringify': !!global.JSON && !!global.JSON.stringify
                     }
                 }
             }

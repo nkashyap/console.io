@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-10-04
+ * Date: 2013-10-17
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -2576,8 +2576,8 @@ ConsoleIO.version = "0.2.2";
                         'prototype.trim': !!String.prototype.trim
                     },
                     "JSON": {
-                        'parse': !!JSON.parse,
-                        'stringify': !!JSON.stringify
+                        'parse': !!global.JSON && !!global.JSON.parse,
+                        'stringify': !!global.JSON && !!global.JSON.stringify
                     }
                 }
             }
@@ -3132,6 +3132,7 @@ ConsoleIO.version = "0.2.2";
 
         var styles = [
             'background-color: rgba(244, 244, 244, 0.9)',
+            'background-color: rgb(244, 244, 244)',
             'color: black',
             'z-index: 5000',
             'overflow: auto',

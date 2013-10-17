@@ -220,6 +220,7 @@
 
         var styles = [
             'background-color: rgba(244, 244, 244, 0.9)',
+            'background-color: rgb(244, 244, 244)',
             'color: black',
             'z-index: 5000',
             'overflow: auto',
