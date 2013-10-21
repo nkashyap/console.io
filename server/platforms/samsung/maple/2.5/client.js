@@ -9,15 +9,7 @@
 (function client() {
     return {
         configure: function configure(exports, global) {
-            var files = ["$MANAGER_WIDGET/Common/webapi/1.0/deviceapis.js"],
-                connectionWatch = {
-                    onconnect: function (type) {
-                        exports.console.info(type + " is connected successfully");
-                    },
-                    ondisconnect: function (type) {
-                        exports.console.info(type + " is disconnected");
-                    }
-                };
+            var files = ["$MANAGER_WIDGET/Common/webapi/1.0/deviceapis.js"];
 
             //global.alert = exports.console.info;
 
@@ -48,7 +40,9 @@
                 try {
                     exports.client.api.network.getAvailableNetworks(function networkSuccess(networks) {
                         exports.util.forEach(networks, function (network) {
-                            network.setWatchListener(connectionWatch, errorCallback);
+                            network.watchConnectionStatus(function (connectionStatus) {
+                                exports.console.info(connectionStatus);
+                            }, errorCallback);
                         });
                     }, errorCallback);
                 } catch (e) {
