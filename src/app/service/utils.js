@@ -22,6 +22,10 @@ if (typeof window.ConsoleIO === "undefined") {
             }
         },
 
+        getOrigin: function getOrigin() {
+            return window.location.origin || window.location.protocol + '//' + (window.location.host || window.location.hostname + ':' + window.location.port);
+        },
+
         ready: function ready(callback) {
             function DOMContentLoaded() {
                 if (document.addEventListener) {
