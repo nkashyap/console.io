@@ -13,14 +13,6 @@
 
     var stacktrace = exports.stacktrace = {};
 
-    function create() {
-        try {
-            undefined();
-        } catch (e) {
-            return e;
-        }
-    }
-
     function getFormatter(e) {
         if (e['arguments'] && e.stack) {
             return exports.formatter.chrome;
@@ -59,9 +51,18 @@
 
     stacktrace.allowedErrorStackLookUp = ['Error', 'ErrorEvent', 'DOMException', 'PositionError'];
 
-    stacktrace.get = function get(e) {
-        e = e || create();
+    stacktrace.create = function create(message) {
+        try {
+            //undefined();
+            throw new Error(message);
+        } catch (e) {
+            // remove error string from stack
+            e.stack = e.stack.replace("Error: ", "");
+            return e;
+        }
+    };
 
+    stacktrace.get = function get(e) {
         var formatterFn = getFormatter(e);
         if (typeof formatterFn === 'function') {
             return formatterFn(e);

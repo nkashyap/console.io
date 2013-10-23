@@ -54,10 +54,12 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Search,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.FilterLabel,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Info,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Log,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Warn,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Info,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Debug,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Warn,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Trace,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Error
         ]
     });

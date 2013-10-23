@@ -46,9 +46,13 @@
 
     console.assert = function assert(x) {
         if (!x) {
-            var args = ['Assertion failed:'];
+            var args = ['Assertion failed:'],
+                traceList = exports.stacktrace.get(exports.stacktrace.create());
+
             args = args.concat(exports.util.toArray(arguments).slice(1));
-            send("assert", arguments, exports.stringify.parse(args), exports.stacktrace.get());
+            traceList.splice(0, 3);
+
+            send("assert", arguments, exports.stringify.parse(args), traceList);
         } else {
             send("assert", arguments);
         }
@@ -171,7 +175,21 @@
     };
 
     console.error = function error(e) {
-        send("error", arguments, null, exports.stacktrace.get(e));
+        var traceList,
+            message = null;
+
+        if (!e) {
+            message = "Unknown Error";
+            e = exports.stacktrace.create(message);
+        }
+
+        traceList = exports.stacktrace.get(e);
+
+        if (message === "Unknown Error") {
+            traceList.splice(0, 3);
+        }
+
+        send("error", arguments, message, traceList);
     };
 
     console.exception = function exception(e) {
@@ -179,7 +197,9 @@
     };
 
     console.trace = function trace() {
-        send("trace", arguments, null, exports.stacktrace.get());
+        var traceList = exports.stacktrace.get(exports.stacktrace.create());
+        traceList.splice(0, 3);
+        send("trace", arguments, "console.trace()", traceList);
     };
 
     console.clear = function clear() {

@@ -71,7 +71,9 @@ ConsoleIO.Model.DHTMLX = {
         Info: { id: 'filter-info', type: 'twoState', text: 'Info', imgEnabled: 'info.gif', tooltip: 'Info', pressed: false },
         Log: { id: 'filter-log', type: 'twoState', text: 'Log', imgEnabled: 'log.png', tooltip: 'Log', pressed: false },
         Warn: { id: 'filter-warn', type: 'twoState', text: 'Warn', imgEnabled: 'warn.png', tooltip: 'Warn', pressed: false },
+
         Debug: { id: 'filter-debug', type: 'twoState', text: 'Debug', imgEnabled: 'debug.gif', tooltip: 'Debug', pressed: false },
+        Trace: { id: 'filter-trace', type: 'twoState', text: 'Trace', imgEnabled: 'trace.png', tooltip: 'Trace', pressed: false },
         Error: { id: 'filter-error', type: 'twoState', text: 'Error', imgEnabled: 'error.gif', tooltip: 'Error', pressed: false }
     }
 };
