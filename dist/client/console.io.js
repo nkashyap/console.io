@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-10-17
+ * Date: 2013-10-23
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -1164,14 +1164,6 @@ ConsoleIO.version = "0.2.2";
 
     var stacktrace = exports.stacktrace = {};
 
-    function create() {
-        try {
-            undefined();
-        } catch (e) {
-            return e;
-        }
-    }
-
     function getFormatter(e) {
         if (e['arguments'] && e.stack) {
             return exports.formatter.chrome;
@@ -1210,9 +1202,18 @@ ConsoleIO.version = "0.2.2";
 
     stacktrace.allowedErrorStackLookUp = ['Error', 'ErrorEvent', 'DOMException', 'PositionError'];
 
-    stacktrace.get = function get(e) {
-        e = e || create();
+    stacktrace.create = function create(message) {
+        try {
+            //undefined();
+            throw new Error(message);
+        } catch (e) {
+            // remove error string from stack
+            e.stack = e.stack.replace("Error: ", "");
+            return e;
+        }
+    };
 
+    stacktrace.get = function get(e) {
         var formatterFn = getFormatter(e);
         if (typeof formatterFn === 'function') {
             return formatterFn(e);
@@ -1912,9 +1913,13 @@ ConsoleIO.version = "0.2.2";
 
     console.assert = function assert(x) {
         if (!x) {
-            var args = ['Assertion failed:'];
+            var args = ['Assertion failed:'],
+                traceList = exports.stacktrace.get(exports.stacktrace.create());
+
             args = args.concat(exports.util.toArray(arguments).slice(1));
-            send("assert", arguments, exports.stringify.parse(args), exports.stacktrace.get());
+            traceList.splice(0, 3);
+
+            send("assert", arguments, exports.stringify.parse(args), traceList);
         } else {
             send("assert", arguments);
         }
@@ -2037,7 +2042,21 @@ ConsoleIO.version = "0.2.2";
     };
 
     console.error = function error(e) {
-        send("error", arguments, null, exports.stacktrace.get(e));
+        var traceList,
+            message = null;
+
+        if (!e) {
+            message = "Unknown Error";
+            e = exports.stacktrace.create(message);
+        }
+
+        traceList = exports.stacktrace.get(e);
+
+        if (message === "Unknown Error") {
+            traceList.splice(0, 3);
+        }
+
+        send("error", arguments, message, traceList);
     };
 
     console.exception = function exception(e) {
@@ -2045,7 +2064,9 @@ ConsoleIO.version = "0.2.2";
     };
 
     console.trace = function trace() {
-        send("trace", arguments, null, exports.stacktrace.get());
+        var traceList = exports.stacktrace.get(exports.stacktrace.create());
+        traceList.splice(0, 3);
+        send("trace", arguments, "console.trace()", traceList);
     };
 
     console.clear = function clear() {
@@ -2995,23 +3016,31 @@ ConsoleIO.version = "0.2.2";
     };
 
     Controller.prototype.setControl = function setControl(data) {
+        var reload = false;
         if (typeof data.paused !== 'undefined') {
             this.control.paused = data.paused;
         }
 
         if (typeof data.filters !== 'undefined') {
+            if (this.control.filters.length !== data.filters.length) {
+                reload = true;
+            }
             this.control.filters = data.filters;
         }
 
         if (data.pageSize !== this.control.pageSize) {
             this.control.pageSize = data.pageSize;
+            reload = true;
         }
 
         if (data.search !== this.control.search) {
             this.applySearch(data.search);
+            reload = true;
         }
 
-        this.view.clear();
+        if (reload || data.clear) {
+            this.view.clear();
+        }
 
         if (!data.clear) {
             this.view.addBatch(this.getData(this.store.added));
