@@ -400,6 +400,7 @@ Device.prototype.webStatus = function webStatus(data) {
 Device.prototype.control = function control(data) {
     this.web.config = data;
     this.emit('web:control', data);
+    this.web.config.clear = false;
 };
 
 Device.prototype.requestSource = function requestSource(name, data) {

@@ -75,6 +75,7 @@
     }
 
     transport.connectionMode = '';
+    transport.paused = false;
 
     transport.setUp = function setUp() {
         /** Fix for old Opera and Maple browsers
@@ -129,11 +130,17 @@
 
         // set console.io event
         exports.console.on('console', function (data) {
-            transport.emit('console', {
+            var msg = {
                 type: data.type,
                 message: escape(data.message),
                 stack: data.stack
-            });
+            };
+
+            if (transport.paused) {
+                pending.push({ name: 'console', data: msg });
+            } else {
+                transport.emit('console', msg);
+            }
         });
 
         if (global.addEventListener) {

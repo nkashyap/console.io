@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-10-23
+ * Date: 2013-10-25
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -1306,6 +1306,7 @@ ConsoleIO.version = "0.2.2";
     }
 
     transport.connectionMode = '';
+    transport.paused = false;
 
     transport.setUp = function setUp() {
         /** Fix for old Opera and Maple browsers
@@ -1360,11 +1361,17 @@ ConsoleIO.version = "0.2.2";
 
         // set console.io event
         exports.console.on('console', function (data) {
-            transport.emit('console', {
+            var msg = {
                 type: data.type,
                 message: escape(data.message),
                 stack: data.stack
-            });
+            };
+
+            if (transport.paused) {
+                pending.push({ name: 'console', data: msg });
+            } else {
+                transport.emit('console', msg);
+            }
         });
 
         if (global.addEventListener) {
@@ -2202,6 +2209,10 @@ ConsoleIO.version = "0.2.2";
     function configWebConsole(data) {
         if (data) {
             exports.web.setConfig(data);
+            exports.transport.paused = data.paused;
+            if (!data.paused) {
+                exports.transport.clearPendingQueue();
+            }
         }
     }
 
@@ -3045,6 +3056,8 @@ ConsoleIO.version = "0.2.2";
         if (!data.clear) {
             this.view.addBatch(this.getData(this.store.added));
             this.addBatch();
+        } else {
+            this.store.added = [];
         }
     };
 

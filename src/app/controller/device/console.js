@@ -208,6 +208,7 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
                     break;
                 case 'clear':
                     this.view.clear();
+                    this.store.added = [];
                     this.notify(true);
                     break;
                 case 'search':

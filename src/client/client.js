@@ -117,6 +117,10 @@
     function configWebConsole(data) {
         if (data) {
             exports.web.setConfig(data);
+            exports.transport.paused = data.paused;
+            if (!data.paused) {
+                exports.transport.clearPendingQueue();
+            }
         }
     }
 

@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-10-23
+ * Date: 2013-10-25
 */
 
 /**
@@ -2396,6 +2396,7 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
                     break;
                 case 'clear':
                     this.view.clear();
+                    this.store.added = [];
                     this.notify(true);
                     break;
                 case 'search':

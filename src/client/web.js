@@ -112,6 +112,8 @@
         if (!data.clear) {
             this.view.addBatch(this.getData(this.store.added));
             this.addBatch();
+        } else {
+            this.store.added = [];
         }
     };
 
