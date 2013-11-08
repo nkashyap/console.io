@@ -47,7 +47,7 @@ ConsoleIO.Model.DHTMLX = {
         Undo: { id: 'undo', type: 'button', text: 'Undo', imgEnabled: 'undo.png', imgDisabled: 'undo_dis.png', tooltip: 'Undo', disabled: true },
         Redo: { id: 'redo', type: 'button', text: 'Redo', imgEnabled: 'redo.png', imgDisabled: 'redo_dis.png', tooltip: 'Redo', disabled: true },
 
-        SelectAll: { id: 'selectAll', type: 'button', text: 'Select All', imgEnabled: 'select_all.png', tooltip: 'Select All' },
+        SelectAll: { id: 'selectAll', type: 'button', text: 'Select All', imgEnabled: 'select_all.png', imgDisabled: 'select_all_dis.png', tooltip: 'Select All' },
         Cut: { id: 'cut', type: 'button', text: 'Cut', imgEnabled: 'cut.png', imgDisabled: 'cut_dis.png', tooltip: 'Cut' },
         Copy: { id: 'copy', type: 'button', text: 'Copy', imgEnabled: 'copy.png', imgDisabled: 'copy_dis.png', tooltip: 'Copy' },
         Paste: { id: 'paste', type: 'button', text: 'Paste', imgEnabled: 'paste.png', imgDisabled: 'paste_dis.png', tooltip: 'Paste' },
@@ -67,8 +67,8 @@ ConsoleIO.Model.DHTMLX = {
 
         Web: { id: 'web', type: 'twoState', text: 'Web Console', imgEnabled: 'console.png', tooltip: 'Web Console', pressed: false },
         PlayPause: { id: 'playPause', type: 'twoState', text: 'Pause', imgEnabled: 'pause.png', tooltip: 'Pause logs', pressed: false },
-        WordWrap: { id: 'wordwrap', type: 'twoState', text: 'Word-Wrap', imgEnabled: 'word_wrap.png', tooltip: 'Word Wrap', pressed: false },
-        Beautify: { id: 'beautify', type: 'twoState', text: 'Beautify', imgEnabled: 'beautify.png', tooltip: 'Beautify', pressed: false },
+        WordWrap: { id: 'wordwrap', type: 'twoState', text: 'Word-Wrap', imgEnabled: 'word_wrap.png', imgDisabled: 'word_wrap_dis.png', tooltip: 'Word Wrap', pressed: false },
+        Beautify: { id: 'beautify', type: 'twoState', text: 'Beautify', imgEnabled: 'beautify.png', imgDisabled: 'beautify_dis.png', tooltip: 'Beautify', pressed: false },
 
 
         FilterLabel: { id: 'filterLabel', type: 'text', text: 'Filters:', tooltip: 'Filter Console Logs' },

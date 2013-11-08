@@ -7,9 +7,9 @@
  * Repositories: https://github.com/nkashyap
  */
 
-ConsoleIO.namespace("ConsoleIO.View.Device.Preview");
+ConsoleIO.namespace("ConsoleIO.View.Device.HTML");
 
-ConsoleIO.View.Device.Preview = function PreviewView(ctrl, model) {
+ConsoleIO.View.Device.HTML = function HTMLView(ctrl, model) {
     this.ctrl = ctrl;
     this.model = model;
     this.target = null;
@@ -22,7 +22,7 @@ ConsoleIO.View.Device.Preview = function PreviewView(ctrl, model) {
 };
 
 
-ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
+ConsoleIO.View.Device.HTML.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.id, this.model.name);
     this.tab = this.target.cells(this.id);
@@ -43,7 +43,8 @@ ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
         tag: 'iframe',
         attr: {
             height: '100%',
-            width: '100%'
+            width: '100%',
+            style: 'display:none;'
         },
         target: document.body
     });
@@ -60,7 +61,7 @@ ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
     this.dhxWins.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('win'));
 };
 
-ConsoleIO.View.Device.Preview.prototype.destroy = function destroy() {
+ConsoleIO.View.Device.HTML.prototype.destroy = function destroy() {
     document.body.removeChild(this.previewFrame);
     document.body.removeChild(this.image);
     this.dhxWins.unload();
@@ -68,35 +69,62 @@ ConsoleIO.View.Device.Preview.prototype.destroy = function destroy() {
 };
 
 
-ConsoleIO.View.Device.Preview.prototype.toggleButton = function toggleButton(id, state) {
-    if (this.toolbar) {
+ConsoleIO.View.Device.HTML.prototype.toggleButton = function toggleButton(name, state) {
+    var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+    if (this.toolbar && item) {
         if (state) {
-            this.toolbar.enableItem(id);
+            this.toolbar.enableItem(item.id);
         } else {
-            this.toolbar.disableItem(id);
+            this.toolbar.disableItem(item.id);
         }
     }
 };
 
-ConsoleIO.View.Device.Preview.prototype.preview = function preview(data) {
-    if (this.dhxWins) {
-        this.previewFrame.src = "data:text/html," + escape(data.content);
+ConsoleIO.View.Device.HTML.prototype.show = function show() {
+    this.previewFrame.style.display = 'block';
+    this.tab.attachObject(this.previewFrame);
+};
 
-        var win = this.dhxWins.createWindow("preview", 0, 0, 900, 700);
-        win.setText("Preview");
-        win.button('park').hide();
-        win.keepInViewport(true);
-        win.setModal(true);
-        win.centerOnScreen();
-        win.button("close").attachEvent("onClick", function () {
-            win.detachObject(this.previewFrame);
-            win.close();
-        }, this);
-        win.attachObject(this.previewFrame);
+ConsoleIO.View.Device.HTML.prototype.hide = function hide() {
+    this.previewFrame.style.display = 'none';
+    this.tab.detachObject(this.previewFrame);
+};
+
+ConsoleIO.View.Device.HTML.prototype.preview = function preview(data) {
+    if (this.ctrl.remoteControl) {
+        this.unbind();
+    }
+
+    this.previewFrame.src = "javascript:false;";
+    ConsoleIO.async(function () {
+        this.previewFrame.contentWindow.document.head.innerHTML = data.style;
+        this.previewFrame.contentWindow.document.body.innerHTML = data.body;
+        if (this.ctrl.remoteControl) {
+            this.bind();
+        }
+
+    }, this);
+};
+
+ConsoleIO.View.Device.HTML.prototype.bind = function bind() {
+    var win = this.previewFrame.contentWindow || this.previewFrame.contentDocument;
+    if (win.document) {
+        ConsoleIO.forEachProperty(this.ctrl.events, function(fn, name){
+            ConsoleIO.addEventListener(win.document.body, name, fn);
+        }, this.ctrl);
     }
 };
 
-ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
+ConsoleIO.View.Device.HTML.prototype.unbind = function unbind() {
+    var win = this.previewFrame.contentWindow || this.previewFrame.contentDocument;
+    if (win.document) {
+        ConsoleIO.forEachProperty(this.ctrl.events, function(fn, name){
+            ConsoleIO.removeEventListener(win.document.body, name, fn);
+        }, this.ctrl);
+    }
+};
+
+ConsoleIO.View.Device.HTML.prototype.screenShot = function screenShot(data) {
     if (this.dhxWins) {
         if (data.screen) {
             this.image.src = data.screen;
@@ -120,11 +148,11 @@ ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
 };
 
 
-ConsoleIO.View.Device.Preview.prototype.setTabActive = function setTabActive() {
+ConsoleIO.View.Device.HTML.prototype.setTabActive = function setTabActive() {
     this.target.setTabActive(this.id);
 };
 
-ConsoleIO.View.Device.Preview.prototype.setItemState = function setItemState(name, state) {
+ConsoleIO.View.Device.HTML.prototype.setItemState = function setItemState(name, state) {
     if (this.toolbar) {
         var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
         if (item) {

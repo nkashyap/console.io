@@ -49,7 +49,6 @@ ConsoleIO.View.Editor.prototype.destroy = function destroy() {
     }
 };
 
-
 ConsoleIO.View.Editor.prototype.fileList = function fileList(data) {
     var scope = this;
     this.toolbar.forEachListOption('open', function (id) {
@@ -81,6 +80,17 @@ ConsoleIO.View.Editor.prototype.createElements = function createElements() {
         target: this.container
     });
 };
+
+ConsoleIO.View.Editor.prototype.show = function show() {
+    this.container.style.display = 'block';
+    this.target.attachObject(this.container);
+};
+
+ConsoleIO.View.Editor.prototype.hide = function hide() {
+    this.container.style.display = 'none';
+    this.target.detachObject(this.container);
+};
+
 
 ConsoleIO.View.Editor.prototype.toggleButton = function toggleButton(id, state) {
     if (this.toolbar) {

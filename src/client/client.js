@@ -346,24 +346,49 @@
         }(location.href)), 100);
     }
 
-    function onHTMLContent() {
+    function onHTMLSource() {
         exports.web.hide();
-        dataPacket('content', {
+        dataPacket('htmlDocument', {
             content: document.documentElement.innerHTML
         });
         exports.web.show();
     }
 
-    function onPreview() {
+    function onHTMLPreview() {
         exports.web.hide();
 
-        exports.transport.emit('previewContent', {
-            content: '<html><head><style type="text/css">' +
-                getStyleRule() + '</style></head>' +
-                getStyledElement().outerHTML + '</html>'
+        exports.transport.emit('htmlContent', {
+            style: '<style type="text/css">' + getStyleRule() + '</style>',
+            body: getStyledElement().outerHTML
         });
 
         exports.web.show();
+    }
+
+    function onRemoteEvent(data) {
+        var element = document.querySelector(data.selector),
+            opt = {
+                'view': global,
+                'bubbles': true,
+                'cancelable': true
+            },
+            moveEvent = new global[data.event]('mousemove', opt),
+            overEvent = new global[data.event]('mouseover', opt),
+            raisedEvent = new global[data.event](data.type, opt);
+
+        if (element) {
+            if (element.innerText.indexOf('<') === 0) {
+                element.dispatchEvent(moveEvent);
+                element.dispatchEvent(overEvent);
+                element.dispatchEvent(raisedEvent);
+            } else {
+                element.parentNode.dispatchEvent(moveEvent);
+                element.parentNode.dispatchEvent(overEvent);
+                element.parentNode.dispatchEvent(raisedEvent);
+            }
+
+            exports.util.async(onHTMLPreview, 1000);
+        }
     }
 
     function onCaptureScreen() {
@@ -468,12 +493,18 @@
         return data;
     }
 
+    function isCanvasSupported() {
+        var canvas = document.createElement('canvas');
+        return !!(canvas.getContext && canvas.getContext('2d'));
+    }
+
     client.getMore = function getMore() {
         var data = [
             {
                 supports: {
                     WebWorker: !!global.Worker,
                     WebSocket: !!global.WebSocket,
+                    Canvas: isCanvasSupported(),
                     Storage: !!global.Storage,
                     LocalStorage: !!global.localStorage,
                     SessionStorage: !!global.sessionStorage,
@@ -587,9 +618,10 @@
         exports.transport.on('device:disconnect', onClientDisconnect);
         exports.transport.on('device:command', onCommand);
         exports.transport.on('device:fileList', onFileList);
-        exports.transport.on('device:htmlContent', onHTMLContent);
+        exports.transport.on('device:htmlSource', onHTMLSource);
+        exports.transport.on('device:htmlPreview', onHTMLPreview);
+        exports.transport.on('device:remoteEvent', onRemoteEvent);
         exports.transport.on('device:fileSource', onFileSource);
-        exports.transport.on('device:previewHTML', onPreview);
         exports.transport.on('device:captureScreen', onCaptureScreen);
         exports.transport.on('device:reload', onReload);
         exports.transport.on('device:name', onNameChanged);

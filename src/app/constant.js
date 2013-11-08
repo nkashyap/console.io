@@ -93,7 +93,7 @@ ConsoleIO.Constant.ICONS = {
     //"OREGAN MEDIA": '',
     PLAYSTATION: 'playstation.png',
 
-    JAVASCRIPT: 'javascript.png',
+    JAVASCRIPT: 'source.png',
     STYLESHEET: 'stylesheet.png',
     WEB: 'web.png',
     FILE: '',

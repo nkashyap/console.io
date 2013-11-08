@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-10-25
+ * Date: 2013-11-08
 */
 
 /**
@@ -60,6 +60,57 @@ if (typeof window.ConsoleIO === "undefined") {
                 document.attachEvent("onreadystatechange", DOMContentLoaded);
                 window.attachEvent("onload", callback);
             }
+        },
+
+        addEventListener: function addEventListener(obj, evt, fnc) {
+            // W3C model
+            if (obj.addEventListener) {
+                obj.addEventListener(evt, fnc, false);
+                return true;
+            } else if (obj.attachEvent) {
+                // Microsoft model
+                return obj.attachEvent('on' + evt, fnc);
+            } else {
+                // Browser don't support W3C or MSFT model, go on with traditional
+                evt = 'on' + evt;
+
+                if (typeof obj[evt] === 'function') {
+                    // Object already has a function on traditional
+                    // Let's wrap it with our own function inside another function
+                    fnc = (function (f1, f2) {
+                        return function () {
+                            f1.apply(this, arguments);
+                            f2.apply(this, arguments);
+                        };
+                    }(obj[evt], fnc));
+                }
+
+                obj[evt] = fnc;
+                return true;
+            }
+
+            return false;
+        },
+
+        removeEventListener: function removeEventListener(obj, evt, fnc) {
+            // W3C model
+            if (obj.removeEventListener) {
+                obj.removeEventListener(evt, fnc, false);
+                return true;
+            } else if (obj.detachEvent) {
+                // Microsoft model
+                return obj.detachEvent('on' + evt, fnc);
+            } else {
+                // Browser don't support W3C or MSFT model, go on with traditional
+                evt = 'on' + evt;
+
+                if (typeof obj[evt] === 'function') {
+                    obj[evt] = null;
+                }
+                return true;
+            }
+
+            return false;
         },
 
         every: (function () {
@@ -167,10 +218,10 @@ if (typeof window.ConsoleIO === "undefined") {
             return target;
         },
 
-        async: function async(fn, scope) {
+        async: function async(fn, scope, timeout) {
             return setTimeout(function () {
                 fn.call(scope);
-            }, 4);
+            }, timeout || 4);
         },
 
         getUniqueId: (function () {
@@ -468,11 +519,15 @@ ConsoleIO.Model.DHTMLX = {
     ToolBarItem: {
         Separator: { type: 'separator' },
 
-        //Back: { id: 'back', type: 'select', text: 'Back', opts: [], imgEnabled: 'back.gif', imgDisabled: 'back_dis.gif', tooltip: 'Back in History' },
-        //Forward: { id: 'forward', type: 'select', text: 'Forward', opts: [], imgEnabled: 'forward.gif', imgDisabled: 'forward_dis.gif', tooltip: 'Forward in History' },
+        //Back: { id: 'back', type: 'select', text: 'Back', opts: [], imgEnabled: 'back.png', imgDisabled: 'back_dis.png', tooltip: 'Back in History' },
+        //Forward: { id: 'forward', type: 'select', text: 'Forward', opts: [], imgEnabled: 'forward.png', imgDisabled: 'forward_dis.png', tooltip: 'Forward in History' },
 
-        PageSize: { id: 'pagesize', type: 'select', text: 'PageSize', imgEnabled: 'pagesize.gif', tooltip: 'Page Size', width: 90, opts: 'pagesizes' },
-        Preview: { id: 'preview', type: 'button', text: 'Preview', imgEnabled: 'preview.gif', imgDisabled: 'preview_dis.gif', tooltip: 'Preview' },
+        PageSize: { id: 'pagesize', type: 'select', text: 'PageSize', imgEnabled: 'pagesize.png', tooltip: 'Page Size', width: 90, opts: 'pagesizes' },
+
+        Source: { id: 'source', type: 'twoState', text: 'Source', imgEnabled: 'source.png', imgDisabled: 'source_dis.png', tooltip: 'Source', pressed: true },
+        Preview: { id: 'preview', type: 'twoState', text: 'Preview', imgEnabled: 'preview.png', imgDisabled: 'preview_dis.png', tooltip: 'Preview', pressed: false },
+
+        Connect: { id: 'connect', type: 'twoState', text: 'Connect', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'Connect' },
         ScreenShot: { id: 'screenShot', type: 'button', text: 'Capture', imgEnabled: 'screenshot.png', imgDisabled: 'screenshot_dis.png', tooltip: 'ScreenShot' },
 
         DeviceNameLabel: { id: 'deviceNameLabel', type: 'text', text: 'Device Name:', tooltip: 'Device Name' },
@@ -480,28 +535,28 @@ ConsoleIO.Model.DHTMLX = {
         DeviceNameSet: { id: 'deviceNameSet', type: 'button', imgEnabled: 'go.png', tooltip: 'Set Device Name' },
 
         SearchText: { id: 'searchText', type: 'input', value: '', width: 100, tooltip: 'Search Text' },
-        Search: { id: 'search', type: 'button', imgEnabled: 'search.gif', imgDisabled: 'search_dis.gif', tooltip: 'Search' },
+        Search: { id: 'search', type: 'button', imgEnabled: 'search.png', imgDisabled: 'search_dis.png', tooltip: 'Search' },
         Execute: { id: 'execute', type: 'button', text: 'Execute', imgEnabled: 'execute.png', imgDisabled: 'execute_dis.png', tooltip: 'Execute (Ctrl+Enter)' },
 
-        Clear: { id: 'clear', type: 'button', text: 'Clear', imgEnabled: 'clear.gif', tooltip: 'Clear' },
-        Refresh: { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' },
+        Clear: { id: 'clear', type: 'button', text: 'Clear', imgEnabled: 'clear.png', tooltip: 'Clear' },
+        Refresh: { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.png', tooltip: 'Refresh' },
         Reload: { id: 'reload', type: 'button', text: 'Reload', imgEnabled: 'reload.png', tooltip: 'Reload Browser' },
 
-        Open: { id: 'open', type: 'select', text: 'Open', imgEnabled: 'open.gif', imgDisabled: 'open_dis.gif', tooltip: 'Open', opts:
+        Open: { id: 'open', type: 'select', text: 'Open', imgEnabled: 'open.png', imgDisabled: 'open_dis.png', tooltip: 'Open', opts:
             [] },
-        Save: { id: 'save', type: 'select', text: 'Save', imgEnabled: 'save.gif', imgDisabled: 'save_dis.gif', tooltip: 'Save', disabled: true, opts:
+        Save: { id: 'save', type: 'select', text: 'Save', imgEnabled: 'save.png', imgDisabled: 'save_dis.png', tooltip: 'Save', disabled: true, opts:
             [
-                ['saveAs', 'obj', 'Save As', 'save_as.gif']
+                ['saveAs', 'obj', 'Save As', 'save_as.png']
             ]},
-        Export: { id: 'export', type: 'button', text: 'Export', imgEnabled: 'downloads.gif', tooltip: 'Export' },
+        Export: { id: 'export', type: 'button', text: 'Export', imgEnabled: 'downloads.png', tooltip: 'Export' },
 
-        Undo: { id: 'undo', type: 'button', text: 'Undo', imgEnabled: 'undo.gif', imgDisabled: 'undo_dis.gif', tooltip: 'Undo', disabled: true },
-        Redo: { id: 'redo', type: 'button', text: 'Redo', imgEnabled: 'redo.gif', imgDisabled: 'redo_dis.gif', tooltip: 'Redo', disabled: true },
+        Undo: { id: 'undo', type: 'button', text: 'Undo', imgEnabled: 'undo.png', imgDisabled: 'undo_dis.png', tooltip: 'Undo', disabled: true },
+        Redo: { id: 'redo', type: 'button', text: 'Redo', imgEnabled: 'redo.png', imgDisabled: 'redo_dis.png', tooltip: 'Redo', disabled: true },
 
-        SelectAll: { id: 'selectAll', type: 'button', text: 'Select All', imgEnabled: 'select_all.gif', tooltip: 'Select All' },
-        Cut: { id: 'cut', type: 'button', text: 'Cut', imgEnabled: 'cut.gif', imgDisabled: 'cut_dis.gif', tooltip: 'Cut' },
-        Copy: { id: 'copy', type: 'button', text: 'Copy', imgEnabled: 'copy.gif', imgDisabled: 'copy_dis.gif', tooltip: 'Copy' },
-        Paste: { id: 'paste', type: 'button', text: 'Paste', imgEnabled: 'paste.gif', imgDisabled: 'paste_dis.gif', tooltip: 'Paste' },
+        SelectAll: { id: 'selectAll', type: 'button', text: 'Select All', imgEnabled: 'select_all.png', imgDisabled: 'select_all_dis.png', tooltip: 'Select All' },
+        Cut: { id: 'cut', type: 'button', text: 'Cut', imgEnabled: 'cut.png', imgDisabled: 'cut_dis.png', tooltip: 'Cut' },
+        Copy: { id: 'copy', type: 'button', text: 'Copy', imgEnabled: 'copy.png', imgDisabled: 'copy_dis.png', tooltip: 'Copy' },
+        Paste: { id: 'paste', type: 'button', text: 'Paste', imgEnabled: 'paste.png', imgDisabled: 'paste_dis.png', tooltip: 'Paste' },
 
 
         Profiler: { id: 'profiler', type: 'twoState', text: 'Start Profiling', imgEnabled: 'rec.png', imgDisabled: 'rec_dis.png', tooltip: 'Start CPU Profiling', pressed: false },
@@ -512,24 +567,23 @@ ConsoleIO.Model.DHTMLX = {
             ] },
         TimeOrPercent: { id: 'timePercent', type: 'twoState', imgEnabled: 'percent.png', imgDisabled: 'percent.png', tooltip: 'Show total and self time in percentage', hidden: true, disabled: true, pressed: false },
         FocusFn: { id: 'focusFn', type: 'button', imgEnabled: 'zoom.png', imgDisabled: 'zoom_dis.png', tooltip: 'Focus selected function', hidden: true, disabled: true },
-        RestoreFn: { id: 'restoreFn', type: 'button', imgEnabled: 'undo.gif', imgDisabled: 'undo_dis.gif', tooltip: 'Restore all functions', hidden: true, disabled: true },
-        ExcludeFn: { id: 'excludeFn', type: 'button', imgEnabled: 'clear.gif', imgDisabled: 'clear_dis.gif', tooltip: 'Exclude selected function', hidden: true, disabled: true },
+        RestoreFn: { id: 'restoreFn', type: 'button', imgEnabled: 'undo.png', imgDisabled: 'undo_dis.png', tooltip: 'Restore all functions', hidden: true, disabled: true },
+        ExcludeFn: { id: 'excludeFn', type: 'button', imgEnabled: 'clear.png', imgDisabled: 'clear_dis.png', tooltip: 'Exclude selected function', hidden: true, disabled: true },
 
 
-        Web: { id: 'web', type: 'twoState', text: 'Web Console', imgEnabled: 'console.gif', tooltip: 'Web Console', pressed: false },
+        Web: { id: 'web', type: 'twoState', text: 'Web Console', imgEnabled: 'console.png', tooltip: 'Web Console', pressed: false },
         PlayPause: { id: 'playPause', type: 'twoState', text: 'Pause', imgEnabled: 'pause.png', tooltip: 'Pause logs', pressed: false },
-        WordWrap: { id: 'wordwrap', type: 'twoState', text: 'Word-Wrap', imgEnabled: 'word_wrap.gif', tooltip: 'Word Wrap', pressed: false },
-        Beautify: { id: 'beautify', type: 'twoState', text: 'Beautify', imgEnabled: 'beautify.png', tooltip: 'Beautify', pressed: false },
+        WordWrap: { id: 'wordwrap', type: 'twoState', text: 'Word-Wrap', imgEnabled: 'word_wrap.png', imgDisabled: 'word_wrap_dis.png', tooltip: 'Word Wrap', pressed: false },
+        Beautify: { id: 'beautify', type: 'twoState', text: 'Beautify', imgEnabled: 'beautify.png', imgDisabled: 'beautify_dis.png', tooltip: 'Beautify', pressed: false },
 
 
         FilterLabel: { id: 'filterLabel', type: 'text', text: 'Filters:', tooltip: 'Filter Console Logs' },
-        Info: { id: 'filter-info', type: 'twoState', text: 'Info', imgEnabled: 'info.gif', tooltip: 'Info', pressed: false },
+        Info: { id: 'filter-info', type: 'twoState', text: 'Info', imgEnabled: 'info.png', tooltip: 'Info', pressed: false },
         Log: { id: 'filter-log', type: 'twoState', text: 'Log', imgEnabled: 'log.png', tooltip: 'Log', pressed: false },
         Warn: { id: 'filter-warn', type: 'twoState', text: 'Warn', imgEnabled: 'warn.png', tooltip: 'Warn', pressed: false },
-
-        Debug: { id: 'filter-debug', type: 'twoState', text: 'Debug', imgEnabled: 'debug.gif', tooltip: 'Debug', pressed: false },
+        Debug: { id: 'filter-debug', type: 'twoState', text: 'Debug', imgEnabled: 'debug.png', tooltip: 'Debug', pressed: false },
         Trace: { id: 'filter-trace', type: 'twoState', text: 'Trace', imgEnabled: 'trace.png', tooltip: 'Trace', pressed: false },
-        Error: { id: 'filter-error', type: 'twoState', text: 'Error', imgEnabled: 'error.gif', tooltip: 'Error', pressed: false }
+        Error: { id: 'filter-error', type: 'twoState', text: 'Error', imgEnabled: 'error.png', tooltip: 'Error', pressed: false }
     }
 };
 
@@ -1002,9 +1056,9 @@ ConsoleIO.View.Device.Explorer.prototype.setIcon = function setIcon(id, icon) {
  * Repositories: https://github.com/nkashyap
  */
 
-ConsoleIO.namespace("ConsoleIO.View.Device.Preview");
+ConsoleIO.namespace("ConsoleIO.View.Device.HTML");
 
-ConsoleIO.View.Device.Preview = function PreviewView(ctrl, model) {
+ConsoleIO.View.Device.HTML = function HTMLView(ctrl, model) {
     this.ctrl = ctrl;
     this.model = model;
     this.target = null;
@@ -1017,7 +1071,7 @@ ConsoleIO.View.Device.Preview = function PreviewView(ctrl, model) {
 };
 
 
-ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
+ConsoleIO.View.Device.HTML.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.id, this.model.name);
     this.tab = this.target.cells(this.id);
@@ -1038,7 +1092,8 @@ ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
         tag: 'iframe',
         attr: {
             height: '100%',
-            width: '100%'
+            width: '100%',
+            style: 'display:none;'
         },
         target: document.body
     });
@@ -1055,7 +1110,7 @@ ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
     this.dhxWins.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('win'));
 };
 
-ConsoleIO.View.Device.Preview.prototype.destroy = function destroy() {
+ConsoleIO.View.Device.HTML.prototype.destroy = function destroy() {
     document.body.removeChild(this.previewFrame);
     document.body.removeChild(this.image);
     this.dhxWins.unload();
@@ -1063,35 +1118,62 @@ ConsoleIO.View.Device.Preview.prototype.destroy = function destroy() {
 };
 
 
-ConsoleIO.View.Device.Preview.prototype.toggleButton = function toggleButton(id, state) {
-    if (this.toolbar) {
+ConsoleIO.View.Device.HTML.prototype.toggleButton = function toggleButton(name, state) {
+    var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+    if (this.toolbar && item) {
         if (state) {
-            this.toolbar.enableItem(id);
+            this.toolbar.enableItem(item.id);
         } else {
-            this.toolbar.disableItem(id);
+            this.toolbar.disableItem(item.id);
         }
     }
 };
 
-ConsoleIO.View.Device.Preview.prototype.preview = function preview(data) {
-    if (this.dhxWins) {
-        this.previewFrame.src = "data:text/html," + escape(data.content);
+ConsoleIO.View.Device.HTML.prototype.show = function show() {
+    this.previewFrame.style.display = 'block';
+    this.tab.attachObject(this.previewFrame);
+};
 
-        var win = this.dhxWins.createWindow("preview", 0, 0, 900, 700);
-        win.setText("Preview");
-        win.button('park').hide();
-        win.keepInViewport(true);
-        win.setModal(true);
-        win.centerOnScreen();
-        win.button("close").attachEvent("onClick", function () {
-            win.detachObject(this.previewFrame);
-            win.close();
-        }, this);
-        win.attachObject(this.previewFrame);
+ConsoleIO.View.Device.HTML.prototype.hide = function hide() {
+    this.previewFrame.style.display = 'none';
+    this.tab.detachObject(this.previewFrame);
+};
+
+ConsoleIO.View.Device.HTML.prototype.preview = function preview(data) {
+    if (this.ctrl.remoteControl) {
+        this.unbind();
+    }
+
+    this.previewFrame.src = "javascript:false;";
+    ConsoleIO.async(function () {
+        this.previewFrame.contentWindow.document.head.innerHTML = data.style;
+        this.previewFrame.contentWindow.document.body.innerHTML = data.body;
+        if (this.ctrl.remoteControl) {
+            this.bind();
+        }
+
+    }, this);
+};
+
+ConsoleIO.View.Device.HTML.prototype.bind = function bind() {
+    var win = this.previewFrame.contentWindow || this.previewFrame.contentDocument;
+    if (win.document) {
+        ConsoleIO.forEachProperty(this.ctrl.events, function(fn, name){
+            ConsoleIO.addEventListener(win.document.body, name, fn);
+        }, this.ctrl);
     }
 };
 
-ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
+ConsoleIO.View.Device.HTML.prototype.unbind = function unbind() {
+    var win = this.previewFrame.contentWindow || this.previewFrame.contentDocument;
+    if (win.document) {
+        ConsoleIO.forEachProperty(this.ctrl.events, function(fn, name){
+            ConsoleIO.removeEventListener(win.document.body, name, fn);
+        }, this.ctrl);
+    }
+};
+
+ConsoleIO.View.Device.HTML.prototype.screenShot = function screenShot(data) {
     if (this.dhxWins) {
         if (data.screen) {
             this.image.src = data.screen;
@@ -1115,11 +1197,11 @@ ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
 };
 
 
-ConsoleIO.View.Device.Preview.prototype.setTabActive = function setTabActive() {
+ConsoleIO.View.Device.HTML.prototype.setTabActive = function setTabActive() {
     this.target.setTabActive(this.id);
 };
 
-ConsoleIO.View.Device.Preview.prototype.setItemState = function setItemState(name, state) {
+ConsoleIO.View.Device.HTML.prototype.setItemState = function setItemState(name, state) {
     if (this.toolbar) {
         var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
         if (item) {
@@ -1579,7 +1661,6 @@ ConsoleIO.View.Editor.prototype.destroy = function destroy() {
     }
 };
 
-
 ConsoleIO.View.Editor.prototype.fileList = function fileList(data) {
     var scope = this;
     this.toolbar.forEachListOption('open', function (id) {
@@ -1611,6 +1692,17 @@ ConsoleIO.View.Editor.prototype.createElements = function createElements() {
         target: this.container
     });
 };
+
+ConsoleIO.View.Editor.prototype.show = function show() {
+    this.container.style.display = 'block';
+    this.target.attachObject(this.container);
+};
+
+ConsoleIO.View.Editor.prototype.hide = function hide() {
+    this.container.style.display = 'none';
+    this.target.detachObject(this.container);
+};
+
 
 ConsoleIO.View.Editor.prototype.toggleButton = function toggleButton(id, state) {
     if (this.toolbar) {
@@ -1886,7 +1978,7 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.console = new ConsoleIO.App.Device.Console(this, this.model);
     this.profile = new ConsoleIO.App.Device.Profile(this, this.model);
     this.source = new ConsoleIO.App.Device.Source(this, this.model);
-    this.preview = new ConsoleIO.App.Device.Preview(this, this.model);
+    this.html = new ConsoleIO.App.Device.HTML(this, this.model);
     this.status = new ConsoleIO.App.Device.Status(this, this.model);
 
     this.view = new ConsoleIO.View.Device(this, this.model);
@@ -1897,7 +1989,7 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
     this.view.render(target);
     this.status.render(this.view.tabs);
     this.source.render(this.view.tabs);
-    this.preview.render(this.view.tabs);
+    this.html.render(this.view.tabs);
     this.profile.render(this.view.tabs);
     this.console.render(this.view.tabs);
 
@@ -1919,7 +2011,7 @@ ConsoleIO.App.Device.prototype.destroy = function destroy() {
     this.console = this.console.destroy();
     this.profile = this.profile.destroy();
     this.source = this.source.destroy();
-    this.preview = this.preview.destroy();
+    this.html = this.html.destroy();
     this.status = this.status.destroy();
     this.view = this.view.destroy();
 };
@@ -1933,7 +2025,7 @@ ConsoleIO.App.Device.prototype.activate = function activate(state) {
     if (!state) {
         this.status.activate(state);
         this.source.activate(state);
-        this.preview.activate(state);
+        this.html.activate(state);
         this.profile.activate(state);
         this.console.activate(state);
     } else if (this.activeTab) {
@@ -1944,7 +2036,7 @@ ConsoleIO.App.Device.prototype.activate = function activate(state) {
 
 ConsoleIO.App.Device.prototype.setItemState = function setItemState(id, state) {
     this.source.setItemState(id, state);
-    this.preview.setItemState(id, state);
+    this.html.setItemState(id, state);
 };
 
 
@@ -2571,18 +2663,21 @@ ConsoleIO.App.Device.Explorer.prototype.onOpenEnd = function onOpenEnd(itemId, s
  * Repositories: https://github.com/nkashyap
  */
 
-ConsoleIO.namespace("ConsoleIO.App.Device.Preview");
+ConsoleIO.namespace("ConsoleIO.App.Device.HTML");
 
-ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
+ConsoleIO.App.Device.HTML = function HTMLController(parent, model) {
     this.parent = parent;
     this.model = model;
 
-    this.view = new ConsoleIO.View.Device.Preview(this, {
-        name: "Preview",
+    this.view = new ConsoleIO.View.Device.HTML(this, {
+        name: "HTML",
         serialNumber: this.model.serialNumber,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Source,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Preview,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify,
@@ -2590,88 +2685,195 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Preview,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.ScreenShot
+            ConsoleIO.Model.DHTMLX.ToolBarItem.ScreenShot,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Connect
         ]
     });
     this.editor = new ConsoleIO.App.Editor(this, {});
 
-    ConsoleIO.Service.Socket.on('device:content:' + this.model.serialNumber, this.addContent, this);
-    ConsoleIO.Service.Socket.on('device:previewContent:' + this.model.serialNumber, this.preview, this);
+    this.activeMode = ConsoleIO.Model.DHTMLX.ToolBarItem.Source.pressed ? 'source' : 'preview';
+    this.remoteControl = false;
+
+    var scope = this;
+    this.events = {
+        click: function onclick(e) {
+            scope.sendEvent(e);
+        }
+//        mousemove: function mousemove(e) {
+//            scope.sendEvent(e);
+//        },
+//        mouseover: function mouseover(e) {
+//            scope.sendEvent(e);
+//        },
+//        mouseout: function mouseout(e) {
+//            scope.sendEvent(e);
+//        }
+    };
+
+    ConsoleIO.Service.Socket.on('device:htmlDocument:' + this.model.serialNumber, this.addContent, this);
+    ConsoleIO.Service.Socket.on('device:htmlContent:' + this.model.serialNumber, this.addContent, this);
     ConsoleIO.Service.Socket.on('device:screenShot:' + this.model.serialNumber, this.screenShot, this);
 };
 
 
-ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
+ConsoleIO.App.Device.HTML.prototype.render = function render(target) {
     this.view.render(target);
     this.editor.render(this.view.tab);
+    this.view.toggleButton('Connect', this.activeMode === 'preview');
 };
 
-ConsoleIO.App.Device.Preview.prototype.destroy = function destroy() {
-    ConsoleIO.Service.Socket.off('device:content:' + this.model.serialNumber, this.addContent, this);
-    ConsoleIO.Service.Socket.off('device:previewContent:' + this.model.serialNumber, this.preview, this);
+ConsoleIO.App.Device.HTML.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:htmlDocument:' + this.model.serialNumber, this.addContent, this);
+    ConsoleIO.Service.Socket.off('device:htmlContent:' + this.model.serialNumber, this.addContent, this);
     ConsoleIO.Service.Socket.off('device:screenShot:' + this.model.serialNumber, this.screenShot, this);
     this.editor = this.editor.destroy();
     this.view = this.view.destroy();
 };
 
 
-ConsoleIO.App.Device.Preview.prototype.activate = function activate(state) {
+ConsoleIO.App.Device.HTML.prototype.activate = function activate(state) {
     if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
         this.editor.setOption('lineWrapping', this.parent.wordWrap);
         this.refresh();
     }
 };
 
-ConsoleIO.App.Device.Preview.prototype.addContent = function addContent(data) {
-    this.editor.setValue(data);
+ConsoleIO.App.Device.HTML.prototype.addContent = function addContent(data) {
+    if (this.activeMode === 'source') {
+        this.view.hide();
+        this.editor.show();
+        this.editor.setValue(data);
+    } else {
+        this.editor.hide();
+        this.view.preview(data);
+        this.view.show();
+    }
 };
 
-ConsoleIO.App.Device.Preview.prototype.preview = function preview(data) {
-    this.view.toggleButton('preview', true);
-    this.view.preview(data);
+ConsoleIO.App.Device.HTML.prototype.buildSelector = function buildSelector(element, childSelector) {
+
+    if (element.tagName.toLowerCase() === 'body') {
+        return childSelector;
+    }
+
+    childSelector = !!childSelector ? ' ' + childSelector : '';
+
+    var thisElementSelector = element.tagName;
+
+    if (!!element.id) {
+        // Use the id. Should be unique, so no need to go further.
+        thisElementSelector = thisElementSelector + '#' + element.id;
+        return thisElementSelector + childSelector;
+    }
+
+    // use an nth-child selector.
+    if (element.parentElement.childElementCount > 1) {
+        var elementPosition = 1, prevSibling = element.previousElementSibling;
+        while (!!prevSibling) {
+            elementPosition++;
+            prevSibling = prevSibling.previousElementSibling;
+        }
+
+        thisElementSelector += ':nth-child(' + elementPosition + ')';
+    }
+
+    return this.buildSelector(element.parentElement, thisElementSelector + childSelector);
 };
 
-ConsoleIO.App.Device.Preview.prototype.screenShot = function screenShot(data) {
-    this.view.toggleButton('screenShot', true);
+ConsoleIO.App.Device.HTML.prototype.screenShot = function screenShot(data) {
+    this.view.toggleButton('ScreenShot', true);
     this.view.screenShot(data);
 };
 
-ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
-    ConsoleIO.Service.Socket.emit('reloadHTML', {
-        serialNumber: this.model.serialNumber,
-        beautify: this.parent.beautify
-    });
+ConsoleIO.App.Device.HTML.prototype.sendEvent = function sendEvent(e) {
+    this.intervals = this.intervals || {};
+    if (!this.intervals[e.type]) {
+        var selector = this.buildSelector(e.srcElement);
+        if (!!selector) {
+            ConsoleIO.Service.Socket.emit('remoteEvent', {
+                serialNumber: this.model.serialNumber,
+                event: e.constructor.name,
+                type: e.type,
+                selector: selector
+            });
+        }
+
+        this.intervals[e.type] = ConsoleIO.async(function () {
+            window.clearTimeout(this.intervals[e.type]);
+            delete this.intervals[e.type];
+        }, this, 500);
+    }
+};
+
+ConsoleIO.App.Device.HTML.prototype.refresh = function refresh() {
+    if (this.activeMode === 'source') {
+        ConsoleIO.Service.Socket.emit('htmlSource', {
+            serialNumber: this.model.serialNumber,
+            beautify: this.parent.beautify
+        });
+    } else {
+        ConsoleIO.Service.Socket.emit('htmlPreview', {
+            serialNumber: this.model.serialNumber
+        });
+    }
 };
 
 
-ConsoleIO.App.Device.Preview.prototype.setTabActive = function setTabActive() {
+ConsoleIO.App.Device.HTML.prototype.setTabActive = function setTabActive() {
     this.view.setTabActive();
 };
 
-ConsoleIO.App.Device.Preview.prototype.setItemState = function setItemState(id, state) {
+ConsoleIO.App.Device.HTML.prototype.setItemState = function setItemState(id, state) {
     this.view.setItemState(id, state);
 };
 
 
-ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(btnId, state) {
+ConsoleIO.App.Device.HTML.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
         switch (btnId) {
+            case 'source':
+                this.activeMode = 'source';
+                this.setItemState('Preview', false);
+
+                this.view.toggleButton('WordWrap', true);
+                this.view.toggleButton('Beautify', true);
+                this.view.toggleButton('SelectAll', true);
+                this.view.toggleButton('Copy', true);
+                this.view.toggleButton('Connect', false);
+
+                this.refresh();
+                break;
             case 'preview':
-                this.view.toggleButton('preview', false);
-                ConsoleIO.Service.Socket.emit('previewHTML', {
-                    serialNumber: this.model.serialNumber
-                });
+                this.activeMode = 'preview';
+                this.setItemState('Source', false);
+
+                this.view.toggleButton('WordWrap', false);
+                this.view.toggleButton('Beautify', false);
+                this.view.toggleButton('SelectAll', false);
+                this.view.toggleButton('Copy', false);
+                this.view.toggleButton('Connect', true);
+
+                this.refresh();
                 break;
             case 'screenShot':
-                this.view.toggleButton('screenShot', false);
+                this.view.toggleButton('ScreenShot', false);
+
                 ConsoleIO.Service.Socket.emit('captureScreen', {
                     serialNumber: this.model.serialNumber
                 });
-                var scope = this;
-                setTimeout(function () {
-                    scope.view.toggleButton('screenShot', true);
-                }, 10000);
+
+                ConsoleIO.async(function () {
+                    this.view.toggleButton('ScreenShot', true);
+                }, this, 10000);
+
+                break;
+            case 'connect':
+                this.remoteControl = state;
+                if (this.remoteControl) {
+                    this.view.bind();
+                } else {
+                    this.view.unbind();
+                }
                 break;
             default:
                 this.parent.parent.parent.server.update({
@@ -3307,6 +3509,14 @@ ConsoleIO.App.Editor.prototype.clear = function clear() {
     }
 };
 
+ConsoleIO.App.Editor.prototype.show = function show() {
+    this.view.show();
+};
+
+ConsoleIO.App.Editor.prototype.hide = function hide() {
+    this.view.hide();
+};
+
 ConsoleIO.App.Editor.prototype.close = function close() {
     this.fileName = null;
     this.editor.setValue("");
@@ -3818,12 +4028,12 @@ ConsoleIO.Constant.IMAGE_URL = {
 ConsoleIO.Constant.ICONS = {
     ONLINE: 'online.png',
     OFFLINE: 'offline.png',
-    SUBSCRIBE: 'subscribe.gif',
-    VERSION: 'version.gif',
+    SUBSCRIBE: 'subscribe.png',
+    VERSION: 'version.png',
 
     //Platform icons
     PC: 'pc.png',
-    TV: 'tv.jpg',
+    TV: 'tv.png',
     STB: 'stb.png',
     MOBILE: 'mobile.png',
     TABLET: 'tablet.png',
@@ -3833,12 +4043,12 @@ ConsoleIO.Constant.ICONS = {
 
     //Manufacturers icons
     LG: 'lg.png',
-    PHILIPS: 'philips.jpg',
-    SAMSUNG: 'samsung.jpg',
+    PHILIPS: 'philips.png',
+    SAMSUNG: 'samsung.png',
     TOSHIBA: 'toshiba.png',
-    TESCO: 'tesco.jpg',
-    SONY: 'sony.jpg',
-    PANASONIC: 'panasonic.gif',
+    TESCO: 'tesco.png',
+    SONY: 'sony.png',
+    PANASONIC: 'panasonic.png',
     MICROSOFT: 'microsoft.png',
     MOZILLA: 'mozilla.png',
     GOOGLE: 'google.png',
@@ -3847,15 +4057,15 @@ ConsoleIO.Constant.ICONS = {
     "OPERA SOFTWARE": 'opera.png',
 
     //Browser icons
-    GINGERBREAD: 'gingerbread.jpg',
+    GINGERBREAD: 'gingerbread.png',
     CHROME: 'chrome.png',
     IE: 'explorer.png',
     FIREFOX: 'firefox.png',
     OPERA: 'opera.png',
     SAFARI: 'safari.png',
-    MAPLE: 'maple.gif',
+    MAPLE: 'maple.png',
     NETTV: 'nettv.png',
-    NETCAST: 'netcast.gif',
+    NETCAST: 'netcast.png',
     TOSHIBATP: 'toshibatp.png',
     ESPIAL: 'espial.png',
     MSTAR: 'mstar.png',
@@ -3863,8 +4073,8 @@ ConsoleIO.Constant.ICONS = {
     //"OREGAN MEDIA": '',
     PLAYSTATION: 'playstation.png',
 
-    JAVASCRIPT: 'javascript.gif',
-    STYLESHEET: 'stylesheet.gif',
+    JAVASCRIPT: 'source.png',
+    STYLESHEET: 'stylesheet.png',
     WEB: 'web.png',
     FILE: '',
     UNKNOWN: 'unknown.png',

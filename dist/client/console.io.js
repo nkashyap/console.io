@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-10-25
+ * Date: 2013-11-08
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -28,7 +28,43 @@ ConsoleIO.version = "0.2.2";
 
     var util = exports.util = {},
         domReady = false,
-        pendingCallback = [];
+        pendingCallback = [],
+        HTMLTagCSSProperties = {};
+
+    function addDefaultCSS(tag){
+        if(tag && !HTMLTagCSSProperties[tag]){
+            var win = document.defaultView || global,
+                element = document.createElement(tag),
+                properties = {};
+
+            document.body.appendChild(element);
+
+            if (win.getComputedStyle) {
+                /* Modern browsers */
+                var styles = win.getComputedStyle(element, '');
+
+                util.forEach(util.toArray(styles), function (style) {
+                    properties[style] = styles.getPropertyValue(style);
+                });
+
+            } else if (element.currentStyle) {
+                /* IE */
+                util.forEachProperty(element.currentStyle, function (value, style) {
+                    properties[style] = value;
+                });
+
+            } else {
+                /* Ancient browser..*/
+                util.forEach(util.toArray(element.style), function (style) {
+                    properties[style] = element.style[style];
+                });
+            }
+
+            HTMLTagCSSProperties[tag] = properties;
+
+            document.body.removeChild(element);
+        }
+    }
 
     util.getScripts = function getScripts() {
         return util.toArray(document.scripts || document.getElementsByName('script'));
@@ -349,28 +385,43 @@ ConsoleIO.version = "0.2.2";
         });
     };
 
+    util.isCSSPropertySame = function isCSSPropertySame(tag, property, value){
+        return (HTMLTagCSSProperties[tag][property] === value);
+    };
+
     util.getAppliedStyles = function getAppliedStyles(element) {
         var win = document.defaultView || global,
-            styleNode = [];
+            styleNode = [],
+            tag = element.tagName;
+
+        addDefaultCSS(tag);
 
         if (win.getComputedStyle) {
             /* Modern browsers */
             var styles = win.getComputedStyle(element, '');
 
             util.forEach(util.toArray(styles), function (style) {
-                styleNode.push(style + ':' + styles.getPropertyValue(style));
+                var value = styles.getPropertyValue(style);
+                if(!util.isCSSPropertySame(tag, style, value)){
+                    styleNode.push(style + ':' + value);
+                }
             });
 
         } else if (element.currentStyle) {
             /* IE */
             util.forEachProperty(element.currentStyle, function (value, style) {
-                styleNode.push(style + ':' + value);
+                if(!util.isCSSPropertySame(tag, style, value)){
+                    styleNode.push(style + ':' + value);
+                }
             });
 
         } else {
             /* Ancient browser..*/
             util.forEach(util.toArray(element.style), function (style) {
-                styleNode.push(style + ':' + element.style[style]);
+                var value = element.style[style];
+                if(!util.isCSSPropertySame(tag, style, value)){
+                    styleNode.push(style + ':' + value);
+                }
             });
         }
 
@@ -542,10 +593,11 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    util.async = function async(fn, scope) {
+    util.async = function async(fn, scope, interval) {
+        interval = typeof scope === 'number' ? scope : interval;
         return setTimeout(function () {
             fn.call(scope);
-        }, 4);
+        }, interval || 4);
     };
 
     util.extend = function extend(target, source) {
@@ -2438,24 +2490,49 @@ ConsoleIO.version = "0.2.2";
         }(location.href)), 100);
     }
 
-    function onHTMLContent() {
+    function onHTMLSource() {
         exports.web.hide();
-        dataPacket('content', {
+        dataPacket('htmlDocument', {
             content: document.documentElement.innerHTML
         });
         exports.web.show();
     }
 
-    function onPreview() {
+    function onHTMLPreview() {
         exports.web.hide();
 
-        exports.transport.emit('previewContent', {
-            content: '<html><head><style type="text/css">' +
-                getStyleRule() + '</style></head>' +
-                getStyledElement().outerHTML + '</html>'
+        exports.transport.emit('htmlContent', {
+            style: '<style type="text/css">' + getStyleRule() + '</style>',
+            body: getStyledElement().outerHTML
         });
 
         exports.web.show();
+    }
+
+    function onRemoteEvent(data) {
+        var element = document.querySelector(data.selector),
+            opt = {
+                'view': global,
+                'bubbles': true,
+                'cancelable': true
+            },
+            moveEvent = new global[data.event]('mousemove', opt),
+            overEvent = new global[data.event]('mouseover', opt),
+            raisedEvent = new global[data.event](data.type, opt);
+
+        if (element) {
+            if (element.innerText.indexOf('<') === 0) {
+                element.dispatchEvent(moveEvent);
+                element.dispatchEvent(overEvent);
+                element.dispatchEvent(raisedEvent);
+            } else {
+                element.parentNode.dispatchEvent(moveEvent);
+                element.parentNode.dispatchEvent(overEvent);
+                element.parentNode.dispatchEvent(raisedEvent);
+            }
+
+            exports.util.async(onHTMLPreview, 1000);
+        }
     }
 
     function onCaptureScreen() {
@@ -2560,12 +2637,18 @@ ConsoleIO.version = "0.2.2";
         return data;
     }
 
+    function isCanvasSupported() {
+        var canvas = document.createElement('canvas');
+        return !!(canvas.getContext && canvas.getContext('2d'));
+    }
+
     client.getMore = function getMore() {
         var data = [
             {
                 supports: {
                     WebWorker: !!global.Worker,
                     WebSocket: !!global.WebSocket,
+                    Canvas: isCanvasSupported(),
                     Storage: !!global.Storage,
                     LocalStorage: !!global.localStorage,
                     SessionStorage: !!global.sessionStorage,
@@ -2679,9 +2762,10 @@ ConsoleIO.version = "0.2.2";
         exports.transport.on('device:disconnect', onClientDisconnect);
         exports.transport.on('device:command', onCommand);
         exports.transport.on('device:fileList', onFileList);
-        exports.transport.on('device:htmlContent', onHTMLContent);
+        exports.transport.on('device:htmlSource', onHTMLSource);
+        exports.transport.on('device:htmlPreview', onHTMLPreview);
+        exports.transport.on('device:remoteEvent', onRemoteEvent);
         exports.transport.on('device:fileSource', onFileSource);
-        exports.transport.on('device:previewHTML', onPreview);
         exports.transport.on('device:captureScreen', onCaptureScreen);
         exports.transport.on('device:reload', onReload);
         exports.transport.on('device:name', onNameChanged);
