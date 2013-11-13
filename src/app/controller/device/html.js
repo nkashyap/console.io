@@ -38,7 +38,7 @@ ConsoleIO.App.Device.HTML = function HTMLController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.TriggerInterval,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Click,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.DoubleClick,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.DblClick,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.KeyPress,
             ConsoleIO.Model.DHTMLX.ToolBarItem.KeyDown,
@@ -207,13 +207,19 @@ ConsoleIO.App.Device.HTML.prototype.setItemState = function setItemState(id, sta
 };
 
 ConsoleIO.App.Device.HTML.prototype.onPreviewButtonClick = function onPreviewButtonClick(btnId, state) {
+    var scope = this,
+        btn = ConsoleIO.Model.DHTMLX.ToolBarItem[btnId];
+
+    if (btn) {
+        btn.pressed = state;
+    }
+
     btnId = btnId.toLowerCase();
 
     this.view.unbind();
 
     if (state) {
         if (!this.events[btnId]) {
-            var scope = this;
             this.events[btnId] = function (e) {
                 scope.sendEvent(e);
             };

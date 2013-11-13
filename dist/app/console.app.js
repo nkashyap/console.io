@@ -528,16 +528,16 @@ ConsoleIO.Model.DHTMLX = {
 
         TriggerLabel: { id: 'triggerLabel', type: 'text', text: 'Trigger Interval' },
         TriggerInterval: { id: 'triggerInterval', type: 'input', value: '', width: 100, tooltip: 'Trigger interval' },
-        KeyPress: { id: 'keyPress', type: 'twoState', text: 'KeyPress', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyPress' },
-        KeyDown: { id: 'keyDown', type: 'twoState', text: 'KeyDown', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyDown' },
-        KeyUp: { id: 'keyUp', type: 'twoState', text: 'KeyUp', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyUp' },
-        MouseMove: { id: 'mouseMove', type: 'twoState', text: 'MouseMove', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseMove' },
-        MouseOver: { id: 'mouseOver', type: 'twoState', text: 'MouseOver', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseOver' },
-        MouseOut: { id: 'mouseOut', type: 'twoState', text: 'MouseOut', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseOut' },
-        MouseEnter: { id: 'mouseEnter', type: 'twoState', text: 'MouseEnter', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseEnter' },
-        MouseLeave: { id: 'mouseLeave', type: 'twoState', text: 'MouseLeave', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseLeave' },
-        Click: { id: 'click', type: 'twoState', text: 'Click', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'Click' },
-        DoubleClick: { id: 'doubleClick', type: 'twoState', text: 'DoubleClick', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'DoubleClick' },
+        KeyPress: { id: 'KeyPress', type: 'twoState', text: 'KeyPress', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyPress' },
+        KeyDown: { id: 'KeyDown', type: 'twoState', text: 'KeyDown', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyDown' },
+        KeyUp: { id: 'KeyUp', type: 'twoState', text: 'KeyUp', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyUp' },
+        MouseMove: { id: 'MouseMove', type: 'twoState', text: 'MouseMove', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseMove' },
+        MouseOver: { id: 'MouseOver', type: 'twoState', text: 'MouseOver', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseOver' },
+        MouseOut: { id: 'MouseOut', type: 'twoState', text: 'MouseOut', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseOut' },
+        MouseEnter: { id: 'MouseEnter', type: 'twoState', text: 'MouseEnter', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseEnter' },
+        MouseLeave: { id: 'MouseLeave', type: 'twoState', text: 'MouseLeave', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseLeave' },
+        Click: { id: 'Click', type: 'twoState', text: 'Click', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'Click' },
+        DblClick: { id: 'DblClick', type: 'twoState', text: 'DoubleClick', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'DoubleClick' },
 
         DeviceNameLabel: { id: 'deviceNameLabel', type: 'text', text: 'Device Name:', tooltip: 'Device Name' },
         DeviceNameText: { id: 'deviceNameText', type: 'input', value: '', width: 120, tooltip: 'Enter Device Name' },
@@ -2735,7 +2735,7 @@ ConsoleIO.App.Device.HTML = function HTMLController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.TriggerInterval,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Click,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.DoubleClick,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.DblClick,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.KeyPress,
             ConsoleIO.Model.DHTMLX.ToolBarItem.KeyDown,
@@ -2904,13 +2904,19 @@ ConsoleIO.App.Device.HTML.prototype.setItemState = function setItemState(id, sta
 };
 
 ConsoleIO.App.Device.HTML.prototype.onPreviewButtonClick = function onPreviewButtonClick(btnId, state) {
+    var scope = this,
+        btn = ConsoleIO.Model.DHTMLX.ToolBarItem[btnId];
+
+    if (btn) {
+        btn.pressed = state;
+    }
+
     btnId = btnId.toLowerCase();
 
     this.view.unbind();
 
     if (state) {
         if (!this.events[btnId]) {
-            var scope = this;
             this.events[btnId] = function (e) {
                 scope.sendEvent(e);
             };
