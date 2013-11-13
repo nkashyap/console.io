@@ -160,8 +160,8 @@ Visit http://<console.io server>/ for ConsoleIO interface (Tested on Chrome Brow
 NOTE:
 * ![Online icons](https://raw.github.com/nkashyap/console.io/master/resources/icons/online.png) Device is registered and connected.
 * ![Offline icons](https://raw.github.com/nkashyap/console.io/master/resources/icons/offline.png) Device is registered but offline.
-* ![Subscribe icons](https://raw.github.com/nkashyap/console.io/master/resources/icons/subscribe.gif) Device is subscribed (double click on Online icon to subscribe).
-* ![Web icons](https://raw.github.com/nkashyap/console.io/master/resources/icons/console.gif) web console icon to enable/disable web remotely.
+* ![Subscribe icons](https://raw.github.com/nkashyap/console.io/master/resources/icons/subscribe.png) Device is subscribed (double click on Online icon to subscribe).
+* ![Web icons](https://raw.github.com/nkashyap/console.io/master/resources/icons/console.png) web console icon to enable/disable web remotely.
 
 
 ### APPLICATION
