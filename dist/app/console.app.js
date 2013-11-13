@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-11-08
+ * Date: 2013-11-13
 */
 
 /**
@@ -440,7 +440,7 @@ ConsoleIO.Service.DHTMLXHelper = {
                     this.addText(item.id, index, item.text);
                     break;
                 case 'input':
-                    this.addInput(item.id, index, item.value);
+                    this.addInput(item.id, index, (item.id === 'triggerInterval') ? ConsoleIO.Settings.triggerInterval : item.value);
                     break;
             }
 
@@ -519,16 +519,25 @@ ConsoleIO.Model.DHTMLX = {
     ToolBarItem: {
         Separator: { type: 'separator' },
 
-        //Back: { id: 'back', type: 'select', text: 'Back', opts: [], imgEnabled: 'back.png', imgDisabled: 'back_dis.png', tooltip: 'Back in History' },
-        //Forward: { id: 'forward', type: 'select', text: 'Forward', opts: [], imgEnabled: 'forward.png', imgDisabled: 'forward_dis.png', tooltip: 'Forward in History' },
-
         PageSize: { id: 'pagesize', type: 'select', text: 'PageSize', imgEnabled: 'pagesize.png', tooltip: 'Page Size', width: 90, opts: 'pagesizes' },
 
         Source: { id: 'source', type: 'twoState', text: 'Source', imgEnabled: 'source.png', imgDisabled: 'source_dis.png', tooltip: 'Source', pressed: true },
         Preview: { id: 'preview', type: 'twoState', text: 'Preview', imgEnabled: 'preview.png', imgDisabled: 'preview_dis.png', tooltip: 'Preview', pressed: false },
 
-        Connect: { id: 'connect', type: 'twoState', text: 'Connect', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'Connect' },
         ScreenShot: { id: 'screenShot', type: 'button', text: 'Capture', imgEnabled: 'screenshot.png', imgDisabled: 'screenshot_dis.png', tooltip: 'ScreenShot' },
+
+        TriggerLabel: { id: 'triggerLabel', type: 'text', text: 'Trigger Interval' },
+        TriggerInterval: { id: 'triggerInterval', type: 'input', value: '', width: 100, tooltip: 'Trigger interval' },
+        KeyPress: { id: 'keyPress', type: 'twoState', text: 'KeyPress', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyPress' },
+        KeyDown: { id: 'keyDown', type: 'twoState', text: 'KeyDown', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyDown' },
+        KeyUp: { id: 'keyUp', type: 'twoState', text: 'KeyUp', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyUp' },
+        MouseMove: { id: 'mouseMove', type: 'twoState', text: 'MouseMove', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseMove' },
+        MouseOver: { id: 'mouseOver', type: 'twoState', text: 'MouseOver', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseOver' },
+        MouseOut: { id: 'mouseOut', type: 'twoState', text: 'MouseOut', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseOut' },
+        MouseEnter: { id: 'mouseEnter', type: 'twoState', text: 'MouseEnter', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseEnter' },
+        MouseLeave: { id: 'mouseLeave', type: 'twoState', text: 'MouseLeave', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseLeave' },
+        Click: { id: 'click', type: 'twoState', text: 'Click', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'Click' },
+        DoubleClick: { id: 'doubleClick', type: 'twoState', text: 'DoubleClick', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'DoubleClick' },
 
         DeviceNameLabel: { id: 'deviceNameLabel', type: 'text', text: 'Device Name:', tooltip: 'Device Name' },
         DeviceNameText: { id: 'deviceNameText', type: 'input', value: '', width: 120, tooltip: 'Enter Device Name' },
@@ -542,12 +551,10 @@ ConsoleIO.Model.DHTMLX = {
         Refresh: { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.png', tooltip: 'Refresh' },
         Reload: { id: 'reload', type: 'button', text: 'Reload', imgEnabled: 'reload.png', tooltip: 'Reload Browser' },
 
-        Open: { id: 'open', type: 'select', text: 'Open', imgEnabled: 'open.png', imgDisabled: 'open_dis.png', tooltip: 'Open', opts:
-            [] },
-        Save: { id: 'save', type: 'select', text: 'Save', imgEnabled: 'save.png', imgDisabled: 'save_dis.png', tooltip: 'Save', disabled: true, opts:
-            [
-                ['saveAs', 'obj', 'Save As', 'save_as.png']
-            ]},
+        Open: { id: 'open', type: 'select', text: 'Open', imgEnabled: 'open.png', imgDisabled: 'open_dis.png', tooltip: 'Open', opts: [] },
+        Save: { id: 'save', type: 'select', text: 'Save', imgEnabled: 'save.png', imgDisabled: 'save_dis.png', tooltip: 'Save', disabled: true, opts: [
+            ['saveAs', 'obj', 'Save As', 'save_as.png']
+        ]},
         Export: { id: 'export', type: 'button', text: 'Export', imgEnabled: 'downloads.png', tooltip: 'Export' },
 
         Undo: { id: 'undo', type: 'button', text: 'Undo', imgEnabled: 'undo.png', imgDisabled: 'undo_dis.png', tooltip: 'Undo', disabled: true },
@@ -560,11 +567,10 @@ ConsoleIO.Model.DHTMLX = {
 
 
         Profiler: { id: 'profiler', type: 'twoState', text: 'Start Profiling', imgEnabled: 'rec.png', imgDisabled: 'rec_dis.png', tooltip: 'Start CPU Profiling', pressed: false },
-        ProfileView: { id: 'displaySelector', type: 'select', text: 'Tree (Top Down)', width: 110, hidden: true, disabled: true, opts:
-            [
-                ['heavy', 'obj', 'Heavy (Bottom Up)'],
-                ['tree', 'obj', 'Tree (Top Down)']
-            ] },
+        ProfileView: { id: 'displaySelector', type: 'select', text: 'Tree (Top Down)', width: 110, hidden: true, disabled: true, opts: [
+            ['heavy', 'obj', 'Heavy (Bottom Up)'],
+            ['tree', 'obj', 'Tree (Top Down)']
+        ] },
         TimeOrPercent: { id: 'timePercent', type: 'twoState', imgEnabled: 'percent.png', imgDisabled: 'percent.png', tooltip: 'Show total and self time in percentage', hidden: true, disabled: true, pressed: false },
         FocusFn: { id: 'focusFn', type: 'button', imgEnabled: 'zoom.png', imgDisabled: 'zoom_dis.png', tooltip: 'Focus selected function', hidden: true, disabled: true },
         RestoreFn: { id: 'restoreFn', type: 'button', imgEnabled: 'undo.png', imgDisabled: 'undo_dis.png', tooltip: 'Restore all functions', hidden: true, disabled: true },
@@ -1063,6 +1069,7 @@ ConsoleIO.View.Device.HTML = function HTMLView(ctrl, model) {
     this.model = model;
     this.target = null;
     this.toolbar = null;
+    this.previewToolbar = null;
     this.tab = null;
     this.dhxWins = null;
     this.previewFrame = null;
@@ -1087,6 +1094,13 @@ ConsoleIO.View.Device.HTML.prototype.render = function render(target) {
     }, this.ctrl);
 
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
+
+    this.previewBar = ConsoleIO.Service.DHTMLXHelper.createElement({
+        tag: 'div',
+        attr: {
+            width: '100%'
+        }
+    });
 
     this.previewFrame = ConsoleIO.Service.DHTMLXHelper.createElement({
         tag: 'iframe',
@@ -1140,17 +1154,12 @@ ConsoleIO.View.Device.HTML.prototype.hide = function hide() {
 };
 
 ConsoleIO.View.Device.HTML.prototype.preview = function preview(data) {
-    if (this.ctrl.remoteControl) {
-        this.unbind();
-    }
-
+    this.unbind();
     this.previewFrame.src = "javascript:false;";
     ConsoleIO.async(function () {
         this.previewFrame.contentWindow.document.head.innerHTML = data.style;
         this.previewFrame.contentWindow.document.body.innerHTML = data.body;
-        if (this.ctrl.remoteControl) {
-            this.bind();
-        }
+        this.bind();
 
     }, this);
 };
@@ -1158,7 +1167,7 @@ ConsoleIO.View.Device.HTML.prototype.preview = function preview(data) {
 ConsoleIO.View.Device.HTML.prototype.bind = function bind() {
     var win = this.previewFrame.contentWindow || this.previewFrame.contentDocument;
     if (win.document) {
-        ConsoleIO.forEachProperty(this.ctrl.events, function(fn, name){
+        ConsoleIO.forEachProperty(this.ctrl.events, function (fn, name) {
             ConsoleIO.addEventListener(win.document.body, name, fn);
         }, this.ctrl);
     }
@@ -1167,7 +1176,7 @@ ConsoleIO.View.Device.HTML.prototype.bind = function bind() {
 ConsoleIO.View.Device.HTML.prototype.unbind = function unbind() {
     var win = this.previewFrame.contentWindow || this.previewFrame.contentDocument;
     if (win.document) {
-        ConsoleIO.forEachProperty(this.ctrl.events, function(fn, name){
+        ConsoleIO.forEachProperty(this.ctrl.events, function (fn, name) {
             ConsoleIO.removeEventListener(win.document.body, name, fn);
         }, this.ctrl);
     }
@@ -1196,6 +1205,38 @@ ConsoleIO.View.Device.HTML.prototype.screenShot = function screenShot(data) {
     }
 };
 
+
+ConsoleIO.View.Device.HTML.prototype.setMode = function setMode(mode) {
+    if (mode === ConsoleIO.Model.DHTMLX.ToolBarItem.Preview.id) {
+        var target = document.querySelector('.dhx_tabcontent_zone > [tab_id=' + this.id + ']');
+        if (!this.previewToolbar && target) {
+            target.insertBefore(this.previewBar, document.querySelector('.dhx_tabcontent_zone > [tab_id=' + this.id + '] [ida=dhxMainCont]'));
+
+            this.previewToolbar = new dhtmlXToolbarObject(this.previewBar, ConsoleIO.Settings.theme);
+            this.previewToolbar.setIconsPath(ConsoleIO.Settings.iconPath);
+            this.previewToolbar.attachEvent("onClick", function (itemId) {
+                this.onPreviewButtonClick(itemId, true);
+            }, this.ctrl);
+
+            this.previewToolbar.attachEvent("onStateChange", function (itemId, state) {
+                this.onPreviewButtonClick(itemId, state);
+            }, this.ctrl);
+
+            this.previewToolbar.attachEvent("onEnter", function (itemId, value) {
+                ConsoleIO.Settings.triggerInterval = value;
+            }, this.ctrl);
+
+            ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.previewToolbar, this.previewToolbar);
+            this.previewBar.className = 'dhx_toolbar_base_18_dhx_skyblue in_tabbarcell';
+        }
+    } else {
+        if (this.previewToolbar) {
+            this.previewToolbar.unload();
+            this.previewToolbar = null;
+            this.previewBar.parentNode.removeChild(this.previewBar);
+        }
+    }
+};
 
 ConsoleIO.View.Device.HTML.prototype.setTabActive = function setTabActive() {
     this.target.setTabActive(this.id);
@@ -2666,6 +2707,8 @@ ConsoleIO.App.Device.Explorer.prototype.onOpenEnd = function onOpenEnd(itemId, s
 ConsoleIO.namespace("ConsoleIO.App.Device.HTML");
 
 ConsoleIO.App.Device.HTML = function HTMLController(parent, model) {
+    var toolBarModel = ConsoleIO.Model.DHTMLX.ToolBarItem;
+
     this.parent = parent;
     this.model = model;
 
@@ -2685,30 +2728,31 @@ ConsoleIO.App.Device.HTML = function HTMLController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.ScreenShot,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Connect
+            ConsoleIO.Model.DHTMLX.ToolBarItem.ScreenShot
+        ],
+        previewToolbar: [
+            ConsoleIO.Model.DHTMLX.ToolBarItem.TriggerLabel,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.TriggerInterval,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Click,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.DoubleClick,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.KeyPress,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.KeyDown,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.KeyUp,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseMove,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseOver,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseOut,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseEnter,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseLeave
         ]
     });
+
     this.editor = new ConsoleIO.App.Editor(this, {});
 
-    this.activeMode = ConsoleIO.Model.DHTMLX.ToolBarItem.Source.pressed ? 'source' : 'preview';
-    this.remoteControl = false;
-
-    var scope = this;
-    this.events = {
-        click: function onclick(e) {
-            scope.sendEvent(e);
-        }
-//        mousemove: function mousemove(e) {
-//            scope.sendEvent(e);
-//        },
-//        mouseover: function mouseover(e) {
-//            scope.sendEvent(e);
-//        },
-//        mouseout: function mouseout(e) {
-//            scope.sendEvent(e);
-//        }
-    };
+    this.activeMode = toolBarModel.Source.pressed ? toolBarModel.Source.id : toolBarModel.Preview.id;
+    this.events = {};
 
     ConsoleIO.Service.Socket.on('device:htmlDocument:' + this.model.serialNumber, this.addContent, this);
     ConsoleIO.Service.Socket.on('device:htmlContent:' + this.model.serialNumber, this.addContent, this);
@@ -2719,7 +2763,7 @@ ConsoleIO.App.Device.HTML = function HTMLController(parent, model) {
 ConsoleIO.App.Device.HTML.prototype.render = function render(target) {
     this.view.render(target);
     this.editor.render(this.view.tab);
-    this.view.toggleButton('Connect', this.activeMode === 'preview');
+    this.switchMode(this.activeMode);
 };
 
 ConsoleIO.App.Device.HTML.prototype.destroy = function destroy() {
@@ -2739,21 +2783,17 @@ ConsoleIO.App.Device.HTML.prototype.activate = function activate(state) {
 };
 
 ConsoleIO.App.Device.HTML.prototype.addContent = function addContent(data) {
-    if (this.activeMode === 'source') {
-        this.view.hide();
-        this.editor.show();
+    if (this.activeMode === ConsoleIO.Model.DHTMLX.ToolBarItem.Source.id) {
         this.editor.setValue(data);
     } else {
-        this.editor.hide();
         this.view.preview(data);
-        this.view.show();
     }
 };
 
 ConsoleIO.App.Device.HTML.prototype.buildSelector = function buildSelector(element, childSelector) {
 
     if (element.tagName.toLowerCase() === 'body') {
-        return childSelector;
+        return childSelector || 'body';
     }
 
     childSelector = !!childSelector ? ' ' + childSelector : '';
@@ -2788,25 +2828,40 @@ ConsoleIO.App.Device.HTML.prototype.screenShot = function screenShot(data) {
 ConsoleIO.App.Device.HTML.prototype.sendEvent = function sendEvent(e) {
     this.intervals = this.intervals || {};
     if (!this.intervals[e.type]) {
-        var selector = this.buildSelector(e.srcElement);
-        if (!!selector) {
-            ConsoleIO.Service.Socket.emit('remoteEvent', {
+        var selector = this.buildSelector(e.srcElement),
+            event = {
                 serialNumber: this.model.serialNumber,
-                event: e.constructor.name,
-                type: e.type,
-                selector: selector
-            });
+                constructor: e.constructor.name
+            };
+
+        if (!!selector) {
+            ConsoleIO.forEachProperty(e, function (value, property) {
+                if (e.hasOwnProperty(property)) {
+                    if (typeof value !== 'object') {
+                        event[property] = value;
+                    } else if (property === 'srcElement') {
+                        event.srcElement = '$!' + selector;
+                    } else if (value !== null && typeof value === 'object' && !!value.tagName) {
+                        var subSelector = this.buildSelector(value);
+                        if (subSelector) {
+                            event[property] = '$!' + subSelector;
+                        }
+                    }
+                }
+            }, this);
+
+            ConsoleIO.Service.Socket.emit('remoteEvent', event);
         }
 
         this.intervals[e.type] = ConsoleIO.async(function () {
             window.clearTimeout(this.intervals[e.type]);
             delete this.intervals[e.type];
-        }, this, 500);
+        }, this, ConsoleIO.Settings.triggerInterval);
     }
 };
 
 ConsoleIO.App.Device.HTML.prototype.refresh = function refresh() {
-    if (this.activeMode === 'source') {
+    if (this.activeMode === ConsoleIO.Model.DHTMLX.ToolBarItem.Source.id) {
         ConsoleIO.Service.Socket.emit('htmlSource', {
             serialNumber: this.model.serialNumber,
             beautify: this.parent.beautify
@@ -2818,6 +2873,27 @@ ConsoleIO.App.Device.HTML.prototype.refresh = function refresh() {
     }
 };
 
+ConsoleIO.App.Device.HTML.prototype.switchMode = function switchMode(mode) {
+    this.activeMode = mode;
+
+    this.setItemState('Preview', (mode === 'preview'));
+    this.setItemState('Source', (mode === 'source'));
+    this.view.toggleButton('WordWrap', (mode === 'source'));
+    this.view.toggleButton('Beautify', (mode === 'source'));
+    this.view.toggleButton('SelectAll', (mode === 'source'));
+    this.view.toggleButton('Copy', (mode === 'source'));
+
+    if (this.activeMode === ConsoleIO.Model.DHTMLX.ToolBarItem.Source.id) {
+        this.view.hide();
+        this.editor.show();
+    } else {
+        this.editor.hide();
+        this.view.show();
+    }
+
+    this.view.setMode(this.activeMode);
+    this.refresh();
+};
 
 ConsoleIO.App.Device.HTML.prototype.setTabActive = function setTabActive() {
     this.view.setTabActive();
@@ -2827,33 +2903,31 @@ ConsoleIO.App.Device.HTML.prototype.setItemState = function setItemState(id, sta
     this.view.setItemState(id, state);
 };
 
+ConsoleIO.App.Device.HTML.prototype.onPreviewButtonClick = function onPreviewButtonClick(btnId, state) {
+    btnId = btnId.toLowerCase();
+
+    this.view.unbind();
+
+    if (state) {
+        if (!this.events[btnId]) {
+            var scope = this;
+            this.events[btnId] = function (e) {
+                scope.sendEvent(e);
+            };
+        }
+    } else {
+        delete this.events[btnId];
+    }
+
+    this.view.bind();
+};
 
 ConsoleIO.App.Device.HTML.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
         switch (btnId) {
             case 'source':
-                this.activeMode = 'source';
-                this.setItemState('Preview', false);
-
-                this.view.toggleButton('WordWrap', true);
-                this.view.toggleButton('Beautify', true);
-                this.view.toggleButton('SelectAll', true);
-                this.view.toggleButton('Copy', true);
-                this.view.toggleButton('Connect', false);
-
-                this.refresh();
-                break;
             case 'preview':
-                this.activeMode = 'preview';
-                this.setItemState('Source', false);
-
-                this.view.toggleButton('WordWrap', false);
-                this.view.toggleButton('Beautify', false);
-                this.view.toggleButton('SelectAll', false);
-                this.view.toggleButton('Copy', false);
-                this.view.toggleButton('Connect', true);
-
-                this.refresh();
+                this.switchMode(btnId);
                 break;
             case 'screenShot':
                 this.view.toggleButton('ScreenShot', false);
@@ -2866,14 +2940,6 @@ ConsoleIO.App.Device.HTML.prototype.onButtonClick = function onButtonClick(btnId
                     this.view.toggleButton('ScreenShot', true);
                 }, this, 10000);
 
-                break;
-            case 'connect':
-                this.remoteControl = state;
-                if (this.remoteControl) {
-                    this.view.bind();
-                } else {
-                    this.view.unbind();
-                }
                 break;
             default:
                 this.parent.parent.parent.server.update({
@@ -3975,7 +4041,8 @@ ConsoleIO.Settings = {
         list: [50, 100, 250, 500]
     },
     defaultTab: 'console',
-    defaultAccordion: 'device'
+    defaultAccordion: 'device',
+    triggerInterval: 1000
 };
 
 /**

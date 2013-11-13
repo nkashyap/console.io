@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <jslint>
 	<file name="src/app/view/device/html.js">
-		<issue line="98" char="48" reason="Script URL." evidence="    this.previewFrame.src = &quot;javascript:false;&quot;;" severity="W" />
+		<issue line="103" char="48" reason="Script URL." evidence="    this.previewFrame.src = &quot;javascript:false;&quot;;" severity="W" />
 	</file>
 </jslint>

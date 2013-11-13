@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-11-08
+ * Date: 2013-11-13
 */
 
 code {
@@ -412,7 +412,7 @@ html, body {
     text-transform: capitalize;
 }
 
-.dhx_tabcontent_zone > div[tab_id^=Profile] > div[ida=dhxMainCont] .containerTableStyle>table {
+.dhx_tabcontent_zone > div[tab_id^=Profile] > div[ida=dhxMainCont] .containerTableStyle > table {
     margin: 0 !important;
 }
 

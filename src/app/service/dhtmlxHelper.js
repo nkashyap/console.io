@@ -42,7 +42,7 @@ ConsoleIO.Service.DHTMLXHelper = {
                     this.addText(item.id, index, item.text);
                     break;
                 case 'input':
-                    this.addInput(item.id, index, item.value);
+                    this.addInput(item.id, index, (item.id === 'triggerInterval') ? ConsoleIO.Settings.triggerInterval : item.value);
                     break;
             }
 

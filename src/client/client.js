@@ -366,28 +366,32 @@
     }
 
     function onRemoteEvent(data) {
-        var element = document.querySelector(data.selector),
-            opt = {
-                'view': global,
-                'bubbles': true,
-                'cancelable': true
-            },
-            moveEvent = new global[data.event]('mousemove', opt),
-            overEvent = new global[data.event]('mouseover', opt),
-            raisedEvent = new global[data.event](data.type, opt);
+        var raisedEvent,
+            element = document.querySelector(data.srcElement.replace("$!", ""));
 
         if (element) {
-            if (element.innerText.indexOf('<') === 0) {
-                element.dispatchEvent(moveEvent);
-                element.dispatchEvent(overEvent);
+            raisedEvent = document.createEvent('HTMLEvents');
+            raisedEvent.view = global;
+            raisedEvent.initEvent(data.type, true, true);
+            exports.util.forEachProperty(data, function (value, property) {
+                if (typeof value === 'string') {
+                    if (value.indexOf('$!') === 0) {
+                        raisedEvent[property] = value === 'body' ? document.body : document.querySelector(value.replace("$!", ""));
+                    } else {
+                        raisedEvent[property] = value;
+                    }
+                } else {
+                    raisedEvent[property] = value;
+                }
+            });
+
+            if (element.innerText.indexOf('<') === 0 || data.srcElement === '$!body') {
                 element.dispatchEvent(raisedEvent);
             } else {
-                element.parentNode.dispatchEvent(moveEvent);
-                element.parentNode.dispatchEvent(overEvent);
                 element.parentNode.dispatchEvent(raisedEvent);
             }
 
-            exports.util.async(onHTMLPreview, 1000);
+            exports.util.async(onHTMLPreview, 500);
         }
     }
 

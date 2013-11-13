@@ -13,16 +13,25 @@ ConsoleIO.Model.DHTMLX = {
     ToolBarItem: {
         Separator: { type: 'separator' },
 
-        //Back: { id: 'back', type: 'select', text: 'Back', opts: [], imgEnabled: 'back.png', imgDisabled: 'back_dis.png', tooltip: 'Back in History' },
-        //Forward: { id: 'forward', type: 'select', text: 'Forward', opts: [], imgEnabled: 'forward.png', imgDisabled: 'forward_dis.png', tooltip: 'Forward in History' },
-
         PageSize: { id: 'pagesize', type: 'select', text: 'PageSize', imgEnabled: 'pagesize.png', tooltip: 'Page Size', width: 90, opts: 'pagesizes' },
 
         Source: { id: 'source', type: 'twoState', text: 'Source', imgEnabled: 'source.png', imgDisabled: 'source_dis.png', tooltip: 'Source', pressed: true },
         Preview: { id: 'preview', type: 'twoState', text: 'Preview', imgEnabled: 'preview.png', imgDisabled: 'preview_dis.png', tooltip: 'Preview', pressed: false },
 
-        Connect: { id: 'connect', type: 'twoState', text: 'Connect', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'Connect' },
         ScreenShot: { id: 'screenShot', type: 'button', text: 'Capture', imgEnabled: 'screenshot.png', imgDisabled: 'screenshot_dis.png', tooltip: 'ScreenShot' },
+
+        TriggerLabel: { id: 'triggerLabel', type: 'text', text: 'Trigger Interval' },
+        TriggerInterval: { id: 'triggerInterval', type: 'input', value: '', width: 100, tooltip: 'Trigger interval' },
+        KeyPress: { id: 'keyPress', type: 'twoState', text: 'KeyPress', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyPress' },
+        KeyDown: { id: 'keyDown', type: 'twoState', text: 'KeyDown', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyDown' },
+        KeyUp: { id: 'keyUp', type: 'twoState', text: 'KeyUp', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyUp' },
+        MouseMove: { id: 'mouseMove', type: 'twoState', text: 'MouseMove', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseMove' },
+        MouseOver: { id: 'mouseOver', type: 'twoState', text: 'MouseOver', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseOver' },
+        MouseOut: { id: 'mouseOut', type: 'twoState', text: 'MouseOut', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseOut' },
+        MouseEnter: { id: 'mouseEnter', type: 'twoState', text: 'MouseEnter', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseEnter' },
+        MouseLeave: { id: 'mouseLeave', type: 'twoState', text: 'MouseLeave', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseLeave' },
+        Click: { id: 'click', type: 'twoState', text: 'Click', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'Click' },
+        DoubleClick: { id: 'doubleClick', type: 'twoState', text: 'DoubleClick', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'DoubleClick' },
 
         DeviceNameLabel: { id: 'deviceNameLabel', type: 'text', text: 'Device Name:', tooltip: 'Device Name' },
         DeviceNameText: { id: 'deviceNameText', type: 'input', value: '', width: 120, tooltip: 'Enter Device Name' },
@@ -36,12 +45,10 @@ ConsoleIO.Model.DHTMLX = {
         Refresh: { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.png', tooltip: 'Refresh' },
         Reload: { id: 'reload', type: 'button', text: 'Reload', imgEnabled: 'reload.png', tooltip: 'Reload Browser' },
 
-        Open: { id: 'open', type: 'select', text: 'Open', imgEnabled: 'open.png', imgDisabled: 'open_dis.png', tooltip: 'Open', opts:
-            [] },
-        Save: { id: 'save', type: 'select', text: 'Save', imgEnabled: 'save.png', imgDisabled: 'save_dis.png', tooltip: 'Save', disabled: true, opts:
-            [
-                ['saveAs', 'obj', 'Save As', 'save_as.png']
-            ]},
+        Open: { id: 'open', type: 'select', text: 'Open', imgEnabled: 'open.png', imgDisabled: 'open_dis.png', tooltip: 'Open', opts: [] },
+        Save: { id: 'save', type: 'select', text: 'Save', imgEnabled: 'save.png', imgDisabled: 'save_dis.png', tooltip: 'Save', disabled: true, opts: [
+            ['saveAs', 'obj', 'Save As', 'save_as.png']
+        ]},
         Export: { id: 'export', type: 'button', text: 'Export', imgEnabled: 'downloads.png', tooltip: 'Export' },
 
         Undo: { id: 'undo', type: 'button', text: 'Undo', imgEnabled: 'undo.png', imgDisabled: 'undo_dis.png', tooltip: 'Undo', disabled: true },
@@ -54,11 +61,10 @@ ConsoleIO.Model.DHTMLX = {
 
 
         Profiler: { id: 'profiler', type: 'twoState', text: 'Start Profiling', imgEnabled: 'rec.png', imgDisabled: 'rec_dis.png', tooltip: 'Start CPU Profiling', pressed: false },
-        ProfileView: { id: 'displaySelector', type: 'select', text: 'Tree (Top Down)', width: 110, hidden: true, disabled: true, opts:
-            [
-                ['heavy', 'obj', 'Heavy (Bottom Up)'],
-                ['tree', 'obj', 'Tree (Top Down)']
-            ] },
+        ProfileView: { id: 'displaySelector', type: 'select', text: 'Tree (Top Down)', width: 110, hidden: true, disabled: true, opts: [
+            ['heavy', 'obj', 'Heavy (Bottom Up)'],
+            ['tree', 'obj', 'Tree (Top Down)']
+        ] },
         TimeOrPercent: { id: 'timePercent', type: 'twoState', imgEnabled: 'percent.png', imgDisabled: 'percent.png', tooltip: 'Show total and self time in percentage', hidden: true, disabled: true, pressed: false },
         FocusFn: { id: 'focusFn', type: 'button', imgEnabled: 'zoom.png', imgDisabled: 'zoom_dis.png', tooltip: 'Focus selected function', hidden: true, disabled: true },
         RestoreFn: { id: 'restoreFn', type: 'button', imgEnabled: 'undo.png', imgDisabled: 'undo_dis.png', tooltip: 'Restore all functions', hidden: true, disabled: true },

@@ -10,6 +10,8 @@
 ConsoleIO.namespace("ConsoleIO.App.Device.HTML");
 
 ConsoleIO.App.Device.HTML = function HTMLController(parent, model) {
+    var toolBarModel = ConsoleIO.Model.DHTMLX.ToolBarItem;
+
     this.parent = parent;
     this.model = model;
 
@@ -29,30 +31,31 @@ ConsoleIO.App.Device.HTML = function HTMLController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.ScreenShot,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Connect
+            ConsoleIO.Model.DHTMLX.ToolBarItem.ScreenShot
+        ],
+        previewToolbar: [
+            ConsoleIO.Model.DHTMLX.ToolBarItem.TriggerLabel,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.TriggerInterval,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Click,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.DoubleClick,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.KeyPress,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.KeyDown,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.KeyUp,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseMove,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseOver,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseOut,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseEnter,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseLeave
         ]
     });
+
     this.editor = new ConsoleIO.App.Editor(this, {});
 
-    this.activeMode = ConsoleIO.Model.DHTMLX.ToolBarItem.Source.pressed ? 'source' : 'preview';
-    this.remoteControl = false;
-
-    var scope = this;
-    this.events = {
-        click: function onclick(e) {
-            scope.sendEvent(e);
-        }
-//        mousemove: function mousemove(e) {
-//            scope.sendEvent(e);
-//        },
-//        mouseover: function mouseover(e) {
-//            scope.sendEvent(e);
-//        },
-//        mouseout: function mouseout(e) {
-//            scope.sendEvent(e);
-//        }
-    };
+    this.activeMode = toolBarModel.Source.pressed ? toolBarModel.Source.id : toolBarModel.Preview.id;
+    this.events = {};
 
     ConsoleIO.Service.Socket.on('device:htmlDocument:' + this.model.serialNumber, this.addContent, this);
     ConsoleIO.Service.Socket.on('device:htmlContent:' + this.model.serialNumber, this.addContent, this);
@@ -63,7 +66,7 @@ ConsoleIO.App.Device.HTML = function HTMLController(parent, model) {
 ConsoleIO.App.Device.HTML.prototype.render = function render(target) {
     this.view.render(target);
     this.editor.render(this.view.tab);
-    this.view.toggleButton('Connect', this.activeMode === 'preview');
+    this.switchMode(this.activeMode);
 };
 
 ConsoleIO.App.Device.HTML.prototype.destroy = function destroy() {
@@ -83,21 +86,17 @@ ConsoleIO.App.Device.HTML.prototype.activate = function activate(state) {
 };
 
 ConsoleIO.App.Device.HTML.prototype.addContent = function addContent(data) {
-    if (this.activeMode === 'source') {
-        this.view.hide();
-        this.editor.show();
+    if (this.activeMode === ConsoleIO.Model.DHTMLX.ToolBarItem.Source.id) {
         this.editor.setValue(data);
     } else {
-        this.editor.hide();
         this.view.preview(data);
-        this.view.show();
     }
 };
 
 ConsoleIO.App.Device.HTML.prototype.buildSelector = function buildSelector(element, childSelector) {
 
     if (element.tagName.toLowerCase() === 'body') {
-        return childSelector;
+        return childSelector || 'body';
     }
 
     childSelector = !!childSelector ? ' ' + childSelector : '';
@@ -132,25 +131,40 @@ ConsoleIO.App.Device.HTML.prototype.screenShot = function screenShot(data) {
 ConsoleIO.App.Device.HTML.prototype.sendEvent = function sendEvent(e) {
     this.intervals = this.intervals || {};
     if (!this.intervals[e.type]) {
-        var selector = this.buildSelector(e.srcElement);
-        if (!!selector) {
-            ConsoleIO.Service.Socket.emit('remoteEvent', {
+        var selector = this.buildSelector(e.srcElement),
+            event = {
                 serialNumber: this.model.serialNumber,
-                event: e.constructor.name,
-                type: e.type,
-                selector: selector
-            });
+                constructor: e.constructor.name
+            };
+
+        if (!!selector) {
+            ConsoleIO.forEachProperty(e, function (value, property) {
+                if (e.hasOwnProperty(property)) {
+                    if (typeof value !== 'object') {
+                        event[property] = value;
+                    } else if (property === 'srcElement') {
+                        event.srcElement = '$!' + selector;
+                    } else if (value !== null && typeof value === 'object' && !!value.tagName) {
+                        var subSelector = this.buildSelector(value);
+                        if (subSelector) {
+                            event[property] = '$!' + subSelector;
+                        }
+                    }
+                }
+            }, this);
+
+            ConsoleIO.Service.Socket.emit('remoteEvent', event);
         }
 
         this.intervals[e.type] = ConsoleIO.async(function () {
             window.clearTimeout(this.intervals[e.type]);
             delete this.intervals[e.type];
-        }, this, 500);
+        }, this, ConsoleIO.Settings.triggerInterval);
     }
 };
 
 ConsoleIO.App.Device.HTML.prototype.refresh = function refresh() {
-    if (this.activeMode === 'source') {
+    if (this.activeMode === ConsoleIO.Model.DHTMLX.ToolBarItem.Source.id) {
         ConsoleIO.Service.Socket.emit('htmlSource', {
             serialNumber: this.model.serialNumber,
             beautify: this.parent.beautify
@@ -162,6 +176,27 @@ ConsoleIO.App.Device.HTML.prototype.refresh = function refresh() {
     }
 };
 
+ConsoleIO.App.Device.HTML.prototype.switchMode = function switchMode(mode) {
+    this.activeMode = mode;
+
+    this.setItemState('Preview', (mode === 'preview'));
+    this.setItemState('Source', (mode === 'source'));
+    this.view.toggleButton('WordWrap', (mode === 'source'));
+    this.view.toggleButton('Beautify', (mode === 'source'));
+    this.view.toggleButton('SelectAll', (mode === 'source'));
+    this.view.toggleButton('Copy', (mode === 'source'));
+
+    if (this.activeMode === ConsoleIO.Model.DHTMLX.ToolBarItem.Source.id) {
+        this.view.hide();
+        this.editor.show();
+    } else {
+        this.editor.hide();
+        this.view.show();
+    }
+
+    this.view.setMode(this.activeMode);
+    this.refresh();
+};
 
 ConsoleIO.App.Device.HTML.prototype.setTabActive = function setTabActive() {
     this.view.setTabActive();
@@ -171,33 +206,31 @@ ConsoleIO.App.Device.HTML.prototype.setItemState = function setItemState(id, sta
     this.view.setItemState(id, state);
 };
 
+ConsoleIO.App.Device.HTML.prototype.onPreviewButtonClick = function onPreviewButtonClick(btnId, state) {
+    btnId = btnId.toLowerCase();
+
+    this.view.unbind();
+
+    if (state) {
+        if (!this.events[btnId]) {
+            var scope = this;
+            this.events[btnId] = function (e) {
+                scope.sendEvent(e);
+            };
+        }
+    } else {
+        delete this.events[btnId];
+    }
+
+    this.view.bind();
+};
 
 ConsoleIO.App.Device.HTML.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
         switch (btnId) {
             case 'source':
-                this.activeMode = 'source';
-                this.setItemState('Preview', false);
-
-                this.view.toggleButton('WordWrap', true);
-                this.view.toggleButton('Beautify', true);
-                this.view.toggleButton('SelectAll', true);
-                this.view.toggleButton('Copy', true);
-                this.view.toggleButton('Connect', false);
-
-                this.refresh();
-                break;
             case 'preview':
-                this.activeMode = 'preview';
-                this.setItemState('Source', false);
-
-                this.view.toggleButton('WordWrap', false);
-                this.view.toggleButton('Beautify', false);
-                this.view.toggleButton('SelectAll', false);
-                this.view.toggleButton('Copy', false);
-                this.view.toggleButton('Connect', true);
-
-                this.refresh();
+                this.switchMode(btnId);
                 break;
             case 'screenShot':
                 this.view.toggleButton('ScreenShot', false);
@@ -210,14 +243,6 @@ ConsoleIO.App.Device.HTML.prototype.onButtonClick = function onButtonClick(btnId
                     this.view.toggleButton('ScreenShot', true);
                 }, this, 10000);
 
-                break;
-            case 'connect':
-                this.remoteControl = state;
-                if (this.remoteControl) {
-                    this.view.bind();
-                } else {
-                    this.view.unbind();
-                }
                 break;
             default:
                 this.parent.parent.parent.server.update({

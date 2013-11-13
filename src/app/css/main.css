@@ -80,7 +80,7 @@ html, body {
     text-transform: capitalize;
 }
 
-.dhx_tabcontent_zone > div[tab_id^=Profile] > div[ida=dhxMainCont] .containerTableStyle>table {
+.dhx_tabcontent_zone > div[tab_id^=Profile] > div[ida=dhxMainCont] .containerTableStyle > table {
     margin: 0 !important;
 }
 

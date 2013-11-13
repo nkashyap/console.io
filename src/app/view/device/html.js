@@ -14,6 +14,7 @@ ConsoleIO.View.Device.HTML = function HTMLView(ctrl, model) {
     this.model = model;
     this.target = null;
     this.toolbar = null;
+    this.previewToolbar = null;
     this.tab = null;
     this.dhxWins = null;
     this.previewFrame = null;
@@ -38,6 +39,13 @@ ConsoleIO.View.Device.HTML.prototype.render = function render(target) {
     }, this.ctrl);
 
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
+
+    this.previewBar = ConsoleIO.Service.DHTMLXHelper.createElement({
+        tag: 'div',
+        attr: {
+            width: '100%'
+        }
+    });
 
     this.previewFrame = ConsoleIO.Service.DHTMLXHelper.createElement({
         tag: 'iframe',
@@ -91,17 +99,12 @@ ConsoleIO.View.Device.HTML.prototype.hide = function hide() {
 };
 
 ConsoleIO.View.Device.HTML.prototype.preview = function preview(data) {
-    if (this.ctrl.remoteControl) {
-        this.unbind();
-    }
-
+    this.unbind();
     this.previewFrame.src = "javascript:false;";
     ConsoleIO.async(function () {
         this.previewFrame.contentWindow.document.head.innerHTML = data.style;
         this.previewFrame.contentWindow.document.body.innerHTML = data.body;
-        if (this.ctrl.remoteControl) {
-            this.bind();
-        }
+        this.bind();
 
     }, this);
 };
@@ -109,7 +112,7 @@ ConsoleIO.View.Device.HTML.prototype.preview = function preview(data) {
 ConsoleIO.View.Device.HTML.prototype.bind = function bind() {
     var win = this.previewFrame.contentWindow || this.previewFrame.contentDocument;
     if (win.document) {
-        ConsoleIO.forEachProperty(this.ctrl.events, function(fn, name){
+        ConsoleIO.forEachProperty(this.ctrl.events, function (fn, name) {
             ConsoleIO.addEventListener(win.document.body, name, fn);
         }, this.ctrl);
     }
@@ -118,7 +121,7 @@ ConsoleIO.View.Device.HTML.prototype.bind = function bind() {
 ConsoleIO.View.Device.HTML.prototype.unbind = function unbind() {
     var win = this.previewFrame.contentWindow || this.previewFrame.contentDocument;
     if (win.document) {
-        ConsoleIO.forEachProperty(this.ctrl.events, function(fn, name){
+        ConsoleIO.forEachProperty(this.ctrl.events, function (fn, name) {
             ConsoleIO.removeEventListener(win.document.body, name, fn);
         }, this.ctrl);
     }
@@ -147,6 +150,38 @@ ConsoleIO.View.Device.HTML.prototype.screenShot = function screenShot(data) {
     }
 };
 
+
+ConsoleIO.View.Device.HTML.prototype.setMode = function setMode(mode) {
+    if (mode === ConsoleIO.Model.DHTMLX.ToolBarItem.Preview.id) {
+        var target = document.querySelector('.dhx_tabcontent_zone > [tab_id=' + this.id + ']');
+        if (!this.previewToolbar && target) {
+            target.insertBefore(this.previewBar, document.querySelector('.dhx_tabcontent_zone > [tab_id=' + this.id + '] [ida=dhxMainCont]'));
+
+            this.previewToolbar = new dhtmlXToolbarObject(this.previewBar, ConsoleIO.Settings.theme);
+            this.previewToolbar.setIconsPath(ConsoleIO.Settings.iconPath);
+            this.previewToolbar.attachEvent("onClick", function (itemId) {
+                this.onPreviewButtonClick(itemId, true);
+            }, this.ctrl);
+
+            this.previewToolbar.attachEvent("onStateChange", function (itemId, state) {
+                this.onPreviewButtonClick(itemId, state);
+            }, this.ctrl);
+
+            this.previewToolbar.attachEvent("onEnter", function (itemId, value) {
+                ConsoleIO.Settings.triggerInterval = value;
+            }, this.ctrl);
+
+            ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.previewToolbar, this.previewToolbar);
+            this.previewBar.className = 'dhx_toolbar_base_18_dhx_skyblue in_tabbarcell';
+        }
+    } else {
+        if (this.previewToolbar) {
+            this.previewToolbar.unload();
+            this.previewToolbar = null;
+            this.previewBar.parentNode.removeChild(this.previewBar);
+        }
+    }
+};
 
 ConsoleIO.View.Device.HTML.prototype.setTabActive = function setTabActive() {
     this.target.setTabActive(this.id);
