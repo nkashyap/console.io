@@ -105,7 +105,6 @@ ConsoleIO.View.Device.HTML.prototype.preview = function preview(data) {
         this.previewFrame.contentWindow.document.head.innerHTML = data.style;
         this.previewFrame.contentWindow.document.body.innerHTML = data.body;
         this.bind();
-
     }, this);
 };
 

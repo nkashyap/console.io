@@ -11,7 +11,8 @@
 
 (function (exports, global) {
 
-    var client = exports.client = {};
+    var client = exports.client = {},
+        syncTimeout;
 
     function storeData(data, msg, online) {
         if (!exports.name) {
@@ -370,6 +371,10 @@
             element = document.querySelector(data.srcElement.replace("$!", ""));
 
         if (element) {
+            if (syncTimeout) {
+                global.clearTimeout(syncTimeout);
+            }
+
             raisedEvent = document.createEvent('HTMLEvents');
             raisedEvent.view = global;
             raisedEvent.initEvent(data.type, true, true);
@@ -391,7 +396,10 @@
                 element.parentNode.dispatchEvent(raisedEvent);
             }
 
-            exports.util.async(onHTMLPreview, 500);
+            syncTimeout = exports.util.async(function () {
+                onHTMLPreview();
+                global.clearTimeout(syncTimeout);
+            }, 500);
         }
     }
 

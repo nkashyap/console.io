@@ -2155,7 +2155,8 @@ ConsoleIO.version = "0.2.2";
 
 (function (exports, global) {
 
-    var client = exports.client = {};
+    var client = exports.client = {},
+        syncTimeout;
 
     function storeData(data, msg, online) {
         if (!exports.name) {
@@ -2514,6 +2515,10 @@ ConsoleIO.version = "0.2.2";
             element = document.querySelector(data.srcElement.replace("$!", ""));
 
         if (element) {
+            if (syncTimeout) {
+                global.clearTimeout(syncTimeout);
+            }
+
             raisedEvent = document.createEvent('HTMLEvents');
             raisedEvent.view = global;
             raisedEvent.initEvent(data.type, true, true);
@@ -2535,7 +2540,10 @@ ConsoleIO.version = "0.2.2";
                 element.parentNode.dispatchEvent(raisedEvent);
             }
 
-            exports.util.async(onHTMLPreview, 500);
+            syncTimeout = exports.util.async(function () {
+                onHTMLPreview();
+                global.clearTimeout(syncTimeout);
+            }, 500);
         }
     }
 
