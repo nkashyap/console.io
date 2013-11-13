@@ -13,6 +13,7 @@
 
     var transport = exports.transport = {},
         pending = [],
+        lazyListener = [],
         config;
 
     function onMessage(event) {
@@ -74,6 +75,7 @@
     }
 
     transport.connectionMode = '';
+    transport.paused = false;
 
     transport.setUp = function setUp() {
         /** Fix for old Opera and Maple browsers
@@ -128,11 +130,17 @@
 
         // set console.io event
         exports.console.on('console', function (data) {
-            transport.emit('console', {
+            var msg = {
                 type: data.type,
                 message: escape(data.message),
                 stack: data.stack
-            });
+            };
+
+            if (transport.paused) {
+                pending.push({ name: 'console', data: msg });
+            } else {
+                transport.emit('console', msg);
+            }
         });
 
         if (global.addEventListener) {
@@ -149,6 +157,11 @@
         transport.io.on('connect_failed', onConnectFailed);
         transport.io.on('reconnect_failed', onReconnectFailed);
         transport.io.on('error', onError);
+
+        exports.util.forEach(lazyListener, function (item) {
+            transport.on(item.name, item.callback, item.scope);
+        });
+        lazyListener = [];
     };
 
     transport.emit = function emit(name, data) {
@@ -162,9 +175,13 @@
     };
 
     transport.on = function on(name, callback, scope) {
-        transport.io.on(name, function () {
-            callback.apply(scope || this, arguments);
-        });
+        if (transport.io) {
+            transport.io.on(name, function () {
+                callback.apply(scope || this, arguments);
+            });
+        } else {
+            lazyListener.push({ name: name, callback: callback, scope: scope });
+        }
     };
 
     transport.isConnected = function isConnected() {

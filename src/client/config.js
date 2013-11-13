@@ -15,10 +15,14 @@
         url: '',
         base: '',
         secure: false,
+        profile: false,
+        excludes: [],
 
+        profileWorker: "plugins/profileWorker.js",
         html2canvas: "plugins/html2canvas.js",
         "socket.io": "socket.io/socket.io.js",
         webStyle: "console.css",
+        profiler: "profiler",
         proxy: 'proxy',
         maxDataPacketSize: 5000,
 
@@ -36,12 +40,17 @@
     function getSettings() {
         var config = exports.config || exports.util.queryParams();
 
+        config.webOnly = config.webonly || config.webOnly;
         config.webOnly = config.webOnly === true || (config.webOnly || '').toLowerCase() === 'true';
         config.web = config.web === true || (config.web || '').toLowerCase() === 'true';
         config.secure = config.secure === true || (config.secure || '').toLowerCase() === 'true';
 
         if (typeof config.filters !== 'undefined') {
             config.filters = typeof config.filters === 'string' ? config.filters.split(',') : config.filters;
+        }
+
+        if (typeof config.excludes !== 'undefined') {
+            config.excludes = typeof config.excludes === 'string' ? config.excludes.split(',') : config.excludes;
         }
 
         return config;
@@ -57,8 +66,47 @@
         }
     }
 
+    function isURLExcluded(url) {
+        var exclude = false;
+
+        exports.util.every(exports.getConfig().excludes, function (folder) {
+            if (url.indexOf(folder + '/') > -1) {
+                exclude = true;
+                return false;
+            }
+            return true;
+        });
+
+        return exclude;
+    }
+
+    function profilerSetUp() {
+        if (exports.util.foundRequireJS()) {
+            var requirejsLoad = global.requirejs.load,
+                baseUrl = exports.util.getUrl('profiler');
+
+            global.requirejs.load = function (context, moduleName, url) {
+                requirejsLoad.call(global.requirejs, context, moduleName, isURLExcluded(url) ? url : exports.util.getProfileUrl(baseUrl, url));
+            };
+        }
+
+        exports.profiler.setUp();
+    }
+
     exports.configure = function configure(cfg) {
         exports.util.extend(defaultConfig, cfg);
+
+        // Setup RequireJS global error handler
+        if (exports.util.foundRequireJS()) {
+            global.requirejs.onError = function (error) {
+                exports.console.error(error, error.requireModules, error.originalError);
+            };
+        }
+
+        //setup requireJS
+        if (defaultConfig.profile) {
+            profilerSetUp();
+        }
 
         if (!defaultConfig.webOnly) {
             //Request console.io.js file to get connect.sid cookie from the server
@@ -114,6 +162,7 @@
             log.style.margin = '10px';
             log.style.paddingTop = '10px';
             log.style.zIndex = 6000;
+            log.style.color = 'white';
             document.body.insertBefore(log, exports.util.getFirstElement(document.body));
         }
 
@@ -149,13 +198,6 @@
 
         return result;
     };
-
-    // Setup RequireJS global error handler
-    if (exports.util.foundRequireJS()) {
-        global.requirejs.onError = function (error) {
-            exports.console.error(error, error.requireModules, error.originalError);
-        };
-    }
 
 
     /**

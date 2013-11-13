@@ -22,6 +22,10 @@ if (typeof window.ConsoleIO === "undefined") {
             }
         },
 
+        getOrigin: function getOrigin() {
+            return window.location.origin || window.location.protocol + '//' + (window.location.host || window.location.hostname + ':' + window.location.port);
+        },
+
         ready: function ready(callback) {
             function DOMContentLoaded() {
                 if (document.addEventListener) {
@@ -46,6 +50,57 @@ if (typeof window.ConsoleIO === "undefined") {
                 document.attachEvent("onreadystatechange", DOMContentLoaded);
                 window.attachEvent("onload", callback);
             }
+        },
+
+        addEventListener: function addEventListener(obj, evt, fnc) {
+            // W3C model
+            if (obj.addEventListener) {
+                obj.addEventListener(evt, fnc, false);
+                return true;
+            } else if (obj.attachEvent) {
+                // Microsoft model
+                return obj.attachEvent('on' + evt, fnc);
+            } else {
+                // Browser don't support W3C or MSFT model, go on with traditional
+                evt = 'on' + evt;
+
+                if (typeof obj[evt] === 'function') {
+                    // Object already has a function on traditional
+                    // Let's wrap it with our own function inside another function
+                    fnc = (function (f1, f2) {
+                        return function () {
+                            f1.apply(this, arguments);
+                            f2.apply(this, arguments);
+                        };
+                    }(obj[evt], fnc));
+                }
+
+                obj[evt] = fnc;
+                return true;
+            }
+
+            return false;
+        },
+
+        removeEventListener: function removeEventListener(obj, evt, fnc) {
+            // W3C model
+            if (obj.removeEventListener) {
+                obj.removeEventListener(evt, fnc, false);
+                return true;
+            } else if (obj.detachEvent) {
+                // Microsoft model
+                return obj.detachEvent('on' + evt, fnc);
+            } else {
+                // Browser don't support W3C or MSFT model, go on with traditional
+                evt = 'on' + evt;
+
+                if (typeof obj[evt] === 'function') {
+                    obj[evt] = null;
+                }
+                return true;
+            }
+
+            return false;
         },
 
         every: (function () {
@@ -135,6 +190,16 @@ if (typeof window.ConsoleIO === "undefined") {
             return Object.prototype.toString.call(obj) === '[object Array]';
         },
 
+        keys: Object.keys || function (obj) {
+            var prop, keys = [], hasOwnProperty = Object.prototype.hasOwnProperty;
+            for (prop in obj) {
+                if (hasOwnProperty.call(obj, prop)) {
+                    keys.push(prop);
+                }
+            }
+            return keys;
+        },
+
         extend: function extend(target, source) {
             this.forEachProperty(source, function (value, property) {
                 target[property] = value;
@@ -146,8 +211,15 @@ if (typeof window.ConsoleIO === "undefined") {
         async: function async(fn, scope, timeout) {
             return setTimeout(function () {
                 fn.call(scope);
-            }, timeout);
+            }, timeout || 4);
         },
+
+        getUniqueId: (function () {
+            var i = 100000;
+            return function () {
+                return ++i;
+            };
+        }()),
 
         addCSSRule: function addCSSRule(selector, rules, index) {
             var sheet = ConsoleIO.styleSheet;

@@ -259,27 +259,29 @@ code {
 }
 
 .type-profile {
-    border-top: 1px solid rgb(111, 114, 117);
+    padding-left: 100px;
+    border-top: 1px solid rgb(255, 115, 0);
 }
 
 .type-profile::after {
     content: "profile";
-    color: rgb(111, 114, 117);
-    background-color: rgb(192, 192, 192);
-    background-color: rgba(192, 192, 192, 0.6);
-    border: 1px solid rgb(111, 114, 117);
+    color: rgb(255, 115, 0);
+    background-color: rgb(255, 186, 93);
+    background-color: rgba(255, 186, 93, 0.60);
+    border: 1px solid rgb(255, 115, 0);
 }
 
 .type-profileEnd {
-    border-top: 1px solid rgb(111, 114, 117);
+    padding-left: 100px;
+    border-top: 1px solid rgb(255, 90, 0);
 }
 
 .type-profileEnd::after {
     content: "profileEnd";
-    color: rgb(111, 114, 117);
-    background-color: rgb(192, 192, 192);
-    background-color: rgba(192, 192, 192, 0.6);
-    border: 1px solid rgb(111, 114, 117);
+    color: rgb(255, 90, 0);
+    background-color: rgb(255, 180, 108);
+    background-color: rgba(255, 180, 108, 0.60);
+    border: 1px solid rgb(255, 90, 0);
 }
 
 .type-trace {

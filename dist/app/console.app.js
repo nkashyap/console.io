@@ -1,11 +1,11 @@
 /**
  * Name: console.io
- * Version: 0.2.0-1
+ * Version: 0.2.2
  * Description: Javascript Remote Web Console
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-19
+ * Date: 2013-11-13
 */
 
 /**
@@ -32,6 +32,10 @@ if (typeof window.ConsoleIO === "undefined") {
             }
         },
 
+        getOrigin: function getOrigin() {
+            return window.location.origin || window.location.protocol + '//' + (window.location.host || window.location.hostname + ':' + window.location.port);
+        },
+
         ready: function ready(callback) {
             function DOMContentLoaded() {
                 if (document.addEventListener) {
@@ -56,6 +60,57 @@ if (typeof window.ConsoleIO === "undefined") {
                 document.attachEvent("onreadystatechange", DOMContentLoaded);
                 window.attachEvent("onload", callback);
             }
+        },
+
+        addEventListener: function addEventListener(obj, evt, fnc) {
+            // W3C model
+            if (obj.addEventListener) {
+                obj.addEventListener(evt, fnc, false);
+                return true;
+            } else if (obj.attachEvent) {
+                // Microsoft model
+                return obj.attachEvent('on' + evt, fnc);
+            } else {
+                // Browser don't support W3C or MSFT model, go on with traditional
+                evt = 'on' + evt;
+
+                if (typeof obj[evt] === 'function') {
+                    // Object already has a function on traditional
+                    // Let's wrap it with our own function inside another function
+                    fnc = (function (f1, f2) {
+                        return function () {
+                            f1.apply(this, arguments);
+                            f2.apply(this, arguments);
+                        };
+                    }(obj[evt], fnc));
+                }
+
+                obj[evt] = fnc;
+                return true;
+            }
+
+            return false;
+        },
+
+        removeEventListener: function removeEventListener(obj, evt, fnc) {
+            // W3C model
+            if (obj.removeEventListener) {
+                obj.removeEventListener(evt, fnc, false);
+                return true;
+            } else if (obj.detachEvent) {
+                // Microsoft model
+                return obj.detachEvent('on' + evt, fnc);
+            } else {
+                // Browser don't support W3C or MSFT model, go on with traditional
+                evt = 'on' + evt;
+
+                if (typeof obj[evt] === 'function') {
+                    obj[evt] = null;
+                }
+                return true;
+            }
+
+            return false;
         },
 
         every: (function () {
@@ -145,6 +200,16 @@ if (typeof window.ConsoleIO === "undefined") {
             return Object.prototype.toString.call(obj) === '[object Array]';
         },
 
+        keys: Object.keys || function (obj) {
+            var prop, keys = [], hasOwnProperty = Object.prototype.hasOwnProperty;
+            for (prop in obj) {
+                if (hasOwnProperty.call(obj, prop)) {
+                    keys.push(prop);
+                }
+            }
+            return keys;
+        },
+
         extend: function extend(target, source) {
             this.forEachProperty(source, function (value, property) {
                 target[property] = value;
@@ -156,8 +221,15 @@ if (typeof window.ConsoleIO === "undefined") {
         async: function async(fn, scope, timeout) {
             return setTimeout(function () {
                 fn.call(scope);
-            }, timeout);
+            }, timeout || 4);
         },
+
+        getUniqueId: (function () {
+            var i = 100000;
+            return function () {
+                return ++i;
+            };
+        }()),
 
         addCSSRule: function addCSSRule(selector, rules, index) {
             var sheet = ConsoleIO.styleSheet;
@@ -210,6 +282,7 @@ ConsoleIO.Service.Socket = {
     connectionMode: null,
 
     connect: function init() {
+        var origin = ConsoleIO.getOrigin();
         ConsoleIO.Service.Socket.guid = ConsoleIO.Service.Storage.getItem('guid');
 
         if (!ConsoleIO.Service.Socket.guid) {
@@ -217,8 +290,8 @@ ConsoleIO.Service.Socket = {
             ConsoleIO.Service.Storage.addItem('guid', ConsoleIO.Service.Socket.guid, 365);
         }
 
-        this.io = window.io.connect(window.location.origin, {
-            secure: window.location.origin.indexOf("https") > -1,
+        this.io = window.io.connect(origin, {
+            secure: origin.indexOf("https") > -1,
             resource: (window.location.pathname.split('/').slice(0, -1).join('/') + '/socket.io').substring(1),
             'sync disconnect on unload': true
         });
@@ -367,12 +440,16 @@ ConsoleIO.Service.DHTMLXHelper = {
                     this.addText(item.id, index, item.text);
                     break;
                 case 'input':
-                    this.addInput(item.id, index, item.value);
+                    this.addInput(item.id, index, (item.id === 'triggerInterval') ? ConsoleIO.Settings.triggerInterval : item.value);
                     break;
             }
 
             if (item.disabled) {
                 this.disableItem(item.id);
+            }
+
+            if (item.hidden) {
+                this.hideItem(item.id);
             }
 
             if (item.width) {
@@ -442,52 +519,77 @@ ConsoleIO.Model.DHTMLX = {
     ToolBarItem: {
         Separator: { type: 'separator' },
 
-        //Back: { id: 'back', type: 'select', text: 'Back', opts: [], imgEnabled: 'back.gif', imgDisabled: 'back_dis.gif', tooltip: 'Back in History' },
-        //Forward: { id: 'forward', type: 'select', text: 'Forward', opts: [], imgEnabled: 'forward.gif', imgDisabled: 'forward_dis.gif', tooltip: 'Forward in History' },
+        PageSize: { id: 'pagesize', type: 'select', text: 'PageSize', imgEnabled: 'pagesize.png', tooltip: 'Page Size', width: 90, opts: 'pagesizes' },
 
-        PageSize: { id: 'pagesize', type: 'select', text: 'PageSize', imgEnabled: 'pagesize.gif', tooltip: 'Page Size', width: 90, opts: 'pagesizes' },
-        Preview: { id: 'preview', type: 'button', text: 'Preview', imgEnabled: 'preview.gif', imgDisabled: 'preview_dis.gif', tooltip: 'Preview' },
+        Source: { id: 'source', type: 'twoState', text: 'Source', imgEnabled: 'source.png', imgDisabled: 'source_dis.png', tooltip: 'Source', pressed: true },
+        Preview: { id: 'preview', type: 'twoState', text: 'Preview', imgEnabled: 'preview.png', imgDisabled: 'preview_dis.png', tooltip: 'Preview', pressed: false },
+
         ScreenShot: { id: 'screenShot', type: 'button', text: 'Capture', imgEnabled: 'screenshot.png', imgDisabled: 'screenshot_dis.png', tooltip: 'ScreenShot' },
+
+        TriggerLabel: { id: 'triggerLabel', type: 'text', text: 'Trigger Interval' },
+        TriggerInterval: { id: 'triggerInterval', type: 'input', value: '', width: 100, tooltip: 'Trigger interval' },
+        KeyPress: { id: 'KeyPress', type: 'twoState', text: 'KeyPress', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyPress' },
+        KeyDown: { id: 'KeyDown', type: 'twoState', text: 'KeyDown', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyDown' },
+        KeyUp: { id: 'KeyUp', type: 'twoState', text: 'KeyUp', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'KeyUp' },
+        MouseMove: { id: 'MouseMove', type: 'twoState', text: 'MouseMove', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseMove' },
+        MouseOver: { id: 'MouseOver', type: 'twoState', text: 'MouseOver', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseOver' },
+        MouseOut: { id: 'MouseOut', type: 'twoState', text: 'MouseOut', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseOut' },
+        MouseEnter: { id: 'MouseEnter', type: 'twoState', text: 'MouseEnter', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseEnter' },
+        MouseLeave: { id: 'MouseLeave', type: 'twoState', text: 'MouseLeave', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'MouseLeave' },
+        Click: { id: 'Click', type: 'twoState', text: 'Click', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'Click' },
+        DblClick: { id: 'DblClick', type: 'twoState', text: 'DoubleClick', imgEnabled: 'connect.png', imgDisabled: 'connect_dis.png', tooltip: 'DoubleClick' },
 
         DeviceNameLabel: { id: 'deviceNameLabel', type: 'text', text: 'Device Name:', tooltip: 'Device Name' },
         DeviceNameText: { id: 'deviceNameText', type: 'input', value: '', width: 120, tooltip: 'Enter Device Name' },
         DeviceNameSet: { id: 'deviceNameSet', type: 'button', imgEnabled: 'go.png', tooltip: 'Set Device Name' },
 
         SearchText: { id: 'searchText', type: 'input', value: '', width: 100, tooltip: 'Search Text' },
-        Search: { id: 'search', type: 'button', imgEnabled: 'search.gif', imgDisabled: 'search_dis.gif', tooltip: 'Search' },
+        Search: { id: 'search', type: 'button', imgEnabled: 'search.png', imgDisabled: 'search_dis.png', tooltip: 'Search' },
         Execute: { id: 'execute', type: 'button', text: 'Execute', imgEnabled: 'execute.png', imgDisabled: 'execute_dis.png', tooltip: 'Execute (Ctrl+Enter)' },
 
-        Clear: { id: 'clear', type: 'button', text: 'Clear', imgEnabled: 'clear.gif', tooltip: 'Clear' },
-        Refresh: { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.gif', tooltip: 'Refresh' },
+        Clear: { id: 'clear', type: 'button', text: 'Clear', imgEnabled: 'clear.png', tooltip: 'Clear' },
+        Refresh: { id: 'refresh', type: 'button', text: 'Refresh', imgEnabled: 'refresh.png', tooltip: 'Refresh' },
         Reload: { id: 'reload', type: 'button', text: 'Reload', imgEnabled: 'reload.png', tooltip: 'Reload Browser' },
 
-        Open: { id: 'open', type: 'select', text: 'Open', imgEnabled: 'open.gif', imgDisabled: 'open_dis.gif', tooltip: 'Open', opts:
-            [] },
-        Save: { id: 'save', type: 'select', text: 'Save', imgEnabled: 'save.gif', imgDisabled: 'save_dis.gif', tooltip: 'Save', disabled: true, opts:
-            [
-                ['saveAs', 'obj', 'Save As', 'save_as.gif']
-            ]},
-        Export: { id: 'export', type: 'button', text: 'Export', imgEnabled: 'downloads.gif', tooltip: 'Export' },
+        Open: { id: 'open', type: 'select', text: 'Open', imgEnabled: 'open.png', imgDisabled: 'open_dis.png', tooltip: 'Open', opts: [] },
+        Save: { id: 'save', type: 'select', text: 'Save', imgEnabled: 'save.png', imgDisabled: 'save_dis.png', tooltip: 'Save', disabled: true, opts: [
+            ['saveAs', 'obj', 'Save As', 'save_as.png']
+        ]},
+        Export: { id: 'export', type: 'button', text: 'Export', imgEnabled: 'downloads.png', tooltip: 'Export' },
 
-        Undo: { id: 'undo', type: 'button', text: 'Undo', imgEnabled: 'undo.gif', imgDisabled: 'undo_dis.gif', tooltip: 'Undo', disabled: true },
-        Redo: { id: 'redo', type: 'button', text: 'Redo', imgEnabled: 'redo.gif', imgDisabled: 'redo_dis.gif', tooltip: 'Redo', disabled: true },
+        Undo: { id: 'undo', type: 'button', text: 'Undo', imgEnabled: 'undo.png', imgDisabled: 'undo_dis.png', tooltip: 'Undo', disabled: true },
+        Redo: { id: 'redo', type: 'button', text: 'Redo', imgEnabled: 'redo.png', imgDisabled: 'redo_dis.png', tooltip: 'Redo', disabled: true },
 
-        SelectAll: { id: 'selectAll', type: 'button', text: 'Select All', imgEnabled: 'select_all.gif', tooltip: 'Select All' },
-        Cut: { id: 'cut', type: 'button', text: 'Cut', imgEnabled: 'cut.gif', imgDisabled: 'cut_dis.gif', tooltip: 'Cut' },
-        Copy: { id: 'copy', type: 'button', text: 'Copy', imgEnabled: 'copy.gif', imgDisabled: 'copy_dis.gif', tooltip: 'Copy' },
-        Paste: { id: 'paste', type: 'button', text: 'Paste', imgEnabled: 'paste.gif', imgDisabled: 'paste_dis.gif', tooltip: 'Paste' },
+        SelectAll: { id: 'selectAll', type: 'button', text: 'Select All', imgEnabled: 'select_all.png', imgDisabled: 'select_all_dis.png', tooltip: 'Select All' },
+        Cut: { id: 'cut', type: 'button', text: 'Cut', imgEnabled: 'cut.png', imgDisabled: 'cut_dis.png', tooltip: 'Cut' },
+        Copy: { id: 'copy', type: 'button', text: 'Copy', imgEnabled: 'copy.png', imgDisabled: 'copy_dis.png', tooltip: 'Copy' },
+        Paste: { id: 'paste', type: 'button', text: 'Paste', imgEnabled: 'paste.png', imgDisabled: 'paste_dis.png', tooltip: 'Paste' },
 
-        Web: { id: 'web', type: 'twoState', text: 'Web Console', imgEnabled: 'console.gif', tooltip: 'Web Console', pressed: false },
+
+        Profiler: { id: 'profiler', type: 'twoState', text: 'Start Profiling', imgEnabled: 'rec.png', imgDisabled: 'rec_dis.png', tooltip: 'Start CPU Profiling', pressed: false },
+        ProfileView: { id: 'displaySelector', type: 'select', text: 'Tree (Top Down)', width: 110, hidden: true, disabled: true, opts: [
+            ['heavy', 'obj', 'Heavy (Bottom Up)'],
+            ['tree', 'obj', 'Tree (Top Down)']
+        ] },
+        TimeOrPercent: { id: 'timePercent', type: 'twoState', imgEnabled: 'percent.png', imgDisabled: 'percent.png', tooltip: 'Show total and self time in percentage', hidden: true, disabled: true, pressed: false },
+        FocusFn: { id: 'focusFn', type: 'button', imgEnabled: 'zoom.png', imgDisabled: 'zoom_dis.png', tooltip: 'Focus selected function', hidden: true, disabled: true },
+        RestoreFn: { id: 'restoreFn', type: 'button', imgEnabled: 'undo.png', imgDisabled: 'undo_dis.png', tooltip: 'Restore all functions', hidden: true, disabled: true },
+        ExcludeFn: { id: 'excludeFn', type: 'button', imgEnabled: 'clear.png', imgDisabled: 'clear_dis.png', tooltip: 'Exclude selected function', hidden: true, disabled: true },
+
+
+        Web: { id: 'web', type: 'twoState', text: 'Web Console', imgEnabled: 'console.png', tooltip: 'Web Console', pressed: false },
         PlayPause: { id: 'playPause', type: 'twoState', text: 'Pause', imgEnabled: 'pause.png', tooltip: 'Pause logs', pressed: false },
-        WordWrap: { id: 'wordwrap', type: 'twoState', text: 'Word-Wrap', imgEnabled: 'word_wrap.gif', tooltip: 'Word Wrap', pressed: false },
-        Beautify: { id: 'beautify', type: 'twoState', text: 'Beautify', imgEnabled: 'beautify.png', tooltip: 'Beautify', pressed: false },
+        WordWrap: { id: 'wordwrap', type: 'twoState', text: 'Word-Wrap', imgEnabled: 'word_wrap.png', imgDisabled: 'word_wrap_dis.png', tooltip: 'Word Wrap', pressed: false },
+        Beautify: { id: 'beautify', type: 'twoState', text: 'Beautify', imgEnabled: 'beautify.png', imgDisabled: 'beautify_dis.png', tooltip: 'Beautify', pressed: false },
+
 
         FilterLabel: { id: 'filterLabel', type: 'text', text: 'Filters:', tooltip: 'Filter Console Logs' },
-        Info: { id: 'filter-info', type: 'twoState', text: 'Info', imgEnabled: 'info.gif', tooltip: 'Info', pressed: false },
+        Info: { id: 'filter-info', type: 'twoState', text: 'Info', imgEnabled: 'info.png', tooltip: 'Info', pressed: false },
         Log: { id: 'filter-log', type: 'twoState', text: 'Log', imgEnabled: 'log.png', tooltip: 'Log', pressed: false },
         Warn: { id: 'filter-warn', type: 'twoState', text: 'Warn', imgEnabled: 'warn.png', tooltip: 'Warn', pressed: false },
-        Debug: { id: 'filter-debug', type: 'twoState', text: 'Debug', imgEnabled: 'debug.gif', tooltip: 'Debug', pressed: false },
-        Error: { id: 'filter-error', type: 'twoState', text: 'Error', imgEnabled: 'error.gif', tooltip: 'Error', pressed: false }
+        Debug: { id: 'filter-debug', type: 'twoState', text: 'Debug', imgEnabled: 'debug.png', tooltip: 'Debug', pressed: false },
+        Trace: { id: 'filter-trace', type: 'twoState', text: 'Trace', imgEnabled: 'trace.png', tooltip: 'Trace', pressed: false },
+        Error: { id: 'filter-error', type: 'twoState', text: 'Error', imgEnabled: 'error.png', tooltip: 'Error', pressed: false }
     }
 };
 
@@ -960,13 +1062,14 @@ ConsoleIO.View.Device.Explorer.prototype.setIcon = function setIcon(id, icon) {
  * Repositories: https://github.com/nkashyap
  */
 
-ConsoleIO.namespace("ConsoleIO.View.Device.Preview");
+ConsoleIO.namespace("ConsoleIO.View.Device.HTML");
 
-ConsoleIO.View.Device.Preview = function PreviewView(ctrl, model) {
+ConsoleIO.View.Device.HTML = function HTMLView(ctrl, model) {
     this.ctrl = ctrl;
     this.model = model;
     this.target = null;
     this.toolbar = null;
+    this.previewToolbar = null;
     this.tab = null;
     this.dhxWins = null;
     this.previewFrame = null;
@@ -975,7 +1078,7 @@ ConsoleIO.View.Device.Preview = function PreviewView(ctrl, model) {
 };
 
 
-ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
+ConsoleIO.View.Device.HTML.prototype.render = function render(target) {
     this.target = target;
     this.target.addTab(this.id, this.model.name);
     this.tab = this.target.cells(this.id);
@@ -992,11 +1095,19 @@ ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
 
     ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
 
+    this.previewBar = ConsoleIO.Service.DHTMLXHelper.createElement({
+        tag: 'div',
+        attr: {
+            width: '100%'
+        }
+    });
+
     this.previewFrame = ConsoleIO.Service.DHTMLXHelper.createElement({
         tag: 'iframe',
         attr: {
             height: '100%',
-            width: '100%'
+            width: '100%',
+            style: 'display:none;'
         },
         target: document.body
     });
@@ -1013,7 +1124,7 @@ ConsoleIO.View.Device.Preview.prototype.render = function render(target) {
     this.dhxWins.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('win'));
 };
 
-ConsoleIO.View.Device.Preview.prototype.destroy = function destroy() {
+ConsoleIO.View.Device.HTML.prototype.destroy = function destroy() {
     document.body.removeChild(this.previewFrame);
     document.body.removeChild(this.image);
     this.dhxWins.unload();
@@ -1021,35 +1132,56 @@ ConsoleIO.View.Device.Preview.prototype.destroy = function destroy() {
 };
 
 
-ConsoleIO.View.Device.Preview.prototype.toggleButton = function toggleButton(id, state) {
-    if (this.toolbar) {
+ConsoleIO.View.Device.HTML.prototype.toggleButton = function toggleButton(name, state) {
+    var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+    if (this.toolbar && item) {
         if (state) {
-            this.toolbar.enableItem(id);
+            this.toolbar.enableItem(item.id);
         } else {
-            this.toolbar.disableItem(id);
+            this.toolbar.disableItem(item.id);
         }
     }
 };
 
-ConsoleIO.View.Device.Preview.prototype.preview = function preview(data) {
-    if (this.dhxWins) {
-        this.previewFrame.src = "data:text/html," + escape(data.content);
+ConsoleIO.View.Device.HTML.prototype.show = function show() {
+    this.previewFrame.style.display = 'block';
+    this.tab.attachObject(this.previewFrame);
+};
 
-        var win = this.dhxWins.createWindow("preview", 0, 0, 900, 700);
-        win.setText("Preview");
-        win.button('park').hide();
-        win.keepInViewport(true);
-        win.setModal(true);
-        win.centerOnScreen();
-        win.button("close").attachEvent("onClick", function () {
-            win.detachObject(this.previewFrame);
-            win.close();
-        }, this);
-        win.attachObject(this.previewFrame);
+ConsoleIO.View.Device.HTML.prototype.hide = function hide() {
+    this.previewFrame.style.display = 'none';
+    this.tab.detachObject(this.previewFrame);
+};
+
+ConsoleIO.View.Device.HTML.prototype.preview = function preview(data) {
+    this.unbind();
+    this.previewFrame.src = "javascript:false;";
+    ConsoleIO.async(function () {
+        this.previewFrame.contentWindow.document.head.innerHTML = data.style;
+        this.previewFrame.contentWindow.document.body.innerHTML = data.body;
+        this.bind();
+    }, this);
+};
+
+ConsoleIO.View.Device.HTML.prototype.bind = function bind() {
+    var win = this.previewFrame.contentWindow || this.previewFrame.contentDocument;
+    if (win.document) {
+        ConsoleIO.forEachProperty(this.ctrl.events, function (fn, name) {
+            ConsoleIO.addEventListener(win.document.body, name, fn);
+        }, this.ctrl);
     }
 };
 
-ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
+ConsoleIO.View.Device.HTML.prototype.unbind = function unbind() {
+    var win = this.previewFrame.contentWindow || this.previewFrame.contentDocument;
+    if (win.document) {
+        ConsoleIO.forEachProperty(this.ctrl.events, function (fn, name) {
+            ConsoleIO.removeEventListener(win.document.body, name, fn);
+        }, this.ctrl);
+    }
+};
+
+ConsoleIO.View.Device.HTML.prototype.screenShot = function screenShot(data) {
     if (this.dhxWins) {
         if (data.screen) {
             this.image.src = data.screen;
@@ -1073,13 +1205,241 @@ ConsoleIO.View.Device.Preview.prototype.screenShot = function screenShot(data) {
 };
 
 
-ConsoleIO.View.Device.Preview.prototype.setTabActive = function setTabActive() {
+ConsoleIO.View.Device.HTML.prototype.setMode = function setMode(mode) {
+    if (mode === ConsoleIO.Model.DHTMLX.ToolBarItem.Preview.id) {
+        var target = document.querySelector('.dhx_tabcontent_zone > [tab_id=' + this.id + ']');
+        if (!this.previewToolbar && target) {
+            target.insertBefore(this.previewBar, document.querySelector('.dhx_tabcontent_zone > [tab_id=' + this.id + '] [ida=dhxMainCont]'));
+
+            this.previewToolbar = new dhtmlXToolbarObject(this.previewBar, ConsoleIO.Settings.theme);
+            this.previewToolbar.setIconsPath(ConsoleIO.Settings.iconPath);
+            this.previewToolbar.attachEvent("onClick", function (itemId) {
+                this.onPreviewButtonClick(itemId, true);
+            }, this.ctrl);
+
+            this.previewToolbar.attachEvent("onStateChange", function (itemId, state) {
+                this.onPreviewButtonClick(itemId, state);
+            }, this.ctrl);
+
+            this.previewToolbar.attachEvent("onEnter", function (itemId, value) {
+                ConsoleIO.Settings.triggerInterval = value;
+            }, this.ctrl);
+
+            ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.previewToolbar, this.previewToolbar);
+            this.previewBar.className = 'dhx_toolbar_base_18_dhx_skyblue in_tabbarcell';
+        }
+    } else {
+        if (this.previewToolbar) {
+            this.previewToolbar.unload();
+            this.previewToolbar = null;
+            this.previewBar.parentNode.removeChild(this.previewBar);
+        }
+    }
+};
+
+ConsoleIO.View.Device.HTML.prototype.setTabActive = function setTabActive() {
     this.target.setTabActive(this.id);
 };
 
-ConsoleIO.View.Device.Preview.prototype.setItemState = function setItemState(id, state) {
+ConsoleIO.View.Device.HTML.prototype.setItemState = function setItemState(name, state) {
     if (this.toolbar) {
-        this.toolbar.setItemState(id, state);
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.toolbar.setItemState(item.id, state);
+        }
+    }
+};
+
+/**
+ * Created with JetBrains WebStorm.
+ * User: nisheeth
+ * Date: 24/09/13
+ * Time: 13:14
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ */
+
+ConsoleIO.namespace("ConsoleIO.View.Device.Profile");
+
+ConsoleIO.View.Device.Profile = function ProfileView(ctrl, model) {
+    this.ctrl = ctrl;
+    this.model = model;
+    this.target = null;
+
+    this.tab = null;
+    this.toolbar = null;
+    this.layout = null;
+    this.listCell = null;
+    this.list = null;
+    this.treeCell = null;
+    this.treeToolbar = null;
+    this.tree = null;
+    this.gridCell = null;
+    this.grid = null;
+
+    this.id = [this.model.name, this.model.serialNumber].join("-");
+};
+
+
+ConsoleIO.View.Device.Profile.prototype.render = function render(target) {
+    this.target = target;
+    this.target.addTab(this.id, this.model.name);
+    this.tab = this.target.cells(this.id);
+
+    this.toolbar = this.tab.attachToolbar();
+    this.toolbar.setIconsPath(ConsoleIO.Settings.iconPath);
+    this.toolbar.attachEvent("onClick", function (itemId) {
+        this.onButtonClick(itemId);
+    }, this.ctrl);
+    this.toolbar.attachEvent("onStateChange", function (itemId, state) {
+        this.onButtonClick(itemId, state);
+    }, this.ctrl);
+
+    ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.toolbar, this.toolbar);
+
+    this.layout = this.tab.attachLayout('3W');
+    this.layout.setEffect("resize", true);
+
+    this.listCell = this.layout.cells(this.model.list.context);
+    this.listCell.setText(this.model.list.title);
+    this.listCell.setWidth(this.model.list.width);
+
+    this.list = this.listCell.attachTree();
+    this.list.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tree'));
+    this.list.setIconPath(ConsoleIO.Settings.iconPath);
+    this.list.enableHighlighting(true);
+    this.list.enableTreeImages(true);
+    this.list.enableTreeLines(true);
+    this.list.enableIEImageFix(true);
+    this.list.attachEvent("onClick", function (itemId) {
+        this.onListClick(itemId);
+    }, this.ctrl);
+
+
+    this.treeCell = this.layout.cells(this.model.tree.context);
+    this.treeCell.setText(this.model.tree.title);
+    this.treeCell.setWidth(this.model.tree.width);
+
+    this.treeToolbar = this.treeCell.attachToolbar();
+    this.treeToolbar.setIconsPath(ConsoleIO.Settings.iconPath);
+    this.treeToolbar.attachEvent("onClick", function (itemId) {
+        this.onButtonClick(itemId);
+    }, this.ctrl);
+    this.treeToolbar.attachEvent("onStateChange", function (itemId, state) {
+        this.onButtonClick(itemId, state);
+    }, this.ctrl);
+    ConsoleIO.Service.DHTMLXHelper.populateToolbar(this.model.tree.toolbar, this.treeToolbar);
+
+    this.tree = this.treeCell.attachTree();
+    this.tree.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('tree'));
+    this.tree.setIconPath(ConsoleIO.Settings.iconPath);
+    this.tree.enableHighlighting(true);
+    this.tree.enableTreeImages(true);
+    this.tree.enableTreeLines(true);
+    this.tree.enableIEImageFix(true);
+    this.tree.attachEvent("onOpenEnd", function (itemId, state) {
+        this.onTreeOpenEnd(itemId, state);
+        return true;
+    }, this.ctrl);
+
+
+    this.gridCell = this.layout.cells(this.model.grid.context);
+    this.gridCell.setText(this.model.grid.title);
+
+    this.grid = this.gridCell.attachGrid();
+    this.grid.setIconsPath(ConsoleIO.Settings.iconPath);
+    this.grid.setImagePath(ConsoleIO.Constant.IMAGE_URL.get('grid'));
+    this.grid.setHeader("Self,Total,Count,Function,Url");
+    this.grid.setInitWidthsP("10,10,10,50,20");
+    this.grid.setColAlign("right,right,right,left,right");
+    this.grid.setColTypes("ro,ro,ro,ro,ro");
+    this.grid.setColSorting("int,int,int,str,str");
+    this.grid.setSkin(ConsoleIO.Constant.THEMES.get('win'));
+    this.grid.init();
+};
+
+ConsoleIO.View.Device.Profile.prototype.destroy = function destroy() {
+    this.target.removeTab(this.id);
+    //this.grid.destructor();
+    //this.tree.destructor();
+    //this.list.destructor();
+};
+
+ConsoleIO.View.Device.Profile.prototype.show = function show() {
+    this.target.showTab(this.id);
+};
+
+ConsoleIO.View.Device.Profile.prototype.hide = function hide() {
+    this.target.hideTab(this.id, true);
+};
+
+ConsoleIO.View.Device.Profile.prototype.addToList = function addToList(id, title, icon) {
+    this.list.insertNewItem(0, id, title, 0, icon, icon, icon);
+};
+
+ConsoleIO.View.Device.Profile.prototype.addTreeItem = function addTreeItem(parent, id, name, icon) {
+    this.tree.insertNewItem(parent, id, name, 0, icon, icon, icon);
+};
+
+ConsoleIO.View.Device.Profile.prototype.addGridItem = function addGridItem(node) {
+    this.grid.addRow(node.id, [
+        node.selfTime, node.totalTime, node.numberOfCalls, node.functionName, node.url
+    ]);
+};
+
+ConsoleIO.View.Device.Profile.prototype.closeItem = function closeItem(id, closeAll) {
+    if (!closeAll) {
+        this.tree.closeItem(id);
+    } else {
+        this.tree.closeAllItems(id);
+    }
+};
+
+ConsoleIO.View.Device.Profile.prototype.deleteListItem = function deleteListItem(id) {
+    this.list.deleteItem(id);
+};
+
+ConsoleIO.View.Device.Profile.prototype.resetTree = function resetTree() {
+    this.tree.deleteItem(this.tree.getItemIdByIndex(0, 0));
+};
+
+ConsoleIO.View.Device.Profile.prototype.resetGrid = function resetGrid() {
+    this.grid.clearAll();
+};
+
+
+ConsoleIO.View.Device.Profile.prototype.setTabActive = function setTabActive() {
+    this.target.setTabActive(this.id);
+};
+
+ConsoleIO.View.Device.Profile.prototype.setTitle = function setTitle(title) {
+    this.treeCell.setText([this.model.tree.title, title || ''].join(': '));
+};
+
+ConsoleIO.View.Device.Profile.prototype.setItemText = function setItemText(name, text) {
+    if (this.toolbar) {
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.toolbar.setItemText(item.id, text || item.text);
+        }
+    }
+};
+
+ConsoleIO.View.Device.Profile.prototype.showItem = function showItem(name) {
+    if (this.treeToolbar) {
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.treeToolbar.showItem(item.id);
+        }
+    }
+};
+
+ConsoleIO.View.Device.Profile.prototype.hideItem = function hideItem(name) {
+    if (this.treeToolbar) {
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.treeToolbar.hideItem(item.id);
+        }
     }
 };
 
@@ -1145,9 +1505,12 @@ ConsoleIO.View.Device.Source.prototype.setTitle = function setTitle(contextId, t
     }
 };
 
-ConsoleIO.View.Device.Source.prototype.setItemState = function setItemState(id, state) {
+ConsoleIO.View.Device.Source.prototype.setItemState = function setItemState(name, state) {
     if (this.toolbar) {
-        this.toolbar.setItemState(id, state);
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.toolbar.setItemState(item.id, state);
+        }
     }
 };
 
@@ -1252,7 +1615,7 @@ ConsoleIO.View.Device.Status.prototype.add = function add(name, value, label) {
         if (typeof value === 'object') {
             ConsoleIO.forEachProperty(value, function (val, itemName) {
                 id = this.getUniqueId(this.id, name);
-                grid.addRow(id, [name + ':' + itemName, val]);
+                grid.addRow(id, [name + '.' + itemName, val]);
                 grid.setCellTextStyle(id, 0, "font-weight:bold;");
             }, this);
         } else {
@@ -1338,7 +1701,6 @@ ConsoleIO.View.Editor.prototype.destroy = function destroy() {
     }
 };
 
-
 ConsoleIO.View.Editor.prototype.fileList = function fileList(data) {
     var scope = this;
     this.toolbar.forEachListOption('open', function (id) {
@@ -1371,6 +1733,17 @@ ConsoleIO.View.Editor.prototype.createElements = function createElements() {
     });
 };
 
+ConsoleIO.View.Editor.prototype.show = function show() {
+    this.container.style.display = 'block';
+    this.target.attachObject(this.container);
+};
+
+ConsoleIO.View.Editor.prototype.hide = function hide() {
+    this.container.style.display = 'none';
+    this.target.detachObject(this.container);
+};
+
+
 ConsoleIO.View.Editor.prototype.toggleButton = function toggleButton(id, state) {
     if (this.toolbar) {
         if (state) {
@@ -1382,9 +1755,12 @@ ConsoleIO.View.Editor.prototype.toggleButton = function toggleButton(id, state) 
 };
 
 
-ConsoleIO.View.Editor.prototype.setItemText = function setItemText(id, text) {
+ConsoleIO.View.Editor.prototype.setItemText = function setItemText(name, text) {
     if (this.toolbar) {
-        this.toolbar.setItemText(id, text);
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.toolbar.setItemText(item.id, text || item.text);
+        }
     }
 };
 
@@ -1640,9 +2016,11 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.wordWrap = ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.pressed;
 
     this.console = new ConsoleIO.App.Device.Console(this, this.model);
+    this.profile = new ConsoleIO.App.Device.Profile(this, this.model);
     this.source = new ConsoleIO.App.Device.Source(this, this.model);
-    this.preview = new ConsoleIO.App.Device.Preview(this, this.model);
+    this.html = new ConsoleIO.App.Device.HTML(this, this.model);
     this.status = new ConsoleIO.App.Device.Status(this, this.model);
+
     this.view = new ConsoleIO.View.Device(this, this.model);
 };
 
@@ -1651,7 +2029,8 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
     this.view.render(target);
     this.status.render(this.view.tabs);
     this.source.render(this.view.tabs);
-    this.preview.render(this.view.tabs);
+    this.html.render(this.view.tabs);
+    this.profile.render(this.view.tabs);
     this.console.render(this.view.tabs);
 
     var panel = this[this.activeTab];
@@ -1660,18 +2039,19 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
     }
 
     if (this.beautify) {
-        this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify.id, this.beautify);
+        this.setItemState("Beautify", this.beautify);
     }
 
     if (this.wordWrap) {
-        this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.id, this.wordWrap);
+        this.setItemState("WordWrap", this.wordWrap);
     }
 };
 
 ConsoleIO.App.Device.prototype.destroy = function destroy() {
     this.console = this.console.destroy();
+    this.profile = this.profile.destroy();
     this.source = this.source.destroy();
-    this.preview = this.preview.destroy();
+    this.html = this.html.destroy();
     this.status = this.status.destroy();
     this.view = this.view.destroy();
 };
@@ -1685,7 +2065,8 @@ ConsoleIO.App.Device.prototype.activate = function activate(state) {
     if (!state) {
         this.status.activate(state);
         this.source.activate(state);
-        this.preview.activate(state);
+        this.html.activate(state);
+        this.profile.activate(state);
         this.console.activate(state);
     } else if (this.activeTab) {
         this[this.activeTab].activate(state);
@@ -1695,7 +2076,7 @@ ConsoleIO.App.Device.prototype.activate = function activate(state) {
 
 ConsoleIO.App.Device.prototype.setItemState = function setItemState(id, state) {
     this.source.setItemState(id, state);
-    this.preview.setItemState(id, state);
+    this.html.setItemState(id, state);
 };
 
 
@@ -1729,14 +2110,14 @@ ConsoleIO.App.Device.prototype.onButtonClick = function onButtonClick(tab, btnId
             handled = true;
             break;
         case 'beautify':
-            this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify.id, this.beautify = state);
+            this.setItemState("Beautify", this.beautify = state);
             handled = true;
             tab.refresh();
             break;
 
         //common on Source and Preview Tabs
         case 'wordwrap':
-            this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.id, this.wordWrap = state);
+            this.setItemState("WordWrap", this.wordWrap = state);
             tab.editor.setOption('lineWrapping', state);
             handled = true;
             break;
@@ -1881,7 +2262,7 @@ ConsoleIO.App.Browser.prototype.add = function add(data) {
 
     ConsoleIO.async(function () {
         this.nodes.processing = false;
-    }, this, 100);
+    }, this);
 
     //set correct icon
     if (data.subscribed && data.online) {
@@ -1993,10 +2374,12 @@ ConsoleIO.App.Device.Console = function ConsoleController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.Search,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.FilterLabel,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Info,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Log,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Warn,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Info,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Debug,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Warn,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Trace,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Error
         ]
     });
@@ -2145,6 +2528,7 @@ ConsoleIO.App.Device.Console.prototype.onButtonClick = function onButtonClick(bt
                     break;
                 case 'clear':
                     this.view.clear();
+                    this.store.added = [];
                     this.notify(true);
                     break;
                 case 'search':
@@ -2249,7 +2633,7 @@ ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
 
     ConsoleIO.async(function () {
         this.nodes.processing = false;
-    }, this, 100);
+    }, this);
 };
 
 ConsoleIO.App.Device.Explorer.prototype.clear = function clear() {
@@ -2319,18 +2703,23 @@ ConsoleIO.App.Device.Explorer.prototype.onOpenEnd = function onOpenEnd(itemId, s
  * Repositories: https://github.com/nkashyap
  */
 
-ConsoleIO.namespace("ConsoleIO.App.Device.Preview");
+ConsoleIO.namespace("ConsoleIO.App.Device.HTML");
 
-ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
+ConsoleIO.App.Device.HTML = function HTMLController(parent, model) {
+    var toolBarModel = ConsoleIO.Model.DHTMLX.ToolBarItem;
+
     this.parent = parent;
     this.model = model;
 
-    this.view = new ConsoleIO.View.Device.Preview(this, {
-        name: "Preview",
+    this.view = new ConsoleIO.View.Device.HTML(this, {
+        name: "HTML",
         serialNumber: this.model.serialNumber,
         toolbar: [
             ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Source,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Preview,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
             ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify,
@@ -2338,88 +2727,224 @@ ConsoleIO.App.Device.Preview = function PreviewController(parent, model) {
             ConsoleIO.Model.DHTMLX.ToolBarItem.SelectAll,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Copy,
             ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Preview,
             ConsoleIO.Model.DHTMLX.ToolBarItem.ScreenShot
+        ],
+        previewToolbar: [
+            ConsoleIO.Model.DHTMLX.ToolBarItem.TriggerLabel,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.TriggerInterval,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Click,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.DblClick,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.KeyPress,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.KeyDown,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.KeyUp,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseMove,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseOver,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseOut,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseEnter,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.MouseLeave
         ]
     });
+
     this.editor = new ConsoleIO.App.Editor(this, {});
 
-    ConsoleIO.Service.Socket.on('device:content:' + this.model.serialNumber, this.addContent, this);
-    ConsoleIO.Service.Socket.on('device:previewContent:' + this.model.serialNumber, this.preview, this);
+    this.activeMode = toolBarModel.Source.pressed ? toolBarModel.Source.id : toolBarModel.Preview.id;
+    this.events = {};
+
+    ConsoleIO.Service.Socket.on('device:htmlDocument:' + this.model.serialNumber, this.addContent, this);
+    ConsoleIO.Service.Socket.on('device:htmlContent:' + this.model.serialNumber, this.addContent, this);
     ConsoleIO.Service.Socket.on('device:screenShot:' + this.model.serialNumber, this.screenShot, this);
 };
 
 
-ConsoleIO.App.Device.Preview.prototype.render = function render(target) {
+ConsoleIO.App.Device.HTML.prototype.render = function render(target) {
     this.view.render(target);
     this.editor.render(this.view.tab);
+    this.switchMode(this.activeMode);
 };
 
-ConsoleIO.App.Device.Preview.prototype.destroy = function destroy() {
-    ConsoleIO.Service.Socket.off('device:content:' + this.model.serialNumber, this.addContent, this);
-    ConsoleIO.Service.Socket.off('device:previewContent:' + this.model.serialNumber, this.preview, this);
+ConsoleIO.App.Device.HTML.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:htmlDocument:' + this.model.serialNumber, this.addContent, this);
+    ConsoleIO.Service.Socket.off('device:htmlContent:' + this.model.serialNumber, this.addContent, this);
     ConsoleIO.Service.Socket.off('device:screenShot:' + this.model.serialNumber, this.screenShot, this);
     this.editor = this.editor.destroy();
     this.view = this.view.destroy();
 };
 
 
-ConsoleIO.App.Device.Preview.prototype.activate = function activate(state) {
+ConsoleIO.App.Device.HTML.prototype.activate = function activate(state) {
     if (state && ConsoleIO.Settings.reloadTabContentWhenActivated) {
         this.editor.setOption('lineWrapping', this.parent.wordWrap);
         this.refresh();
     }
 };
 
-ConsoleIO.App.Device.Preview.prototype.addContent = function addContent(data) {
-    this.editor.setValue(data);
+ConsoleIO.App.Device.HTML.prototype.addContent = function addContent(data) {
+    if (this.activeMode === ConsoleIO.Model.DHTMLX.ToolBarItem.Source.id) {
+        this.editor.setValue(data);
+    } else {
+        this.view.preview(data);
+    }
 };
 
-ConsoleIO.App.Device.Preview.prototype.preview = function preview(data) {
-    this.view.toggleButton('preview', true);
-    this.view.preview(data);
+ConsoleIO.App.Device.HTML.prototype.buildSelector = function buildSelector(element, childSelector) {
+
+    if (element.tagName.toLowerCase() === 'body') {
+        return childSelector || 'body';
+    }
+
+    childSelector = !!childSelector ? ' ' + childSelector : '';
+
+    var thisElementSelector = element.tagName;
+
+    if (!!element.id) {
+        // Use the id. Should be unique, so no need to go further.
+        thisElementSelector = thisElementSelector + '#' + element.id;
+        return thisElementSelector + childSelector;
+    }
+
+    // use an nth-child selector.
+    if (element.parentElement.childElementCount > 1) {
+        var elementPosition = 1, prevSibling = element.previousElementSibling;
+        while (!!prevSibling) {
+            elementPosition++;
+            prevSibling = prevSibling.previousElementSibling;
+        }
+
+        thisElementSelector += ':nth-child(' + elementPosition + ')';
+    }
+
+    return this.buildSelector(element.parentElement, thisElementSelector + childSelector);
 };
 
-ConsoleIO.App.Device.Preview.prototype.screenShot = function screenShot(data) {
-    this.view.toggleButton('screenShot', true);
+ConsoleIO.App.Device.HTML.prototype.screenShot = function screenShot(data) {
+    this.view.toggleButton('ScreenShot', true);
     this.view.screenShot(data);
 };
 
-ConsoleIO.App.Device.Preview.prototype.refresh = function refresh() {
-    ConsoleIO.Service.Socket.emit('reloadHTML', {
-        serialNumber: this.model.serialNumber,
-        beautify: this.parent.beautify
-    });
+ConsoleIO.App.Device.HTML.prototype.sendEvent = function sendEvent(e) {
+    this.intervals = this.intervals || {};
+    if (!this.intervals[e.type]) {
+        var selector = this.buildSelector(e.srcElement),
+            event = {
+                serialNumber: this.model.serialNumber,
+                constructor: e.constructor.name
+            };
+
+        if (!!selector) {
+            ConsoleIO.forEachProperty(e, function (value, property) {
+                if (e.hasOwnProperty(property)) {
+                    if (typeof value !== 'object') {
+                        event[property] = value;
+                    } else if (property === 'srcElement') {
+                        event.srcElement = '$!' + selector;
+                    } else if (value !== null && typeof value === 'object' && !!value.tagName) {
+                        var subSelector = this.buildSelector(value);
+                        if (subSelector) {
+                            event[property] = '$!' + subSelector;
+                        }
+                    }
+                }
+            }, this);
+
+            ConsoleIO.Service.Socket.emit('remoteEvent', event);
+        }
+
+        this.intervals[e.type] = ConsoleIO.async(function () {
+            window.clearTimeout(this.intervals[e.type]);
+            delete this.intervals[e.type];
+        }, this, ConsoleIO.Settings.triggerInterval);
+    }
 };
 
+ConsoleIO.App.Device.HTML.prototype.refresh = function refresh() {
+    if (this.activeMode === ConsoleIO.Model.DHTMLX.ToolBarItem.Source.id) {
+        ConsoleIO.Service.Socket.emit('htmlSource', {
+            serialNumber: this.model.serialNumber,
+            beautify: this.parent.beautify
+        });
+    } else {
+        ConsoleIO.Service.Socket.emit('htmlPreview', {
+            serialNumber: this.model.serialNumber
+        });
+    }
+};
 
-ConsoleIO.App.Device.Preview.prototype.setTabActive = function setTabActive() {
+ConsoleIO.App.Device.HTML.prototype.switchMode = function switchMode(mode) {
+    this.activeMode = mode;
+
+    this.setItemState('Preview', (mode === 'preview'));
+    this.setItemState('Source', (mode === 'source'));
+    this.view.toggleButton('WordWrap', (mode === 'source'));
+    this.view.toggleButton('Beautify', (mode === 'source'));
+    this.view.toggleButton('SelectAll', (mode === 'source'));
+    this.view.toggleButton('Copy', (mode === 'source'));
+
+    if (this.activeMode === ConsoleIO.Model.DHTMLX.ToolBarItem.Source.id) {
+        this.view.hide();
+        this.editor.show();
+    } else {
+        this.editor.hide();
+        this.view.show();
+    }
+
+    this.view.setMode(this.activeMode);
+    this.refresh();
+};
+
+ConsoleIO.App.Device.HTML.prototype.setTabActive = function setTabActive() {
     this.view.setTabActive();
 };
 
-ConsoleIO.App.Device.Preview.prototype.setItemState = function setItemState(id, state) {
+ConsoleIO.App.Device.HTML.prototype.setItemState = function setItemState(id, state) {
     this.view.setItemState(id, state);
 };
 
+ConsoleIO.App.Device.HTML.prototype.onPreviewButtonClick = function onPreviewButtonClick(btnId, state) {
+    var scope = this,
+        btn = ConsoleIO.Model.DHTMLX.ToolBarItem[btnId];
 
-ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(btnId, state) {
+    if (btn) {
+        btn.pressed = state;
+    }
+
+    btnId = btnId.toLowerCase();
+
+    this.view.unbind();
+
+    if (state) {
+        if (!this.events[btnId]) {
+            this.events[btnId] = function (e) {
+                scope.sendEvent(e);
+            };
+        }
+    } else {
+        delete this.events[btnId];
+    }
+
+    this.view.bind();
+};
+
+ConsoleIO.App.Device.HTML.prototype.onButtonClick = function onButtonClick(btnId, state) {
     if (!this.parent.onButtonClick(this, btnId, state)) {
         switch (btnId) {
+            case 'source':
             case 'preview':
-                this.view.toggleButton('preview', false);
-                ConsoleIO.Service.Socket.emit('previewHTML', {
-                    serialNumber: this.model.serialNumber
-                });
+                this.switchMode(btnId);
                 break;
             case 'screenShot':
-                this.view.toggleButton('screenShot', false);
+                this.view.toggleButton('ScreenShot', false);
+
                 ConsoleIO.Service.Socket.emit('captureScreen', {
                     serialNumber: this.model.serialNumber
                 });
-                var scope = this;
-                setTimeout(function () {
-                    scope.view.toggleButton('screenShot', true);
-                }, 10000);
+
+                ConsoleIO.async(function () {
+                    this.view.toggleButton('ScreenShot', true);
+                }, this, 10000);
+
                 break;
             default:
                 this.parent.parent.parent.server.update({
@@ -2427,6 +2952,222 @@ ConsoleIO.App.Device.Preview.prototype.onButtonClick = function onButtonClick(bt
                     btnId: btnId,
                     state: state
                 });
+                break;
+        }
+    }
+};
+
+/**
+ * Created with JetBrains WebStorm.
+ * User: nisheeth
+ * Date: 24/09/13
+ * Time: 12:56
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ */
+
+ConsoleIO.namespace("ConsoleIO.App.Device.Profile");
+
+ConsoleIO.App.Device.Profile = function ProfileController(parent, model) {
+    this.parent = parent;
+    this.model = model;
+    this.profiles = {};
+    this.activeProfile = null;
+    this.openNodes = [];
+    this.view = new ConsoleIO.View.Device.Profile(this, {
+        name: "Profile",
+        serialNumber: this.model.serialNumber,
+        toolbar: [
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Reload,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Profiler,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Clear
+        ],
+        list: {
+            context: 'a',
+            title: 'Profiles',
+            width: 120
+        },
+        tree: {
+            context: 'b',
+            title: 'Active Profile',
+            width: 350,
+            toolbar: [
+                ConsoleIO.Model.DHTMLX.ToolBarItem.ProfileView,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.Separator,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.TimeOrPercent,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.FocusFn,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.RestoreFn,
+                ConsoleIO.Model.DHTMLX.ToolBarItem.ExcludeFn
+            ]
+        },
+        grid: {
+            context: 'c',
+            title: 'Summary'
+        }
+    });
+
+    ConsoleIO.Service.Socket.on('device:profile:' + this.model.serialNumber, this.addProfile, this);
+    ConsoleIO.Service.Socket.on('device:online:' + this.model.serialNumber, this.syncConfig, this);
+};
+
+
+ConsoleIO.App.Device.Profile.prototype.render = function render(target) {
+    this.view.render(target);
+    ConsoleIO.async(function () {
+        this.syncConfig(this.model);
+    }, this);
+};
+
+ConsoleIO.App.Device.Profile.prototype.destroy = function destroy() {
+    ConsoleIO.Service.Socket.off('device:profile:' + this.model.serialNumber, this.addProfile, this);
+    ConsoleIO.Service.Socket.off('device:online:' + this.model.serialNumber, this.syncConfig, this);
+    this.view = this.view.destroy();
+};
+
+ConsoleIO.App.Device.Profile.prototype.syncConfig = function syncConfig(data) {
+    if (data.serialNumber === this.model.serialNumber) {
+        this.model = data;
+        if (!data.web.config.profile || data.web.config.profile === 'false') {
+            this.view.hide();
+        } else {
+            this.view.show();
+        }
+    }
+};
+
+ConsoleIO.App.Device.Profile.prototype.clear = function clear() {
+    ConsoleIO.forEach(ConsoleIO.keys(this.profiles), function (id) {
+        this.view.deleteListItem(id);
+    }, this);
+
+    this.view.resetTree();
+    this.view.resetGrid();
+    this.view.setTitle();
+
+    this.profiles = {};
+    this.openNodes = [];
+    this.activeProfile = null;
+};
+
+ConsoleIO.App.Device.Profile.prototype.addProfile = function addProfile(profile) {
+    if (this.profiles[profile.uid]) {
+        profile.uid = ConsoleIO.getUniqueId();
+    }
+    this.profiles[profile.uid] = profile;
+    this.view.addToList(profile.uid, profile.title, ConsoleIO.Constant.ICONS.PROFILE);
+};
+
+ConsoleIO.App.Device.Profile.prototype.addTreeNodes = function addTreeNodes(node, parent) {
+    this.view.addTreeItem(parent, node.id, node.functionName || node.id, ConsoleIO.Constant.ICONS.FUNCTIONS);
+
+    if (node.children.length > 0) {
+        ConsoleIO.forEach(node.children, function (child) {
+            this.addTreeNodes(child, node.id);
+        }, this);
+    }
+};
+
+ConsoleIO.App.Device.Profile.prototype.addGridRows = function addGridRows(node, items) {
+    var index = items.indexOf(node.id);
+
+    this.view.addGridItem(this.toDate(node));
+
+    if (index > -1) {
+        items.splice(index, 1);
+    }
+
+    if (node.children.length > 0) {
+        ConsoleIO.forEach(node.children, function (child) {
+            if (items.indexOf(child.id) > -1) {
+                this.addGridRows(child, items);
+            } else {
+                this.view.addGridItem(this.toDate(child));
+            }
+        }, this);
+    }
+};
+
+ConsoleIO.App.Device.Profile.prototype.toDate = function toDate(node) {
+    var data = {
+        id: node.id,
+        functionName: node.functionName || node.id,
+        selfTime: this.parseTime(node.selfTime),
+        totalTime: this.parseTime(node.totalTime),
+        numberOfCalls: node.numberOfCalls
+    };
+
+    if (node.url) {
+        data.url = "<a target='_blank' href='" + node.url + "' >" + node.url.substring(node.url.lastIndexOf('/') + 1) + ":" + node.lineNumber + "</a>";
+    }
+
+    return data;
+};
+
+ConsoleIO.App.Device.Profile.prototype.parseTime = function parseTime(time) {
+    return (time / 1000) + ' ms';
+};
+
+ConsoleIO.App.Device.Profile.prototype.activate = function activate(state) {
+
+};
+
+ConsoleIO.App.Device.Profile.prototype.setTabActive = function setTabActive() {
+    this.view.setTabActive();
+};
+
+
+ConsoleIO.App.Device.Profile.prototype.onTreeOpenEnd = function onTreeOpenEnd(id, state) {
+    var index = this.openNodes.indexOf(id);
+    this.view.resetGrid();
+
+    if (state === 1 && index === -1) {
+        this.openNodes.push(id);
+    } else if (state === -1 && index > -1) {
+        this.openNodes.splice(index, 1);
+    }
+
+    ConsoleIO.async(function () {
+        this.addGridRows(this.profiles[this.activeProfile].head, [].concat(this.openNodes));
+    }, this);
+};
+
+ConsoleIO.App.Device.Profile.prototype.onListClick = function onListClick(id) {
+    this.view.resetTree();
+    this.view.resetGrid();
+
+    this.activeProfile = id;
+    this.openNodes = [];
+
+    var activeProfile = this.profiles[id];
+    this.view.setTitle(activeProfile.title);
+
+    ConsoleIO.async(function () {
+        this.addTreeNodes(activeProfile.head, 0);
+        this.view.closeItem(0, true);
+    }, this);
+};
+
+ConsoleIO.App.Device.Profile.prototype.onButtonClick = function onButtonClick(btnId, state) {
+    if (!this.parent.onButtonClick(this, btnId, state)) {
+        switch (btnId) {
+            case 'profiler':
+                ConsoleIO.Service.Socket.emit('profiler', {
+                    serialNumber: this.model.serialNumber,
+                    state: state
+                });
+
+                if (state) {
+                    this.view.setItemText("Profiler", 'Stop Profiling');
+                } else {
+                    this.view.setItemText("Profiler");
+                }
+                break;
+            case 'clear':
+                this.clear();
+                break;
+            default:
+                console.log(btnId, state);
                 break;
         }
     }
@@ -2839,6 +3580,14 @@ ConsoleIO.App.Editor.prototype.clear = function clear() {
     }
 };
 
+ConsoleIO.App.Editor.prototype.show = function show() {
+    this.view.show();
+};
+
+ConsoleIO.App.Editor.prototype.hide = function hide() {
+    this.view.hide();
+};
+
 ConsoleIO.App.Editor.prototype.close = function close() {
     this.fileName = null;
     this.editor.setValue("");
@@ -2846,7 +3595,7 @@ ConsoleIO.App.Editor.prototype.close = function close() {
     this.getDoc().clearHistory();
     this.updateButtonState();
     this.setTitle();
-    this.view.setItemText(ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.id, ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.text);
+    this.view.setItemText("Clear");
 };
 
 ConsoleIO.App.Editor.prototype.save = function save(saveAs) {
@@ -2896,7 +3645,7 @@ ConsoleIO.App.Editor.prototype.setValue = function setValue(data) {
     if (data.name) {
         this.fileName = data.name;
         this.setTitle(this.fileName);
-        this.view.setItemText(ConsoleIO.Model.DHTMLX.ToolBarItem.Clear.id, 'Close');
+        this.view.setItemText("Clear", 'Close');
     }
 
     var content = data.content.replace(/%20/img, " "),
@@ -3297,7 +4046,8 @@ ConsoleIO.Settings = {
         list: [50, 100, 250, 500]
     },
     defaultTab: 'console',
-    defaultAccordion: 'device'
+    defaultAccordion: 'device',
+    triggerInterval: 1000
 };
 
 /**
@@ -3350,12 +4100,12 @@ ConsoleIO.Constant.IMAGE_URL = {
 ConsoleIO.Constant.ICONS = {
     ONLINE: 'online.png',
     OFFLINE: 'offline.png',
-    SUBSCRIBE: 'subscribe.gif',
-    VERSION: 'version.gif',
+    SUBSCRIBE: 'subscribe.png',
+    VERSION: 'version.png',
 
     //Platform icons
     PC: 'pc.png',
-    TV: 'tv.jpg',
+    TV: 'tv.png',
     STB: 'stb.png',
     MOBILE: 'mobile.png',
     TABLET: 'tablet.png',
@@ -3365,12 +4115,12 @@ ConsoleIO.Constant.ICONS = {
 
     //Manufacturers icons
     LG: 'lg.png',
-    PHILIPS: 'philips.jpg',
-    SAMSUNG: 'samsung.jpg',
+    PHILIPS: 'philips.png',
+    SAMSUNG: 'samsung.png',
     TOSHIBA: 'toshiba.png',
-    TESCO: 'tesco.jpg',
-    SONY: 'sony.jpg',
-    PANASONIC: 'panasonic.gif',
+    TESCO: 'tesco.png',
+    SONY: 'sony.png',
+    PANASONIC: 'panasonic.png',
     MICROSOFT: 'microsoft.png',
     MOZILLA: 'mozilla.png',
     GOOGLE: 'google.png',
@@ -3379,15 +4129,15 @@ ConsoleIO.Constant.ICONS = {
     "OPERA SOFTWARE": 'opera.png',
 
     //Browser icons
-    GINGERBREAD: 'gingerbread.jpg',
+    GINGERBREAD: 'gingerbread.png',
     CHROME: 'chrome.png',
     IE: 'explorer.png',
     FIREFOX: 'firefox.png',
     OPERA: 'opera.png',
     SAFARI: 'safari.png',
-    MAPLE: 'maple.gif',
+    MAPLE: 'maple.png',
     NETTV: 'nettv.png',
-    NETCAST: 'netcast.gif',
+    NETCAST: 'netcast.png',
     TOSHIBATP: 'toshibatp.png',
     ESPIAL: 'espial.png',
     MSTAR: 'mstar.png',
@@ -3395,12 +4145,15 @@ ConsoleIO.Constant.ICONS = {
     //"OREGAN MEDIA": '',
     PLAYSTATION: 'playstation.png',
 
-    JAVASCRIPT: 'javascript.gif',
-    STYLESHEET: 'stylesheet.gif',
+    JAVASCRIPT: 'source.png',
+    STYLESHEET: 'stylesheet.png',
     WEB: 'web.png',
     FILE: '',
     UNKNOWN: 'unknown.png',
-    FOLDEROPEN: '../../' + ConsoleIO.Constant.IMAGE_URL.get('tree') + '/folderOpen.gif'
+    FOLDEROPEN: '../../' + ConsoleIO.Constant.IMAGE_URL.get('tree') + '/folderOpen.gif',
+
+    PROFILE: 'profiles.png',
+    FUNCTIONS: 'functions.png'
 };
 
 /**

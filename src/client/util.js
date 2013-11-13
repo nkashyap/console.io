@@ -13,7 +13,43 @@
 
     var util = exports.util = {},
         domReady = false,
-        pendingCallback = [];
+        pendingCallback = [],
+        HTMLTagCSSProperties = {};
+
+    function addDefaultCSS(tag){
+        if(tag && !HTMLTagCSSProperties[tag]){
+            var win = document.defaultView || global,
+                element = document.createElement(tag),
+                properties = {};
+
+            document.body.appendChild(element);
+
+            if (win.getComputedStyle) {
+                /* Modern browsers */
+                var styles = win.getComputedStyle(element, '');
+
+                util.forEach(util.toArray(styles), function (style) {
+                    properties[style] = styles.getPropertyValue(style);
+                });
+
+            } else if (element.currentStyle) {
+                /* IE */
+                util.forEachProperty(element.currentStyle, function (value, style) {
+                    properties[style] = value;
+                });
+
+            } else {
+                /* Ancient browser..*/
+                util.forEach(util.toArray(element.style), function (style) {
+                    properties[style] = element.style[style];
+                });
+            }
+
+            HTMLTagCSSProperties[tag] = properties;
+
+            document.body.removeChild(element);
+        }
+    }
 
     util.getScripts = function getScripts() {
         return util.toArray(document.scripts || document.getElementsByName('script'));
@@ -170,7 +206,8 @@
         }
 
         var node = document.createElement('script'),
-            head = document.getElementsByTagName('head')[0];
+            head = document.getElementsByTagName('head')[0],
+            config = exports.getConfig();
 
         node.type = 'text/javascript';
         node.charset = 'utf-8';
@@ -198,6 +235,12 @@
         }
 
         function onScriptError() {
+            if (config.web) {
+                exports.console.exception(url, arguments);
+            } else {
+                exports.debug('failed to load ' + url);
+            }
+
             node.removeEventListener('error', onScriptError, false);
         }
 
@@ -327,28 +370,43 @@
         });
     };
 
+    util.isCSSPropertySame = function isCSSPropertySame(tag, property, value){
+        return (HTMLTagCSSProperties[tag][property] === value);
+    };
+
     util.getAppliedStyles = function getAppliedStyles(element) {
         var win = document.defaultView || global,
-            styleNode = [];
+            styleNode = [],
+            tag = element.tagName;
+
+        addDefaultCSS(tag);
 
         if (win.getComputedStyle) {
             /* Modern browsers */
             var styles = win.getComputedStyle(element, '');
 
             util.forEach(util.toArray(styles), function (style) {
-                styleNode.push(style + ':' + styles.getPropertyValue(style));
+                var value = styles.getPropertyValue(style);
+                if(!util.isCSSPropertySame(tag, style, value)){
+                    styleNode.push(style + ':' + value);
+                }
             });
 
         } else if (element.currentStyle) {
             /* IE */
             util.forEachProperty(element.currentStyle, function (value, style) {
-                styleNode.push(style + ':' + value);
+                if(!util.isCSSPropertySame(tag, style, value)){
+                    styleNode.push(style + ':' + value);
+                }
             });
 
         } else {
             /* Ancient browser..*/
             util.forEach(util.toArray(element.style), function (style) {
-                styleNode.push(style + ':' + element.style[style]);
+                var value = element.style[style];
+                if(!util.isCSSPropertySame(tag, style, value)){
+                    styleNode.push(style + ':' + value);
+                }
             });
         }
 
@@ -368,6 +426,22 @@
         url += (config.base.length > 0 ? '/' + config.base : '/') + fileUrl;
 
         return url;
+    };
+
+    util.getProfileUrl = function getProfileUrl(baseUrl, url) {
+        if (url.indexOf('.js') === -1) {
+            return url;
+        }
+
+        if (url.indexOf('http:') === -1 && url.indexOf('https:') === -1) {
+            if (url.indexOf('/') === 0) {
+                url = [location.origin, url].join('/');
+            } else {
+                url = [location.origin, location.pathname, url].join('/');
+            }
+        }
+
+        return baseUrl + '?url=' + url;
     };
 
     util.showInfo = function showInfo(content, online) {
@@ -438,6 +512,27 @@
         }
     }());
 
+    util.filter = (function () {
+        if (Array.prototype.filter) {
+            return function (array, callback, scope) {
+                return (array || []).filter(callback, scope);
+            };
+        } else {
+            return function (array, callback, scope) {
+                array = array || [];
+                var i = 0, length = array.length, newArray = [];
+                if (length) {
+                    do {
+                        if (callback.call(scope || array, array[i], i, array)) {
+                            newArray.push(array[i]);
+                        }
+                    } while (++i < length);
+                }
+                return newArray;
+            };
+        }
+    }());
+
     util.forEach = (function () {
         if (Array.prototype.forEach) {
             return function (array, callback, scope) {
@@ -456,11 +551,38 @@
         }
     }());
 
+    util.noop = function noop() {
+    };
+
+    util.asyncForEach = function asyncForEach(array, callback, finishCallback, scope) {
+        array = [].concat(array || []);
+        util.asyncIteration(array, callback || util.noop, finishCallback || util.noop, scope);
+    };
+
+    util.asyncIteration = function asyncIteration(array, callback, finishCallback, scope) {
+        if (array.length > 0) {
+            setTimeout(function () {
+                callback.call(scope || array, array.shift(), function finish() {
+                    util.asyncIteration(array, callback, finishCallback, scope);
+                });
+            }, 4);
+        } else {
+            finishCallback.call(scope);
+        }
+    };
+
     util.forEachProperty = function forEachProperty(obj, callback, scope) {
         var prop;
         for (prop in obj) {
             callback.call(scope || obj, obj[prop], prop, obj);
         }
+    };
+
+    util.async = function async(fn, scope, interval) {
+        interval = typeof scope === 'number' ? scope : interval;
+        return setTimeout(function () {
+            fn.call(scope);
+        }, interval || 4);
     };
 
     util.extend = function extend(target, source) {

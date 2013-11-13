@@ -17,9 +17,11 @@ ConsoleIO.App.Device = function DeviceController(parent, model) {
     this.wordWrap = ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.pressed;
 
     this.console = new ConsoleIO.App.Device.Console(this, this.model);
+    this.profile = new ConsoleIO.App.Device.Profile(this, this.model);
     this.source = new ConsoleIO.App.Device.Source(this, this.model);
-    this.preview = new ConsoleIO.App.Device.Preview(this, this.model);
+    this.html = new ConsoleIO.App.Device.HTML(this, this.model);
     this.status = new ConsoleIO.App.Device.Status(this, this.model);
+
     this.view = new ConsoleIO.View.Device(this, this.model);
 };
 
@@ -28,7 +30,8 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
     this.view.render(target);
     this.status.render(this.view.tabs);
     this.source.render(this.view.tabs);
-    this.preview.render(this.view.tabs);
+    this.html.render(this.view.tabs);
+    this.profile.render(this.view.tabs);
     this.console.render(this.view.tabs);
 
     var panel = this[this.activeTab];
@@ -37,18 +40,19 @@ ConsoleIO.App.Device.prototype.render = function render(target) {
     }
 
     if (this.beautify) {
-        this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify.id, this.beautify);
+        this.setItemState("Beautify", this.beautify);
     }
 
     if (this.wordWrap) {
-        this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.id, this.wordWrap);
+        this.setItemState("WordWrap", this.wordWrap);
     }
 };
 
 ConsoleIO.App.Device.prototype.destroy = function destroy() {
     this.console = this.console.destroy();
+    this.profile = this.profile.destroy();
     this.source = this.source.destroy();
-    this.preview = this.preview.destroy();
+    this.html = this.html.destroy();
     this.status = this.status.destroy();
     this.view = this.view.destroy();
 };
@@ -62,7 +66,8 @@ ConsoleIO.App.Device.prototype.activate = function activate(state) {
     if (!state) {
         this.status.activate(state);
         this.source.activate(state);
-        this.preview.activate(state);
+        this.html.activate(state);
+        this.profile.activate(state);
         this.console.activate(state);
     } else if (this.activeTab) {
         this[this.activeTab].activate(state);
@@ -72,7 +77,7 @@ ConsoleIO.App.Device.prototype.activate = function activate(state) {
 
 ConsoleIO.App.Device.prototype.setItemState = function setItemState(id, state) {
     this.source.setItemState(id, state);
-    this.preview.setItemState(id, state);
+    this.html.setItemState(id, state);
 };
 
 
@@ -106,14 +111,14 @@ ConsoleIO.App.Device.prototype.onButtonClick = function onButtonClick(tab, btnId
             handled = true;
             break;
         case 'beautify':
-            this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.Beautify.id, this.beautify = state);
+            this.setItemState("Beautify", this.beautify = state);
             handled = true;
             tab.refresh();
             break;
 
         //common on Source and Preview Tabs
         case 'wordwrap':
-            this.setItemState(ConsoleIO.Model.DHTMLX.ToolBarItem.WordWrap.id, this.wordWrap = state);
+            this.setItemState("WordWrap", this.wordWrap = state);
             tab.editor.setOption('lineWrapping', state);
             handled = true;
             break;

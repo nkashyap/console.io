@@ -1,13 +1,9 @@
 # Console.IO
 
 [![Build Status](https://travis-ci.org/nkashyap/console.io.png?branch=master)](https://travis-ci.org/nkashyap/console.io)
-[![Nodejitsu Deploy Status](https://webhooks.nodejitsu.com/nkashyap/console.io.png)](https://webops.nodejitsu.com#nodejitsu/webhooks)
 
 Console.IO is a NodeJS project. It provides Remote Web Console for websites and web applications.
 It uses express.io (express & socket.io) to provide user real time experience.
-
-* [Demo] (http://console.io.jit.su/)
-* [Console.IO] (http://nkashyap.github.io/console.io)
 
 It works pretty much on all modern browsers, mobile devices, Smart TVs, etc
 
@@ -230,6 +226,8 @@ NOTE: All multilines code should be wrapped within self executable function. E.G
  * console.error(error)
  * console.exception(error)
  * console.trace()
+ * console.profile()    // works only when client is enabled with profiler mode
+ * console.profileEnd() // works only when client is enabled with profiler mode
 
 #### TODO
 * console.group()
@@ -237,10 +235,6 @@ NOTE: All multilines code should be wrapped within self executable function. E.G
 * console.groupEnd()
 * console.markTimeline()
 * console.timestamp()
-* console.profiles
-* console.profile()
-* console.profileEnd()
-
 
 ### SERVER CONFIGURATION
 
@@ -328,6 +322,42 @@ NOTE: Only IIS8 supports websockets therefore Console.IO is configured to used x
     define(['console.io'], function (consoleio) {
         consoleio.configure({});
     });
+```
+
+### PROFILER
+
+Profile support is now added in Console.IO. Profile tab is only displayed when profiler is enabled and it can only enabled from client side.
+
+NOTE:it only works when files are loaded using RequireJS at the moment.
+
+#### Enabling profiler from client
+
+##### Include Script directly
+
+```html
+<script type="text/javascript" src="/console.io/console.io.js?profile=true&excludes=folder1,folder2"></script>
+```
+
+##### Via RequireJS
+
+```html
+    // usage
+    define(['console.io'], function (consoleio) {
+        consoleio.configure({
+            profile: true,
+            excludes: ['folder1','folder2']
+        });
+    });
+```
+
+#### Fix regex issue in node dependency
+
+Add following lines at 1408 in /node_modules/escodegen/escodegen.js
+
+```html
+if (expr.value.toString() === '[object Object]' && expr.raw) {
+    expr.value = expr.raw;
+}
 ```
 
 

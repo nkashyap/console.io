@@ -60,8 +60,11 @@ ConsoleIO.View.Device.Source.prototype.setTitle = function setTitle(contextId, t
     }
 };
 
-ConsoleIO.View.Device.Source.prototype.setItemState = function setItemState(id, state) {
+ConsoleIO.View.Device.Source.prototype.setItemState = function setItemState(name, state) {
     if (this.toolbar) {
-        this.toolbar.setItemState(id, state);
+        var item = ConsoleIO.Model.DHTMLX.ToolBarItem[name];
+        if (item) {
+            this.toolbar.setItemState(item.id, state);
+        }
     }
 };

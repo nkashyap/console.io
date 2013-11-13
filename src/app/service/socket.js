@@ -16,6 +16,7 @@ ConsoleIO.Service.Socket = {
     connectionMode: null,
 
     connect: function init() {
+        var origin = ConsoleIO.getOrigin();
         ConsoleIO.Service.Socket.guid = ConsoleIO.Service.Storage.getItem('guid');
 
         if (!ConsoleIO.Service.Socket.guid) {
@@ -23,8 +24,8 @@ ConsoleIO.Service.Socket = {
             ConsoleIO.Service.Storage.addItem('guid', ConsoleIO.Service.Socket.guid, 365);
         }
 
-        this.io = window.io.connect(window.location.origin, {
-            secure: window.location.origin.indexOf("https") > -1,
+        this.io = window.io.connect(origin, {
+            secure: origin.indexOf("https") > -1,
             resource: (window.location.pathname.split('/').slice(0, -1).join('/') + '/socket.io').substring(1),
             'sync disconnect on unload': true
         });

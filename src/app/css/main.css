@@ -79,3 +79,14 @@ html, body {
 .dhx_acc_item_label {
     text-transform: capitalize;
 }
+
+.dhx_tabcontent_zone > div[tab_id^=Profile] > div[ida=dhxMainCont] .containerTableStyle > table {
+    margin: 0 !important;
+}
+
+.dhx_tabcontent_zone > div[tab_id^=Profile] > div[ida=dhxMainCont] .standartTreeRow,
+.dhx_tabcontent_zone > div[tab_id^=Profile] > div[ida=dhxMainCont] .standartTreeRow_lor,
+.dhx_tabcontent_zone > div[tab_id^=Profile] > div[ida=dhxMainCont] .standartTreeImage {
+    height: 20px !important;
+    line-height: 20px !important;
+}

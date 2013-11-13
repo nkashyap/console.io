@@ -252,11 +252,16 @@ function Manager() {
             setUp: registerDevice,
             register: registerDevice,
             console: defineDeviceCommandRouteHandler('command', 'console'),
+
             files: defineDeviceCommandRouteHandler('command', 'files'),
-            previewContent: defineDeviceCommandRouteHandler('command', 'previewContent'),
-            screenShot: defineDeviceCommandRouteHandler('command', 'screenShot'),
             source: defineDeviceCommandRouteHandler('processSource', 'source'),
-            content: defineDeviceCommandRouteHandler('processSource', 'content'),
+
+            htmlDocument: defineDeviceCommandRouteHandler('processSource', 'htmlDocument'),
+            htmlContent: defineDeviceCommandRouteHandler('command', 'htmlContent'),
+
+            screenShot: defineDeviceCommandRouteHandler('command', 'screenShot'),
+
+            profile: defineDeviceCommandRouteHandler('command', 'profile'),
             status: defineDeviceRouteHandler('status'),
             webStatus: defineDeviceRouteHandler('webStatus'),
             serialNumber: defineDeviceRouteHandler('setSerialNumber')
@@ -273,12 +278,19 @@ function Manager() {
             webConfig: defineUserCommandRouteEmitHandler('web:config', true),
             webControl: defineDeviceMethodRouteHandler('control'),
 
-            fileSource: defineUserCommandRouteHandler('requestSource', 'fileSource'),
-            reloadHTML: defineUserCommandRouteHandler('requestSource', 'htmlContent'),
-            reloadDevice: defineUserCommandRouteEmitHandler('reload'),
             reloadFiles: defineUserCommandRouteEmitHandler('fileList'),
-            previewHTML: defineUserCommandRouteEmitHandler('previewHTML'),
+            fileSource: defineUserCommandRouteHandler('requestSource', 'fileSource'),
+
+            htmlSource: defineUserCommandRouteHandler('requestSource', 'htmlSource'),
+            htmlPreview: defineUserCommandRouteEmitHandler('htmlPreview'),
+
+            remoteEvent: defineUserCommandRouteEmitHandler('remoteEvent', true),
+
             captureScreen: defineUserCommandRouteEmitHandler('captureScreen'),
+
+            profiler: defineUserCommandRouteEmitHandler('profiler', true),
+            reloadDevice: defineUserCommandRouteEmitHandler('reload'),
+
             deviceStatus: defineUserCommandRouteEmitHandler('status'),
             execute: defineUserCommandRouteEmitHandler('command', 'code'),
 

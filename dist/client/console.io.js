@@ -1,15 +1,15 @@
 /**
  * Name: console.io
- * Version: 0.2.0-1
+ * Version: 0.2.2
  * Description: Javascript Remote Web Console
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-19
+ * Date: 2013-11-13
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
-ConsoleIO.version = "0.2.0-1";
+ConsoleIO.version = "0.2.2";
 
 (function(){
 
@@ -28,7 +28,43 @@ ConsoleIO.version = "0.2.0-1";
 
     var util = exports.util = {},
         domReady = false,
-        pendingCallback = [];
+        pendingCallback = [],
+        HTMLTagCSSProperties = {};
+
+    function addDefaultCSS(tag){
+        if(tag && !HTMLTagCSSProperties[tag]){
+            var win = document.defaultView || global,
+                element = document.createElement(tag),
+                properties = {};
+
+            document.body.appendChild(element);
+
+            if (win.getComputedStyle) {
+                /* Modern browsers */
+                var styles = win.getComputedStyle(element, '');
+
+                util.forEach(util.toArray(styles), function (style) {
+                    properties[style] = styles.getPropertyValue(style);
+                });
+
+            } else if (element.currentStyle) {
+                /* IE */
+                util.forEachProperty(element.currentStyle, function (value, style) {
+                    properties[style] = value;
+                });
+
+            } else {
+                /* Ancient browser..*/
+                util.forEach(util.toArray(element.style), function (style) {
+                    properties[style] = element.style[style];
+                });
+            }
+
+            HTMLTagCSSProperties[tag] = properties;
+
+            document.body.removeChild(element);
+        }
+    }
 
     util.getScripts = function getScripts() {
         return util.toArray(document.scripts || document.getElementsByName('script'));
@@ -185,7 +221,8 @@ ConsoleIO.version = "0.2.0-1";
         }
 
         var node = document.createElement('script'),
-            head = document.getElementsByTagName('head')[0];
+            head = document.getElementsByTagName('head')[0],
+            config = exports.getConfig();
 
         node.type = 'text/javascript';
         node.charset = 'utf-8';
@@ -213,6 +250,12 @@ ConsoleIO.version = "0.2.0-1";
         }
 
         function onScriptError() {
+            if (config.web) {
+                exports.console.exception(url, arguments);
+            } else {
+                exports.debug('failed to load ' + url);
+            }
+
             node.removeEventListener('error', onScriptError, false);
         }
 
@@ -342,28 +385,43 @@ ConsoleIO.version = "0.2.0-1";
         });
     };
 
+    util.isCSSPropertySame = function isCSSPropertySame(tag, property, value){
+        return (HTMLTagCSSProperties[tag][property] === value);
+    };
+
     util.getAppliedStyles = function getAppliedStyles(element) {
         var win = document.defaultView || global,
-            styleNode = [];
+            styleNode = [],
+            tag = element.tagName;
+
+        addDefaultCSS(tag);
 
         if (win.getComputedStyle) {
             /* Modern browsers */
             var styles = win.getComputedStyle(element, '');
 
             util.forEach(util.toArray(styles), function (style) {
-                styleNode.push(style + ':' + styles.getPropertyValue(style));
+                var value = styles.getPropertyValue(style);
+                if(!util.isCSSPropertySame(tag, style, value)){
+                    styleNode.push(style + ':' + value);
+                }
             });
 
         } else if (element.currentStyle) {
             /* IE */
             util.forEachProperty(element.currentStyle, function (value, style) {
-                styleNode.push(style + ':' + value);
+                if(!util.isCSSPropertySame(tag, style, value)){
+                    styleNode.push(style + ':' + value);
+                }
             });
 
         } else {
             /* Ancient browser..*/
             util.forEach(util.toArray(element.style), function (style) {
-                styleNode.push(style + ':' + element.style[style]);
+                var value = element.style[style];
+                if(!util.isCSSPropertySame(tag, style, value)){
+                    styleNode.push(style + ':' + value);
+                }
             });
         }
 
@@ -383,6 +441,22 @@ ConsoleIO.version = "0.2.0-1";
         url += (config.base.length > 0 ? '/' + config.base : '/') + fileUrl;
 
         return url;
+    };
+
+    util.getProfileUrl = function getProfileUrl(baseUrl, url) {
+        if (url.indexOf('.js') === -1) {
+            return url;
+        }
+
+        if (url.indexOf('http:') === -1 && url.indexOf('https:') === -1) {
+            if (url.indexOf('/') === 0) {
+                url = [location.origin, url].join('/');
+            } else {
+                url = [location.origin, location.pathname, url].join('/');
+            }
+        }
+
+        return baseUrl + '?url=' + url;
     };
 
     util.showInfo = function showInfo(content, online) {
@@ -453,6 +527,27 @@ ConsoleIO.version = "0.2.0-1";
         }
     }());
 
+    util.filter = (function () {
+        if (Array.prototype.filter) {
+            return function (array, callback, scope) {
+                return (array || []).filter(callback, scope);
+            };
+        } else {
+            return function (array, callback, scope) {
+                array = array || [];
+                var i = 0, length = array.length, newArray = [];
+                if (length) {
+                    do {
+                        if (callback.call(scope || array, array[i], i, array)) {
+                            newArray.push(array[i]);
+                        }
+                    } while (++i < length);
+                }
+                return newArray;
+            };
+        }
+    }());
+
     util.forEach = (function () {
         if (Array.prototype.forEach) {
             return function (array, callback, scope) {
@@ -471,11 +566,38 @@ ConsoleIO.version = "0.2.0-1";
         }
     }());
 
+    util.noop = function noop() {
+    };
+
+    util.asyncForEach = function asyncForEach(array, callback, finishCallback, scope) {
+        array = [].concat(array || []);
+        util.asyncIteration(array, callback || util.noop, finishCallback || util.noop, scope);
+    };
+
+    util.asyncIteration = function asyncIteration(array, callback, finishCallback, scope) {
+        if (array.length > 0) {
+            setTimeout(function () {
+                callback.call(scope || array, array.shift(), function finish() {
+                    util.asyncIteration(array, callback, finishCallback, scope);
+                });
+            }, 4);
+        } else {
+            finishCallback.call(scope);
+        }
+    };
+
     util.forEachProperty = function forEachProperty(obj, callback, scope) {
         var prop;
         for (prop in obj) {
             callback.call(scope || obj, obj[prop], prop, obj);
         }
+    };
+
+    util.async = function async(fn, scope, interval) {
+        interval = typeof scope === 'number' ? scope : interval;
+        return setTimeout(function () {
+            fn.call(scope);
+        }, interval || 4);
     };
 
     util.extend = function extend(target, source) {
@@ -1094,14 +1216,6 @@ ConsoleIO.version = "0.2.0-1";
 
     var stacktrace = exports.stacktrace = {};
 
-    function create() {
-        try {
-            undefined();
-        } catch (e) {
-            return e;
-        }
-    }
-
     function getFormatter(e) {
         if (e['arguments'] && e.stack) {
             return exports.formatter.chrome;
@@ -1140,9 +1254,18 @@ ConsoleIO.version = "0.2.0-1";
 
     stacktrace.allowedErrorStackLookUp = ['Error', 'ErrorEvent', 'DOMException', 'PositionError'];
 
-    stacktrace.get = function get(e) {
-        e = e || create();
+    stacktrace.create = function create(message) {
+        try {
+            //undefined();
+            throw new Error(message);
+        } catch (e) {
+            // remove error string from stack
+            e.stack = e.stack.replace("Error: ", "");
+            return e;
+        }
+    };
 
+    stacktrace.get = function get(e) {
         var formatterFn = getFormatter(e);
         if (typeof formatterFn === 'function') {
             return formatterFn(e);
@@ -1173,6 +1296,7 @@ ConsoleIO.version = "0.2.0-1";
 
     var transport = exports.transport = {},
         pending = [],
+        lazyListener = [],
         config;
 
     function onMessage(event) {
@@ -1234,6 +1358,7 @@ ConsoleIO.version = "0.2.0-1";
     }
 
     transport.connectionMode = '';
+    transport.paused = false;
 
     transport.setUp = function setUp() {
         /** Fix for old Opera and Maple browsers
@@ -1288,11 +1413,17 @@ ConsoleIO.version = "0.2.0-1";
 
         // set console.io event
         exports.console.on('console', function (data) {
-            transport.emit('console', {
+            var msg = {
                 type: data.type,
                 message: escape(data.message),
                 stack: data.stack
-            });
+            };
+
+            if (transport.paused) {
+                pending.push({ name: 'console', data: msg });
+            } else {
+                transport.emit('console', msg);
+            }
         });
 
         if (global.addEventListener) {
@@ -1309,6 +1440,11 @@ ConsoleIO.version = "0.2.0-1";
         transport.io.on('connect_failed', onConnectFailed);
         transport.io.on('reconnect_failed', onReconnectFailed);
         transport.io.on('error', onError);
+
+        exports.util.forEach(lazyListener, function (item) {
+            transport.on(item.name, item.callback, item.scope);
+        });
+        lazyListener = [];
     };
 
     transport.emit = function emit(name, data) {
@@ -1322,9 +1458,13 @@ ConsoleIO.version = "0.2.0-1";
     };
 
     transport.on = function on(name, callback, scope) {
-        transport.io.on(name, function () {
-            callback.apply(scope || this, arguments);
-        });
+        if (transport.io) {
+            transport.io.on(name, function () {
+                callback.apply(scope || this, arguments);
+            });
+        } else {
+            lazyListener.push({ name: name, callback: callback, scope: scope });
+        }
     };
 
     transport.isConnected = function isConnected() {
@@ -1390,6 +1530,401 @@ ConsoleIO.version = "0.2.0-1";
 }('undefined' !== typeof ConsoleIO ? ConsoleIO : module.exports, this));
 
 /**
+ * Created with JetBrains WebStorm.
+ * User: nisheeth
+ * Date: 23/09/13
+ * Time: 08:23
+ * Email: nisheeth.k.kashyap@gmail.com
+ * Repositories: https://github.com/nkashyap
+ *
+ * Profiler
+ */
+
+(function (exports, global) {
+
+    var profiler = exports.profiler = {},
+        definitionStore = {},
+        getProfileId = (function () {
+            var i = 0;
+            return function () {
+                return ['Profile', ++i].join(' ');
+            };
+        }());
+
+    global.__pb = global.__pe = exports.util.noop;
+    global.__pd = function cacheDefinition(file, data) {
+        definitionStore[file] = data;
+    };
+
+    function setUpWebWorker() {
+        var worker = profiler.worker = new global.Worker(exports.util.getUrl('profileWorker'));
+
+        function onMessage(event) {
+            if (event.data.type === 'report') {
+                exports.transport.emit('profile', event.data.report);
+            } else {
+                exports.console.log(event.data);
+            }
+        }
+
+        function onError(event) {
+            exports.console.error(event);
+        }
+
+        worker.addEventListener('message', onMessage, false);
+        worker.addEventListener('error', onError, false);
+
+        profiler.begin = function begin(callId, args, time, reset) {
+            if (!reset) {
+                var isEvent = exports.util.getType(args[0]).toLowerCase().indexOf('event') > -1;
+                if (isEvent && !args[0].__profiled) {
+                    reset = isEvent;
+                    args[0].__profiled = true;
+                }
+            }
+
+            if (profiler.enabled) {
+                worker.postMessage({
+                    type: 'begin',
+                    callId: callId,
+                    time: time,
+                    reset: reset
+                });
+            }
+        };
+
+        profiler.end = function end(callId, time) {
+            if (profiler.enabled) {
+                worker.postMessage({
+                    type: 'end',
+                    callId: callId,
+                    time: time
+                });
+            }
+        };
+
+        profiler.start = function start(title) {
+            title = title || getProfileId();
+            profiler.enabled = true;
+            profiler.store.push(title);
+            worker.postMessage({
+                type: 'start',
+                title: title
+            });
+
+            return title;
+        };
+
+        profiler.finish = function finish(title) {
+            if (!title) {
+                title = profiler.store.pop();
+            }
+
+            var index = profiler.store.indexOf(title);
+            if (index > -1) {
+                profiler.store.splice(index, 1);
+            }
+
+            profiler.enabled = profiler.store.length > 0;
+            worker.postMessage({
+                type: 'finish',
+                title: title
+            });
+
+            return title;
+        };
+
+        profiler.clear = function clear() {
+            profiler.enabled = false;
+            profiler.store = [];
+            worker.postMessage({
+                type: 'clear'
+            });
+        };
+
+        profiler.load = function load(file, table) {
+            worker.postMessage({
+                type: 'load',
+                file: file,
+                table: table
+            });
+        };
+
+        exports.util.forEachProperty(definitionStore, function (data, file) {
+            profiler.load(file, data);
+        });
+
+        global.__pd = profiler.load;
+        global.__pb = profiler.begin;
+        global.__pe = profiler.end;
+    }
+
+    function setUpAsync() {
+        var dataTable = {},
+            indexMap = {},
+            getUniqueId = (function () {
+                var i = 0;
+                return function () {
+                    return ++i;
+                };
+            }());
+
+        function ScriptProfileNode(callId, time) {
+            var def = dataTable[callId] || ['root', 0, ''];
+            this.id = getUniqueId();
+            this.functionName = def[0];
+            this.lineNumber = def[1];
+            this.url = def[2];
+            this.callUID = callId;
+            this.startTime = time;
+
+            this.totalTime = 0;
+            this.selfTime = 0;
+            this.numberOfCalls = 1;
+            this.visible = true;
+            this.children = [];
+        }
+
+        ScriptProfileNode.prototype.finish = function finish(callback) {
+            this.adjustTime(Date.now());
+            exports.util.async(callback);
+        };
+
+        ScriptProfileNode.prototype.getNodeByCallerId = function getNodeByCallerId(callId) {
+            var node;
+            exports.util.every(this.children, function (child) {
+                if (child.callUID === callId) {
+                    node = child;
+                    return false;
+                }
+
+                return true;
+            });
+
+            return node;
+        };
+
+        ScriptProfileNode.prototype.getActiveNode = function getActiveNode() {
+            var length = this.children.length;
+            return (length > 0) ? this.children[length - 1] : null;
+        };
+
+        ScriptProfileNode.prototype.adjustTime = function adjustTime(time) {
+            this.totalTime = time - this.startTime;
+
+            if (this.children.length > 0) {
+                var childTotalTime = 0;
+                util.forEach(this.children, function iterationFn(child) {
+                    childTotalTime += child.totalTime;
+                }, this);
+
+                if (childTotalTime > this.totalTime) {
+                    this.totalTime = childTotalTime;
+                }
+
+                this.selfTime = Math.abs(this.totalTime - childTotalTime);
+            } else {
+                this.selfTime = this.totalTime;
+            }
+        };
+
+        ScriptProfileNode.prototype.begin = function begin(callId, time) {
+            var node = this.getNodeByCallerId(callId);
+            if (node) {
+                ++node.numberOfCalls;
+            } else {
+                node = new ScriptProfileNode(callId, time);
+                this.children.push(node);
+            }
+        };
+
+        ScriptProfileNode.prototype.end = function end(callId, time) {
+            var node = this.getNodeByCallerId(callId);
+            if (node) {
+                node.adjustTime(time);
+                return true;
+            }
+
+            return false;
+        };
+
+
+        function ScriptProfile(title) {
+            this.title = title || getProfileId();
+            this.uid = profiler.store.length + 1;
+            this.head = new ScriptProfileNode(this.uid, Date.now());
+
+            this.active = true;
+            this.depth = 0;
+        }
+
+        ScriptProfile.prototype.finish = function finish(callback) {
+            delete this.active;
+            delete this.depth;
+
+            this.head.finish(callback);
+        };
+
+        ScriptProfile.prototype.getActiveNode = function getActiveNode(depth) {
+            var i = 0,
+                node = this.head;
+
+            depth = typeof depth === 'undefined' ? this.depth : depth;
+
+            if (depth > 0) {
+                do {
+                    node = node.getActiveNode();
+                } while (depth > ++i);
+            }
+
+            return node;
+        };
+
+        ScriptProfile.prototype.begin = function begin(callId, beginTime, reset) {
+            if (reset) {
+                this.depth = 0;
+            }
+
+            if (!indexMap[callId]) {
+                indexMap[callId] = [];
+            }
+
+            indexMap[callId].push(this.depth);
+
+            this.getActiveNode().begin(callId, beginTime);
+            this.depth++;
+        };
+
+        ScriptProfile.prototype.end = function end(callId, endTime) {
+            this.depth--;
+            if (indexMap[callId]) {
+                var node = this.getActiveNode(indexMap[callId].pop());
+                if (!node.end(callId, endTime)) {
+                    exports.console.log(callId + ' failed to find node.');
+                }
+            } else {
+                exports.console.log(callId + ' depth index not mapped.');
+            }
+        };
+
+        function getActiveProfiles() {
+            return exports.util.filter(profiler.store, function (profile) {
+                return !!profile.active;
+            });
+        }
+
+        function getLastActiveProfile() {
+            var lastProfile;
+            exports.util.every(profiler.store.reverse(), function (profile) {
+                if (!!profile.active) {
+                    lastProfile = profile;
+                    return false;
+                }
+                return true;
+            });
+
+            return lastProfile;
+        }
+
+        function getProfileByTitle(title) {
+            var lastProfile;
+            exports.util.every(profiler.store, function (profile) {
+                if (!!profile.active && profile.title === title) {
+                    lastProfile = profile;
+                    return false;
+                }
+                return true;
+            });
+
+            return lastProfile;
+        }
+
+        profiler.begin = function begin(callId, args, beginTime, reset) {
+            if (profiler.enabled) {
+                if (!reset) {
+                    var isEvent = exports.util.getType(args[0]).toLowerCase().indexOf('event') > -1;
+                    if (isEvent && !args[0].__profiled) {
+                        reset = isEvent;
+                        args[0].__profiled = true;
+                    }
+                }
+
+                exports.util.forEach(getActiveProfiles(), function (profile) {
+                    profile.begin(callId, beginTime, reset);
+                });
+            }
+        };
+
+        profiler.end = function end(callId, endTime) {
+            if (profiler.enabled) {
+                exports.util.forEach(getActiveProfiles(), function (profile) {
+                    profile.end(callId, endTime);
+                });
+            }
+        };
+
+        profiler.start = function start(title) {
+            var profile = new ScriptProfile(title);
+            profiler.store.push(profile);
+            profiler.enabled = true;
+            return profile.title;
+        };
+
+        profiler.finish = function finish(title) {
+            var profile;
+            if (title) {
+                profile = getProfileByTitle(title);
+            }
+
+            if (!profile) {
+                profile = getLastActiveProfile();
+            }
+
+            profiler.enabled = (getActiveProfiles().length > 1);
+
+            if (profile) {
+                profile.finish(function () {
+                    exports.transport.emit('profile', profile);
+                });
+                return profile.title;
+            }
+        };
+
+        profiler.clear = function clear() {
+            profiler.enabled = false;
+            profiler.store = [];
+        };
+
+        profiler.load = function load(file, data) {
+            exports.util.forEachProperty(data, function (item) {
+                item.push(file);
+            });
+
+            exports.util.extend(dataTable, data);
+        };
+
+        exports.util.forEachProperty(definitionStore, function (data, file) {
+            profiler.load(file, data);
+        });
+
+        global.__pd = profiler.load;
+        global.__pb = profiler.begin;
+        global.__pe = profiler.end;
+    }
+
+    profiler.enabled = false;
+    profiler.store = [];
+    profiler.setUp = function () {
+        if (global.Worker) {
+            setUpWebWorker();
+        } else {
+            setUpAsync();
+        }
+    };
+
+}('undefined' !== typeof ConsoleIO ? ConsoleIO : module.exports, this));
+
+/**
  * Created with IntelliJ IDEA.
  * User: nisheeth
  * Date: 27/08/13
@@ -1433,13 +1968,17 @@ ConsoleIO.version = "0.2.0-1";
         });
     }
 
-    console.profiles = [];
+    console._native = nativeConsole;
 
     console.assert = function assert(x) {
         if (!x) {
-            var args = ['Assertion failed:'];
+            var args = ['Assertion failed:'],
+                traceList = exports.stacktrace.get(exports.stacktrace.create());
+
             args = args.concat(exports.util.toArray(arguments).slice(1));
-            send("assert", arguments, exports.stringify.parse(args), exports.stacktrace.get());
+            traceList.splice(0, 3);
+
+            send("assert", arguments, exports.stringify.parse(args), traceList);
         } else {
             send("assert", arguments);
         }
@@ -1551,15 +2090,32 @@ ConsoleIO.version = "0.2.0-1";
     };
 
     console.profile = function profile(title) {
-        send("profile", arguments);
+        send("profile", arguments, 'Profile "' + exports.profiler.start(title) + '" started.');
     };
 
     console.profileEnd = function profileEnd(title) {
-        send("profileEnd", arguments);
+        title = exports.profiler.finish(title);
+        if (title) {
+            send("profileEnd", arguments, 'Profile "' + title + '" finished.');
+        }
     };
 
     console.error = function error(e) {
-        send("error", arguments, null, exports.stacktrace.get(e));
+        var traceList,
+            message = null;
+
+        if (!e) {
+            message = "Unknown Error";
+            e = exports.stacktrace.create(message);
+        }
+
+        traceList = exports.stacktrace.get(e);
+
+        if (message === "Unknown Error") {
+            traceList.splice(0, 3);
+        }
+
+        send("error", arguments, message, traceList);
     };
 
     console.exception = function exception(e) {
@@ -1567,7 +2123,9 @@ ConsoleIO.version = "0.2.0-1";
     };
 
     console.trace = function trace() {
-        send("trace", arguments, null, exports.stacktrace.get());
+        var traceList = exports.stacktrace.get(exports.stacktrace.create());
+        traceList.splice(0, 3);
+        send("trace", arguments, "console.trace()", traceList);
     };
 
     console.clear = function clear() {
@@ -1597,7 +2155,8 @@ ConsoleIO.version = "0.2.0-1";
 
 (function (exports, global) {
 
-    var client = exports.client = {};
+    var client = exports.client = {},
+        syncTimeout;
 
     function storeData(data, msg, online) {
         if (!exports.name) {
@@ -1703,6 +2262,10 @@ ConsoleIO.version = "0.2.0-1";
     function configWebConsole(data) {
         if (data) {
             exports.web.setConfig(data);
+            exports.transport.paused = data.paused;
+            if (!data.paused) {
+                exports.transport.clearPendingQueue();
+            }
         }
     }
 
@@ -1928,24 +2491,60 @@ ConsoleIO.version = "0.2.0-1";
         }(location.href)), 100);
     }
 
-    function onHTMLContent() {
+    function onHTMLSource() {
         exports.web.hide();
-        dataPacket('content', {
+        dataPacket('htmlDocument', {
             content: document.documentElement.innerHTML
         });
         exports.web.show();
     }
 
-    function onPreview() {
+    function onHTMLPreview() {
         exports.web.hide();
 
-        exports.transport.emit('previewContent', {
-            content: '<html><head><style type="text/css">' +
-                getStyleRule() + '</style></head>' +
-                getStyledElement().outerHTML + '</html>'
+        exports.transport.emit('htmlContent', {
+            style: '<style type="text/css">' + getStyleRule() + '</style>',
+            body: getStyledElement().outerHTML
         });
 
         exports.web.show();
+    }
+
+    function onRemoteEvent(data) {
+        var raisedEvent,
+            element = document.querySelector(data.srcElement.replace("$!", ""));
+
+        if (element) {
+            if (syncTimeout) {
+                global.clearTimeout(syncTimeout);
+            }
+
+            raisedEvent = document.createEvent('HTMLEvents');
+            raisedEvent.view = global;
+            raisedEvent.initEvent(data.type, true, true);
+            exports.util.forEachProperty(data, function (value, property) {
+                if (typeof value === 'string') {
+                    if (value.indexOf('$!') === 0) {
+                        raisedEvent[property] = value === 'body' ? document.body : document.querySelector(value.replace("$!", ""));
+                    } else {
+                        raisedEvent[property] = value;
+                    }
+                } else {
+                    raisedEvent[property] = value;
+                }
+            });
+
+            if (element.innerText.indexOf('<') === 0 || data.srcElement === '$!body') {
+                element.dispatchEvent(raisedEvent);
+            } else {
+                element.parentNode.dispatchEvent(raisedEvent);
+            }
+
+            syncTimeout = exports.util.async(function () {
+                onHTMLPreview();
+                global.clearTimeout(syncTimeout);
+            }, 500);
+        }
     }
 
     function onCaptureScreen() {
@@ -2019,6 +2618,14 @@ ConsoleIO.version = "0.2.0-1";
         }
     }
 
+    function onProfiler(data) {
+        if (data.state) {
+            exports.console.profile();
+        } else {
+            exports.console.profileEnd();
+        }
+    }
+
     function onCommand(cmd) {
         exports.console.info('executing...');
         var result = evalFn(cmd);
@@ -2027,6 +2634,93 @@ ConsoleIO.version = "0.2.0-1";
         }
     }
 
+    function getStorage(storage) {
+        var key, i = 0,
+            data = {},
+            length = storage.length;
+
+        while (i < length) {
+            key = storage.key(i++);
+            if (key) {
+                data[key] = storage.getItem(key);
+            }
+        }
+
+        return data;
+    }
+
+    function isCanvasSupported() {
+        var canvas = document.createElement('canvas');
+        return !!(canvas.getContext && canvas.getContext('2d'));
+    }
+
+    client.getMore = function getMore() {
+        var data = [
+            {
+                supports: {
+                    WebWorker: !!global.Worker,
+                    WebSocket: !!global.WebSocket,
+                    Canvas: isCanvasSupported(),
+                    Storage: !!global.Storage,
+                    LocalStorage: !!global.localStorage,
+                    SessionStorage: !!global.sessionStorage,
+                    IDBFactory: !!global.IDBFactory,
+                    ApplicationCache: !!global.applicationCache,
+                    Console: !!exports.console._native,
+                    "Object": {
+                        create: !!Object.create,
+                        keys: !!Object.keys,
+                        getPrototypeOf: !!Object.getPrototypeOf,
+                        defineProperty: !!Object.defineProperty,
+                        defineProperties: !!Object.defineProperties,
+                        getOwnPropertyDescriptor: !!Object.getOwnPropertyDescriptor,
+                        preventExtensions: !!Object.preventExtensions,
+                        isExtensible: !!Object.isExtensible,
+                        seal: !!Object.seal,
+                        isSealed: !!Object.isSealed,
+                        freeze: !!Object.freeze,
+                        isFrozen: !!Object.isFrozen
+                    },
+                    "Array": {
+                        isArray: !!Array.isArray,
+                        'prototype.indexOf': !!Array.prototype.indexOf,
+                        'prototype.lastIndexOf': !!Array.prototype.lastIndexOf,
+                        'prototype.reduceRight': !!Array.prototype.reduceRight,
+                        'prototype.reduce': !!Array.prototype.reduce,
+                        'prototype.map': !!Array.prototype.map,
+                        'prototype.forEach': !!Array.prototype.forEach,
+                        'prototype.some': !!Array.prototype.some,
+                        'prototype.every': !!Array.prototype.every,
+                        'prototype.filter': !!Array.prototype.filter
+                    },
+                    "Function": {
+                        'prototype.bind': !!Function.prototype.bind
+                    },
+                    "Date": {
+                        'prototype.toJSON': !!Date.prototype.toJSON
+                    },
+                    "String": {
+                        'prototype.trim': !!String.prototype.trim
+                    },
+                    "JSON": {
+                        'parse': !!global.JSON && !!global.JSON.parse,
+                        'stringify': !!global.JSON && !!global.JSON.stringify
+                    }
+                }
+            }
+        ];
+
+        if (!!global.localStorage && !!global.sessionStorage) {
+            data.push({
+                storage: {
+                    localStorage: getStorage(global.localStorage),
+                    sessionStorage: getStorage(global.sessionStorage)
+                }
+            });
+        }
+
+        return data;
+    };
 
     client.jsonify = function jsonify(obj) {
         var returnObj = {},
@@ -2080,12 +2774,14 @@ ConsoleIO.version = "0.2.0-1";
         exports.transport.on('device:disconnect', onClientDisconnect);
         exports.transport.on('device:command', onCommand);
         exports.transport.on('device:fileList', onFileList);
-        exports.transport.on('device:htmlContent', onHTMLContent);
+        exports.transport.on('device:htmlSource', onHTMLSource);
+        exports.transport.on('device:htmlPreview', onHTMLPreview);
+        exports.transport.on('device:remoteEvent', onRemoteEvent);
         exports.transport.on('device:fileSource', onFileSource);
-        exports.transport.on('device:previewHTML', onPreview);
         exports.transport.on('device:captureScreen', onCaptureScreen);
         exports.transport.on('device:reload', onReload);
         exports.transport.on('device:name', onNameChanged);
+        exports.transport.on('device:profiler', onProfiler);
 
         exports.transport.on('device:web:control', configWebConsole);
         exports.transport.on('device:web:config', setUpWebConsole);
@@ -2112,10 +2808,14 @@ ConsoleIO.version = "0.2.0-1";
         url: '',
         base: '',
         secure: false,
+        profile: false,
+        excludes: [],
 
+        profileWorker: "plugins/profileWorker.js",
         html2canvas: "plugins/html2canvas.js",
         "socket.io": "socket.io/socket.io.js",
         webStyle: "console.css",
+        profiler: "profiler",
         proxy: 'proxy',
         maxDataPacketSize: 5000,
 
@@ -2133,12 +2833,17 @@ ConsoleIO.version = "0.2.0-1";
     function getSettings() {
         var config = exports.config || exports.util.queryParams();
 
+        config.webOnly = config.webonly || config.webOnly;
         config.webOnly = config.webOnly === true || (config.webOnly || '').toLowerCase() === 'true';
         config.web = config.web === true || (config.web || '').toLowerCase() === 'true';
         config.secure = config.secure === true || (config.secure || '').toLowerCase() === 'true';
 
         if (typeof config.filters !== 'undefined') {
             config.filters = typeof config.filters === 'string' ? config.filters.split(',') : config.filters;
+        }
+
+        if (typeof config.excludes !== 'undefined') {
+            config.excludes = typeof config.excludes === 'string' ? config.excludes.split(',') : config.excludes;
         }
 
         return config;
@@ -2154,8 +2859,47 @@ ConsoleIO.version = "0.2.0-1";
         }
     }
 
+    function isURLExcluded(url) {
+        var exclude = false;
+
+        exports.util.every(exports.getConfig().excludes, function (folder) {
+            if (url.indexOf(folder + '/') > -1) {
+                exclude = true;
+                return false;
+            }
+            return true;
+        });
+
+        return exclude;
+    }
+
+    function profilerSetUp() {
+        if (exports.util.foundRequireJS()) {
+            var requirejsLoad = global.requirejs.load,
+                baseUrl = exports.util.getUrl('profiler');
+
+            global.requirejs.load = function (context, moduleName, url) {
+                requirejsLoad.call(global.requirejs, context, moduleName, isURLExcluded(url) ? url : exports.util.getProfileUrl(baseUrl, url));
+            };
+        }
+
+        exports.profiler.setUp();
+    }
+
     exports.configure = function configure(cfg) {
         exports.util.extend(defaultConfig, cfg);
+
+        // Setup RequireJS global error handler
+        if (exports.util.foundRequireJS()) {
+            global.requirejs.onError = function (error) {
+                exports.console.error(error, error.requireModules, error.originalError);
+            };
+        }
+
+        //setup requireJS
+        if (defaultConfig.profile) {
+            profilerSetUp();
+        }
 
         if (!defaultConfig.webOnly) {
             //Request console.io.js file to get connect.sid cookie from the server
@@ -2211,6 +2955,7 @@ ConsoleIO.version = "0.2.0-1";
             log.style.margin = '10px';
             log.style.paddingTop = '10px';
             log.style.zIndex = 6000;
+            log.style.color = 'white';
             document.body.insertBefore(log, exports.util.getFirstElement(document.body));
         }
 
@@ -2246,13 +2991,6 @@ ConsoleIO.version = "0.2.0-1";
 
         return result;
     };
-
-    // Setup RequireJS global error handler
-    if (exports.util.foundRequireJS()) {
-        global.requirejs.onError = function (error) {
-            exports.console.error(error, error.requireModules, error.originalError);
-        };
-    }
 
 
     /**
@@ -2385,27 +3123,37 @@ ConsoleIO.version = "0.2.0-1";
     };
 
     Controller.prototype.setControl = function setControl(data) {
+        var reload = false;
         if (typeof data.paused !== 'undefined') {
             this.control.paused = data.paused;
         }
 
         if (typeof data.filters !== 'undefined') {
+            if (this.control.filters.length !== data.filters.length) {
+                reload = true;
+            }
             this.control.filters = data.filters;
         }
 
         if (data.pageSize !== this.control.pageSize) {
             this.control.pageSize = data.pageSize;
+            reload = true;
         }
 
         if (data.search !== this.control.search) {
             this.applySearch(data.search);
+            reload = true;
         }
 
-        this.view.clear();
+        if (reload || data.clear) {
+            this.view.clear();
+        }
 
         if (!data.clear) {
             this.view.addBatch(this.getData(this.store.added));
             this.addBatch();
+        } else {
+            this.store.added = [];
         }
     };
 
@@ -2522,6 +3270,7 @@ ConsoleIO.version = "0.2.0-1";
 
         var styles = [
             'background-color: rgba(244, 244, 244, 0.9)',
+            'background-color: rgb(244, 244, 244)',
             'color: black',
             'z-index: 5000',
             'overflow: auto',

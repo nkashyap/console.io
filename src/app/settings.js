@@ -18,5 +18,6 @@ ConsoleIO.Settings = {
         list: [50, 100, 250, 500]
     },
     defaultTab: 'console',
-    defaultAccordion: 'device'
+    defaultAccordion: 'device',
+    triggerInterval: 1000
 };

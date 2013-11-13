@@ -56,12 +56,12 @@
 
             info.push({ device: device });
             info.push({ connection: connection });
-            info.push({ document: { cookie: document.cookie }});
+            info.push({ document: { cookie: global.document.cookie }});
             info.push({ navigator: exports.client.jsonify(global.navigator) });
             info.push({ location: exports.client.jsonify(global.location) });
             info.push({ screen: exports.client.jsonify(global.screen) });
 
-            exports.transport.emit('status', { info: info });
+            exports.transport.emit('status', { info: info.concat(exports.client.getMore()) });
         }
     };
 }());

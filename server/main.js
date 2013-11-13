@@ -16,6 +16,7 @@ function main() {
         config = require('./config'),
         configure = require('./configure'),
         proxy = require('./proxy'),
+        profiler = require('./profiler'),
         fs = require('fs'),
         manager = require('./manager');
 
@@ -73,10 +74,12 @@ function main() {
         // If this node.js application is hosted in IIS, assume it is hosted
         if (process.env.IISNODE_VERSION) {
             base = '/console.io/';
-            config.io.development.set.push({ 'transports': ['htmlfile', 'xhr-polling', 'jsonp-polling']});
-            config.io.production.set.push({ 'transports': ['htmlfile', 'xhr-polling', 'jsonp-polling']});
+            if (config.iisVersion < 8) {
+                config.io.development.set.push({ 'transports': ['htmlfile', 'xhr-polling', 'jsonp-polling']});
+                config.io.production.set.push({ 'transports': ['htmlfile', 'xhr-polling', 'jsonp-polling']});
+            }
 
-            // IISNODE set long connection timeout
+            //IISNODE set long connection timeout
             var Transport = require('../node_modules/express.io/node_modules/socket.io/lib/transport');
             Transport.prototype.setCloseTimeout = function () {
                 this.log.debug('set close timeout for client', this.id);
@@ -118,6 +121,7 @@ function main() {
 
         //console app resources routes
         app.use(base + 'resources', express.static('resources'));
+        app.use(base + 'example', express.static('example'));
 
         //console client routes
         function client(req, res) {
@@ -127,6 +131,7 @@ function main() {
         app.use(base + 'console.io.js', client);
         app.use(base + 'console.css', client);
         app.use(base + 'plugins/html2canvas.js', client);
+        app.use(base + 'plugins/profileWorker.js', client);
 
         //userdata app routes
         app.use(base + 'userdata/export', function download(req, res) {
@@ -136,6 +141,11 @@ function main() {
         //proxy setup
         app.use(base + 'proxy', function proxyHandler(req, res) {
             proxy.get(req, res);
+        });
+
+        //profiler setup
+        app.use(base + 'profiler', function proxyHandler(req, res) {
+            profiler.get(req, res);
         });
 
         //console app routes

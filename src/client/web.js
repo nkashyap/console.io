@@ -83,27 +83,37 @@
     };
 
     Controller.prototype.setControl = function setControl(data) {
+        var reload = false;
         if (typeof data.paused !== 'undefined') {
             this.control.paused = data.paused;
         }
 
         if (typeof data.filters !== 'undefined') {
+            if (this.control.filters.length !== data.filters.length) {
+                reload = true;
+            }
             this.control.filters = data.filters;
         }
 
         if (data.pageSize !== this.control.pageSize) {
             this.control.pageSize = data.pageSize;
+            reload = true;
         }
 
         if (data.search !== this.control.search) {
             this.applySearch(data.search);
+            reload = true;
         }
 
-        this.view.clear();
+        if (reload || data.clear) {
+            this.view.clear();
+        }
 
         if (!data.clear) {
             this.view.addBatch(this.getData(this.store.added));
             this.addBatch();
+        } else {
+            this.store.added = [];
         }
     };
 
@@ -220,6 +230,7 @@
 
         var styles = [
             'background-color: rgba(244, 244, 244, 0.9)',
+            'background-color: rgb(244, 244, 244)',
             'color: black',
             'z-index: 5000',
             'overflow: auto',

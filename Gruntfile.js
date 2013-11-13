@@ -42,6 +42,7 @@ module.exports = function (grunt) {
                     'src/client/formatter.js',
                     'src/client/stacktrace.js',
                     'src/client/transport.js',
+                    'src/client/profiler.js',
                     'src/client/console.js',
                     'src/client/client.js',
                     'src/client/config.js',
@@ -120,6 +121,14 @@ module.exports = function (grunt) {
                         cwd: 'src/client/plugins/',
                         flatten: true,
                         filter: 'isFile'
+                    },
+                    {
+                        src: ['profileWorker.js'],
+                        dest: 'dist/client/plugins/',
+                        expand: true,
+                        cwd: 'src/client/',
+                        flatten: true,
+                        filter: 'isFile'
                     }
                 ]
             },
@@ -154,7 +163,8 @@ module.exports = function (grunt) {
             },
             'plugins': {
                 files: {
-                    'dist/client/plugins/html2canvas.min.js': ['src/client/plugins/html2canvas.js']
+                    'dist/client/plugins/html2canvas.min.js': ['src/client/plugins/html2canvas.js'],
+                    'dist/client/plugins/profileWorker.min.js': ['src/client/profileWorker.js']
                 }
             },
             'app': {

@@ -48,12 +48,12 @@ ConsoleIO.Constant.IMAGE_URL = {
 ConsoleIO.Constant.ICONS = {
     ONLINE: 'online.png',
     OFFLINE: 'offline.png',
-    SUBSCRIBE: 'subscribe.gif',
-    VERSION: 'version.gif',
+    SUBSCRIBE: 'subscribe.png',
+    VERSION: 'version.png',
 
     //Platform icons
     PC: 'pc.png',
-    TV: 'tv.jpg',
+    TV: 'tv.png',
     STB: 'stb.png',
     MOBILE: 'mobile.png',
     TABLET: 'tablet.png',
@@ -63,12 +63,12 @@ ConsoleIO.Constant.ICONS = {
 
     //Manufacturers icons
     LG: 'lg.png',
-    PHILIPS: 'philips.jpg',
-    SAMSUNG: 'samsung.jpg',
+    PHILIPS: 'philips.png',
+    SAMSUNG: 'samsung.png',
     TOSHIBA: 'toshiba.png',
-    TESCO: 'tesco.jpg',
-    SONY: 'sony.jpg',
-    PANASONIC: 'panasonic.gif',
+    TESCO: 'tesco.png',
+    SONY: 'sony.png',
+    PANASONIC: 'panasonic.png',
     MICROSOFT: 'microsoft.png',
     MOZILLA: 'mozilla.png',
     GOOGLE: 'google.png',
@@ -77,15 +77,15 @@ ConsoleIO.Constant.ICONS = {
     "OPERA SOFTWARE": 'opera.png',
 
     //Browser icons
-    GINGERBREAD: 'gingerbread.jpg',
+    GINGERBREAD: 'gingerbread.png',
     CHROME: 'chrome.png',
     IE: 'explorer.png',
     FIREFOX: 'firefox.png',
     OPERA: 'opera.png',
     SAFARI: 'safari.png',
-    MAPLE: 'maple.gif',
+    MAPLE: 'maple.png',
     NETTV: 'nettv.png',
-    NETCAST: 'netcast.gif',
+    NETCAST: 'netcast.png',
     TOSHIBATP: 'toshibatp.png',
     ESPIAL: 'espial.png',
     MSTAR: 'mstar.png',
@@ -93,10 +93,13 @@ ConsoleIO.Constant.ICONS = {
     //"OREGAN MEDIA": '',
     PLAYSTATION: 'playstation.png',
 
-    JAVASCRIPT: 'javascript.gif',
-    STYLESHEET: 'stylesheet.gif',
+    JAVASCRIPT: 'source.png',
+    STYLESHEET: 'stylesheet.png',
     WEB: 'web.png',
     FILE: '',
     UNKNOWN: 'unknown.png',
-    FOLDEROPEN: '../../' + ConsoleIO.Constant.IMAGE_URL.get('tree') + '/folderOpen.gif'
+    FOLDEROPEN: '../../' + ConsoleIO.Constant.IMAGE_URL.get('tree') + '/folderOpen.gif',
+
+    PROFILE: 'profiles.png',
+    FUNCTIONS: 'functions.png'
 };

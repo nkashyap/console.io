@@ -77,7 +77,7 @@ ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
 
     ConsoleIO.async(function () {
         this.nodes.processing = false;
-    }, this, 100);
+    }, this);
 };
 
 ConsoleIO.App.Device.Explorer.prototype.clear = function clear() {

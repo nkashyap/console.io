@@ -11,7 +11,8 @@
 
 (function (exports, global) {
 
-    var client = exports.client = {};
+    var client = exports.client = {},
+        syncTimeout;
 
     function storeData(data, msg, online) {
         if (!exports.name) {
@@ -117,6 +118,10 @@
     function configWebConsole(data) {
         if (data) {
             exports.web.setConfig(data);
+            exports.transport.paused = data.paused;
+            if (!data.paused) {
+                exports.transport.clearPendingQueue();
+            }
         }
     }
 
@@ -342,24 +347,60 @@
         }(location.href)), 100);
     }
 
-    function onHTMLContent() {
+    function onHTMLSource() {
         exports.web.hide();
-        dataPacket('content', {
+        dataPacket('htmlDocument', {
             content: document.documentElement.innerHTML
         });
         exports.web.show();
     }
 
-    function onPreview() {
+    function onHTMLPreview() {
         exports.web.hide();
 
-        exports.transport.emit('previewContent', {
-            content: '<html><head><style type="text/css">' +
-                getStyleRule() + '</style></head>' +
-                getStyledElement().outerHTML + '</html>'
+        exports.transport.emit('htmlContent', {
+            style: '<style type="text/css">' + getStyleRule() + '</style>',
+            body: getStyledElement().outerHTML
         });
 
         exports.web.show();
+    }
+
+    function onRemoteEvent(data) {
+        var raisedEvent,
+            element = document.querySelector(data.srcElement.replace("$!", ""));
+
+        if (element) {
+            if (syncTimeout) {
+                global.clearTimeout(syncTimeout);
+            }
+
+            raisedEvent = document.createEvent('HTMLEvents');
+            raisedEvent.view = global;
+            raisedEvent.initEvent(data.type, true, true);
+            exports.util.forEachProperty(data, function (value, property) {
+                if (typeof value === 'string') {
+                    if (value.indexOf('$!') === 0) {
+                        raisedEvent[property] = value === 'body' ? document.body : document.querySelector(value.replace("$!", ""));
+                    } else {
+                        raisedEvent[property] = value;
+                    }
+                } else {
+                    raisedEvent[property] = value;
+                }
+            });
+
+            if (element.innerText.indexOf('<') === 0 || data.srcElement === '$!body') {
+                element.dispatchEvent(raisedEvent);
+            } else {
+                element.parentNode.dispatchEvent(raisedEvent);
+            }
+
+            syncTimeout = exports.util.async(function () {
+                onHTMLPreview();
+                global.clearTimeout(syncTimeout);
+            }, 500);
+        }
     }
 
     function onCaptureScreen() {
@@ -433,6 +474,14 @@
         }
     }
 
+    function onProfiler(data) {
+        if (data.state) {
+            exports.console.profile();
+        } else {
+            exports.console.profileEnd();
+        }
+    }
+
     function onCommand(cmd) {
         exports.console.info('executing...');
         var result = evalFn(cmd);
@@ -441,6 +490,93 @@
         }
     }
 
+    function getStorage(storage) {
+        var key, i = 0,
+            data = {},
+            length = storage.length;
+
+        while (i < length) {
+            key = storage.key(i++);
+            if (key) {
+                data[key] = storage.getItem(key);
+            }
+        }
+
+        return data;
+    }
+
+    function isCanvasSupported() {
+        var canvas = document.createElement('canvas');
+        return !!(canvas.getContext && canvas.getContext('2d'));
+    }
+
+    client.getMore = function getMore() {
+        var data = [
+            {
+                supports: {
+                    WebWorker: !!global.Worker,
+                    WebSocket: !!global.WebSocket,
+                    Canvas: isCanvasSupported(),
+                    Storage: !!global.Storage,
+                    LocalStorage: !!global.localStorage,
+                    SessionStorage: !!global.sessionStorage,
+                    IDBFactory: !!global.IDBFactory,
+                    ApplicationCache: !!global.applicationCache,
+                    Console: !!exports.console._native,
+                    "Object": {
+                        create: !!Object.create,
+                        keys: !!Object.keys,
+                        getPrototypeOf: !!Object.getPrototypeOf,
+                        defineProperty: !!Object.defineProperty,
+                        defineProperties: !!Object.defineProperties,
+                        getOwnPropertyDescriptor: !!Object.getOwnPropertyDescriptor,
+                        preventExtensions: !!Object.preventExtensions,
+                        isExtensible: !!Object.isExtensible,
+                        seal: !!Object.seal,
+                        isSealed: !!Object.isSealed,
+                        freeze: !!Object.freeze,
+                        isFrozen: !!Object.isFrozen
+                    },
+                    "Array": {
+                        isArray: !!Array.isArray,
+                        'prototype.indexOf': !!Array.prototype.indexOf,
+                        'prototype.lastIndexOf': !!Array.prototype.lastIndexOf,
+                        'prototype.reduceRight': !!Array.prototype.reduceRight,
+                        'prototype.reduce': !!Array.prototype.reduce,
+                        'prototype.map': !!Array.prototype.map,
+                        'prototype.forEach': !!Array.prototype.forEach,
+                        'prototype.some': !!Array.prototype.some,
+                        'prototype.every': !!Array.prototype.every,
+                        'prototype.filter': !!Array.prototype.filter
+                    },
+                    "Function": {
+                        'prototype.bind': !!Function.prototype.bind
+                    },
+                    "Date": {
+                        'prototype.toJSON': !!Date.prototype.toJSON
+                    },
+                    "String": {
+                        'prototype.trim': !!String.prototype.trim
+                    },
+                    "JSON": {
+                        'parse': !!global.JSON && !!global.JSON.parse,
+                        'stringify': !!global.JSON && !!global.JSON.stringify
+                    }
+                }
+            }
+        ];
+
+        if (!!global.localStorage && !!global.sessionStorage) {
+            data.push({
+                storage: {
+                    localStorage: getStorage(global.localStorage),
+                    sessionStorage: getStorage(global.sessionStorage)
+                }
+            });
+        }
+
+        return data;
+    };
 
     client.jsonify = function jsonify(obj) {
         var returnObj = {},
@@ -494,12 +630,14 @@
         exports.transport.on('device:disconnect', onClientDisconnect);
         exports.transport.on('device:command', onCommand);
         exports.transport.on('device:fileList', onFileList);
-        exports.transport.on('device:htmlContent', onHTMLContent);
+        exports.transport.on('device:htmlSource', onHTMLSource);
+        exports.transport.on('device:htmlPreview', onHTMLPreview);
+        exports.transport.on('device:remoteEvent', onRemoteEvent);
         exports.transport.on('device:fileSource', onFileSource);
-        exports.transport.on('device:previewHTML', onPreview);
         exports.transport.on('device:captureScreen', onCaptureScreen);
         exports.transport.on('device:reload', onReload);
         exports.transport.on('device:name', onNameChanged);
+        exports.transport.on('device:profiler', onProfiler);
 
         exports.transport.on('device:web:control', configWebConsole);
         exports.transport.on('device:web:config', setUpWebConsole);

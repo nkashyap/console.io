@@ -1,11 +1,11 @@
 /**
  * Name: console.io
- * Version: 0.2.0-1
+ * Version: 0.2.2
  * Description: Javascript Remote Web Console
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-09-19
+ * Date: 2013-11-13
 */
 
 code {
@@ -269,27 +269,29 @@ code {
 }
 
 .type-profile {
-    border-top: 1px solid rgb(111, 114, 117);
+    padding-left: 100px;
+    border-top: 1px solid rgb(255, 115, 0);
 }
 
 .type-profile::after {
     content: "profile";
-    color: rgb(111, 114, 117);
-    background-color: rgb(192, 192, 192);
-    background-color: rgba(192, 192, 192, 0.6);
-    border: 1px solid rgb(111, 114, 117);
+    color: rgb(255, 115, 0);
+    background-color: rgb(255, 186, 93);
+    background-color: rgba(255, 186, 93, 0.60);
+    border: 1px solid rgb(255, 115, 0);
 }
 
 .type-profileEnd {
-    border-top: 1px solid rgb(111, 114, 117);
+    padding-left: 100px;
+    border-top: 1px solid rgb(255, 90, 0);
 }
 
 .type-profileEnd::after {
     content: "profileEnd";
-    color: rgb(111, 114, 117);
-    background-color: rgb(192, 192, 192);
-    background-color: rgba(192, 192, 192, 0.6);
-    border: 1px solid rgb(111, 114, 117);
+    color: rgb(255, 90, 0);
+    background-color: rgb(255, 180, 108);
+    background-color: rgba(255, 180, 108, 0.60);
+    border: 1px solid rgb(255, 90, 0);
 }
 
 .type-trace {
@@ -410,52 +412,65 @@ html, body {
     text-transform: capitalize;
 }
 
+.dhx_tabcontent_zone > div[tab_id^=Profile] > div[ida=dhxMainCont] .containerTableStyle > table {
+    margin: 0 !important;
+}
+
+.dhx_tabcontent_zone > div[tab_id^=Profile] > div[ida=dhxMainCont] .standartTreeRow,
+.dhx_tabcontent_zone > div[tab_id^=Profile] > div[ida=dhxMainCont] .standartTreeRow_lor,
+.dhx_tabcontent_zone > div[tab_id^=Profile] > div[ida=dhxMainCont] .standartTreeImage {
+    height: 20px !important;
+    line-height: 20px !important;
+}
+
 ::-webkit-scrollbar {
-    width: 15px
+    width: 15px;
+    height: 15px;
+}
+
+::-webkit-scrollbar,
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track-piece,
+::-webkit-scrollbar-corner,
+::-webkit-scrollbar-resizer {
+    background-color: white;
 }
 
 ::-webkit-scrollbar-button:vertical {
-    background-color: transparent;
-    height: 5px
+    height: 5px;
 }
 
-::-webkit-scrollbar-button:start:decrement {
-    display: block
+::-webkit-scrollbar-button:horizontal {
+    width: 5px;
 }
 
-::-webkit-scrollbar-button:end:increment {
-    display: block
+::-webkit-scrollbar-track-piece:vertical {
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
-::-webkit-scrollbar-button:vertical:start:increment {
-    display: none
+::-webkit-scrollbar-track-piece:horizontal {
+    margin-right: 10px;
+    margin-left: 10px;
 }
 
-::-webkit-scrollbar-button:vertical:end:decrement {
-    display: none
-}
-
-::-webkit-scrollbar-track-piece {
-    background-color: white
+::-webkit-scrollbar-thumb {
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 ::-webkit-scrollbar-thumb:vertical {
-    background-color: rgb(0, 0, 0);
-    background-color: rgba(0, 0, 0, 0.2);
-    height: 50px;
     border-right: 4px solid white;
-    border-left: 4px solid white
+    border-left: 4px solid white;
 }
 
-::-webkit-scrollbar-thumb:vertical:hover {
+::-webkit-scrollbar-thumb:horizontal {
+    border-top: 4px solid white;
+    border-bottom: 4px solid white;
+}
+
+::-webkit-scrollbar-thumb:hover {
     background-color: rgb(0, 0, 0);
-    background-color: rgba(0, 0, 0, 0.4)
-}
-
-::-webkit-scrollbar-corner:vertical {
-    background-color: white
-}
-
-::-webkit-scrollbar-resizer:vertical {
-    background-color: red
+    background-color: rgba(0, 0, 0, 0.4);
 }

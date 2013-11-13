@@ -1,11 +1,10 @@
 {
     "name": "xconsole.io",
-    "version": "0.2.1a",
+    "version": "0.2.2",
     "project": "console.io",
     "subdomain": "console.io",
     "description": "Javascript Remote Web Console",
     "homepage": "http://nkashyap.github.io/console.io/",
-    "demo": "http://console.io.jit.su/",
     "author": {
         "name": "Nisheeth Kashyap",
         "email": "nisheeth.k.kashyap@gmail.com"
@@ -22,7 +21,10 @@
         "express.io": "latest",
         "request": "latest",
         "uglify-js": "latest",
-        "js-beautify": "latest"
+        "js-beautify": "latest",
+        "esprima": "latest",
+        "estraverse": "latest",
+        "escodegen": "latest"
     },
     "devDependencies": {
         "grunt": "latest",
