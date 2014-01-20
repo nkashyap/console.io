@@ -48,7 +48,9 @@
                 try {
                     exports.client.api.network.getAvailableNetworks(function networkSuccess(networks) {
                         exports.util.forEach(networks, function (network) {
-                            network.setWatchListener(connectionWatch, errorCallback);
+                            if(network.isActive()){
+                                network.setWatchListener(connectionWatch, errorCallback);
+                            }
                         });
                     }, errorCallback);
                 } catch (e) {
