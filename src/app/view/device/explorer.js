@@ -65,6 +65,11 @@ ConsoleIO.View.Device.Explorer.prototype.add = function add(id, name, parentId, 
     }
 };
 
+
+ConsoleIO.View.Device.Explorer.prototype.getSelectedId = function getSelectedId() {
+    return this.tree.getSelectedItemId();
+};
+
 ConsoleIO.View.Device.Explorer.prototype.deleteItem = function deleteItem(id) {
     this.tree.deleteItem(id);
 };

@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-11-13
+ * Date: 2014-03-16
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
@@ -2319,13 +2319,17 @@ ConsoleIO.version = "0.2.2";
             config = exports.getConfig(),
             start = 0;
 
-        while (start < length) {
-            dispatchPacket(name, data, content.substr(start, config.maxDataPacketSize), start, length);
+        if (data.saveFile) {
+            dispatchPacket(name, data, content, start, length);
+        } else {
+            while (start < length) {
+                dispatchPacket(name, data, content.substr(start, config.maxDataPacketSize), start, length);
 
-            if (start === 0) {
-                start = config.maxDataPacketSize;
-            } else {
-                start += config.maxDataPacketSize;
+                if (start === 0) {
+                    start = config.maxDataPacketSize;
+                } else {
+                    start += config.maxDataPacketSize;
+                }
             }
         }
     }
@@ -2428,7 +2432,8 @@ ConsoleIO.version = "0.2.2";
 
                         dataPacket('source', {
                             url: originalURL,
-                            content: content
+                            content: content,
+                            saveFile: !!data.saveFile
                         });
                     }
                 };
