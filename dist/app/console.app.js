@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2013-11-13
+ * Date: 2014-03-16
 */
 
 /**
@@ -1034,6 +1034,11 @@ ConsoleIO.View.Device.Explorer.prototype.add = function add(id, name, parentId, 
     } else {
         this.tree.insertNewItem(parentId, id, name);
     }
+};
+
+
+ConsoleIO.View.Device.Explorer.prototype.getSelectedId = function getSelectedId() {
+    return this.tree.getSelectedItemId();
 };
 
 ConsoleIO.View.Device.Explorer.prototype.deleteItem = function deleteItem(id) {
@@ -2579,6 +2584,7 @@ ConsoleIO.App.Device.Explorer = function ExplorerController(parent, model) {
 
     this.view = new ConsoleIO.View.Device.Explorer(this, this.model);
     ConsoleIO.Service.Socket.on('device:files:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.on('device:download:' + this.model.serialNumber, this.download, this);
 };
 
 
@@ -2589,6 +2595,7 @@ ConsoleIO.App.Device.Explorer.prototype.render = function render(target) {
 
 ConsoleIO.App.Device.Explorer.prototype.destroy = function destroy() {
     ConsoleIO.Service.Socket.off('device:files:' + this.model.serialNumber, this.add, this);
+    ConsoleIO.Service.Socket.off('device:download:' + this.model.serialNumber, this.download, this);
     this.clear();
     this.view = this.view.destroy();
 };
@@ -2636,6 +2643,17 @@ ConsoleIO.App.Device.Explorer.prototype.add = function add(data) {
     }, this);
 };
 
+ConsoleIO.App.Device.Explorer.prototype.download = function download(data) {
+    if (!this.exportFrame) {
+        this.exportFrame = ConsoleIO.Service.DHTMLXHelper.createElement({
+            tag: 'iframe',
+            target: document.body
+        });
+    }
+
+    this.exportFrame.src = data.file;
+};
+
 ConsoleIO.App.Device.Explorer.prototype.clear = function clear() {
     ConsoleIO.forEach(this.store.folder, function (folder) {
         this.deleteItem(folder);
@@ -2659,6 +2677,24 @@ ConsoleIO.App.Device.Explorer.prototype.refresh = function refresh() {
     });
 };
 
+ConsoleIO.App.Device.Explorer.prototype.exports = function exports() {
+    var nodeId = this.view.getSelectedId();
+
+    if(this.store.folder.indexOf(nodeId) > -1){
+        alert('Please select a file to download');
+        return false;
+    }
+
+    if(this.store.files.indexOf(nodeId) > -1){
+        ConsoleIO.Service.Socket.emit('fileSource', {
+            serialNumber: this.model.serialNumber,
+            saveFile: true,
+            url: (nodeId.indexOf("http") === -1 ? '/' : '') + nodeId.replace(/[|]/igm, "/")
+        });
+    }
+};
+
+
 ConsoleIO.App.Device.Explorer.prototype.getParentId = function getParentId(list, item) {
     var index = list.indexOf(item);
     if (index > 0) {
@@ -2671,6 +2707,12 @@ ConsoleIO.App.Device.Explorer.prototype.getParentId = function getParentId(list,
 ConsoleIO.App.Device.Explorer.prototype.onButtonClick = function onButtonClick(btnId) {
     if (btnId === 'refresh') {
         this.refresh();
+    }
+    switch(btnId){
+        case 'refresh': this.refresh();
+                        break;
+        case 'export': this.exports();
+                        break;
     }
 };
 
@@ -3216,7 +3258,8 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
         contextId: 'explorer',
         width: 200,
         toolbar: [
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Export
         ]
     });
 

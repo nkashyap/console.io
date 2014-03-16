@@ -426,7 +426,7 @@ Device.prototype.processSource = function processSource(name, data) {
         }
 
         // data packets
-        if (data.hasOwnProperty('start') && data.hasOwnProperty('length')) {
+        if (!data.saveFile && data.hasOwnProperty('start') && data.hasOwnProperty('length')) {
             this.content = (this.content || '') + data.content;
 
             if (data.start === 0) {
@@ -438,7 +438,7 @@ Device.prototype.processSource = function processSource(name, data) {
                     content = utils.getContent(this.content, type),
                     length = content.length;
 
-                // dispatch data in chunk to avoid core mirror locking up
+                // dispatch data in chunk to avoid code mirror locking up
                 while (start < length) {
                     this.dispatchPacket(name, data, content.substr(start, this.maxLength), start, length);
 
@@ -458,7 +458,29 @@ Device.prototype.processSource = function processSource(name, data) {
         }
     }
 
-    this.broadcast(name + ':' + this.serialNumber, data);
+    if (data.saveFile) {
+        var file = [
+            "userdata/export/", data.url.replace(/[|]/ig, '-')
+        ].join("");
+
+        utils.writeFile(
+            './',
+            file,
+            data.content,
+            function success() {
+                this.broadcast('download:' + this.serialNumber, {
+                    file: file
+                });
+            },
+            function error(e) {
+                this.emit('error', {
+                    message: e.message
+                });
+            },
+            this);
+    } else {
+        this.broadcast(name + ':' + this.serialNumber, data);
+    }
 };
 
 Device.prototype.dispatchPacket = function dispatchPacket(name, params, content, start, length) {

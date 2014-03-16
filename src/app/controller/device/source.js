@@ -41,7 +41,8 @@ ConsoleIO.App.Device.Source = function SourceController(parent, model) {
         contextId: 'explorer',
         width: 200,
         toolbar: [
-            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Refresh,
+            ConsoleIO.Model.DHTMLX.ToolBarItem.Export
         ]
     });
 

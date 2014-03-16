@@ -175,13 +175,17 @@
             config = exports.getConfig(),
             start = 0;
 
-        while (start < length) {
-            dispatchPacket(name, data, content.substr(start, config.maxDataPacketSize), start, length);
+        if (data.saveFile) {
+            dispatchPacket(name, data, content, start, length);
+        } else {
+            while (start < length) {
+                dispatchPacket(name, data, content.substr(start, config.maxDataPacketSize), start, length);
 
-            if (start === 0) {
-                start = config.maxDataPacketSize;
-            } else {
-                start += config.maxDataPacketSize;
+                if (start === 0) {
+                    start = config.maxDataPacketSize;
+                } else {
+                    start += config.maxDataPacketSize;
+                }
             }
         }
     }
@@ -284,7 +288,8 @@
 
                         dataPacket('source', {
                             url: originalURL,
-                            content: content
+                            content: content,
+                            saveFile: !!data.saveFile
                         });
                     }
                 };
