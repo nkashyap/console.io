@@ -26,12 +26,7 @@
           <li class="title">DOWNLOADS</li>
         </nav>
       </div><!-- end header -->
-    <a href="http://opensource.nodejitsu.com/">
-      <img
-        style="position: absolute; top: 0; left: 0; border: 0"
-        src="//www.nodejitsu.com/img/foss-r-orange.png"
-        alt="Apply for the Nodejitsu free for Open Source program">
-    </a>
+
     <div class="wrapper">
 
       <section>
@@ -46,7 +41,8 @@
         <h1>
 <a name="consoleio" class="anchor" href="#consoleio"><span class="octicon octicon-link"></span></a>Console.IO</h1>
 
-<p><a href="https://travis-ci.org/nkashyap/console.io"><img src="https://travis-ci.org/nkashyap/console.io.png?branch=master" alt="Build Status"></a></p>
+<p><a href="https://travis-ci.org/nkashyap/console.io"><img src="https://travis-ci.org/nkashyap/console.io.png?branch=master" alt="Build Status"></a>
+<a href="https://webops.nodejitsu.com#nkashyap/console.io"><img src="https://webhooks.nodejitsu.com/nkashyap/console.io.png" alt="Nodejitsu Deploy Status Badges"></a></p>
 
 <p>Console.IO is a NodeJS project. It provides Remote Web Console for websites and web applications.
 It uses express.io (express &amp; socket.io) to provide user real time experience.</p>
@@ -113,8 +109,8 @@ It uses express.io (express &amp; socket.io) to provide user real time experienc
     requirejs.config({
         baseUrl: './',
         paths: {
-            "socket.io": "<span class="nt">&lt;console</span><span class="err">.</span><span class="na">io</span> <span class="na">server</span><span class="nt">&gt;</span>/socket.io/socket.io",
-            "console.io": "<span class="nt">&lt;console</span><span class="err">.</span><span class="na">io</span> <span class="na">server</span><span class="nt">&gt;</span>/console.io"
+            "socket.io": "<span class="nt">&lt;console.io</span> <span class="na">server</span><span class="nt">&gt;</span>/socket.io/socket.io",
+            "console.io": "<span class="nt">&lt;console.io</span> <span class="na">server</span><span class="nt">&gt;</span>/console.io"
         }
     });
 
@@ -135,7 +131,7 @@ It uses express.io (express &amp; socket.io) to provide user real time experienc
 <div class="highlight highlight-html"><pre>window.ConsoleIO = window.ConsoleIO || {};
 
 window.ConsoleIO.config = {
-    url: "<span class="nt">&lt;console</span><span class="err">.</span><span class="na">io</span> <span class="na">server</span><span class="nt">&gt;</span>",
+    url: "<span class="nt">&lt;console.io</span> <span class="na">server</span><span class="nt">&gt;</span>",
     base: "",
 
     // optionals
@@ -173,7 +169,7 @@ Note that it only works when script is included directly not via RequireJS.</p>
 
 <div class="highlight highlight-html"><pre>define(['console.io'], function (consoleio) {
     consoleio.configure({
-        url: "<span class="nt">&lt;console</span><span class="err">.</span><span class="na">io</span> <span class="na">server</span><span class="nt">&gt;</span>",
+        url: "<span class="nt">&lt;console.io</span> <span class="na">server</span><span class="nt">&gt;</span>",
         base: "",
 
         // optionals
