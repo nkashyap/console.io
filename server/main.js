@@ -19,7 +19,7 @@ function main() {
         profiler = require('./profiler'),
         fs = require('fs'),
         path = require('path'),
-        root = path.normalize(__dirname + '/../'),
+        ROOT = path.normalize(__dirname + '/../'),
         manager = require('./manager');
 
     function Workers() {
@@ -33,13 +33,13 @@ function main() {
                 expressApp = express().http().io();
             } else {
                 if (config.https.pfx) {
-                    opts.pfx = fs.readFileSync(root + config.https.pfx);
+                    opts.pfx = fs.readFileSync(ROOT + config.https.pfx);
                 } else {
-                    opts.key = fs.readFileSync(root + config.https.key);
-                    opts.cert = fs.readFileSync(root + config.https.certificate);
+                    opts.key = fs.readFileSync(ROOT + config.https.key);
+                    opts.cert = fs.readFileSync(ROOT + config.https.certificate);
                     // This is necessary only if the client uses the self-signed certificate.
                     if (config.https.ca) {
-                        opts.ca = fs.readFileSync(root + config.https.ca);
+                        opts.ca = fs.readFileSync(ROOT + config.https.ca);
                     }
                 }
 
@@ -122,12 +122,12 @@ function main() {
         //}
 
         //console app resources routes
-        app.use(base + 'resources', express.static(root + 'resources'));
-        app.use(base + 'example', express.static(root + 'example'));
+        app.use(base + 'resources', express.static(ROOT + 'resources'));
+        app.use(base + 'example', express.static(ROOT + 'example'));
 
         //console client routes
         function client(req, res) {
-            res.sendfile(root + 'dist/client' + getURL(req.originalUrl, base));
+            res.sendfile(ROOT + 'dist/client' + getURL(req.originalUrl, base));
         }
 
         app.use(base + 'console.io.js', client);
@@ -137,7 +137,7 @@ function main() {
 
         //userdata app routes
         app.use(base + 'userdata/export', function download(req, res) {
-            res.download(root + req.originalUrl.replace(base, ''));
+            res.download(ROOT + req.originalUrl.replace(base, ''));
         });
 
         //proxy setup
@@ -152,7 +152,7 @@ function main() {
 
         //console app routes
         app.use(base, function app(req, res) {
-            res.sendfile(root + 'dist/app' + getURL(req.originalUrl, base));
+            res.sendfile(ROOT + 'dist/app' + getURL(req.originalUrl, base));
         });
 
         // initialize connection manager
