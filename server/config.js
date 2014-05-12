@@ -54,10 +54,10 @@ var config = {
     /** https configurations **/
     https: {
         enable: false,
-        //pfx: './server/certificates/bbdev1.pfx',
-        key: './server/certificates/server.key',
-        certificate: './server/certificates/server.crt',
-        ca: './server/certificates/ca.crt'
+        //pfx: '/server/certificates/bbdev1.pfx',
+        key: '/server/certificates/server.key',
+        certificate: '/server/certificates/server.crt',
+        ca: '/server/certificates/ca.crt'
     },
 
     /** socket.io configurations **/

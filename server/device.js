@@ -9,7 +9,9 @@
  * require detectDevice module
  */
 var detectDevice = require('./detectdevice'),
-    utils = require('./utils');
+    path = require('path'),
+    utils = require('./utils'),
+    root = path.normalize(__dirname + '/../');
 
 
 /**
@@ -46,7 +48,7 @@ function Device(application, request, manager) {
      * Client specific script
      * @member {object} client
      */
-    this.client = utils.getScript('./server/platforms', this.device, 'client.js');
+    this.client = utils.getScript(root + '/server/platforms', this.device, 'client.js');
 
     /**
      * Device serial Number
@@ -143,7 +145,7 @@ Device.detect = function detect(request) {
      */
     request.io.emit('device:registration', {
         name: request.cookies.deviceName || Device.getName(config),
-        client: utils.getScript('./server/platforms', config, 'client.js')
+        client: utils.getScript(root + '/server/platforms', config, 'client.js')
     });
 };
 
@@ -254,7 +256,7 @@ Device.prototype.online = function online(request) {
 
     /** get client script if in dev mode **/
     if (process.env.NODE_ENV === 'development') {
-        this.client = utils.getScript('./server/platforms', this.device, 'client.js');
+        this.client = utils.getScript(root + '/server/platforms', this.device, 'client.js');
     }
 
     /**
@@ -464,7 +466,7 @@ Device.prototype.processSource = function processSource(name, data) {
         ].join("");
 
         utils.writeFile(
-            './',
+            root,
             file,
             data.content,
             function success() {

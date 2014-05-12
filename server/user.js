@@ -5,7 +5,9 @@
  * Time: 17:21
  * To change this template use File | Settings | File Templates.
  */
-var utils = require('./utils');
+var utils = require('./utils'),
+    path = require('path'),
+    root = path.normalize(__dirname + '/../');
 
 function User(application, request, manager) {
     this.application = application;
@@ -118,7 +120,7 @@ User.prototype.exportLog = function exportLog(data) {
     }
 
     utils.readFile(
-        './dist/client/',
+        root + '/dist/client/',
         'console.css',
         function success(cssContent) {
             var content = [
@@ -131,7 +133,7 @@ User.prototype.exportLog = function exportLog(data) {
                 '</body></html>'
             ].join("");
 
-            utils.writeFile("./", file, content, function success() {
+            utils.writeFile(root, file, content, function success() {
                 this.emit('download', {
                     file: file
                 });
@@ -148,7 +150,7 @@ User.prototype.beautify = function beautify(data) {
 
 User.prototype.fileList = function fileList() {
     utils.readdir(
-        './userdata/scripts/',
+        root + '/userdata/scripts/',
         function success(files) {
             this.emit('fileList', files);
         },
@@ -166,7 +168,7 @@ User.prototype.readFile = function readFile(data) {
     }
 
     utils.readFile(
-        './userdata/scripts/',
+        root + '/userdata/scripts/',
         data.name,
         function success(content) {
             this.emit('fileContent', {
@@ -188,7 +190,7 @@ User.prototype.writeFile = function writeFile(data) {
     }
 
     utils.writeFile(
-        './userdata/scripts/',
+        root + '/userdata/scripts/',
         data.name,
         data.content,
         function success() {
