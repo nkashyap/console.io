@@ -6,19 +6,21 @@
  * To change this template use File | Settings | File Templates.
  */
 
-var fs = require('fs'),
+var ROOT = __dirname + '/../',
+    fs = require('fs'),
+    path = require('path'),
     UglifyJS = require('uglify-js'),
     beautify = require('js-beautify');
 
 var Utils = {
     fileCache: {},
 
-    getFile: function getFile(path, config, file) {
+    getFile: function getFile(loc, config, file) {
         var filePath;
 
-        if (fs.existsSync(path.join("/"))) {
-            var versionPath = path.concat([config.version, file]).join("/"),
-                defaultPath = path.concat(['_default_', file]).join("/");
+        if (fs.existsSync(loc.join("/"))) {
+            var versionPath = loc.concat([config.version, file]).join("/"),
+                defaultPath = loc.concat(['_default_', file]).join("/");
 
             if (fs.existsSync(versionPath)) {
                 filePath = versionPath;
@@ -31,23 +33,23 @@ var Utils = {
     },
 
     getDeviceScript: function getDeviceScript(basePath, config, file) {
-        var path;
+        var loc;
 
-        path = this.getFile([basePath, config.manufacture, config.platform, config.browser], config, file);
+        loc = this.getFile([basePath, config.manufacture, config.platform, config.browser], config, file);
 
-        if (!path) {
-            path = this.getFile([basePath, config.manufacture, config.browser], config, file);
+        if (!loc) {
+            loc = this.getFile([basePath, config.manufacture, config.browser], config, file);
         }
 
-        if (!path) {
-            path = this.getFile([basePath, config.browser], config, file);
+        if (!loc) {
+            loc = this.getFile([basePath, config.browser], config, file);
         }
 
-        if (!path) {
-            path = this.getFile([basePath], { version: '____' }, file);
+        if (!loc) {
+            loc = this.getFile([basePath], { version: '____' }, file);
         }
 
-        return path;
+        return loc;
     },
 
     getScript: function getScript(basePath, config, fileName) {
@@ -118,9 +120,11 @@ var Utils = {
         return content;
     },
 
-
-    readdir: function readdir(path, successCallback, errorCallback, scope) {
-        fs.readdir(path, function callback(err, files) {
+    readdir: function readdir(loc, successCallback, errorCallback, scope) {
+        var basepath = path.normalize(ROOT + (loc || ''));
+        console.info('readdir', basepath);
+        fs.readdir(basepath, function callback(err, files) {
+            console.info('readdir:success', basepath, !err);
             if (err) {
                 errorCallback.call(scope, err);
             } else {
@@ -129,8 +133,11 @@ var Utils = {
         });
     },
 
-    readFile: function readFile(path, name, successCallback, errorCallback, scope) {
-        fs.readFile(path + name, 'utf8', function callback(err, content) {
+    readFile: function readFile(loc, name, successCallback, errorCallback, scope) {
+        var basepath = path.normalize(ROOT + (loc || '') + name);
+        console.info('readFile', basepath);
+        fs.readFile(basepath, 'utf8', function callback(err, content) {
+            console.info('readFile:success', basepath, !err);
             if (err) {
                 errorCallback.call(scope, err);
             } else {
@@ -139,8 +146,11 @@ var Utils = {
         });
     },
 
-    writeFile: function writeFile(path, name, content, successCallback, errorCallback, scope) {
-        fs.writeFile(path + name, content, function callback(err) {
+    writeFile: function writeFile(loc, name, content, successCallback, errorCallback, scope) {
+        var basepath = path.normalize(ROOT + (loc || '') + name);
+        console.info('writeFile', basepath);
+        fs.writeFile(basepath, content, function callback(err) {
+            console.info('writeFile:success', basepath, !err);
             if (err) {
                 errorCallback.call(scope, err);
             } else {
