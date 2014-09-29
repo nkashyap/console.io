@@ -18,9 +18,9 @@ var Utils = {
     getFile: function getFile(loc, config, file) {
         var filePath;
 
-        if (fs.existsSync(loc.join("/"))) {
-            var versionPath = loc.concat([config.version, file]).join("/"),
-                defaultPath = loc.concat(['_default_', file]).join("/");
+        if (fs.existsSync(ROOT + loc.join("/"))) {
+            var versionPath = ROOT + loc.concat([config.version, file]).join("/"),
+                defaultPath = ROOT + loc.concat(['_default_', file]).join("/");
 
             if (fs.existsSync(versionPath)) {
                 filePath = versionPath;
