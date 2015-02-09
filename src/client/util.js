@@ -16,8 +16,8 @@
         pendingCallback = [],
         HTMLTagCSSProperties = {};
 
-    function addDefaultCSS(tag){
-        if(tag && !HTMLTagCSSProperties[tag]){
+    function addDefaultCSS (tag) {
+        if (tag && !HTMLTagCSSProperties[tag]) {
             var win = document.defaultView || global,
                 element = document.createElement(tag),
                 properties = {};
@@ -51,23 +51,23 @@
         }
     }
 
-    util.getScripts = function getScripts() {
+    util.getScripts = function getScripts () {
         return util.toArray(document.scripts || document.getElementsByName('script'));
     };
 
-    util.getStyles = function getStyles() {
+    util.getStyles = function getStyles () {
         return util.toArray(document.getElementsByTagName('link'));
     };
 
-    util.getFirstElement = function getFirstElement(element) {
+    util.getFirstElement = function getFirstElement (element) {
         return element ? (element.firstElementChild || element.firstChild) : false;
     };
 
-    util.getOrigin = function getOrigin() {
+    util.getOrigin = function getOrigin () {
         return global.location.origin || global.location.protocol + '//' + (global.location.host || global.location.hostname + ':' + global.location.port);
     };
 
-    util.getHashParams = function getHashParams() {
+    util.getHashParams = function getHashParams () {
         var params = {},
             hash = global.location.hash || global.location.href.replace(util.getOrigin() + global.location.pathname, '');
 
@@ -81,7 +81,7 @@
         return params;
     };
 
-    util.getQueryParams = function getQueryParams(url) {
+    util.getQueryParams = function getQueryParams (url) {
         url = url || global.location.href;
 
         var params = {},
@@ -97,7 +97,7 @@
         return params;
     };
 
-    util.queryParams = function queryParams() {
+    util.queryParams = function queryParams () {
         var params = {},
             scripts = util.getScripts();
 
@@ -133,7 +133,7 @@
         return params;
     };
 
-    util.checkFile = function checkFile(url) {
+    util.checkFile = function checkFile (url) {
         var isJS = url.indexOf('.js') > -1,
             isCSS = url.indexOf('.css') > -1,
             tags = isJS ? util.getScripts() : isCSS ? util.getStyles() : null,
@@ -151,7 +151,7 @@
         return value;
     };
 
-    util.removeFile = function removeFile(url) {
+    util.removeFile = function removeFile (url) {
         var tag = url.indexOf('.js') > -1 ? 'script' : url.indexOf('.css') > -1 ? 'link' : null,
             elements, attr;
 
@@ -167,7 +167,7 @@
         }
     };
 
-    util.requireCSS = function requireCSS(url, callback) {
+    util.requireCSS = function requireCSS (url, callback) {
         if (util.checkFile(url)) {
             if (callback) {
                 setTimeout(function () {
@@ -197,7 +197,7 @@
         head.appendChild(link);
     };
 
-    util.requireScript = function requireScript(url, callback) {
+    util.requireScript = function requireScript (url, callback) {
         if (util.checkFile(url)) {
             setTimeout(function () {
                 callback(url);
@@ -220,7 +220,7 @@
             }, 1);
         }
 
-        function onScriptLoad() {
+        function onScriptLoad () {
             if (node.removeEventListener) {
                 node.removeEventListener('load', onScriptLoad, false);
                 callback(url);
@@ -234,7 +234,7 @@
             }
         }
 
-        function onScriptError() {
+        function onScriptError () {
             if (config.web) {
                 exports.console.exception(url, arguments);
             } else {
@@ -258,7 +258,7 @@
         head.appendChild(node);
     };
 
-    util.ready = function ready(callback) {
+    util.ready = function ready (callback) {
         if (domReady) {
             setTimeout(callback, 1);
             return false;
@@ -270,7 +270,7 @@
             return false;
         }
 
-        function callbackFn() {
+        function callbackFn () {
             domReady = true;
 
             util.forEach(pendingCallback, function (fn) {
@@ -283,7 +283,7 @@
             setTimeout(callbackFn, 1);
         }
 
-        function DOMContentLoaded() {
+        function DOMContentLoaded () {
             if (document.addEventListener) {
                 document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
                 callbackFn();
@@ -304,7 +304,7 @@
         }
     };
 
-    util.require = function require(urls, callback) {
+    util.require = function require (urls, callback) {
         if (typeof urls === 'string') {
             urls = [urls];
         }
@@ -314,7 +314,7 @@
             length = urls.length,
             loadedScripts = {};
 
-        function onScriptLoaded(scriptURL) {
+        function onScriptLoaded (scriptURL) {
             var done = true;
             loadedScripts[scriptURL] = true;
             for (var fileURL in loadedScripts) {
@@ -341,7 +341,7 @@
         }
     };
 
-    util.addCSSRule = function addCSSRule(sheet, selector, rules, index) {
+    util.addCSSRule = function addCSSRule (sheet, selector, rules, index) {
         try {
             if (sheet.insertRule) {
                 sheet.insertRule(selector + "{" + rules + "}", index);
@@ -353,7 +353,7 @@
         }
     };
 
-    util.deleteCSSRule = function deleteCSSRule(sheet, selector) {
+    util.deleteCSSRule = function deleteCSSRule (sheet, selector) {
         var rules = sheet.cssRules || sheet.rules;
 
         util.forEach(util.toArray(rules), function (rule, index) {
@@ -370,11 +370,11 @@
         });
     };
 
-    util.isCSSPropertySame = function isCSSPropertySame(tag, property, value){
+    util.isCSSPropertySame = function isCSSPropertySame (tag, property, value) {
         return (HTMLTagCSSProperties[tag][property] === value);
     };
 
-    util.getAppliedStyles = function getAppliedStyles(element) {
+    util.getAppliedStyles = function getAppliedStyles (element) {
         var win = document.defaultView || global,
             styleNode = [],
             tag = element.tagName;
@@ -387,7 +387,7 @@
 
             util.forEach(util.toArray(styles), function (style) {
                 var value = styles.getPropertyValue(style);
-                if(!util.isCSSPropertySame(tag, style, value)){
+                if (!util.isCSSPropertySame(tag, style, value)) {
                     styleNode.push(style + ':' + value);
                 }
             });
@@ -395,7 +395,7 @@
         } else if (element.currentStyle) {
             /* IE */
             util.forEachProperty(element.currentStyle, function (value, style) {
-                if(!util.isCSSPropertySame(tag, style, value)){
+                if (!util.isCSSPropertySame(tag, style, value)) {
                     styleNode.push(style + ':' + value);
                 }
             });
@@ -404,7 +404,7 @@
             /* Ancient browser..*/
             util.forEach(util.toArray(element.style), function (style) {
                 var value = element.style[style];
-                if(!util.isCSSPropertySame(tag, style, value)){
+                if (!util.isCSSPropertySame(tag, style, value)) {
                     styleNode.push(style + ':' + value);
                 }
             });
@@ -413,7 +413,7 @@
         return styleNode.join("; ");
     };
 
-    util.getUrl = function getUrl(name) {
+    util.getUrl = function getUrl (name) {
         var config = exports.getConfig(),
             url = config.url,
             last = url.length - 1,
@@ -428,7 +428,7 @@
         return url;
     };
 
-    util.getProfileUrl = function getProfileUrl(baseUrl, url) {
+    util.getProfileUrl = function getProfileUrl (baseUrl, url) {
         if (url.indexOf('.js') === -1) {
             return url;
         }
@@ -444,7 +444,7 @@
         return baseUrl + '?url=' + url;
     };
 
-    util.showInfo = function showInfo(content, online) {
+    util.showInfo = function showInfo (content, online) {
         var className = "consoleio",
             bgColor = online ? 'rgba(0, 130, 30, 0.8)' : 'rgba(0, 0, 0, 0.8)',
             css = "content: 'Console.IO:" + content + "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
@@ -454,26 +454,26 @@
 
         util.deleteCSSRule(exports.styleSheet, "." + className + ":after");
         util.addCSSRule(exports.styleSheet, "." + className + ":after", css);
-        document.body.setAttribute("class", className);
+        document.body.setAttribute("class", document.body.getAttribute("class") + ' ' + className);
     };
 
-    util.isIFrameChild = function isIFrameChild() {
+    util.isIFrameChild = function isIFrameChild () {
         return global.location !== global.parent.location;
     };
 
-    util.foundRequireJS = function foundRequireJS() {
+    util.foundRequireJS = function foundRequireJS () {
         return typeof global.requirejs !== 'undefined';
     };
 
-    util.foundDefine = function foundDefine() {
+    util.foundDefine = function foundDefine () {
         return typeof define === "function" && define.amd;
     };
 
-    util.getType = function getType(data) {
+    util.getType = function getType (data) {
         return Object.prototype.toString.apply(data).replace('[object ', '').replace(']', '');
     };
 
-    util.getFunctionName = function getFunctionName(data) {
+    util.getFunctionName = function getFunctionName (data) {
         var name;
         // in FireFox, Function objects have a name property...
         if (data) {
@@ -483,7 +483,7 @@
         return name || "anonymous";
     };
 
-    util.toArray = function toArray(data) {
+    util.toArray = function toArray (data) {
         return Array.prototype.slice.call(data);
     };
 
@@ -551,18 +551,18 @@
         }
     }());
 
-    util.noop = function noop() {
+    util.noop = function noop () {
     };
 
-    util.asyncForEach = function asyncForEach(array, callback, finishCallback, scope) {
+    util.asyncForEach = function asyncForEach (array, callback, finishCallback, scope) {
         array = [].concat(array || []);
         util.asyncIteration(array, callback || util.noop, finishCallback || util.noop, scope);
     };
 
-    util.asyncIteration = function asyncIteration(array, callback, finishCallback, scope) {
+    util.asyncIteration = function asyncIteration (array, callback, finishCallback, scope) {
         if (array.length > 0) {
             setTimeout(function () {
-                callback.call(scope || array, array.shift(), function finish() {
+                callback.call(scope || array, array.shift(), function finish () {
                     util.asyncIteration(array, callback, finishCallback, scope);
                 });
             }, 4);
@@ -571,21 +571,21 @@
         }
     };
 
-    util.forEachProperty = function forEachProperty(obj, callback, scope) {
+    util.forEachProperty = function forEachProperty (obj, callback, scope) {
         var prop;
         for (prop in obj) {
             callback.call(scope || obj, obj[prop], prop, obj);
         }
     };
 
-    util.async = function async(fn, scope, interval) {
+    util.async = function async (fn, scope, interval) {
         interval = typeof scope === 'number' ? scope : interval;
         return setTimeout(function () {
             fn.call(scope);
         }, interval || 4);
     };
 
-    util.extend = function extend(target, source) {
+    util.extend = function extend (target, source) {
         util.forEachProperty(source, function (value, property) {
             target[property] = value;
         });
