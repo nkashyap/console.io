@@ -1,11 +1,11 @@
 /**
  * Name: console.io
- * Version: 0.2.2
+ * Version: 0.2.5
  * Description: Javascript Remote Web Console
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2014-03-16
+ * Date: 2015-02-09
 */
 
 /**

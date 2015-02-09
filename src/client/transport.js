@@ -14,9 +14,9 @@
     var transport = exports.transport = {},
         pending = [],
         lazyListener = [],
-        config;
+        config, retryCount = 0;
 
-    function onMessage(event) {
+    function onMessage (event) {
         var data = event.data;
         transport.emit(data.event, {
             type: data.type,
@@ -26,32 +26,31 @@
         });
     }
 
-    function onConnect() {
+    function onConnect () {
+        retryCount = 0;
         transport.emit('setUp', exports.client.getConfig());
-
         exports.console.log('Connected to the Server', arguments);
     }
 
-    function onConnecting(mode) {
+    function onConnecting (mode) {
         transport.connectionMode = mode;
         transport.showInfoBar('connecting', false);
-
         exports.console.log('Connecting to the Server', mode);
     }
 
-    function onReconnect(mode, attempts) {
+    function onReconnect (mode, attempts) {
+        retryCount = 0;
         transport.connectionMode = mode;
         transport.emit('online', exports.client.getConfig());
-
         exports.console.log('Reconnected to the Server after ' + attempts + ' attempts.', mode, attempts);
     }
 
-    function onReconnecting() {
+    function onReconnecting () {
         transport.showInfoBar('reconnecting', false);
         exports.console.log('Reconnecting to the Server', arguments);
     }
 
-    function onDisconnect(reason) {
+    function onDisconnect (reason) {
         transport.showInfoBar('disconnect', false);
         exports.console.log('Disconnected from the Server', reason);
         if (!reason || (reason && reason !== 'booted')) {
@@ -59,29 +58,42 @@
         }
     }
 
-    function onConnectFailed() {
+    function onConnectFailed () {
         transport.showInfoBar('connection failed', false);
         exports.console.warn('Failed to connect to the Server', arguments);
+        retry();
     }
 
-    function onReconnectFailed() {
+    function onReconnectFailed () {
         transport.showInfoBar('reconnection failed', false);
         exports.console.warn('Failed to reconnect to the Server', arguments);
+        retry();
     }
 
-    function onError(e) {
+    function onError (e) {
         transport.showInfoBar('connection error', false);
         exports.console.warn('Socket Error', e);
+        retry();
+    }
+
+    function retry () {
+        if (retryCount < 5) {
+            transport.showInfoBar('retrying', false);
+            exports.storage.removeItem('serialNumber');
+            exports.storage.removeItem('deviceName');
+            exports.client.reload();
+            retryCount++;
+        }
     }
 
     transport.connectionMode = '';
     transport.paused = false;
 
-    transport.setUp = function setUp() {
+    transport.setUp = function setUp () {
         /** Fix for old Opera and Maple browsers
          * to process JSONP requests in a queue
          */
-        (function overrideJsonPolling(io) {
+        (function overrideJsonPolling (io) {
             if (!io.Transport["jsonp-polling"]) {
                 return;
             }
@@ -91,14 +103,14 @@
             io.Transport["jsonp-polling"].prototype.requestQueue = [];
             io.Transport["jsonp-polling"].prototype.isProcessingQueue = false;
             io.Transport["jsonp-polling"].prototype.hasOutstandingRequests = false;
-            io.Transport["jsonp-polling"].prototype.postRequest = function postRequest() {
+            io.Transport["jsonp-polling"].prototype.postRequest = function postRequest () {
                 var scope = this;
                 this.isProcessingQueue = true;
                 setTimeout(function () {
                     original.call(scope, scope.requestQueue.shift());
                 }, 10);
             };
-            io.Transport["jsonp-polling"].prototype.completePostRequest = function completePostRequest() {
+            io.Transport["jsonp-polling"].prototype.completePostRequest = function completePostRequest () {
                 var scope = this;
                 setTimeout(function () {
                     scope.socket.setBuffer(false);
@@ -107,7 +119,7 @@
                     scope.processPendingRequests();
                 }, 250);
             };
-            io.Transport["jsonp-polling"].prototype.processPendingRequests = function processPendingRequests() {
+            io.Transport["jsonp-polling"].prototype.processPendingRequests = function processPendingRequests () {
                 if (this.hasOutstandingRequests && !this.isProcessingQueue) {
                     this.postRequest();
                     this.completePostRequest();
@@ -137,7 +149,7 @@
             };
 
             if (transport.paused) {
-                pending.push({ name: 'console', data: msg });
+                pending.push({name: 'console', data: msg});
             } else {
                 transport.emit('console', msg);
             }
@@ -164,31 +176,31 @@
         lazyListener = [];
     };
 
-    transport.emit = function emit(name, data) {
+    transport.emit = function emit (name, data) {
         if (transport.isConnected()) {
             transport.io.emit('device:' + name, data || {});
             return true;
         } else {
-            pending.push({ name: name, data: data });
+            pending.push({name: name, data: data});
             return false;
         }
     };
 
-    transport.on = function on(name, callback, scope) {
+    transport.on = function on (name, callback, scope) {
         if (transport.io) {
             transport.io.on(name, function () {
                 callback.apply(scope || this, arguments);
             });
         } else {
-            lazyListener.push({ name: name, callback: callback, scope: scope });
+            lazyListener.push({name: name, callback: callback, scope: scope});
         }
     };
 
-    transport.isConnected = function isConnected() {
+    transport.isConnected = function isConnected () {
         return transport.io && transport.io.socket ? transport.io.socket.connected : false;
     };
 
-    transport.forceReconnect = function forceReconnect() {
+    transport.forceReconnect = function forceReconnect () {
         try {
             transport.io.socket.disconnectSync();
             transport.io.socket.reconnect();
@@ -197,7 +209,7 @@
         }
     };
 
-    transport.showInfoBar = function showInfoBar(msg, isOnline) {
+    transport.showInfoBar = function showInfoBar (msg, isOnline) {
         var cfg = exports.getConfig(),
             title = [];
 
@@ -231,7 +243,7 @@
         exports.util.showInfo(title.join('|'), isOnline);
     };
 
-    transport.clearPendingQueue = function clearPendingQueue() {
+    transport.clearPendingQueue = function clearPendingQueue () {
         var queue = [];
 
         exports.util.forEach(pending, function (item) {

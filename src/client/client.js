@@ -515,6 +515,8 @@
         return !!(canvas.getContext && canvas.getContext('2d'));
     }
 
+    client.reload = onReload;
+
     client.getMore = function getMore() {
         var data = [
             {
