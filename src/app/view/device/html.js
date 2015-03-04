@@ -100,7 +100,9 @@ ConsoleIO.View.Device.HTML.prototype.hide = function hide() {
 
 ConsoleIO.View.Device.HTML.prototype.preview = function preview(data) {
     this.unbind();
+    /* jshint ignore:start */
     this.previewFrame.src = "javascript:false;";
+    /* jshint ignore:end */
     ConsoleIO.async(function () {
         var document = this.previewFrame.contentWindow.document;
         document.head.innerHTML = (data.style || '') + (data.links || '');
