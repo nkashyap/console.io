@@ -1,21 +1,6 @@
-html, body {
-    background-color: white;
-    margin: 0;
-    padding: 0;
-}
-
-li {
-    font-size: 12px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    width: 800px;
-}
-
-#wrapper {
-    padding: 5px;
-    font-size: 14px;
-    background-color: white;
-    color: black;
-    margin: 5px;
+body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+    background-image: url(/resources/images/bg.jpeg);
+    background-repeat: repeat;
 }

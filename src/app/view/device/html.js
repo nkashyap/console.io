@@ -100,10 +100,13 @@ ConsoleIO.View.Device.HTML.prototype.hide = function hide() {
 
 ConsoleIO.View.Device.HTML.prototype.preview = function preview(data) {
     this.unbind();
+    /* jshint ignore:start */
     this.previewFrame.src = "javascript:false;";
+    /* jshint ignore:end */
     ConsoleIO.async(function () {
-        this.previewFrame.contentWindow.document.head.innerHTML = data.style;
-        this.previewFrame.contentWindow.document.body.innerHTML = data.body;
+        var document = this.previewFrame.contentWindow.document;
+        document.head.innerHTML = (data.style || '') + (data.links || '');
+        document.body.innerHTML = data.body;
         this.bind();
     }, this);
 };

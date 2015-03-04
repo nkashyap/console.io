@@ -14,7 +14,7 @@
     var client = exports.client = {},
         syncTimeout;
 
-    function storeData(data, msg, online) {
+    function storeData (data, msg, online) {
         if (!exports.name) {
             exports.name = data.name;
             exports.storage.addItem("deviceName", data.name, 365);
@@ -25,12 +25,12 @@
         }
     }
 
-    function addBindSupport() {
+    function addBindSupport () {
         if (Function.prototype.bind) {
             return false;
         }
 
-        Function.prototype.bind = function bind(oThis) {
+        Function.prototype.bind = function bind (oThis) {
             if (typeof this !== "function") {
                 throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
             }
@@ -49,22 +49,18 @@
         };
     }
 
-    function getStyleRule() {
-        var styleText = [],
+    function getStyleRule () {
+        var styleText = [], links = [],
             regex = new RegExp("((http|https)://)?([^/]+)", 'img');
-
         exports.util.forEach(exports.util.toArray(document.styleSheets), function (style) {
             try {
                 var rules = style.cssRules || style.rules,
                     href = style.href.match(regex);
-
                 href.pop();
-
                 if (rules) {
                     exports.util.forEach(exports.util.toArray(rules), function (styleRule) {
                         var cssText = styleRule.cssText,
                             baseURL = href.concat();
-
                         if (cssText) {
                             //TODO this only check only for 1 level up
                             if (cssText.indexOf("../") > -1) {
@@ -75,15 +71,20 @@
                             styleText.push(cssText);
                         }
                     });
+                } else if (style.href) {
+                    links.push('<link href="' + style.href + '" rel="stylesheet" >');
                 }
             } catch (e) {
             }
         });
 
-        return styleText.join(" ");
+        return {
+            content: '<style type="text/css">' + styleText.join(" ") + '</style>',
+            links: links.join(" ")
+        };
     }
 
-    function getStyledElement(element, clone) {
+    function getStyledElement (element, clone) {
         element = element || document.body;
         clone = clone || element.cloneNode(true);
 
@@ -96,7 +97,7 @@
         return clone;
     }
 
-    function getXHR() {
+    function getXHR () {
         var xhr;
         if (global.XMLHttpRequest) {
             xhr = new XMLHttpRequest();
@@ -114,8 +115,7 @@
         return xhr;
     }
 
-
-    function configWebConsole(data) {
+    function configWebConsole (data) {
         if (data) {
             exports.web.setConfig(data);
             exports.transport.paused = data.paused;
@@ -125,7 +125,7 @@
         }
     }
 
-    function setUpWebConsole(data) {
+    function setUpWebConsole (data) {
         if (typeof data.enabled !== 'undefined') {
             if (data.enabled) {
                 exports.web.enabled();
@@ -137,7 +137,7 @@
         configWebConsole(data.config);
     }
 
-    function evalFn(body) {
+    function evalFn (body) {
         /*jshint evil:true */
         var evalFun;
         try {
@@ -150,7 +150,7 @@
         /*jshint evil:false */
     }
 
-    function extend(source) {
+    function extend (source) {
         var clientFns, method;
         if (source) {
             clientFns = evalFn(source);
@@ -169,7 +169,7 @@
     }
 
     // dispatch data in chunk to avoid core mirror locking up
-    function dataPacket(name, data) {
+    function dataPacket (name, data) {
         var content = data.content,
             length = content.length,
             config = exports.getConfig(),
@@ -190,7 +190,7 @@
         }
     }
 
-    function dispatchPacket(name, params, content, start, length) {
+    function dispatchPacket (name, params, content, start, length) {
         var fn = (function (exports, name, params, content, start, length) {
             return function () {
                 var data = exports.util.extend({}, params);
@@ -204,8 +204,7 @@
         setTimeout(fn, 100);
     }
 
-
-    function onRegistration(data) {
+    function onRegistration (data) {
         storeData(data, 'registration');
 
         // setup client specific scripts
@@ -214,7 +213,7 @@
         exports.console.log('Registration', exports.name);
     }
 
-    function onReady(data) {
+    function onReady (data) {
         storeData(data, 'ready');
         setUpWebConsole(data.web);
 
@@ -228,7 +227,7 @@
         exports.console.log('Ready', exports.name);
     }
 
-    function onOnline(data) {
+    function onOnline (data) {
         if (data.serialNumber === exports.serialNumber) {
             storeData(data, 'online', true);
             setUpWebConsole(data.web);
@@ -244,14 +243,14 @@
         }
     }
 
-    function onOffline(data) {
+    function onOffline (data) {
         if (data.serialNumber === exports.serialNumber) {
             storeData(data, 'offline');
             exports.console.log('Offline', exports.name);
         }
     }
 
-    function onClientDisconnect(data) {
+    function onClientDisconnect (data) {
         if (data.serialNumber === exports.serialNumber) {
             storeData(data, 'client disconnect');
             exports.console.log('client disconnected', exports.serialNumber);
@@ -259,7 +258,7 @@
         }
     }
 
-    function onNameChanged(data) {
+    function onNameChanged (data) {
         if (!data.name) {
             exports.storage.removeItem('deviceName');
         }
@@ -269,7 +268,7 @@
         exports.transport.showInfoBar('new name', true);
     }
 
-    function onFileSource(data) {
+    function onFileSource (data) {
         try {
             var xhr = getXHR(),
                 proxy = exports.util.getUrl('proxy'),
@@ -294,23 +293,23 @@
                     }
                 };
 
-                xhr.onloadend = function onLoadEnd(e) {
+                xhr.onloadend = function onLoadEnd (e) {
                     exports.console.info('file:onLoadEnd', e);
                 };
 
-                xhr.onloadstart = function onLoadStart(e) {
+                xhr.onloadstart = function onLoadStart (e) {
                     exports.console.info('file:onLoadStart', e);
                 };
 
-                xhr.onprogress = function onProgress(e) {
+                xhr.onprogress = function onProgress (e) {
                     exports.console.info('file:onProgress', e);
                 };
 
-                xhr.onload = function onLoad(e) {
+                xhr.onload = function onLoad (e) {
                     exports.console.info('file:onLoad', e);
                 };
 
-                xhr.onerror = function onError(e) {
+                xhr.onerror = function onError (e) {
                     // if xhr fails to get file content use proxy to retrieve it
                     // it might be because of cross domain issue
                     if (data.url.indexOf(proxy) === -1) {
@@ -338,7 +337,7 @@
         }
     }
 
-    function onReload() {
+    function onReload () {
         exports.console.log('Reloading...');
 
         global.setTimeout((function (url) {
@@ -352,7 +351,7 @@
         }(location.href)), 100);
     }
 
-    function onHTMLSource() {
+    function onHTMLSource () {
         exports.web.hide();
         dataPacket('htmlDocument', {
             content: document.documentElement.innerHTML
@@ -360,18 +359,19 @@
         exports.web.show();
     }
 
-    function onHTMLPreview() {
+    function onHTMLPreview () {
         exports.web.hide();
-
+        var styles = getStyleRule();
         exports.transport.emit('htmlContent', {
-            style: '<style type="text/css">' + getStyleRule() + '</style>',
+            links: styles.links,
+            style: styles.content,
             body: getStyledElement().outerHTML
         });
 
         exports.web.show();
     }
 
-    function onRemoteEvent(data) {
+    function onRemoteEvent (data) {
         var raisedEvent,
             element = document.querySelector(data.srcElement.replace("$!", ""));
 
@@ -408,7 +408,7 @@
         }
     }
 
-    function onCaptureScreen() {
+    function onCaptureScreen () {
 
         addBindSupport();
 
@@ -445,7 +445,7 @@
         });
     }
 
-    function onFileList() {
+    function onFileList () {
         var scripts = [],
             styles = [],
             origin = exports.util.getOrigin();
@@ -479,7 +479,7 @@
         }
     }
 
-    function onProfiler(data) {
+    function onProfiler (data) {
         if (data.state) {
             exports.console.profile();
         } else {
@@ -487,7 +487,7 @@
         }
     }
 
-    function onCommand(cmd) {
+    function onCommand (cmd) {
         exports.console.info('executing...');
         var result = evalFn(cmd);
         if (typeof result !== 'undefined') {
@@ -495,7 +495,7 @@
         }
     }
 
-    function getStorage(storage) {
+    function getStorage (storage) {
         var key, i = 0,
             data = {},
             length = storage.length;
@@ -510,14 +510,14 @@
         return data;
     }
 
-    function isCanvasSupported() {
+    function isCanvasSupported () {
         var canvas = document.createElement('canvas');
         return !!(canvas.getContext && canvas.getContext('2d'));
     }
 
     client.reload = onReload;
 
-    client.getMore = function getMore() {
+    client.getMore = function getMore () {
         var data = [
             {
                 supports: {
@@ -585,7 +585,7 @@
         return data;
     };
 
-    client.jsonify = function jsonify(obj) {
+    client.jsonify = function jsonify (obj) {
         var returnObj = {},
             dataTypes = [
                 'Arguments', 'Array', 'String', 'Number', 'Boolean',
@@ -603,7 +603,7 @@
         return returnObj;
     };
 
-    client.getConfig = function getConfig() {
+    client.getConfig = function getConfig () {
         var navigator = global.navigator,
             options = {
                 userAgent: navigator.userAgent,
@@ -625,11 +625,11 @@
         return options;
     };
 
-    client.register = function register() {
+    client.register = function register () {
         exports.transport.emit('register', client.getConfig());
     };
 
-    client.setUp = function setUp() {
+    client.setUp = function setUp () {
         exports.transport.on('device:registration', onRegistration);
         exports.transport.on('device:ready', onReady);
         exports.transport.on('device:online', onOnline);

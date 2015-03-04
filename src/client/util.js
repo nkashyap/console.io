@@ -450,7 +450,7 @@
             css = "content: 'Console.IO:" + content + "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
                 "font-size: 12px; font-weight: bold; color: lightgrey; " +
                 "background-color: " + bgColor + "; border: 1px solid rgb(0, 0, 0); " +
-                "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
+                "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;z-index:5000;";
 
         util.deleteCSSRule(exports.styleSheet, "." + className + ":after");
         util.addCSSRule(exports.styleSheet, "." + className + ":after", css);
