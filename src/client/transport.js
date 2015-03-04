@@ -198,36 +198,17 @@
     };
 
     transport.showInfoBar = function showInfoBar(msg, isOnline) {
-        var cfg = exports.getConfig(),
-            title = [];
+        var cfg = exports.getConfig(), title = [];
 
-        if (exports.name) {
-            title.push(exports.name);
-        }
-
-        if (exports.serialNumber) {
-            title.push(exports.serialNumber);
-        }
-
-        if (cfg.secure) {
-            title.push('secure');
-        }
-
-        if (cfg.web) {
-            title.push('web');
-        }
-
-        if (cfg.url) {
-            title.push(cfg.url);
-        }
-
-        if (cfg.base) {
-            title.push(cfg.base);
-        }
-
+        if (exports.name) title.push(exports.name);
+        if (exports.serialNumber) title.push(exports.serialNumber);
+        if (cfg.secure) title.push('secure');
+        if (cfg.web) title.push('web');
+        if (cfg.url) title.push(cfg.url);
+        if (cfg.base) title.push(cfg.base);
         title.push(msg);
         title.push(isOnline ? 'online' : 'offline');
-
+        if (transport.connectionMode) title.push(transport.connectionMode);
         exports.util.showInfo(title.join('|'), isOnline);
     };
 

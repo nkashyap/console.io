@@ -1,11 +1,11 @@
 /**
  * Name: console.io
- * Version: 0.2.2
+ * Version: 0.2.5
  * Description: Javascript Remote Web Console
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2014-03-16
+ * Date: 2015-03-04
 */
 
 /**
@@ -1162,8 +1162,9 @@ ConsoleIO.View.Device.HTML.prototype.preview = function preview(data) {
     this.unbind();
     this.previewFrame.src = "javascript:false;";
     ConsoleIO.async(function () {
-        this.previewFrame.contentWindow.document.head.innerHTML = data.style;
-        this.previewFrame.contentWindow.document.body.innerHTML = data.body;
+        var document = this.previewFrame.contentWindow.document;
+        document.head.innerHTML = (data.style || '') + (data.links || '');
+        document.body.innerHTML = data.body;
         this.bind();
     }, this);
 };
@@ -3664,7 +3665,7 @@ ConsoleIO.App.Editor.prototype.command = function command() {
     if (content) {
         ConsoleIO.Service.Socket.emit('execute', {
             serialNumber: this.parent.getActiveDeviceSerialNumber(),
-            code: content
+            code: '(function(){' + content + '}());'
         });
     }
 };

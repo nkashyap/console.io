@@ -61,9 +61,7 @@
         exports.transport.setUp();
         exports.client.setUp();
 
-        if (defaultConfig.web) {
-            exports.web.setUp();
-        }
+        if (defaultConfig.web) exports.web.setUp();
     }
 
     function isURLExcluded(url) {

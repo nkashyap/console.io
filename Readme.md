@@ -181,13 +181,6 @@ Shortcuts:
 * Shift-Ctrl-F / Cmd-Option-F: Replace
 * Shift-Ctrl-R / Shift-Cmd-Option-F: Replace all
 
-NOTE: All multilines code should be wrapped within self executable function. E.G
-```html
-(function doSomeThing(){
- .......
-}())
-```
-
 #### Device and Tabs
 * Files: Show all attached javascript and css files in the web page
 * Status: Device Status and some basic information

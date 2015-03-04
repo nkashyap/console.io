@@ -13,7 +13,7 @@
 
     var web = exports.web = {};
 
-    function Controller() {
+    function Controller () {
         this.store = {
             added: [],
             queue: []
@@ -43,14 +43,14 @@
         //exports.transport.on('device:web:control', this.setControl, this);
     }
 
-    Controller.prototype.setUp = function setUp() {
+    Controller.prototype.setUp = function setUp () {
         var scope = this;
         exports.util.requireCSS(exports.util.getUrl('webStyle'), function () {
             scope.enabled();
         });
     };
 
-    Controller.prototype.enabled = function enabled() {
+    Controller.prototype.enabled = function enabled () {
         if (!this.isEnabled) {
             this.isEnabled = true;
             this.view.render(document.body);
@@ -62,11 +62,11 @@
                 global.detachEvent('onmessage', exports.web.onMessage);
             }
 
-            exports.transport.emit('webStatus', { enabled: true });
+            exports.transport.emit('webStatus', {enabled: true});
         }
     };
 
-    Controller.prototype.disabled = function disabled() {
+    Controller.prototype.disabled = function disabled () {
         if (this.isEnabled) {
             this.isEnabled = false;
             exports.console.removeListener('console', exports.web.logger);
@@ -77,12 +77,12 @@
                 global.attachEvent('onmessage', exports.web.onMessage);
             }
 
-            exports.transport.emit('webStatus', { enabled: false });
+            exports.transport.emit('webStatus', {enabled: false});
             this.view.destroy();
         }
     };
 
-    Controller.prototype.setControl = function setControl(data) {
+    Controller.prototype.setControl = function setControl (data) {
         var reload = false;
         if (typeof data.paused !== 'undefined') {
             this.control.paused = data.paused;
@@ -117,7 +117,7 @@
         }
     };
 
-    Controller.prototype.getData = function getData(store) {
+    Controller.prototype.getData = function getData (store) {
         var count = 0, dataStore = [];
         if (store.length > 0) {
             exports.util.every([].concat(store).reverse(), function (item) {
@@ -133,15 +133,15 @@
         return dataStore;
     };
 
-    Controller.prototype.hide = function hide() {
+    Controller.prototype.hide = function hide () {
         return this.view.hide();
     };
 
-    Controller.prototype.show = function show() {
+    Controller.prototype.show = function show () {
         return this.view.show();
     };
 
-    Controller.prototype.add = function add(data) {
+    Controller.prototype.add = function add (data) {
         if (!this.control.paused) {
             this.store.added.push(data);
             this.view.add(data);
@@ -150,7 +150,7 @@
         }
     };
 
-    Controller.prototype.addBatch = function addBatch() {
+    Controller.prototype.addBatch = function addBatch () {
         if (!this.control.paused) {
             this.view.addBatch(this.getData(this.store.queue));
             this.store.added = this.store.added.concat(this.store.queue);
@@ -158,7 +158,7 @@
         }
     };
 
-    Controller.prototype.applySearch = function applySearch(value) {
+    Controller.prototype.applySearch = function applySearch (value) {
         this.control.search = typeof value !== 'undefined' ? value : null;
         if (this.control.search) {
             if (this.control.search[0] !== "\\") {
@@ -169,34 +169,33 @@
         }
     };
 
-    Controller.prototype.isSearchFiltered = function isSearchFiltered(data) {
+    Controller.prototype.isSearchFiltered = function isSearchFiltered (data) {
         return this.control.search ? data.message.search(this.control.search) > -1 : true;
     };
 
-    Controller.prototype.isFiltered = function isFiltered(data) {
+    Controller.prototype.isFiltered = function isFiltered (data) {
         return this.control.filters.length === 0 || (this.control.filters.length > 0 && this.control.filters.indexOf(data.type) > -1);
     };
 
-
-    function View(ctrl) {
+    function View (ctrl) {
         this.ctrl = ctrl;
         this.elements = {};
         this.target = null;
         this.container = null;
     }
 
-    View.prototype.render = function render(target) {
+    View.prototype.render = function render (target) {
         this.target = target;
         this.createContainer();
     };
 
-    View.prototype.reload = function reload() {
+    View.prototype.reload = function reload () {
         this.clear();
         this.container.parentNode.removeChild(this.container);
         this.createContainer();
     };
 
-    View.prototype.destroy = function destroy() {
+    View.prototype.destroy = function destroy () {
         if (this.container) {
             this.clear();
             if (this.container.parentNode) {
@@ -207,13 +206,13 @@
         }
     };
 
-    View.prototype.hide = function hide() {
+    View.prototype.hide = function hide () {
         if (this.target && this.container) {
             this.target.removeChild(this.container);
         }
     };
 
-    View.prototype.show = function show() {
+    View.prototype.show = function show () {
         if (this.target && this.container) {
             if (this.ctrl.config.position && this.ctrl.config.position === 'top') {
                 this.target.insertBefore(this.container, exports.util.getFirstElement(this.target));
@@ -223,11 +222,8 @@
         }
     };
 
-    View.prototype.createContainer = function createContainer() {
-        if (this.container) {
-            return false;
-        }
-
+    View.prototype.createContainer = function createContainer () {
+        if (this.container) return false;
         var styles = [
             'background-color: rgba(244, 244, 244, 0.9)',
             'background-color: rgb(244, 244, 244)',
@@ -254,12 +250,12 @@
         }
 
         switch (this.ctrl.config.position.toLowerCase()) {
-            case 'top':
-                styles.push('top: 5px');
-                break;
-            default:
-                styles.push('bottom: 5px');
-                break;
+        case 'top':
+            styles.push('top: 5px');
+            break;
+        default:
+            styles.push('bottom: 5px');
+            break;
         }
 
         var config = exports.getConfig();
@@ -276,7 +272,7 @@
         });
     };
 
-    View.prototype.createElement = function createElement(config) {
+    View.prototype.createElement = function createElement (config) {
         config.tag = config.tag || 'div';
         if (!this.elements[config.tag]) {
             this.elements[config.tag] = document.createElement(config.tag);
@@ -306,7 +302,7 @@
         return element;
     };
 
-    View.prototype.stripBrackets = function stripBrackets(data) {
+    View.prototype.stripBrackets = function stripBrackets (data) {
         var last = data.length - 1;
         if (data.charAt(0) === '[' && data.charAt(last) === ']') {
             return data.substring(1, last);
@@ -314,7 +310,7 @@
         return data;
     };
 
-    View.prototype.getElementData = function getElementData(data) {
+    View.prototype.getElementData = function getElementData (data) {
         var tag = 'code',
             css = data.type,
             origin = data.origin,
@@ -355,9 +351,9 @@
         if (origin) {
             origin = data.origin.replace(/(\/|:|\.)/igm, '');
             originClass = "content: 'iframe:" + data.origin + "'; position: absolute; top: 0px; right: 0px; padding: 2px 8px; " +
-                "font-size: 12px; color: lightgrey !important; " +
-                "background-color: black; " +
-                "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
+            "font-size: 12px; color: lightgrey !important; " +
+            "background-color: black; " +
+            "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
 
             exports.util.deleteCSSRule(exports.styleSheet, '.' + origin + ":before");
             exports.util.addCSSRule(exports.styleSheet, '.' + origin + ":before", originClass);
@@ -370,7 +366,7 @@
         };
     };
 
-    View.prototype.add = function add(data) {
+    View.prototype.add = function add (data) {
         if (!this.ctrl.isFiltered(data) || !this.ctrl.isSearchFiltered(data) || !this.container) {
             return false;
         }
@@ -392,7 +388,7 @@
         this.removeOverflowElement();
     };
 
-    View.prototype.addBatch = function addBatch(store) {
+    View.prototype.addBatch = function addBatch (store) {
         if (store.length > 0 && this.container) {
             var fragment = document.createDocumentFragment();
 
@@ -416,7 +412,7 @@
         }
     };
 
-    View.prototype.clear = function clear() {
+    View.prototype.clear = function clear () {
         if (this.container) {
             while (this.container.firstChild) {
                 this.container.removeChild(this.container.firstChild);
@@ -424,7 +420,7 @@
         }
     };
 
-    View.prototype.removeOverflowElement = function removeOverflowElement() {
+    View.prototype.removeOverflowElement = function removeOverflowElement () {
         var length = this.container.childElementCount || this.container.children.length;
         while (length > this.ctrl.control.pageSize) {
             this.container.removeChild(this.container.lastElementChild || this.container.lastChild);
@@ -432,14 +428,11 @@
         }
     };
 
-
-    web.logger = function logger(data) {
-        if (exports.web.console) {
-            exports.web.console.add(data);
-        }
+    web.logger = function logger (data) {
+        if (exports.web.console) exports.web.console.add(data);
     };
 
-    web.onMessage = function onMessage(event) {
+    web.onMessage = function onMessage (event) {
         if (exports.web.console) {
             var data = event.data;
             if (data.event === 'console') {
@@ -453,15 +446,12 @@
         }
     };
 
-    web.setUp = function setUp() {
-        if (!web.console) {
-            web.console = new Controller();
-        }
-
+    web.setUp = function setUp () {
+        if (!web.console) web.console = new Controller();
         web.console.setUp();
     };
 
-    web.enabled = function enabled() {
+    web.enabled = function enabled () {
         if (!web.console) {
             web.setUp();
         } else {
@@ -469,50 +459,34 @@
         }
     };
 
-    web.disabled = function disabled() {
-        if (web.console) {
-            web.console.disabled();
-        }
+    web.disabled = function disabled () {
+        if (web.console) web.console.disabled();
     };
 
-    web.setConfig = function setConfig(data) {
-        if (web.console) {
-            web.console.setControl(data);
-        }
-
+    web.setConfig = function setConfig (data) {
+        if (web.console) web.console.setControl(data);
         var info = [
-            exports.name || '', exports.serialNumber || '', exports.transport.isConnected() ? 'online' : 'offline'
+            exports.name || '',
+            exports.serialNumber || '',
+            exports.transport.isConnected() ? 'online' : 'offline',
+            exports.transport.connectionMode
         ];
 
-        if (data.paused) {
-            info.push('paused');
-        }
-
+        if (data.paused) info.push('paused');
         if (data.filters && data.filters.length > 0) {
             info.push('filters:' + data.filters.join(","));
         }
-
-        if (data.pageSize) {
-            info.push('pagesize:' + data.pageSize);
-        }
-
-        if (data.search) {
-            info.push('search:' + data.search);
-        }
-
+        if (data.pageSize) info.push('pagesize:' + data.pageSize);
+        if (data.search) info.push('search:' + data.search);
         exports.util.showInfo(info.join('|'), exports.transport.isConnected());
     };
 
-    web.show = function show() {
-        if (web.console) {
-            return web.console.show();
-        }
+    web.show = function show () {
+        if (web.console) return web.console.show();
     };
 
-    web.hide = function hide() {
-        if (web.console) {
-            return web.console.hide();
-        }
+    web.hide = function hide () {
+        if (web.console) return web.console.hide();
     };
 
 }('undefined' !== typeof ConsoleIO ? ConsoleIO : module.exports, this));

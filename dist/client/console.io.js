@@ -1,15 +1,15 @@
 /**
  * Name: console.io
- * Version: 0.2.2
+ * Version: 0.2.5
  * Description: Javascript Remote Web Console
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2014-03-16
+ * Date: 2015-03-04
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
-ConsoleIO.version = "0.2.2";
+ConsoleIO.version = "0.2.5";
 
 (function(){
 
@@ -31,8 +31,8 @@ ConsoleIO.version = "0.2.2";
         pendingCallback = [],
         HTMLTagCSSProperties = {};
 
-    function addDefaultCSS(tag){
-        if(tag && !HTMLTagCSSProperties[tag]){
+    function addDefaultCSS (tag) {
+        if (tag && !HTMLTagCSSProperties[tag]) {
             var win = document.defaultView || global,
                 element = document.createElement(tag),
                 properties = {};
@@ -66,23 +66,23 @@ ConsoleIO.version = "0.2.2";
         }
     }
 
-    util.getScripts = function getScripts() {
+    util.getScripts = function getScripts () {
         return util.toArray(document.scripts || document.getElementsByName('script'));
     };
 
-    util.getStyles = function getStyles() {
+    util.getStyles = function getStyles () {
         return util.toArray(document.getElementsByTagName('link'));
     };
 
-    util.getFirstElement = function getFirstElement(element) {
+    util.getFirstElement = function getFirstElement (element) {
         return element ? (element.firstElementChild || element.firstChild) : false;
     };
 
-    util.getOrigin = function getOrigin() {
+    util.getOrigin = function getOrigin () {
         return global.location.origin || global.location.protocol + '//' + (global.location.host || global.location.hostname + ':' + global.location.port);
     };
 
-    util.getHashParams = function getHashParams() {
+    util.getHashParams = function getHashParams () {
         var params = {},
             hash = global.location.hash || global.location.href.replace(util.getOrigin() + global.location.pathname, '');
 
@@ -96,7 +96,7 @@ ConsoleIO.version = "0.2.2";
         return params;
     };
 
-    util.getQueryParams = function getQueryParams(url) {
+    util.getQueryParams = function getQueryParams (url) {
         url = url || global.location.href;
 
         var params = {},
@@ -112,7 +112,7 @@ ConsoleIO.version = "0.2.2";
         return params;
     };
 
-    util.queryParams = function queryParams() {
+    util.queryParams = function queryParams () {
         var params = {},
             scripts = util.getScripts();
 
@@ -148,7 +148,7 @@ ConsoleIO.version = "0.2.2";
         return params;
     };
 
-    util.checkFile = function checkFile(url) {
+    util.checkFile = function checkFile (url) {
         var isJS = url.indexOf('.js') > -1,
             isCSS = url.indexOf('.css') > -1,
             tags = isJS ? util.getScripts() : isCSS ? util.getStyles() : null,
@@ -166,7 +166,7 @@ ConsoleIO.version = "0.2.2";
         return value;
     };
 
-    util.removeFile = function removeFile(url) {
+    util.removeFile = function removeFile (url) {
         var tag = url.indexOf('.js') > -1 ? 'script' : url.indexOf('.css') > -1 ? 'link' : null,
             elements, attr;
 
@@ -182,7 +182,7 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    util.requireCSS = function requireCSS(url, callback) {
+    util.requireCSS = function requireCSS (url, callback) {
         if (util.checkFile(url)) {
             if (callback) {
                 setTimeout(function () {
@@ -212,7 +212,7 @@ ConsoleIO.version = "0.2.2";
         head.appendChild(link);
     };
 
-    util.requireScript = function requireScript(url, callback) {
+    util.requireScript = function requireScript (url, callback) {
         if (util.checkFile(url)) {
             setTimeout(function () {
                 callback(url);
@@ -235,7 +235,7 @@ ConsoleIO.version = "0.2.2";
             }, 1);
         }
 
-        function onScriptLoad() {
+        function onScriptLoad () {
             if (node.removeEventListener) {
                 node.removeEventListener('load', onScriptLoad, false);
                 callback(url);
@@ -249,7 +249,7 @@ ConsoleIO.version = "0.2.2";
             }
         }
 
-        function onScriptError() {
+        function onScriptError () {
             if (config.web) {
                 exports.console.exception(url, arguments);
             } else {
@@ -273,7 +273,7 @@ ConsoleIO.version = "0.2.2";
         head.appendChild(node);
     };
 
-    util.ready = function ready(callback) {
+    util.ready = function ready (callback) {
         if (domReady) {
             setTimeout(callback, 1);
             return false;
@@ -285,7 +285,7 @@ ConsoleIO.version = "0.2.2";
             return false;
         }
 
-        function callbackFn() {
+        function callbackFn () {
             domReady = true;
 
             util.forEach(pendingCallback, function (fn) {
@@ -298,7 +298,7 @@ ConsoleIO.version = "0.2.2";
             setTimeout(callbackFn, 1);
         }
 
-        function DOMContentLoaded() {
+        function DOMContentLoaded () {
             if (document.addEventListener) {
                 document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
                 callbackFn();
@@ -319,7 +319,7 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    util.require = function require(urls, callback) {
+    util.require = function require (urls, callback) {
         if (typeof urls === 'string') {
             urls = [urls];
         }
@@ -329,7 +329,7 @@ ConsoleIO.version = "0.2.2";
             length = urls.length,
             loadedScripts = {};
 
-        function onScriptLoaded(scriptURL) {
+        function onScriptLoaded (scriptURL) {
             var done = true;
             loadedScripts[scriptURL] = true;
             for (var fileURL in loadedScripts) {
@@ -356,7 +356,7 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    util.addCSSRule = function addCSSRule(sheet, selector, rules, index) {
+    util.addCSSRule = function addCSSRule (sheet, selector, rules, index) {
         try {
             if (sheet.insertRule) {
                 sheet.insertRule(selector + "{" + rules + "}", index);
@@ -368,7 +368,7 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    util.deleteCSSRule = function deleteCSSRule(sheet, selector) {
+    util.deleteCSSRule = function deleteCSSRule (sheet, selector) {
         var rules = sheet.cssRules || sheet.rules;
 
         util.forEach(util.toArray(rules), function (rule, index) {
@@ -385,11 +385,11 @@ ConsoleIO.version = "0.2.2";
         });
     };
 
-    util.isCSSPropertySame = function isCSSPropertySame(tag, property, value){
+    util.isCSSPropertySame = function isCSSPropertySame (tag, property, value) {
         return (HTMLTagCSSProperties[tag][property] === value);
     };
 
-    util.getAppliedStyles = function getAppliedStyles(element) {
+    util.getAppliedStyles = function getAppliedStyles (element) {
         var win = document.defaultView || global,
             styleNode = [],
             tag = element.tagName;
@@ -402,7 +402,7 @@ ConsoleIO.version = "0.2.2";
 
             util.forEach(util.toArray(styles), function (style) {
                 var value = styles.getPropertyValue(style);
-                if(!util.isCSSPropertySame(tag, style, value)){
+                if (!util.isCSSPropertySame(tag, style, value)) {
                     styleNode.push(style + ':' + value);
                 }
             });
@@ -410,7 +410,7 @@ ConsoleIO.version = "0.2.2";
         } else if (element.currentStyle) {
             /* IE */
             util.forEachProperty(element.currentStyle, function (value, style) {
-                if(!util.isCSSPropertySame(tag, style, value)){
+                if (!util.isCSSPropertySame(tag, style, value)) {
                     styleNode.push(style + ':' + value);
                 }
             });
@@ -419,7 +419,7 @@ ConsoleIO.version = "0.2.2";
             /* Ancient browser..*/
             util.forEach(util.toArray(element.style), function (style) {
                 var value = element.style[style];
-                if(!util.isCSSPropertySame(tag, style, value)){
+                if (!util.isCSSPropertySame(tag, style, value)) {
                     styleNode.push(style + ':' + value);
                 }
             });
@@ -428,7 +428,7 @@ ConsoleIO.version = "0.2.2";
         return styleNode.join("; ");
     };
 
-    util.getUrl = function getUrl(name) {
+    util.getUrl = function getUrl (name) {
         var config = exports.getConfig(),
             url = config.url,
             last = url.length - 1,
@@ -443,7 +443,7 @@ ConsoleIO.version = "0.2.2";
         return url;
     };
 
-    util.getProfileUrl = function getProfileUrl(baseUrl, url) {
+    util.getProfileUrl = function getProfileUrl (baseUrl, url) {
         if (url.indexOf('.js') === -1) {
             return url;
         }
@@ -459,36 +459,36 @@ ConsoleIO.version = "0.2.2";
         return baseUrl + '?url=' + url;
     };
 
-    util.showInfo = function showInfo(content, online) {
+    util.showInfo = function showInfo (content, online) {
         var className = "consoleio",
             bgColor = online ? 'rgba(0, 130, 30, 0.8)' : 'rgba(0, 0, 0, 0.8)',
             css = "content: 'Console.IO:" + content + "'; position: fixed; top: 0px; left: 0px; padding: 2px 8px; " +
                 "font-size: 12px; font-weight: bold; color: lightgrey; " +
                 "background-color: " + bgColor + "; border: 1px solid rgb(0, 0, 0); " +
-                "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
+                "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;z-index:5000;";
 
         util.deleteCSSRule(exports.styleSheet, "." + className + ":after");
         util.addCSSRule(exports.styleSheet, "." + className + ":after", css);
         document.body.setAttribute("class", className);
     };
 
-    util.isIFrameChild = function isIFrameChild() {
+    util.isIFrameChild = function isIFrameChild () {
         return global.location !== global.parent.location;
     };
 
-    util.foundRequireJS = function foundRequireJS() {
+    util.foundRequireJS = function foundRequireJS () {
         return typeof global.requirejs !== 'undefined';
     };
 
-    util.foundDefine = function foundDefine() {
+    util.foundDefine = function foundDefine () {
         return typeof define === "function" && define.amd;
     };
 
-    util.getType = function getType(data) {
+    util.getType = function getType (data) {
         return Object.prototype.toString.apply(data).replace('[object ', '').replace(']', '');
     };
 
-    util.getFunctionName = function getFunctionName(data) {
+    util.getFunctionName = function getFunctionName (data) {
         var name;
         // in FireFox, Function objects have a name property...
         if (data) {
@@ -498,7 +498,7 @@ ConsoleIO.version = "0.2.2";
         return name || "anonymous";
     };
 
-    util.toArray = function toArray(data) {
+    util.toArray = function toArray (data) {
         return Array.prototype.slice.call(data);
     };
 
@@ -566,18 +566,18 @@ ConsoleIO.version = "0.2.2";
         }
     }());
 
-    util.noop = function noop() {
+    util.noop = function noop () {
     };
 
-    util.asyncForEach = function asyncForEach(array, callback, finishCallback, scope) {
+    util.asyncForEach = function asyncForEach (array, callback, finishCallback, scope) {
         array = [].concat(array || []);
         util.asyncIteration(array, callback || util.noop, finishCallback || util.noop, scope);
     };
 
-    util.asyncIteration = function asyncIteration(array, callback, finishCallback, scope) {
+    util.asyncIteration = function asyncIteration (array, callback, finishCallback, scope) {
         if (array.length > 0) {
             setTimeout(function () {
-                callback.call(scope || array, array.shift(), function finish() {
+                callback.call(scope || array, array.shift(), function finish () {
                     util.asyncIteration(array, callback, finishCallback, scope);
                 });
             }, 4);
@@ -586,21 +586,21 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    util.forEachProperty = function forEachProperty(obj, callback, scope) {
+    util.forEachProperty = function forEachProperty (obj, callback, scope) {
         var prop;
         for (prop in obj) {
             callback.call(scope || obj, obj[prop], prop, obj);
         }
     };
 
-    util.async = function async(fn, scope, interval) {
+    util.async = function async (fn, scope, interval) {
         interval = typeof scope === 'number' ? scope : interval;
         return setTimeout(function () {
             fn.call(scope);
         }, interval || 4);
     };
 
-    util.extend = function extend(target, source) {
+    util.extend = function extend (target, source) {
         util.forEachProperty(source, function (value, property) {
             target[property] = value;
         });
@@ -1481,36 +1481,17 @@ ConsoleIO.version = "0.2.2";
     };
 
     transport.showInfoBar = function showInfoBar(msg, isOnline) {
-        var cfg = exports.getConfig(),
-            title = [];
+        var cfg = exports.getConfig(), title = [];
 
-        if (exports.name) {
-            title.push(exports.name);
-        }
-
-        if (exports.serialNumber) {
-            title.push(exports.serialNumber);
-        }
-
-        if (cfg.secure) {
-            title.push('secure');
-        }
-
-        if (cfg.web) {
-            title.push('web');
-        }
-
-        if (cfg.url) {
-            title.push(cfg.url);
-        }
-
-        if (cfg.base) {
-            title.push(cfg.base);
-        }
-
+        if (exports.name) title.push(exports.name);
+        if (exports.serialNumber) title.push(exports.serialNumber);
+        if (cfg.secure) title.push('secure');
+        if (cfg.web) title.push('web');
+        if (cfg.url) title.push(cfg.url);
+        if (cfg.base) title.push(cfg.base);
         title.push(msg);
         title.push(isOnline ? 'online' : 'offline');
-
+        if (transport.connectionMode) title.push(transport.connectionMode);
         exports.util.showInfo(title.join('|'), isOnline);
     };
 
@@ -2158,7 +2139,7 @@ ConsoleIO.version = "0.2.2";
     var client = exports.client = {},
         syncTimeout;
 
-    function storeData(data, msg, online) {
+    function storeData (data, msg, online) {
         if (!exports.name) {
             exports.name = data.name;
             exports.storage.addItem("deviceName", data.name, 365);
@@ -2169,12 +2150,12 @@ ConsoleIO.version = "0.2.2";
         }
     }
 
-    function addBindSupport() {
+    function addBindSupport () {
         if (Function.prototype.bind) {
             return false;
         }
 
-        Function.prototype.bind = function bind(oThis) {
+        Function.prototype.bind = function bind (oThis) {
             if (typeof this !== "function") {
                 throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
             }
@@ -2193,22 +2174,18 @@ ConsoleIO.version = "0.2.2";
         };
     }
 
-    function getStyleRule() {
-        var styleText = [],
+    function getStyleRule () {
+        var styleText = [], links = [],
             regex = new RegExp("((http|https)://)?([^/]+)", 'img');
-
         exports.util.forEach(exports.util.toArray(document.styleSheets), function (style) {
             try {
                 var rules = style.cssRules || style.rules,
                     href = style.href.match(regex);
-
                 href.pop();
-
                 if (rules) {
                     exports.util.forEach(exports.util.toArray(rules), function (styleRule) {
                         var cssText = styleRule.cssText,
                             baseURL = href.concat();
-
                         if (cssText) {
                             //TODO this only check only for 1 level up
                             if (cssText.indexOf("../") > -1) {
@@ -2219,15 +2196,20 @@ ConsoleIO.version = "0.2.2";
                             styleText.push(cssText);
                         }
                     });
+                } else if (style.href) {
+                    links.push('<link href="' + style.href + '" rel="stylesheet" >');
                 }
             } catch (e) {
             }
         });
 
-        return styleText.join(" ");
+        return {
+            content: '<style type="text/css">' + styleText.join(" ") + '</style>',
+            links: links.join(" ")
+        };
     }
 
-    function getStyledElement(element, clone) {
+    function getStyledElement (element, clone) {
         element = element || document.body;
         clone = clone || element.cloneNode(true);
 
@@ -2240,7 +2222,7 @@ ConsoleIO.version = "0.2.2";
         return clone;
     }
 
-    function getXHR() {
+    function getXHR () {
         var xhr;
         if (global.XMLHttpRequest) {
             xhr = new XMLHttpRequest();
@@ -2258,8 +2240,7 @@ ConsoleIO.version = "0.2.2";
         return xhr;
     }
 
-
-    function configWebConsole(data) {
+    function configWebConsole (data) {
         if (data) {
             exports.web.setConfig(data);
             exports.transport.paused = data.paused;
@@ -2269,7 +2250,7 @@ ConsoleIO.version = "0.2.2";
         }
     }
 
-    function setUpWebConsole(data) {
+    function setUpWebConsole (data) {
         if (typeof data.enabled !== 'undefined') {
             if (data.enabled) {
                 exports.web.enabled();
@@ -2281,7 +2262,7 @@ ConsoleIO.version = "0.2.2";
         configWebConsole(data.config);
     }
 
-    function evalFn(body) {
+    function evalFn (body) {
         /*jshint evil:true */
         var evalFun;
         try {
@@ -2294,7 +2275,7 @@ ConsoleIO.version = "0.2.2";
         /*jshint evil:false */
     }
 
-    function extend(source) {
+    function extend (source) {
         var clientFns, method;
         if (source) {
             clientFns = evalFn(source);
@@ -2313,7 +2294,7 @@ ConsoleIO.version = "0.2.2";
     }
 
     // dispatch data in chunk to avoid core mirror locking up
-    function dataPacket(name, data) {
+    function dataPacket (name, data) {
         var content = data.content,
             length = content.length,
             config = exports.getConfig(),
@@ -2334,7 +2315,7 @@ ConsoleIO.version = "0.2.2";
         }
     }
 
-    function dispatchPacket(name, params, content, start, length) {
+    function dispatchPacket (name, params, content, start, length) {
         var fn = (function (exports, name, params, content, start, length) {
             return function () {
                 var data = exports.util.extend({}, params);
@@ -2348,8 +2329,7 @@ ConsoleIO.version = "0.2.2";
         setTimeout(fn, 100);
     }
 
-
-    function onRegistration(data) {
+    function onRegistration (data) {
         storeData(data, 'registration');
 
         // setup client specific scripts
@@ -2358,7 +2338,7 @@ ConsoleIO.version = "0.2.2";
         exports.console.log('Registration', exports.name);
     }
 
-    function onReady(data) {
+    function onReady (data) {
         storeData(data, 'ready');
         setUpWebConsole(data.web);
 
@@ -2372,7 +2352,7 @@ ConsoleIO.version = "0.2.2";
         exports.console.log('Ready', exports.name);
     }
 
-    function onOnline(data) {
+    function onOnline (data) {
         if (data.serialNumber === exports.serialNumber) {
             storeData(data, 'online', true);
             setUpWebConsole(data.web);
@@ -2388,14 +2368,14 @@ ConsoleIO.version = "0.2.2";
         }
     }
 
-    function onOffline(data) {
+    function onOffline (data) {
         if (data.serialNumber === exports.serialNumber) {
             storeData(data, 'offline');
             exports.console.log('Offline', exports.name);
         }
     }
 
-    function onClientDisconnect(data) {
+    function onClientDisconnect (data) {
         if (data.serialNumber === exports.serialNumber) {
             storeData(data, 'client disconnect');
             exports.console.log('client disconnected', exports.serialNumber);
@@ -2403,7 +2383,7 @@ ConsoleIO.version = "0.2.2";
         }
     }
 
-    function onNameChanged(data) {
+    function onNameChanged (data) {
         if (!data.name) {
             exports.storage.removeItem('deviceName');
         }
@@ -2413,7 +2393,7 @@ ConsoleIO.version = "0.2.2";
         exports.transport.showInfoBar('new name', true);
     }
 
-    function onFileSource(data) {
+    function onFileSource (data) {
         try {
             var xhr = getXHR(),
                 proxy = exports.util.getUrl('proxy'),
@@ -2438,23 +2418,23 @@ ConsoleIO.version = "0.2.2";
                     }
                 };
 
-                xhr.onloadend = function onLoadEnd(e) {
+                xhr.onloadend = function onLoadEnd (e) {
                     exports.console.info('file:onLoadEnd', e);
                 };
 
-                xhr.onloadstart = function onLoadStart(e) {
+                xhr.onloadstart = function onLoadStart (e) {
                     exports.console.info('file:onLoadStart', e);
                 };
 
-                xhr.onprogress = function onProgress(e) {
+                xhr.onprogress = function onProgress (e) {
                     exports.console.info('file:onProgress', e);
                 };
 
-                xhr.onload = function onLoad(e) {
+                xhr.onload = function onLoad (e) {
                     exports.console.info('file:onLoad', e);
                 };
 
-                xhr.onerror = function onError(e) {
+                xhr.onerror = function onError (e) {
                     // if xhr fails to get file content use proxy to retrieve it
                     // it might be because of cross domain issue
                     if (data.url.indexOf(proxy) === -1) {
@@ -2482,7 +2462,7 @@ ConsoleIO.version = "0.2.2";
         }
     }
 
-    function onReload() {
+    function onReload () {
         exports.console.log('Reloading...');
 
         global.setTimeout((function (url) {
@@ -2496,7 +2476,7 @@ ConsoleIO.version = "0.2.2";
         }(location.href)), 100);
     }
 
-    function onHTMLSource() {
+    function onHTMLSource () {
         exports.web.hide();
         dataPacket('htmlDocument', {
             content: document.documentElement.innerHTML
@@ -2504,18 +2484,19 @@ ConsoleIO.version = "0.2.2";
         exports.web.show();
     }
 
-    function onHTMLPreview() {
+    function onHTMLPreview () {
         exports.web.hide();
-
+        var styles = getStyleRule();
         exports.transport.emit('htmlContent', {
-            style: '<style type="text/css">' + getStyleRule() + '</style>',
+            links: styles.links,
+            style: styles.content,
             body: getStyledElement().outerHTML
         });
 
         exports.web.show();
     }
 
-    function onRemoteEvent(data) {
+    function onRemoteEvent (data) {
         var raisedEvent,
             element = document.querySelector(data.srcElement.replace("$!", ""));
 
@@ -2552,7 +2533,7 @@ ConsoleIO.version = "0.2.2";
         }
     }
 
-    function onCaptureScreen() {
+    function onCaptureScreen () {
 
         addBindSupport();
 
@@ -2589,7 +2570,7 @@ ConsoleIO.version = "0.2.2";
         });
     }
 
-    function onFileList() {
+    function onFileList () {
         var scripts = [],
             styles = [],
             origin = exports.util.getOrigin();
@@ -2623,7 +2604,7 @@ ConsoleIO.version = "0.2.2";
         }
     }
 
-    function onProfiler(data) {
+    function onProfiler (data) {
         if (data.state) {
             exports.console.profile();
         } else {
@@ -2631,7 +2612,7 @@ ConsoleIO.version = "0.2.2";
         }
     }
 
-    function onCommand(cmd) {
+    function onCommand (cmd) {
         exports.console.info('executing...');
         var result = evalFn(cmd);
         if (typeof result !== 'undefined') {
@@ -2639,7 +2620,7 @@ ConsoleIO.version = "0.2.2";
         }
     }
 
-    function getStorage(storage) {
+    function getStorage (storage) {
         var key, i = 0,
             data = {},
             length = storage.length;
@@ -2654,12 +2635,12 @@ ConsoleIO.version = "0.2.2";
         return data;
     }
 
-    function isCanvasSupported() {
+    function isCanvasSupported () {
         var canvas = document.createElement('canvas');
         return !!(canvas.getContext && canvas.getContext('2d'));
     }
 
-    client.getMore = function getMore() {
+    client.getMore = function getMore () {
         var data = [
             {
                 supports: {
@@ -2727,7 +2708,7 @@ ConsoleIO.version = "0.2.2";
         return data;
     };
 
-    client.jsonify = function jsonify(obj) {
+    client.jsonify = function jsonify (obj) {
         var returnObj = {},
             dataTypes = [
                 'Arguments', 'Array', 'String', 'Number', 'Boolean',
@@ -2745,7 +2726,7 @@ ConsoleIO.version = "0.2.2";
         return returnObj;
     };
 
-    client.getConfig = function getConfig() {
+    client.getConfig = function getConfig () {
         var navigator = global.navigator,
             options = {
                 userAgent: navigator.userAgent,
@@ -2767,11 +2748,11 @@ ConsoleIO.version = "0.2.2";
         return options;
     };
 
-    client.register = function register() {
+    client.register = function register () {
         exports.transport.emit('register', client.getConfig());
     };
 
-    client.setUp = function setUp() {
+    client.setUp = function setUp () {
         exports.transport.on('device:registration', onRegistration);
         exports.transport.on('device:ready', onReady);
         exports.transport.on('device:online', onOnline);
@@ -2859,9 +2840,7 @@ ConsoleIO.version = "0.2.2";
         exports.transport.setUp();
         exports.client.setUp();
 
-        if (defaultConfig.web) {
-            exports.web.setUp();
-        }
+        if (defaultConfig.web) exports.web.setUp();
     }
 
     function isURLExcluded(url) {
@@ -3058,7 +3037,7 @@ ConsoleIO.version = "0.2.2";
 
     var web = exports.web = {};
 
-    function Controller() {
+    function Controller () {
         this.store = {
             added: [],
             queue: []
@@ -3088,14 +3067,14 @@ ConsoleIO.version = "0.2.2";
         //exports.transport.on('device:web:control', this.setControl, this);
     }
 
-    Controller.prototype.setUp = function setUp() {
+    Controller.prototype.setUp = function setUp () {
         var scope = this;
         exports.util.requireCSS(exports.util.getUrl('webStyle'), function () {
             scope.enabled();
         });
     };
 
-    Controller.prototype.enabled = function enabled() {
+    Controller.prototype.enabled = function enabled () {
         if (!this.isEnabled) {
             this.isEnabled = true;
             this.view.render(document.body);
@@ -3107,11 +3086,11 @@ ConsoleIO.version = "0.2.2";
                 global.detachEvent('onmessage', exports.web.onMessage);
             }
 
-            exports.transport.emit('webStatus', { enabled: true });
+            exports.transport.emit('webStatus', {enabled: true});
         }
     };
 
-    Controller.prototype.disabled = function disabled() {
+    Controller.prototype.disabled = function disabled () {
         if (this.isEnabled) {
             this.isEnabled = false;
             exports.console.removeListener('console', exports.web.logger);
@@ -3122,12 +3101,12 @@ ConsoleIO.version = "0.2.2";
                 global.attachEvent('onmessage', exports.web.onMessage);
             }
 
-            exports.transport.emit('webStatus', { enabled: false });
+            exports.transport.emit('webStatus', {enabled: false});
             this.view.destroy();
         }
     };
 
-    Controller.prototype.setControl = function setControl(data) {
+    Controller.prototype.setControl = function setControl (data) {
         var reload = false;
         if (typeof data.paused !== 'undefined') {
             this.control.paused = data.paused;
@@ -3162,7 +3141,7 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    Controller.prototype.getData = function getData(store) {
+    Controller.prototype.getData = function getData (store) {
         var count = 0, dataStore = [];
         if (store.length > 0) {
             exports.util.every([].concat(store).reverse(), function (item) {
@@ -3178,15 +3157,15 @@ ConsoleIO.version = "0.2.2";
         return dataStore;
     };
 
-    Controller.prototype.hide = function hide() {
+    Controller.prototype.hide = function hide () {
         return this.view.hide();
     };
 
-    Controller.prototype.show = function show() {
+    Controller.prototype.show = function show () {
         return this.view.show();
     };
 
-    Controller.prototype.add = function add(data) {
+    Controller.prototype.add = function add (data) {
         if (!this.control.paused) {
             this.store.added.push(data);
             this.view.add(data);
@@ -3195,7 +3174,7 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    Controller.prototype.addBatch = function addBatch() {
+    Controller.prototype.addBatch = function addBatch () {
         if (!this.control.paused) {
             this.view.addBatch(this.getData(this.store.queue));
             this.store.added = this.store.added.concat(this.store.queue);
@@ -3203,7 +3182,7 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    Controller.prototype.applySearch = function applySearch(value) {
+    Controller.prototype.applySearch = function applySearch (value) {
         this.control.search = typeof value !== 'undefined' ? value : null;
         if (this.control.search) {
             if (this.control.search[0] !== "\\") {
@@ -3214,34 +3193,33 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    Controller.prototype.isSearchFiltered = function isSearchFiltered(data) {
+    Controller.prototype.isSearchFiltered = function isSearchFiltered (data) {
         return this.control.search ? data.message.search(this.control.search) > -1 : true;
     };
 
-    Controller.prototype.isFiltered = function isFiltered(data) {
+    Controller.prototype.isFiltered = function isFiltered (data) {
         return this.control.filters.length === 0 || (this.control.filters.length > 0 && this.control.filters.indexOf(data.type) > -1);
     };
 
-
-    function View(ctrl) {
+    function View (ctrl) {
         this.ctrl = ctrl;
         this.elements = {};
         this.target = null;
         this.container = null;
     }
 
-    View.prototype.render = function render(target) {
+    View.prototype.render = function render (target) {
         this.target = target;
         this.createContainer();
     };
 
-    View.prototype.reload = function reload() {
+    View.prototype.reload = function reload () {
         this.clear();
         this.container.parentNode.removeChild(this.container);
         this.createContainer();
     };
 
-    View.prototype.destroy = function destroy() {
+    View.prototype.destroy = function destroy () {
         if (this.container) {
             this.clear();
             if (this.container.parentNode) {
@@ -3252,13 +3230,13 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    View.prototype.hide = function hide() {
+    View.prototype.hide = function hide () {
         if (this.target && this.container) {
             this.target.removeChild(this.container);
         }
     };
 
-    View.prototype.show = function show() {
+    View.prototype.show = function show () {
         if (this.target && this.container) {
             if (this.ctrl.config.position && this.ctrl.config.position === 'top') {
                 this.target.insertBefore(this.container, exports.util.getFirstElement(this.target));
@@ -3268,11 +3246,8 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    View.prototype.createContainer = function createContainer() {
-        if (this.container) {
-            return false;
-        }
-
+    View.prototype.createContainer = function createContainer () {
+        if (this.container) return false;
         var styles = [
             'background-color: rgba(244, 244, 244, 0.9)',
             'background-color: rgb(244, 244, 244)',
@@ -3299,12 +3274,12 @@ ConsoleIO.version = "0.2.2";
         }
 
         switch (this.ctrl.config.position.toLowerCase()) {
-            case 'top':
-                styles.push('top: 5px');
-                break;
-            default:
-                styles.push('bottom: 5px');
-                break;
+        case 'top':
+            styles.push('top: 5px');
+            break;
+        default:
+            styles.push('bottom: 5px');
+            break;
         }
 
         var config = exports.getConfig();
@@ -3321,7 +3296,7 @@ ConsoleIO.version = "0.2.2";
         });
     };
 
-    View.prototype.createElement = function createElement(config) {
+    View.prototype.createElement = function createElement (config) {
         config.tag = config.tag || 'div';
         if (!this.elements[config.tag]) {
             this.elements[config.tag] = document.createElement(config.tag);
@@ -3351,7 +3326,7 @@ ConsoleIO.version = "0.2.2";
         return element;
     };
 
-    View.prototype.stripBrackets = function stripBrackets(data) {
+    View.prototype.stripBrackets = function stripBrackets (data) {
         var last = data.length - 1;
         if (data.charAt(0) === '[' && data.charAt(last) === ']') {
             return data.substring(1, last);
@@ -3359,7 +3334,7 @@ ConsoleIO.version = "0.2.2";
         return data;
     };
 
-    View.prototype.getElementData = function getElementData(data) {
+    View.prototype.getElementData = function getElementData (data) {
         var tag = 'code',
             css = data.type,
             origin = data.origin,
@@ -3400,9 +3375,9 @@ ConsoleIO.version = "0.2.2";
         if (origin) {
             origin = data.origin.replace(/(\/|:|\.)/igm, '');
             originClass = "content: 'iframe:" + data.origin + "'; position: absolute; top: 0px; right: 0px; padding: 2px 8px; " +
-                "font-size: 12px; color: lightgrey !important; " +
-                "background-color: black; " +
-                "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
+            "font-size: 12px; color: lightgrey !important; " +
+            "background-color: black; " +
+            "font-family: Monaco,Menlo,Consolas,'Courier New',monospace;";
 
             exports.util.deleteCSSRule(exports.styleSheet, '.' + origin + ":before");
             exports.util.addCSSRule(exports.styleSheet, '.' + origin + ":before", originClass);
@@ -3415,7 +3390,7 @@ ConsoleIO.version = "0.2.2";
         };
     };
 
-    View.prototype.add = function add(data) {
+    View.prototype.add = function add (data) {
         if (!this.ctrl.isFiltered(data) || !this.ctrl.isSearchFiltered(data) || !this.container) {
             return false;
         }
@@ -3437,7 +3412,7 @@ ConsoleIO.version = "0.2.2";
         this.removeOverflowElement();
     };
 
-    View.prototype.addBatch = function addBatch(store) {
+    View.prototype.addBatch = function addBatch (store) {
         if (store.length > 0 && this.container) {
             var fragment = document.createDocumentFragment();
 
@@ -3461,7 +3436,7 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    View.prototype.clear = function clear() {
+    View.prototype.clear = function clear () {
         if (this.container) {
             while (this.container.firstChild) {
                 this.container.removeChild(this.container.firstChild);
@@ -3469,7 +3444,7 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    View.prototype.removeOverflowElement = function removeOverflowElement() {
+    View.prototype.removeOverflowElement = function removeOverflowElement () {
         var length = this.container.childElementCount || this.container.children.length;
         while (length > this.ctrl.control.pageSize) {
             this.container.removeChild(this.container.lastElementChild || this.container.lastChild);
@@ -3477,14 +3452,11 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-
-    web.logger = function logger(data) {
-        if (exports.web.console) {
-            exports.web.console.add(data);
-        }
+    web.logger = function logger (data) {
+        if (exports.web.console) exports.web.console.add(data);
     };
 
-    web.onMessage = function onMessage(event) {
+    web.onMessage = function onMessage (event) {
         if (exports.web.console) {
             var data = event.data;
             if (data.event === 'console') {
@@ -3498,15 +3470,12 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    web.setUp = function setUp() {
-        if (!web.console) {
-            web.console = new Controller();
-        }
-
+    web.setUp = function setUp () {
+        if (!web.console) web.console = new Controller();
         web.console.setUp();
     };
 
-    web.enabled = function enabled() {
+    web.enabled = function enabled () {
         if (!web.console) {
             web.setUp();
         } else {
@@ -3514,50 +3483,34 @@ ConsoleIO.version = "0.2.2";
         }
     };
 
-    web.disabled = function disabled() {
-        if (web.console) {
-            web.console.disabled();
-        }
+    web.disabled = function disabled () {
+        if (web.console) web.console.disabled();
     };
 
-    web.setConfig = function setConfig(data) {
-        if (web.console) {
-            web.console.setControl(data);
-        }
-
+    web.setConfig = function setConfig (data) {
+        if (web.console) web.console.setControl(data);
         var info = [
-            exports.name || '', exports.serialNumber || '', exports.transport.isConnected() ? 'online' : 'offline'
+            exports.name || '',
+            exports.serialNumber || '',
+            exports.transport.isConnected() ? 'online' : 'offline',
+            exports.transport.connectionMode
         ];
 
-        if (data.paused) {
-            info.push('paused');
-        }
-
+        if (data.paused) info.push('paused');
         if (data.filters && data.filters.length > 0) {
             info.push('filters:' + data.filters.join(","));
         }
-
-        if (data.pageSize) {
-            info.push('pagesize:' + data.pageSize);
-        }
-
-        if (data.search) {
-            info.push('search:' + data.search);
-        }
-
+        if (data.pageSize) info.push('pagesize:' + data.pageSize);
+        if (data.search) info.push('search:' + data.search);
         exports.util.showInfo(info.join('|'), exports.transport.isConnected());
     };
 
-    web.show = function show() {
-        if (web.console) {
-            return web.console.show();
-        }
+    web.show = function show () {
+        if (web.console) return web.console.show();
     };
 
-    web.hide = function hide() {
-        if (web.console) {
-            return web.console.hide();
-        }
+    web.hide = function hide () {
+        if (web.console) return web.console.hide();
     };
 
 }('undefined' !== typeof ConsoleIO ? ConsoleIO : module.exports, this));

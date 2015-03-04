@@ -8,20 +8,21 @@
 
 window.SERVER_PORT = 8082;
 
-function init() {
+function init () {
     "use strict";
-
-    var currentIndex = 0,
-        connectionMode = document.getElementById('ConnectionMode'),
-        Commands = [
+    window.Test = {
+        duration: 2000,
+        timeout: undefined,
+        currentIndex: 0,
+        commands: [
             "console.log('log test');",
             "console.info('info test');",
             "console.warn('warn test');",
             "console.debug('debug test');",
             "console.assert(1 === 1, 'assert test');",
             "console.assert(1 !== 1, 'assert test');",
-            "console.dir(document.getElementById('dummy'));",
-            "console.dirxml(document.getElementById('dummy'));",
+            "console.dir(document.getElementById('welcome'));",
+            "console.dirxml(document.getElementById('welcome'));",
             "console.time('test');",
             "console.time('test-child');",
             "console.count('test');",
@@ -33,29 +34,26 @@ function init() {
             "console.trace();",
             "console.error();"
         ],
-        length = Commands.length;
-
-    setInterval(function () {
-        if (currentIndex < length) {
-            eval(Commands[currentIndex++]);
-        } else {
-            currentIndex = 0;
+        start: function () {
+            var scope = this;
+            var callback = function () {
+                if (scope.currentIndex < scope.commands.length) {
+                    eval(scope.commands[scope.currentIndex++]);
+                } else {
+                    scope.currentIndex = 0;
+                }
+            };
+            scope.timeout = window.setInterval(callback, scope.duration);
+        },
+        stop: function () {
+            var scope = this;
+            window.clearInterval(scope.timeout);
+            scope.timeout = undefined;
         }
-
-        if (window.ConsoleIO) {
-            var info = [
-                "Name: " + window.ConsoleIO.name,
-                "serialNumber: " + window.ConsoleIO.serialNumber,
-                "mode: " + window.ConsoleIO.transport.connectionMode,
-                "connected: " + window.ConsoleIO.transport.isConnected()
-            ].join("<br>");
-
-            connectionMode.innerHTML = info;
-        }
-    }, 2000);
+    };
 }
 
-function requireScript(url, callback) {
+function requireScript (url, callback) {
     var node = document.createElement('script'),
         head = document.getElementsByTagName('head')[0];
 
@@ -70,7 +68,7 @@ function requireScript(url, callback) {
         }, 1);
     }
 
-    function onScriptLoad() {
+    function onScriptLoad () {
         if (node.removeEventListener) {
             node.removeEventListener('load', onScriptLoad, false);
             callback(url);
@@ -84,7 +82,7 @@ function requireScript(url, callback) {
         }
     }
 
-    function onScriptError() {
+    function onScriptError () {
         node.removeEventListener('error', onScriptError, false);
     }
 

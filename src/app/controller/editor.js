@@ -185,7 +185,7 @@ ConsoleIO.App.Editor.prototype.command = function command() {
     if (content) {
         ConsoleIO.Service.Socket.emit('execute', {
             serialNumber: this.parent.getActiveDeviceSerialNumber(),
-            code: content
+            code: '(function(){' + content + '}());'
         });
     }
 };
