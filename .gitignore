@@ -2,3 +2,5 @@
 /console.io.iml
 /node_modules
 /iisnode
+/dist/app/report/
+/dist/client/report/

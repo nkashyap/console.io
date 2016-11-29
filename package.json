@@ -1,60 +1,61 @@
 {
-    "name": "xconsole.io",
-    "version": "0.2.6",
-    "project": "console.io",
-    "subdomain": "console.io",
-    "description": "Javascript Remote Web Console",
-    "homepage": "http://nkashyap.github.io/console.io/",
-    "author": {
-        "name": "Nisheeth Kashyap",
-        "email": "nisheeth.k.kashyap@gmail.com"
-    },
-    "keywords": [
-        "console",
-        "console.io",
-        "debugger",
-        "web console",
-        "remote console",
-        "javascript"
-    ],
-    "dependencies": {
-        "express.io": "latest",
-        "request": "latest",
-        "uglify-js": "latest",
-        "js-beautify": "latest",
-        "esprima": "latest",
-        "estraverse": "latest",
-        "escodegen": "latest"
-    },
-    "devDependencies": {
-        "grunt": "latest",
-        "grunt-cli": "latest",
-        "grunt-contrib-jshint": "latest",
-        "grunt-contrib-nodeunit": "latest",
-        "grunt-contrib-uglify": "latest",
-        "grunt-contrib-watch": "latest",
-        "grunt-contrib-concat": "latest",
-        "grunt-contrib-cssmin": "latest",
-        "grunt-contrib-yuidoc": "latest",
-        "grunt-contrib-csslint": "latest",
-        "grunt-contrib-copy": "latest"
-    },
-    "main": "./server/main.js",
-    "bin": {
-        "consoleio": "./bin/consoleio.js"
-    },
-    "scripts": {
-        "start": "node server/main.js",
-        "test": "grunt test --verbose"
-    },
-    "engines": {
-        "node": "*"
-    },
-    "preferGlobal": true,
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/nkashyap/console.io.git"
-    },
-    "license": "MIT",
-    "readmeFilename": "README.md"
+  "name": "xconsole.io",
+  "version": "0.2.6",
+  "project": "console.io",
+  "subdomain": "console.io",
+  "description": "Javascript Remote Web Console",
+  "homepage": "http://nkashyap.github.io/console.io/",
+  "author": {
+    "name": "Nisheeth Kashyap",
+    "email": "nisheeth.k.kashyap@gmail.com"
+  },
+  "keywords": [
+    "console",
+    "console.io",
+    "debugger",
+    "web console",
+    "remote console",
+    "javascript"
+  ],
+  "dependencies": {
+    "escodegen": "^1.8.1",
+    "esprima": "^3.1.2",
+    "estraverse": "^4.2.0",
+    "express.io": "^1.1.13",
+    "js-beautify": "^1.6.4",
+    "request": "^2.79.0",
+    "uglify-js": "^2.7.4"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-cli": "^1.2.0",
+    "grunt-contrib-jshint": "^1.1.0",
+    "grunt-contrib-nodeunit": "^1.0.0",
+    "grunt-contrib-uglify": "^2.0.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-cssmin": "^1.0.2",
+    "grunt-contrib-yuidoc": "^1.0.0",
+    "grunt-contrib-csslint": "^2.0.0",
+    "grunt-contrib-copy": "^1.0.0"
+  },
+  "main": "./server/main.js",
+  "bin": {
+    "consoleio": "./bin/consoleio.js"
+  },
+  "scripts": {
+    "start": "node server/main.js",
+    "test": "grunt test --verbose",
+    "postinstall": "cd ./node_modules/express.io && npm i && cd ../express && npm i"
+  },
+  "engines": {
+    "node": "*"
+  },
+  "preferGlobal": true,
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nkashyap/console.io.git"
+  },
+  "license": "MIT",
+  "readmeFilename": "README.md"
 }

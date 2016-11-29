@@ -12,6 +12,10 @@
  * @author Nisheeth Kashyap <nisheeth.k.kashyap@gmail.com>
  */
 function main() {
+    if (!process.EventEmitter) {
+      process.EventEmitter = require('events');
+    }
+
     var express = require('express.io'),
         config = require('./config'),
         configure = require('./configure'),
@@ -21,6 +25,7 @@ function main() {
         path = require('path'),
         ROOT = path.normalize(__dirname + '/../'),
         manager = require('./manager');
+
 
     function Workers() {
         var app,

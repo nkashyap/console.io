@@ -5,7 +5,7 @@
  * Website: http://nkashyap.github.io/console.io/
  * Author: Nisheeth Kashyap
  * Email: nisheeth.k.kashyap@gmail.com
- * Date: 2015-03-04
+ * Date: 2016-11-29
 */
 
 var ConsoleIO = ("undefined" === typeof module ? {} : module.exports);
