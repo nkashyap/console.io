@@ -1,6 +1,6 @@
 {
   "name": "xconsole.io",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "project": "console.io",
   "subdomain": "console.io",
   "description": "Javascript Remote Web Console",
