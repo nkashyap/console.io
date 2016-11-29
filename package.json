@@ -46,7 +46,9 @@
   "scripts": {
     "start": "node server/main.js",
     "test": "grunt test --verbose",
-    "postinstall": "cd ./node_modules/express.io && npm i && cd ../express && npm i"
+    "express.io": "cd ./node_modules/express.io && npm i",
+    "express": "cd ./node_modules/express && npm i",
+    "postinstall": "npm run express.io && npm run express"
   },
   "engines": {
     "node": "*"
